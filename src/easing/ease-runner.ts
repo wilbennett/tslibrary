@@ -1,5 +1,5 @@
 import { Easer, EaserCallback } from '.';
-import { AnimationLoop } from '../utils/animation-loop';
+import { AnimationLoop } from '../animation';
 
 export class EaseRunner {
     private _easers: Easer[] = [];
