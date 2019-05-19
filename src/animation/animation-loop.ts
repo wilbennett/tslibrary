@@ -35,22 +35,8 @@ export class AnimationLoop {
 
   onUpdate(updater: AnimCallback) { this._updaters.push(updater); }
   onRender(renderer: AnimCallback) { this._renderers.push(renderer); }
-
-  removeOnUpdate(updater: AnimCallback) {
-    const index = this._updaters.findIndex(u => u === updater);
-
-    if (index < 0) return;
-
-    this._updaters.splice(index, 1);
-  }
-
-  removeOnRender(renderer: AnimCallback) {
-    const index = this._renderers.findIndex(u => u === renderer);
-
-    if (index < 0) return;
-
-    this._renderers.splice(index, 1);
-  }
+  removeOnUpdate(updater: AnimCallback) { this._updaters.remove(updater); }
+  removeOnRender(renderer: AnimCallback) { this._renderers.remove(renderer); }
 
   protected initLoop = (timestamp: DOMHighResTimeStamp) => {
     requestAnimationFrame(this.loop);

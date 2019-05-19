@@ -40,11 +40,8 @@ export class EaseRunner {
     add(...easers: Easer[]) { this._easers.push(...easers); }
 
     remove(easer: Easer) {
-        const index = this._easers.findIndex(x => x === easer);
+        if (!this._easers.remove(easer)) return;
 
-        if (index < 0) return;
-
-        this._easers.splice(index, 1);
         this._onRemoveListeners.forEach(listener => listener(easer));
     }
 
@@ -70,14 +67,7 @@ export class EaseRunner {
     }
 
     onRemove(listener: EaserCallback) { this._onRemoveListeners.push(listener); }
-
-    removeOnRemove(listener: EaserCallback) {
-        const index = this._onRemoveListeners.findIndex(x => x === listener);
-
-        if (index < 0) return;
-
-        this._onRemoveListeners.splice(index, 1);
-    }
+    removeOnRemove(listener: EaserCallback) { this._onRemoveListeners.remove(listener); }
 
     private update = () => {
         if (this.isPaused) return;
@@ -92,7 +82,5 @@ export class EaseRunner {
         this.removeEasers(toRemove);
     }
 
-    private removeEasers(easers: Easer[]) {
-        easers.forEach(easer => this.remove(easer));
-    }
+    private removeEasers(easers: Easer[]) { easers.forEach(easer => this.remove(easer)); }
 }
