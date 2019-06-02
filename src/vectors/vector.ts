@@ -1,4 +1,4 @@
-import { MathEx } from '../core/mathex';
+import { MathEx } from '../core';
 
 export abstract class Vector {
     get x() { return 0; }
