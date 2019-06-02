@@ -1,5 +1,5 @@
 import { EaseFunction, EaserCallback, EaserValueCallback, ValueEaser } from '.';
-import { MathEx } from '../core/mathex';
+import { MathEx } from '../core';
 
 export class NumberEaser extends ValueEaser<number> {
     constructor(
