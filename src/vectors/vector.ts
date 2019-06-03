@@ -1,5 +1,4 @@
 import { MathEx } from '../core';
-import { Vector2 } from './Vector2';
 
 export abstract class Vector {
     get x() { return 0; }
@@ -365,14 +364,6 @@ export abstract class Vector {
             ? `[${this.x.toFixed(precision)}, ${this.y.toFixed(precision)}, ${this.z.toFixed(precision)}, ${this.w.toFixed(precision)}]`
             : `<${this.x.toFixed(precision)}, ${this.y.toFixed(precision)}, ${this.z.toFixed(precision)}, ${this.w.toFixed(precision)}>`;
     }
-
-    // TODO: Proper 3D implementation.
-    static fromRadians(angle: number, radius: number = 1) {
-        return new Vector2(Math.cos(angle), Math.sin(angle)).scale(radius);
-    }
-
-    // TODO: Proper 3D implementation.
-    static fromDegrees(angle: number, mag: number = 1) { return this.fromRadians(angle * MathEx.ONE_RADIAN, mag); }
 
     protected clear(instance: Vector) {
         if (instance._magSquared !== undefined)
