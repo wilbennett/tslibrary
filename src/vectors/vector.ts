@@ -113,6 +113,7 @@ export abstract class Vector {
     normalizeScale(scale: number) { return this.normalizeScaleO(scale, this); }
 
     multO(other: Vector, result: Vector): Vector;
+    multO(scaleX: number, result: Vector): Vector;
     multO(scaleX: number, scaleY: number, result: Vector): Vector;
     multO(scaleX: number, scaleY: number, scaleZ: number, result: Vector): Vector;
     multO(param1: Vector | number, param2?: any, param3?: any, param4?: Vector): Vector {
@@ -126,6 +127,11 @@ export abstract class Vector {
             scaleY = param1.y;
             scaleZ = param1.z;
             result = param2;
+        } else if (arguments.length === 2) {
+            scaleX = param1;
+            scaleY = 1;
+            scaleZ = 1;
+            result = param3!;
         } else if (arguments.length === 3) {
             scaleX = param1;
             scaleY = param2;

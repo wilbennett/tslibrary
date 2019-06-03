@@ -65,6 +65,7 @@ export class Vector2 extends Vector {
     }
 
     multO(other: Vector, result: Vector): Vector;
+    multO(scaleX: number, result: Vector): Vector;
     multO(scaleX: number, scaleY: number, result: Vector): Vector;
     multO(scaleX: number, scaleY: number, scaleZ: number, result: Vector): Vector;
     multO(param1: Vector | number, param2?: any, param3?: any, param4?: Vector): Vector {
@@ -76,6 +77,10 @@ export class Vector2 extends Vector {
             scaleX = param1.x;
             scaleY = param1.y;
             result = param2;
+        } else if (arguments.length === 2) {
+            scaleX = param1;
+            scaleY = 1;
+            result = param3!;
         } else if (arguments.length === 3) {
             scaleX = param1;
             scaleY = param2;
@@ -109,7 +114,8 @@ export class Vector2 extends Vector {
     }
 
     toMetersO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
-        return result.set(this.x / pixelsPerMeter, this.y / pixelsPerMeter, 0, this.w);
+        const inverse = 1 / pixelsPerMeter;
+        return result.set(this.x * inverse, this.y * inverse, 0, this.w);
     }
 
     equals(other: Vector, epsilon: number = Number.EPSILON) {
