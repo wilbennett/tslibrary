@@ -1,7 +1,7 @@
 import { Vector2Base } from '.';
 import { MathEx } from '../core';
 
-class Vector2ZeroPosition extends Vector2Base {
+class Vector2ZeroPosition extends Vector2 {
     static get [Symbol.species]() { return Vector2; }
 
     get w() { return 1; }
@@ -11,7 +11,7 @@ class Vector2ZeroPosition extends Vector2Base {
     set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
 }
 
-class Vector2ZeroDirection extends Vector2Base {
+class Vector2ZeroDirection extends Vector2 {
     static get [Symbol.species]() { return Vector2; }
 
     set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
@@ -33,6 +33,7 @@ export class Vector2 extends Vector2Base {
             this._w = param4 || 0;
     }
 
+    static get elementCount() { return 3; }
     private _x: number;
     get x() { return this._x; }
     set x(value) { this._x = value; }

@@ -48,6 +48,7 @@ export class Vector2F32 extends Vector2Base {
     }
 
     static get [Symbol.species]() { return Vector2; }
+    static get elementCount() { return 3; }
     get x() { return this._values[this._startIndex]; }
     set x(value) { this._values[this._startIndex] = value; }
     get y() { return this._values[this._startIndex + 1]; }

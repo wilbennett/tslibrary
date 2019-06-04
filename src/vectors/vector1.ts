@@ -11,6 +11,7 @@ export class Vector1 extends Vector {
         this._x = x || 0;
     }
 
+    static get elementCount() { return 1; }
     private _x: number;
     get x() { return this._x; }
     set x(value) { this._x = value; }

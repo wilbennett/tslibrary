@@ -2,6 +2,7 @@ import { NullVector } from '.';
 import { MathEx } from '../core';
 
 export abstract class Vector {
+    static get elementCount() { return 4; }
     get x() { return 0; }
     // @ts-ignore - unused params.
     set x(value) { }
