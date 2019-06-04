@@ -1,3 +1,4 @@
+import { NullVector } from '.';
 import { MathEx } from '../core';
 
 export abstract class Vector {
@@ -35,6 +36,8 @@ export abstract class Vector {
     get degrees() { return this.radians * MathEx.ONE_DEGREE; }
 
     static pixelsPerMeter = 30;
+    private static _empty: Vector;
+    static get empty() { return Vector._empty || (Vector._empty = new NullVector()); }
     static get [Symbol.species]() { return this; }
 
     newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
