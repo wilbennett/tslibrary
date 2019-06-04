@@ -1,6 +1,7 @@
 import { Vector } from '.';
 
 export class NullVector extends Vector {
+    get isEmpty() { return true; }
 
     // @ts-ignore - unused param.
     protected newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0) { return this; }

@@ -16,6 +16,7 @@ export abstract class Vector {
     set w(value) { }
     get isPosition() { return this.w !== 0; }
     get isDirection() { return this.w === 0; }
+    get isEmpty() { return false; }
     protected get _magSquared(): number | undefined { return undefined; }
     // @ts-ignore - unused params.
     protected set _magSquared(value) { }
