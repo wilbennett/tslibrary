@@ -12,7 +12,7 @@ export abstract class VectorCollection {
         return result;
     }
 
-    get(index: number) { return this.items[index]; }
+    get(index: number) { return index >= 0 && index < this.length - 1 ? this.items[index] : Vector.empty; }
     createIndexer() { return new VectorIndexer(this); }
 }
 
@@ -28,6 +28,7 @@ export class VectorIndexer extends Vector {
     get hasCurrent() { return this._index >= 0 && this._index < this._collection.length; }
     get hasNext() { return this._index < this._collection.length - 1; }
     get hasPrior() { return this._index > 0; }
+    get current() { return this._collection.get(this._index); }
     get next() { return this.updateCurrent(this._index + 1); }
     get prior() { return this.updateCurrent(this._index - 1); }
     get first() { return this.updateCurrent(0); }
@@ -44,7 +45,7 @@ export class VectorIndexer extends Vector {
 
     protected updateCurrent(index: number) {
         this._index = index;
-        return this.hasCurrent ? this._collection.get(this._index) : Vector.empty;
+        return this._collection.get(this._index);
     }
 }
 
