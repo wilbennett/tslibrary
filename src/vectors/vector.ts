@@ -40,7 +40,7 @@ export abstract class Vector {
     static get empty() { return Vector._empty || (Vector._empty = new NullVector()); }
     static get [Symbol.species]() { return this; }
 
-    newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
+    protected newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
         // @ts-ignore - species pattern.
         const Species = this.constructor[Symbol.species];
         return new Species(x, y, z, w);
