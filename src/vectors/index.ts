@@ -7,3 +7,4 @@ export * from "./vector2F32";
 export * from "./vector-collection";
 export * from "./vector-indexer";
 export * from "./vector-groups";
+export * from "./vector-groups-builder";
