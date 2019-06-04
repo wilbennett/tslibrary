@@ -2,6 +2,8 @@ import { Vector2Base } from '.';
 import { MathEx } from '../core';
 
 class Vector2ZeroPosition extends Vector2Base {
+    static get [Symbol.species]() { return Vector2; }
+
     get w() { return 1; }
     // @ts-ignore - unused param.
     set w(value) { }
@@ -10,6 +12,8 @@ class Vector2ZeroPosition extends Vector2Base {
 }
 
 class Vector2ZeroDirection extends Vector2Base {
+    static get [Symbol.species]() { return Vector2; }
+
     set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
 }
 
