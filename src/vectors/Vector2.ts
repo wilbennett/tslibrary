@@ -1,6 +1,18 @@
 import { Vector2Base } from '.';
 import { MathEx } from '../core';
 
+class Vector2ZeroPosition extends Vector2Base {
+    get w() { return 1; }
+    // @ts-ignore - unused param.
+    set w(value) { }
+
+    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
+}
+
+class Vector2ZeroDirection extends Vector2Base {
+    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
+}
+
 export class Vector2 extends Vector2Base {
     constructor();
     constructor(x: number);
@@ -33,8 +45,10 @@ export class Vector2 extends Vector2Base {
     protected get _mag(): number | undefined { return this.__mag; }
     protected set _mag(value) { this.__magSquared = value; }
 
-    static get zeroPosition() { return new PVector2(0, 0); }
-    static get zeroDirection() { return new DVector2(0, 0); }
+    private static _zeroPosition: Vector = new Vector2ZeroPosition;
+    static get zeroPosition() { return _zeroPosition; }
+    private static _zeroDirection: Vector = new Vector2ZeroDirection;
+    static get zeroDirection() { return _zeroDirection; }
 
     static fromRadians(angle: number, radius: number = 1) {
         return new Vector2(Math.cos(angle), Math.sin(angle)).scale(radius);
