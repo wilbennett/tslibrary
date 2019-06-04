@@ -44,7 +44,7 @@ export class VectorIndexer extends Vector {
 
     protected updateCurrent(index: number) {
         this._index = index;
-        return this._collection.get(this._index);
+        return this.hasCurrent ? this._collection.get(this._index) : Vector.empty;
     }
 }
 
