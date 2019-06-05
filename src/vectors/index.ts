@@ -13,4 +13,5 @@ export * from "./vectorb-collection";
 export * from "./vector2b-collection";
 export * from "./vector2b-indexer";
 export * from "./vectorb-groups";
+export * from "./vectorb-groups-builder";
 export * from "./vectorF32-groups-builder";
