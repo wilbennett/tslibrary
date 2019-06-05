@@ -1,6 +1,6 @@
 import { Vector, Vector2B, Vector2F32Indexer, VectorCollection } from '.';
 
-export class Vector2F32Collection extends VectorCollection {
+export class Vector2BCollection extends VectorCollection {
     protected static readonly ERROR_NO_VALUES = "setStorage must be called before accessing values.";
 
     constructor(count: number) {
@@ -12,7 +12,7 @@ export class Vector2F32Collection extends VectorCollection {
     protected _values?: Float32Array;
     get values() {
         if (!this._values)
-            throw Vector2F32Collection.ERROR_NO_VALUES;
+            throw Vector2BCollection.ERROR_NO_VALUES;
 
         return this._values;
     }
@@ -35,7 +35,7 @@ export class Vector2F32Collection extends VectorCollection {
 
     protected createItems() {
         if (!this._values)
-            throw Vector2F32Collection.ERROR_NO_VALUES;
+            throw Vector2BCollection.ERROR_NO_VALUES;
 
         const length = this._length;
         let index = this._startIndex;

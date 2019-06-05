@@ -1,10 +1,10 @@
-import { Vector, Vector2B, Vector2F32Collection, VectorIndexer } from '.';
+import { Vector, Vector2B, Vector2BCollection, VectorIndexer } from '.';
 
 export class Vector2F32Indexer extends VectorIndexer {
     protected _valuesF32: Float32Array;
     protected _startIndex: number;
 
-    constructor(collection: Vector2F32Collection) {
+    constructor(collection: Vector2BCollection) {
         super(collection);
         this._valuesF32 = collection.values;
         this._startIndex = collection.startIndex;
