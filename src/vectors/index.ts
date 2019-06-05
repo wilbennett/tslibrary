@@ -3,7 +3,7 @@ export * from "./null-vector";
 export * from "./vector1";
 export * from "./vector2";
 export * from "./vector2D";
-export * from "./vector2F32";
+export * from "./vector2B";
 export * from "./vector-collection";
 export * from "./vector-indexer";
 export * from "./vector-groups";

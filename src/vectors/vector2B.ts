@@ -1,6 +1,6 @@
 import { Vector2, Vector2D } from '.';
 
-export class Vector2F32 extends Vector2 {
+export class Vector2B extends Vector2 {
     protected _values: Float32Array;
     protected _startIndex: number;
 

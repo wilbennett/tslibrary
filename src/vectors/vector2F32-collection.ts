@@ -1,4 +1,4 @@
-import { Vector, Vector2F32, Vector2F32Indexer, VectorCollection } from '.';
+import { Vector, Vector2B, Vector2F32Indexer, VectorCollection } from '.';
 
 export class Vector2F32Collection extends VectorCollection {
     protected static readonly ERROR_NO_VALUES = "setStorage must be called before accessing values.";
@@ -21,7 +21,7 @@ export class Vector2F32Collection extends VectorCollection {
 
     protected _length: number;
     get length() { return this._length; }
-    get elementCount() { return this.length * Vector2F32.elementCount; };
+    get elementCount() { return this.length * Vector2B.elementCount; };
     private _items?: Vector[];
     get items() { return this._items || (this._items = this.createItems()); }
 
@@ -41,11 +41,11 @@ export class Vector2F32Collection extends VectorCollection {
         let index = this._startIndex;
 
         if (!this._items)
-            this._items = new Array<Vector2F32>(length);
+            this._items = new Array<Vector2B>(length);
 
         for (let i = 0; i < length; i++) {
-            this._items[i] = new Vector2F32(this._values, index);
-            index += Vector2F32.elementCount;
+            this._items[i] = new Vector2B(this._values, index);
+            index += Vector2B.elementCount;
         }
 
         return this._items;
