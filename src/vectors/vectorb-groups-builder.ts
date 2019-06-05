@@ -1,4 +1,5 @@
 import {
+    Vector1BCollection,
     Vector2BCollection,
     VectorBCollection,
     VectorBGroups,
@@ -29,7 +30,7 @@ export abstract class VectorBGroupsBuilder extends VectorGroupsBuilder {
     add(groupName: string, dimensions: VectorDimension, count: number) {
         switch (dimensions) {
             case 1:
-                // TODO: Implement
+                this._groups.add(groupName, new Vector1BCollection(count));
                 break;
 
             case 2:

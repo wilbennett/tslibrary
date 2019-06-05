@@ -1,4 +1,4 @@
-import { Vector2B, Vector2BIndexer, VectorBCollection, VectorData } from '.';
+import { Vector2B, Vector2BIndexer, VectorBCollection, VectorData, VectorIndexer } from '.';
 
 export class Vector2BCollection extends VectorBCollection {
     constructor(count: number) {
@@ -7,7 +7,7 @@ export class Vector2BCollection extends VectorBCollection {
 
     get elementCount() { return this.length * Vector2B.elementCount; };
 
-    createIndexer() { return new Vector2BIndexer(this); }
+    createIndexer(): VectorIndexer { return new Vector2BIndexer(this); }
 
     protected createItemsCore(values: VectorData) {
         const length = this._length;
