@@ -1,4 +1,4 @@
-import { Vector2, Vector2Base } from '.';
+import { Vector2Base, Vector2D } from '.';
 
 export class Vector2F32 extends Vector2Base {
     protected _values: Float32Array;
@@ -52,7 +52,7 @@ export class Vector2F32 extends Vector2Base {
         this.w = w;
     }
 
-    static get [Symbol.species]() { return Vector2; }
+    static get [Symbol.species]() { return Vector2D; }
     static get elementCount() { return 3; }
     get x() { return this._values[this._startIndex]; }
     set x(value) { this._values[this._startIndex] = value; }

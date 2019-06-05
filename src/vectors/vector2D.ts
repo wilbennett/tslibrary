@@ -1,23 +1,7 @@
-import { Vector2Base } from '.';
+import { Vector, Vector2Base } from '.';
 import { MathEx } from '../core';
 
-class Vector2ZeroPosition extends Vector2 {
-    static get [Symbol.species]() { return Vector2; }
-
-    get w() { return 1; }
-    // @ts-ignore - unused param.
-    set w(value) { }
-
-    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
-}
-
-class Vector2ZeroDirection extends Vector2 {
-    static get [Symbol.species]() { return Vector2; }
-
-    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2(x, y, z, w); }
-}
-
-export class Vector2 extends Vector2Base {
+export class Vector2D extends Vector2Base {
     constructor();
     constructor(x: number);
     constructor(x: number, y: number);
@@ -50,30 +34,46 @@ export class Vector2 extends Vector2Base {
     protected get _mag(): number | undefined { return this.__mag; }
     protected set _mag(value) { this.__magSquared = value; }
 
-    private static _zeroPosition: Vector = new Vector2ZeroPosition;
-    static get zeroPosition() { return _zeroPosition; }
-    private static _zeroDirection: Vector = new Vector2ZeroDirection;
-    static get zeroDirection() { return _zeroDirection; }
+    private static _zeroPosition: Vector;
+    static get zeroPosition() { return Vector2D._zeroPosition || (Vector2D._zeroPosition = new Vector2ZeroPosition()); }
+    private static _zeroDirection: Vector;
+    static get zeroDirection() { return Vector2D._zeroDirection || (Vector2D._zeroDirection = new Vector2ZeroDirection()); }
 
     static fromRadians(angle: number, radius: number = 1) {
-        return new Vector2(Math.cos(angle), Math.sin(angle)).scale(radius);
+        return new Vector2D(Math.cos(angle), Math.sin(angle)).scale(radius);
     }
 
     static fromDegrees(angle: number, mag: number = 1) { return this.fromRadians(angle * MathEx.ONE_RADIAN, mag); }
 }
 
-export class PVector2 extends Vector2 {
+export class PVector2 extends Vector2D {
     constructor(x: number = 0, y: number = 0) {
         super(x, y, 1);
     }
 
-    static get [Symbol.species]() { return Vector2; }
+    static get [Symbol.species]() { return Vector2D; }
 }
 
-export class DVector2 extends Vector2 {
+export class DVector2 extends Vector2D {
     constructor(x: number = 0, y: number = 0) {
         super(x, y, 0);
     }
 
-    static get [Symbol.species]() { return Vector2; }
+    static get [Symbol.species]() { return Vector2D; }
+}
+
+class Vector2ZeroPosition extends Vector2D {
+    static get [Symbol.species]() { return Vector2D; }
+
+    get w() { return 1; }
+    // @ts-ignore - unused param.
+    set w(value) { }
+
+    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2D(x, y, z, w); }
+}
+
+class Vector2ZeroDirection extends Vector2D {
+    static get [Symbol.species]() { return Vector2D; }
+
+    set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2D(x, y, z, w); }
 }
