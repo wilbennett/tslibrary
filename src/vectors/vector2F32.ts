@@ -1,6 +1,6 @@
-import { Vector2Base, Vector2D } from '.';
+import { Vector2, Vector2D } from '.';
 
-export class Vector2F32 extends Vector2Base {
+export class Vector2F32 extends Vector2 {
     protected _values: Float32Array;
     protected _startIndex: number;
 

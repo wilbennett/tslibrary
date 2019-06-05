@@ -1,7 +1,7 @@
-import { Vector, Vector2Base } from '.';
+import { Vector, Vector2 } from '.';
 import { MathEx } from '../core';
 
-export class Vector2D extends Vector2Base {
+export class Vector2D extends Vector2 {
     constructor();
     constructor(x: number);
     constructor(x: number, y: number);

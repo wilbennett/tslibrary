@@ -1,6 +1,6 @@
 import { Vector } from '.';
 
-export class Vector2Base extends Vector {
+export class Vector2 extends Vector {
     get magSquared() { return this.x * this.x + this.y * this.y; }
     get mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
 
