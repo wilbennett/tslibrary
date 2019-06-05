@@ -1,4 +1,4 @@
-import { Vector, Vector2B, Vector2F32Indexer, VectorCollection } from '.';
+import { Vector, Vector2B, Vector2F32Indexer, VectorCollection, VectorData } from '.';
 
 export class Vector2BCollection extends VectorCollection {
     protected static readonly ERROR_NO_VALUES = "setStorage must be called before accessing values.";
@@ -9,7 +9,7 @@ export class Vector2BCollection extends VectorCollection {
         this._length = count;
     }
 
-    protected _values?: Float32Array;
+    protected _values?: VectorData;
     get values() {
         if (!this._values)
             throw Vector2BCollection.ERROR_NO_VALUES;
@@ -27,7 +27,7 @@ export class Vector2BCollection extends VectorCollection {
 
     createIndexer() { return new Vector2F32Indexer(this); }
 
-    setStorage(values: Float32Array, startIndex: number) {
+    setStorage(values: VectorData, startIndex: number) {
         this._values = values;
         this._startIndex = startIndex;
         this._items = undefined;
