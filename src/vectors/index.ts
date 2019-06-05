@@ -2,6 +2,7 @@ export * from "./vector-types";
 export * from "./vector";
 export * from "./null-vector";
 export * from "./vector1";
+export * from "./vector1d";
 export * from "./vector2";
 export * from "./vector2d";
 export * from "./vector2b";
