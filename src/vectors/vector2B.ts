@@ -1,25 +1,25 @@
-import { Vector2, Vector2D } from '.';
+import { Vector2, Vector2D, VectorData } from '.';
 
 export class Vector2B extends Vector2 {
-    protected _values: Float32Array;
+    protected _values: VectorData;
     protected _startIndex: number;
 
     constructor();
-    constructor(values: Float32Array, startIndex: number);
-    constructor(x: number, values: Float32Array, startIndex: number);
-    constructor(x: number, y: number, values: Float32Array, startIndex: number);
-    constructor(x: number, y: number, w: number, values: Float32Array, startIndex: number);
+    constructor(values: VectorData, startIndex: number);
+    constructor(x: number, values: VectorData, startIndex: number);
+    constructor(x: number, y: number, values: VectorData, startIndex: number);
+    constructor(x: number, y: number, w: number, values: VectorData, startIndex: number);
     constructor(param1?: any, param2?: any, param3?: any, param4?: any, param5?: any) {
         super();
         let x = 0;
         let y = 0;
         let w = 0;
-        let values: Float32Array;
+        let values: VectorData;
         let startIndex = 0;
 
         switch (arguments.length) {
             case 0:
-                values = new Float32Array(3);
+                values = new Array<number>(3);
                 break;
             case 2:
                 values = param1;
