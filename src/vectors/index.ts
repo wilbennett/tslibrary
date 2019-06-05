@@ -1,3 +1,4 @@
+export * from "./vector-types";
 export * from "./vector";
 export * from "./null-vector";
 export * from "./vector1";

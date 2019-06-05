@@ -1,6 +1,4 @@
-import { VectorGroups } from '.';
-
-export type VectorDimension = 1 | 2;
+import { VectorDimension, VectorGroups } from '.';
 
 export abstract class VectorGroupsBuilder {
     abstract get Groups(): VectorGroups;
