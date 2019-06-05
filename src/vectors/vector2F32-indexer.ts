@@ -1,7 +1,7 @@
-import { Vector, Vector2B, Vector2BCollection, VectorIndexer } from '.';
+import { Vector, Vector2B, Vector2BCollection, VectorData, VectorIndexer } from '.';
 
 export class Vector2F32Indexer extends VectorIndexer {
-    protected _valuesF32: Float32Array;
+    protected _valuesF32: VectorData;
     protected _startIndex: number;
 
     constructor(collection: Vector2BCollection) {
