@@ -15,6 +15,9 @@ export class Vector2BIndexer extends VectorIndexer {
     set x(value) { this._values[this._index * Vector2B.elementCount + this._startIndex] = value; }
     get y() { return this._values[this._index * Vector2B.elementCount + this._startIndex + 1]; }
     set y(value) { this._values[this._index * Vector2B.elementCount + this._startIndex + 1] = value; }
+    get z() { return 0; }
+    // @ts-ignore - unused params.
+    set z(value) { }
     get w() { return this._values[this._index * Vector2B.elementCount + this._startIndex + 2]; }
     set w(value) { this._values[this._index * Vector2B.elementCount + this._startIndex + 2] = value; }
 

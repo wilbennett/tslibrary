@@ -20,6 +20,8 @@ export class VectorIndexer extends Vector {
     set x(value) { this._collection.get(this._index).x = value; }
     get y() { return this._collection.get(this._index).y; }
     set y(value) { this._collection.get(this._index).y = value; }
+    get z() { return this._collection.get(this._index).z; }
+    set z(value) { this._collection.get(this._index).z = value; }
     get w() { return this._collection.get(this._index).w; }
     set w(value) { this._collection.get(this._index).w = value; }
     reset(forward: boolean = true) { this._index = forward ? -1 : this._collection.length; }

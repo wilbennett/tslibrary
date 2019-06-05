@@ -16,6 +16,9 @@ export class Vector1BIndexer extends VectorIndexer {
     get y() { return 0; }
     // @ts-ignore - unused params.
     set y(value) { }
+    get z() { return 0; }
+    // @ts-ignore - unused params.
+    set z(value) { }
     get w() { return 0; }
     // @ts-ignore - unused params.
     set w(value) { }
