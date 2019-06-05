@@ -1,6 +1,6 @@
 import { Vector, Vector2B, Vector2BCollection, VectorData, VectorIndexer } from '.';
 
-export class Vector2F32Indexer extends VectorIndexer {
+export class Vector2BIndexer extends VectorIndexer {
     protected _valuesF32: VectorData;
     protected _startIndex: number;
 

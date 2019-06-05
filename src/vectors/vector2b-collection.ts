@@ -1,4 +1,4 @@
-import { Vector, Vector2B, Vector2F32Indexer, VectorCollection, VectorData } from '.';
+import { Vector, Vector2B, Vector2BIndexer, VectorCollection, VectorData } from '.';
 
 export class Vector2BCollection extends VectorCollection {
     protected static readonly ERROR_NO_VALUES = "setStorage must be called before accessing values.";
@@ -25,7 +25,7 @@ export class Vector2BCollection extends VectorCollection {
     private _items?: Vector[];
     get items() { return this._items || (this._items = this.createItems()); }
 
-    createIndexer() { return new Vector2F32Indexer(this); }
+    createIndexer() { return new Vector2BIndexer(this); }
 
     setStorage(values: VectorData, startIndex: number) {
         this._values = values;
