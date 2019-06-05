@@ -1,4 +1,11 @@
-import { Vector2BCollection, VectorBGroups, VectorDimension, VectorGroups, VectorGroupsBuilder } from '.';
+import {
+    Vector2BCollection,
+    VectorBCollection,
+    VectorBGroups,
+    VectorDimension,
+    VectorGroups,
+    VectorGroupsBuilder,
+} from '.';
 
 export class VectorF32GroupsBuilder extends VectorGroupsBuilder {
     protected _groups = new VectorBGroups();
@@ -10,7 +17,7 @@ export class VectorF32GroupsBuilder extends VectorGroupsBuilder {
         let collections = this._groups.groups.values();
 
         for (const collection of collections) {
-            const item = <Vector2BCollection>collection;
+            const item = <VectorBCollection>collection;
             item.setStorage(array, index);
             index += item.elementCount;
         }
