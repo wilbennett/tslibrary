@@ -1,7 +1,7 @@
-import { Vector2BCollection, Vector2F32Groups, VectorDimension, VectorGroups, VectorGroupsBuilder } from '.';
+import { Vector2BCollection, VectorBGroups, VectorDimension, VectorGroups, VectorGroupsBuilder } from '.';
 
 export class VectorF32GroupsBuilder extends VectorGroupsBuilder {
-    protected _groups = new Vector2F32Groups();
+    protected _groups = new VectorBGroups();
 
     get Groups(): VectorGroups {
         const int32bytes = 32 / 8;
