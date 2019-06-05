@@ -9,6 +9,7 @@ export * from "./vector-collection";
 export * from "./vector-indexer";
 export * from "./vector-groups";
 export * from "./vector-groups-builder";
+export * from "./vectorb-collection";
 export * from "./vector2b-collection";
 export * from "./vector2b-indexer";
 export * from "./vectorB-groups";
