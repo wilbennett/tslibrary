@@ -3,7 +3,7 @@ import { Vector, VectorIndexer } from '.';
 export abstract class VectorCollection {
     protected _indexer?: VectorIndexer;
 
-    abstract get length(): number;
+    get length() { return this.items.length; }
     abstract get elementCount(): number;
     abstract get items(): Vector[];
 

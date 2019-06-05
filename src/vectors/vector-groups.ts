@@ -1,7 +1,8 @@
 import { VectorCollection } from '.';
 
 export abstract class VectorGroups {
-    abstract get groups(): Map<string, VectorCollection>;
+    protected _groups = new Map<string, VectorCollection>();
+    get groups() { return this._groups; }
     get count() { return this.groups.size; }
 
     get elementCount() {
@@ -14,5 +15,5 @@ export abstract class VectorGroups {
         return sum;
     }
 
-    abstract get(name: string): VectorCollection | null;
+    get(name: string) { return this.groups.get(name); }
 }

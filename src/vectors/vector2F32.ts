@@ -5,10 +5,11 @@ export class Vector2F32 extends Vector2Base {
     protected _startIndex: number;
 
     constructor();
+    constructor(values: Float32Array, startIndex: number);
     constructor(x: number, values: Float32Array, startIndex: number);
     constructor(x: number, y: number, values: Float32Array, startIndex: number);
     constructor(x: number, y: number, w: number, values: Float32Array, startIndex: number);
-    constructor(param1?: number, param2?: any, param3?: any, param4?: any, param5?: any) {
+    constructor(param1?: any, param2?: any, param3?: any, param4?: any, param5?: any) {
         super();
         let x = 0;
         let y = 0;
@@ -19,6 +20,10 @@ export class Vector2F32 extends Vector2Base {
         switch (arguments.length) {
             case 0:
                 values = new Float32Array(3);
+                break;
+            case 2:
+                values = param1;
+                startIndex = param2;
                 break;
             case 3:
                 x = param1!;
