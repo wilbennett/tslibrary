@@ -38,7 +38,7 @@ export abstract class VectorBGroupsBuilder extends VectorGroupsBuilder {
                 break;
 
             default:
-                this.unsupportedElementCount(dimensions);
+                this.unsupportedDimension(dimensions);
         }
 
         return this;
