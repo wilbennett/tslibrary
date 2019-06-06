@@ -33,6 +33,24 @@ export abstract class Vector {
     // @ts-ignore - unused params.
     protected set _mag(value) { }
 
+    getCoord(index: number) {
+        switch (index) {
+            case 0: return this.x;
+            case 1: return this.y;
+            case 2: return this.z;
+            default: return this.w;
+        }
+    }
+
+    setCoord(index: number, value: number) {
+        switch (index) {
+            case 0: this.x = value; break;
+            case 1: this.y = value; break;
+            case 2: this.z = value; break;
+            default: this.w = value; break;
+        }
+    }
+
     get magSquared() { return this.x * this.x + this.y * this.y + this.z * this.z; }
     get mag() { return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z); }
     get normal() { return this.perp(); }
