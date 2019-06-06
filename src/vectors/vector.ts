@@ -15,6 +15,14 @@ export abstract class Vector {
     get w() { return 0; }
     // @ts-ignore - unused params.
     set w(value) { }
+    get r() { return this.x; }
+    set r(value) { this.x = value; }
+    get g() { return this.y; }
+    set g(value) { this.y = value; }
+    get b() { return this.z; }
+    set b(value) { this.z = value; }
+    get a() { return this.w; }
+    set a(value) { this.w = value; }
     get isPosition() { return this.w !== 0; }
     get isDirection() { return this.w === 0; }
     get isEmpty() { return false; }
