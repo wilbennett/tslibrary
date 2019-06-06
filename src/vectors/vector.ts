@@ -69,8 +69,6 @@ export abstract class Vector {
     clone() { return this.newVector(this.x, this.y, this.z, this.w); }
 
     dot(other: Vector) { return this.x * other.x + this.y * other.y + this.z * other.z; }
-    // TODO: Proper 3D implementation.
-    cross(other: Vector) { return this.x * other.y - this.y * other.x; }
 
     distanceSquared(other: Vector) {
         const deltaX = other.x - this.x;
@@ -80,6 +78,18 @@ export abstract class Vector {
     }
 
     distance(other: Vector) { return Math.sqrt(this.distanceSquared(other)); }
+
+    cross2D(other: Vector) { return this.x * other.y - this.y * other.x; }
+
+    crossO(other: Vector, result: Vector) {
+        return result.set(
+            this.y * other.z - this.z * other.y,
+            this.z * other.x - this.x * other.z,
+            this.x * other.y - this.y * other.x,
+            0);
+    }
+    crossN(other: Vector) { return this.crossO(other, this.newVector()); }
+    cross(other: Vector) { return this.crossO(other, this); }
 
     asCartesianO(result: Vector) { return result.set(this.x / this.w, this.y / this.w, this.z / this.w, 1); }
     asCartesianN() { return this.asCartesianO(this.newVector()); }

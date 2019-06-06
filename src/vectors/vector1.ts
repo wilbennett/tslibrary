@@ -6,14 +6,15 @@ export class Vector1 extends Vector {
     get mag() { return Math.abs(this.x); }
 
     dot(other: Vector) { return this.x * other.x; }
-    // TODO: Revisit.
-    cross(other: Vector) { return this.x * other.x; }
 
     distanceSquared(other: Vector) {
         const deltaX = other.x - this.x;
         return deltaX * deltaX;
     }
 
+    // TODO: Revisit.
+    cross2D(other: Vector) { return this.x * other.x; }
+    crossO(other: Vector, result: Vector) { return result.set(this.cross2D(other), 0, 0, 0); }
     asCartesianO(result: Vector) { return result.set(this.x, 0, 0, 0); }
     asPositionO(result: Vector) { return result.set(this.x, 0, 0, 0); }
     asDirectionO(result: Vector) { return result.set(this.x, 0, 0, 0); }

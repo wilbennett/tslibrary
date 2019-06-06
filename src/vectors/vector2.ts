@@ -5,7 +5,6 @@ export class Vector2 extends Vector {
     get mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
 
     dot(other: Vector) { return this.x * other.x + this.y * other.y; }
-    cross(other: Vector) { return this.x * other.y - this.y * other.x; }
 
     distanceSquared(other: Vector) {
         const deltaX = other.x - this.x;
@@ -13,6 +12,8 @@ export class Vector2 extends Vector {
         return deltaX * deltaX + deltaY * deltaY;
     }
 
+    cross2D(other: Vector) { return this.x * other.y - this.y * other.x; }
+    crossO(other: Vector, result: Vector) { return result.set(this.cross2D(other), 0, 0, 0); }
     asCartesianO(result: Vector) { return result.set(this.x / this.w, this.y / this.w, 0, 1); }
     asPositionO(result: Vector) { return result.set(this.x, this.y, 0, 1); }
     asDirectionO(result: Vector) { return result.set(this.x, this.y, 0, 0); }

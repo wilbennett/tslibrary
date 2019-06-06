@@ -11,9 +11,11 @@ export class NullVector extends Vector {
     // @ts-ignore - unused param.
     dot(other: Vector) { return 0; }
     // @ts-ignore - unused param.
-    cross(other: Vector) { return 0; }
-    // @ts-ignore - unused param.
     distanceSquared(other: Vector) { return 0; }
+    // @ts-ignore - unused param.
+    cross2D(other: Vector) { return 0; }
+    // @ts-ignore - unused param.
+    crossO(other: Vector, result: Vector) { return result.set(0, 0, 0, 0); }
     // @ts-ignore - unused param.
     asCartesianO(result: Vector) { return result.set(0, 0, 0, 0); }
     // @ts-ignore - unused param.
