@@ -26,7 +26,7 @@ export class VectorIndexer extends Vector {
     set w(value) { this._collection.get(this._index).w = value; }
 
     reset(forward: boolean = true) { this._index = forward ? -1 : this._collection.length; }
-    get(index: number) { return this.updateCurrent(index); }
+    valueAt(index: number) { return this.updateCurrent(index); }
 
     protected updateCurrent(index: number) {
         this._index = index;
