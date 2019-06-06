@@ -19,6 +19,8 @@ export * from "./vector1b-collection";
 export * from "./vector1b-indexer";
 export * from "./vector2b-collection";
 export * from "./vector2b-indexer";
+export * from "./vector3b-collection";
+export * from "./vector3b-indexer";
 export * from "./vectorb-groups";
 export * from "./vectorb-groups-builder";
 export * from "./vectorF32-groups-builder";

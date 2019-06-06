@@ -9,7 +9,7 @@ export class Vector3D extends Vector3 {
         this._w = w || 0;
     }
 
-    static get elementCount() { return 3; }
+    static get elementCount() { return 4; }
     private _x: number;
     get x() { return this._x; }
     set x(value) { this._x = value; }

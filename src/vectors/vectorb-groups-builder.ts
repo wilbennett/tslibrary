@@ -1,6 +1,7 @@
 import {
     Vector1BCollection,
     Vector2BCollection,
+    Vector3BCollection,
     VectorBCollection,
     VectorBGroups,
     VectorData,
@@ -35,6 +36,10 @@ export abstract class VectorBGroupsBuilder extends VectorGroupsBuilder {
 
             case 2:
                 this._groups.add(groupName, new Vector2BCollection(count));
+                break;
+
+            case 3:
+                this._groups.add(groupName, new Vector3BCollection(count));
                 break;
 
             default:
