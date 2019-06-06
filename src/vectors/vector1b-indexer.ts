@@ -10,7 +10,7 @@ export class Vector1BIndexer extends VectorIndexer {
         this._startIndex = collection.startIndex;
     }
 
-    get current() { return this._collection.get(this._index); }
+    get current() { return this.updateCurrent(this._index); }
     get x() { return this._values[this._index * Vector1B.elementCount + this._startIndex]; }
     set x(value) { this._values[this._index * Vector1B.elementCount + this._startIndex] = value; }
     get y() { return 0; }

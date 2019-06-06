@@ -1,16 +1,16 @@
-import { Vector, Vector2B, Vector2BCollection, VectorData, VectorIndexer } from '.';
+import { Vector, Vector2B, VectorBCollection, VectorData, VectorIndexer } from '.';
 
 export class Vector2BIndexer extends VectorIndexer {
     protected _values: VectorData;
     protected _startIndex: number;
 
-    constructor(collection: Vector2BCollection) {
+    constructor(collection: VectorBCollection) {
         super(collection);
         this._values = collection.values;
         this._startIndex = collection.startIndex;
     }
 
-    get current() { return this._collection.get(this._index); }
+    get current() { return this.updateCurrent(this._index); }
     get x() { return this._values[this._index * Vector2B.elementCount + this._startIndex]; }
     set x(value) { this._values[this._index * Vector2B.elementCount + this._startIndex] = value; }
     get y() { return this._values[this._index * Vector2B.elementCount + this._startIndex + 1]; }
