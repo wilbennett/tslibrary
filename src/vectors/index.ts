@@ -9,6 +9,7 @@ export * from "./vector2d";
 export * from "./vector2b";
 export * from "./vector3";
 export * from "./vector3d";
+export * from "./vector3b";
 export * from "./vector-collection";
 export * from "./vector-indexer";
 export * from "./vector-groups";
