@@ -58,7 +58,7 @@ export abstract class Vector {
     // TODO: Proper 3D implementation.
     get radians() {
         const res = Math.atan2(this.y, this.x);
-        return res >= 0 ? res : res + 2 * Math.PI;
+        return res >= 0 ? res : res + MathEx.TWO_PI;
     }
 
     get degrees() { return this.radians * MathEx.ONE_DEGREE; }
@@ -396,7 +396,7 @@ export abstract class Vector {
 
     draw(ctx: CanvasRenderingContext2D, radius: number) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, radius, 0, MathEx.TWO_PI);
         ctx.fill();
     }
 
