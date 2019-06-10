@@ -12,7 +12,7 @@ export abstract class VectorBCollection extends VectorCollection {
     protected _values?: VectorData;
     get values() {
         if (!this._values)
-            throw VectorBCollection.ERROR_NO_VALUES;
+            throw new Error(VectorBCollection.ERROR_NO_VALUES);
 
         return this._values;
     }
@@ -34,7 +34,7 @@ export abstract class VectorBCollection extends VectorCollection {
 
     protected createItems() {
         if (!this._values)
-            throw VectorBCollection.ERROR_NO_VALUES;
+            throw new Error(VectorBCollection.ERROR_NO_VALUES);
 
         return this.createItemsCore(this._values);
     }

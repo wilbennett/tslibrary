@@ -5,6 +5,6 @@ export abstract class VectorGroupsBuilder {
     abstract add(groupName: string, dimensions: VectorDimension, count: number): this;
 
     protected unsupportedDimension(value: never) {
-        throw `Element count of ${value} is not supported`;
+        throw new Error(`Element count of ${value} is not supported`);
     }
 }
