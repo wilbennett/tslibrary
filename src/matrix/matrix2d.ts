@@ -14,3 +14,5 @@ export class Matrix2D extends Matrix2 {
     createValues(): MatrixValues { return createValues(); }
     getIdentity(result: MatrixValues): MatrixValues { return getIdentity(result); }
 }
+
+Matrix2.instanceConstructor = Matrix2D;

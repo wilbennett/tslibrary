@@ -1,6 +1,10 @@
 import { DataMode, Matrix, MatrixData, MatrixValues } from '.';
 import { Vector, Vector2D } from '../vectors';
 
+export interface Matrix2Constructor {
+    new(): Matrix2;
+}
+
 export abstract class Matrix2 extends Matrix {
     private _temp: Float32Array;
 
@@ -10,8 +14,23 @@ export abstract class Matrix2 extends Matrix {
         this._temp = new Float32Array(6);
     }
 
+    private static _instanceConstructor: Matrix2Constructor;
+    static get instanceConstructor() { return this._instanceConstructor; }
+    static set instanceConstructor(value: Matrix2Constructor) { this._instanceConstructor = value; }
+
+    private static _instance: Matrix2;
+    static get instance() { return this._instance || (this._instance = this.create()); }
+    static set instance(value: Matrix2) { this._instance = value; }
+
     static get elementCount() { return 6; }
     get elementCount() { return 6; }
+
+    static create() {
+        if (!this._instanceConstructor)
+            throw new Error(`instanceConstructor must me set before calling create.`);
+
+        return new this._instanceConstructor();
+    }
 
     setTranslation(value: Vector): this;
     setTranslation(px: number, py: number, pz?: number): this;
