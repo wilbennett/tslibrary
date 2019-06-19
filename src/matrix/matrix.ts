@@ -45,7 +45,7 @@ export class MatrixData {
 export function copy(source: MatrixValues, result: MatrixValues) {
     if (Array.isArray(result)) {
         if (Array.isArray(source)) {
-            result.splice(0, source.length, ...result);
+            result.splice(0, source.length, ...source);
         } else {
             source.forEach((v, i) => result[i] = v);
         }
@@ -139,9 +139,9 @@ export abstract class Matrix {
     abstract setSkew(value: Vector): this;
     abstract setSkew(radiansX: number, radiansY: number, radiansZ?: number): this;
 
-    setSkewDegrees2D(value: Vector): this;
-    setSkewDegrees2D(degreesX: number, degreesY: number, degreesZ?: number): this;
-    setSkewDegrees2D(param1: number | Vector, param2?: number, param3?: number): this {
+    setSkewDegrees(value: Vector): this;
+    setSkewDegrees(degreesX: number, degreesY: number, degreesZ?: number): this;
+    setSkewDegrees(param1: number | Vector, param2?: number, param3?: number): this {
         let radiansX = 0;
         let radiansY = 0;
         let radiansZ = 0;
@@ -151,9 +151,9 @@ export abstract class Matrix {
             radiansY = MathEx.toRadians(param1.y);
             radiansZ = MathEx.toRadians(param1.z);
         } else {
-            radiansX = param1;
-            radiansY = param2!;
-            radiansZ = param3 || 0;
+            radiansX = MathEx.toRadians(param1);
+            radiansY = MathEx.toRadians(param2!);
+            radiansZ = MathEx.toRadians(param3 || 0);
         }
 
         return this.setSkew(radiansX, radiansY, radiansZ);
@@ -195,9 +195,9 @@ export abstract class Matrix {
             radiansY = MathEx.toRadians(param1.y);
             radiansZ = MathEx.toRadians(param1.z);
         } else {
-            radiansX = param1;
-            radiansY = param2!;
-            radiansZ = param3 || 0;
+            radiansX = MathEx.toRadians(param1);
+            radiansY = MathEx.toRadians(param2!);
+            radiansZ = MathEx.toRadians(param3 || 0);
         }
 
         return this.skew(radiansX, radiansY, radiansZ);
@@ -294,6 +294,8 @@ export abstract class Matrix {
     protected abstract applyRotation(data: MatrixValues, startIndex?: number): number;
 
     protected updateValues() {
+        this._data.isDirtyValues = false;
+
         if (this._dataMode === DataMode.fixed) {
             this.getIdentity(this.values);
 
@@ -314,8 +316,8 @@ export abstract class Matrix {
     }
 
     protected updateInverse() {
-        this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== null;
         this._data.isDirtyInverse = false;
+        this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== null;
     }
 
     protected cloneData() {

@@ -326,16 +326,16 @@ export abstract class Matrix2 extends Matrix {
         const values0 = values[0];
         const values1 = values[1];
 
-        if (radiansX) {
-            const tanX = Math.tan(radiansX);
-            values[0] += values[2] * tanX;
-            values[1] += values[3] * tanX;
-        }
-
         if (radiansY) {
             const tanY = Math.tan(radiansY);
-            values[2] += values0 * tanY;
-            values[3] += values1 * tanY;
+            values[0] += values[2] * tanY;
+            values[1] += values[3] * tanY;
+        }
+
+        if (radiansX) {
+            const tanX = Math.tan(radiansX);
+            values[2] += values0 * tanX;
+            values[3] += values1 * tanX;
         }
 
         this.valuesUpdated();

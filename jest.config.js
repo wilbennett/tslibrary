@@ -5,4 +5,8 @@ module.exports = {
     "transform": {
         "^.+\\.tsx?$": "ts-jest"
     },
+    "coverageReporters": [
+        "html",
+        "text"
+    ]
 }
