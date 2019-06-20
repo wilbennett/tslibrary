@@ -2,6 +2,8 @@ import { Matrix, Matrix2, Matrix2D, MatrixValues } from '..';
 import { MathEx } from '../../core';
 import { Vector2D } from '../../vectors';
 
+const DEFAULT_PREC = 3;
+
 function prec(values: MatrixValues, amt: number) {
     const vals = Array.isArray(values) ? values : Array.from(values);
     return vals.map(v => v.toPrecision(amt)).join();
@@ -45,25 +47,25 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         it("Should be identity when setToIdentity called", () => {
             const initial = [1, 1, 1, 1, 1, 1];
             const identity = matrix.getIdentity([]);
-            matrix.set(initial);
+            matrix.set(initial)/*?.*/;
             expect(matrix.values.toString()).toEqual(initial.toString());
-            matrix.setToIdentity();
+            matrix.setToIdentity()/*?.*/;
             expect(matrix.values.toString()).toEqual(identity.toString());
         });
 
         it("Should set translation", () => {
-            matrix.setTranslation(new Vector2D(10, 20));
+            matrix.setTranslation(new Vector2D(10, 20))/*?.*/;
             expect(matrix.values.toString()).toBe("1,0,0,1,10,20");
-            matrix.setTranslation(30, 40);
+            matrix.setTranslation(30, 40)/*?.*/;
             expect(matrix.values.toString()).toBe("1,0,0,1,30,40");
         });
 
         it("Should set scale", () => {
-            matrix.setScale(new Vector2D(2, 3));
+            matrix.setScale(new Vector2D(2, 3))/*?.*/;
             expect(matrix.values.toString()).toBe("2,0,0,3,0,0");
-            matrix.setScale(4, 5);
+            matrix.setScale(4, 5)/*?.*/;
             expect(matrix.values.toString()).toBe("4,0,0,5,0,0");
-            matrix.setScale(6);
+            matrix.setScale(6)/*?.*/;
             expect(matrix.values.toString()).toBe("6,0,0,6,0,0");
         });
 
@@ -72,23 +74,34 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             const degreesY = 30;
             const expected = "1.00,0.577,0.176,1.00,0.00,0.00";
 
-            matrix.setSkew(new Vector2D(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)));
-            expect(prec(matrix.values, 3)).toBe(expected);
+            matrix.setSkew(new Vector2D(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)))/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
 
-            matrix.reset();
-            matrix.setSkew(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY));
-            expect(prec(matrix.values, 3)).toBe(expected);
+            matrix.reset()/*?.*/;
+            matrix.setSkew(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY))/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
 
-            matrix.reset();
-            matrix.setSkewDegrees(new Vector2D(degreesX, degreesY));
-            expect(prec(matrix.values, 3)).toBe(expected);
+            matrix.reset()/*?.*/;
+            matrix.setSkewDegrees(new Vector2D(degreesX, degreesY))/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
 
-            matrix.reset();
-            matrix.setSkewDegrees(degreesX, degreesY);
-            expect(prec(matrix.values, 3)).toBe(expected);
+            matrix.reset()/*?.*/;
+            matrix.setSkewDegrees(degreesX, degreesY)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
         });
 
-        it.todo("Should set rotation");
+        it("Should set rotation", () => {
+            const degrees = 10;
+            const expected = "0.985,0.174,-0.174,0.985,0.00,0.00";
+
+            matrix.setRotation2D(MathEx.toRadians(degrees));
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            matrix.reset();
+            matrix.setRotationDegrees2D(degrees);
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+        });
+
         it.todo("Should apply transforms in the correct order");
         it.todo("Should do translation");
         it.todo("Should do scale");
