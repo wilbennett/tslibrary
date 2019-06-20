@@ -201,8 +201,27 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.values, DEFAULT_PREC)).toBe("0.354,-0.354,1.08,0.757,150,150");
         });
 
-        it.todo("Should transform a vector");
-        it.todo("Should inverse transform a vector");
+        it("Should transform a vector", () => {
+            const tx = 10;
+            const ty = 20;
+            const initial = new Vector2D(1, 0);
+            const expected = new Vector2D(initial.x + tx, initial.y + ty).toString();
+
+            matrix.translate(tx, ty)/*?.*/;
+            expect(matrix.transform(initial).toString()).toBe(expected);
+        });
+
+        it("Should inverse transform a vector", () => {
+            const tx = 10;
+            const ty = 20;
+            const initial = new Vector2D(1, 0);
+
+            matrix.translate(tx, ty)/*?.*/;
+            const transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
         it.todo("Should calculate inverse translation");
         it.todo("Should calculate inverse rotation");
         it.todo("Should calculate inverse skew");

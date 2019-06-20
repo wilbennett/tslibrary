@@ -203,8 +203,8 @@ export abstract class Matrix2 extends Matrix {
         values = values || this.values;
 
         return new Vector2D(
-            values[0] * point.x + values[2] * point.y + values[4] * point.w,
-            values[1] * point.x + values[3] * point.y + values[5] * point.w);
+            values[0] * point.x + values[2] * point.y + values[4],
+            values[1] * point.x + values[3] * point.y + values[5]);
     }
 
     calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined {
@@ -256,7 +256,6 @@ export abstract class Matrix2 extends Matrix {
         return 0;
     }
 
-
     // 0 2 4
     // 1 3 5
     protected _mult(a: MatrixValues, b: MatrixValues) {
@@ -269,12 +268,6 @@ export abstract class Matrix2 extends Matrix {
         a[3] = temp[1] * b[2] + temp[3] * b[3];
         a[4] = temp[0] * b[4] + temp[2] * b[5] + temp[4];
         a[5] = temp[1] * b[4] + temp[3] * b[5] + temp[5];
-    }
-
-    protected _transformPoint(px: number, py: number, matrix: number[]) {
-        return new Vector2D(
-            matrix[0] * px + matrix[2] * py + matrix[4],
-            matrix[1] * px + matrix[3] * py + matrix[5]);
     }
 
     protected _translate(dx: number, dy: number): this {
