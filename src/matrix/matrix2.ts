@@ -53,31 +53,6 @@ export abstract class Matrix2 extends Matrix {
         return this;
     }
 
-    setScale(value: Vector): this;
-    setScale(value: number): this;
-    setScale(px: number, py: number, pz?: number): this;
-    // @ts-ignore - unused param.
-    setScale(param1: Vector | number, py?: number, pz?: number): this {
-        this.dataMode = DataMode.fixed;
-        this._data.isDirtyValues = true;
-        let px = 0;
-
-        if (param1 instanceof Vector) {
-            px = param1.x;
-            py = param1.y;
-        } else if (arguments.length === 1) {
-            px = param1;
-            py = param1;
-        } else {
-            px = param1;
-            py = py || 1;
-        }
-
-        this._scaleData[0] = px;
-        this._scaleData[1] = py;
-        return this;
-    }
-
     setRotation2D(radians: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
@@ -108,6 +83,31 @@ export abstract class Matrix2 extends Matrix {
         return this;
     }
 
+    setScale(value: Vector): this;
+    setScale(value: number): this;
+    setScale(px: number, py: number, pz?: number): this;
+    // @ts-ignore - unused param.
+    setScale(param1: Vector | number, py?: number, pz?: number): this {
+        this.dataMode = DataMode.fixed;
+        this._data.isDirtyValues = true;
+        let px = 0;
+
+        if (param1 instanceof Vector) {
+            px = param1.x;
+            py = param1.y;
+        } else if (arguments.length === 1) {
+            px = param1;
+            py = param1;
+        } else {
+            px = param1;
+            py = py || 1;
+        }
+
+        this._scaleData[0] = px;
+        this._scaleData[1] = py;
+        return this;
+    }
+
     translate(value: Vector): this;
     translate(px: number, py: number, pz?: number): this;
     // @ts-ignore - unused param.
@@ -124,28 +124,6 @@ export abstract class Matrix2 extends Matrix {
         }
 
         return this._translate(px, py);
-    }
-
-    scale(value: Vector): this;
-    scale(value: number): this;
-    scale(px: number, py: number, pz?: number): this;
-    // @ts-ignore - unused param.
-    scale(param1: Vector | number, py?: number, pz?: number): this {
-        this.dataMode = DataMode.dynamic;
-        let px = 0;
-
-        if (param1 instanceof Vector) {
-            px = param1.x;
-            py = param1.y;
-        } else if (arguments.length === 1) {
-            px = param1;
-            py = param1;
-        } else {
-            px = param1;
-            py = py || 1;
-        }
-
-        return this._scale(px, py);
     }
 
     rotate2D(radians: number): this;
@@ -185,6 +163,28 @@ export abstract class Matrix2 extends Matrix {
 
     skewX(radians: number): this { return this._skew(radians, 0); }
     skewY(radians: number): this { return this._skew(0, radians); }
+
+    scale(value: Vector): this;
+    scale(value: number): this;
+    scale(px: number, py: number, pz?: number): this;
+    // @ts-ignore - unused param.
+    scale(param1: Vector | number, py?: number, pz?: number): this {
+        this.dataMode = DataMode.dynamic;
+        let px = 0;
+
+        if (param1 instanceof Vector) {
+            px = param1.x;
+            py = param1.y;
+        } else if (arguments.length === 1) {
+            px = param1;
+            py = param1;
+        } else {
+            px = param1;
+            py = py || 1;
+        }
+
+        return this._scale(px, py);
+    }
 
     mult(values: MatrixValues): this;
     mult(values1: MatrixValues, values2: MatrixValues): MatrixValues;
@@ -285,16 +285,6 @@ export abstract class Matrix2 extends Matrix {
         return this;
     }
 
-    protected _scale(sx: number, sy: number): this {
-        const values = this.values;
-        values[0] *= sx;
-        values[1] *= sx;
-        values[2] *= sy;
-        values[3] *= sy;
-        this.valuesUpdated();
-        return this;
-    }
-
     protected _rotate2D(radians: number, centerX?: number, centerY?: number): this {
         centerX = centerX || 0;
         centerY = centerY || 0;
@@ -338,6 +328,16 @@ export abstract class Matrix2 extends Matrix {
             values[3] += values1 * tanX;
         }
 
+        this.valuesUpdated();
+        return this;
+    }
+
+    protected _scale(sx: number, sy: number): this {
+        const values = this.values;
+        values[0] *= sx;
+        values[1] *= sx;
+        values[2] *= sy;
+        values[3] *= sy;
         this.valuesUpdated();
         return this;
     }

@@ -60,9 +60,9 @@ export abstract class Matrix {
     protected _data: MatrixData;
     protected _stack: MatrixData[] = [];
     protected _translateData: number[] = [];
-    protected _scaleData: number[] = [];
-    protected _skewData: number[] = [];
     protected _rotateData: number[] = [];
+    protected _skewData: number[] = [];
+    protected _scaleData: number[] = [];
 
     constructor(data: MatrixData) {
         this._data = data;
@@ -131,9 +131,6 @@ export abstract class Matrix {
 
     abstract setTranslation(value: Vector): this;
     abstract setTranslation(px: number, py: number, pz?: number): this;
-    abstract setScale(value: Vector): this;
-    abstract setScale(value: number): this;
-    abstract setScale(px: number, py: number, pz?: number): this;
     abstract setRotation2D(radians: number): this;
     setRotationDegrees2D(degrees: number): this { return this.setRotation2D(MathEx.toRadians(degrees)); }
     abstract setSkew(value: Vector): this;
@@ -159,11 +156,12 @@ export abstract class Matrix {
         return this.setSkew(radiansX, radiansY, radiansZ);
     }
 
+    abstract setScale(value: Vector): this;
+    abstract setScale(value: number): this;
+    abstract setScale(px: number, py: number, pz?: number): this;
+
     abstract translate(value: Vector): this;
     abstract translate(px: number, py: number, pz?: number): this;
-    abstract scale(value: Vector): this;
-    abstract scale(value: number): this;
-    abstract scale(px: number, py: number, pz?: number): this;
     abstract rotate2D(radians: number): this;
     abstract rotate2D(radians: number, centerX: number, centerY: number): this;
     abstract rotate2D(radians: number, center: Vector): this;
@@ -210,6 +208,10 @@ export abstract class Matrix {
     // @ts-ignore - unused param.
     skewZ(radians: number): this { return this; }
     skewZDegrees(degrees: number) { return this.skewZ(MathEx.toRadians(degrees)); }
+
+    abstract scale(value: Vector): this;
+    abstract scale(value: number): this;
+    abstract scale(px: number, py: number, pz?: number): this;
 
     abstract mult(values: MatrixValues): this;
     abstract mult(values1: MatrixValues, values2: MatrixValues): MatrixValues;

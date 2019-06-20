@@ -60,13 +60,16 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.values.toString()).toBe("1,0,0,1,30,40");
         });
 
-        it("Should set scale", () => {
-            matrix.setScale(new Vector2D(2, 3))/*?.*/;
-            expect(matrix.values.toString()).toBe("2,0,0,3,0,0");
-            matrix.setScale(4, 5)/*?.*/;
-            expect(matrix.values.toString()).toBe("4,0,0,5,0,0");
-            matrix.setScale(6)/*?.*/;
-            expect(matrix.values.toString()).toBe("6,0,0,6,0,0");
+        it("Should set rotation", () => {
+            const degrees = 10;
+            const expected = "0.985,0.174,-0.174,0.985,0.00,0.00";
+
+            matrix.setRotation2D(MathEx.toRadians(degrees));
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            matrix.reset();
+            matrix.setRotationDegrees2D(degrees);
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
         });
 
         it("Should set skew", () => {
@@ -90,30 +93,27 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
         });
 
-        it("Should set rotation", () => {
-            const degrees = 10;
-            const expected = "0.985,0.174,-0.174,0.985,0.00,0.00";
-
-            matrix.setRotation2D(MathEx.toRadians(degrees));
-            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
-
-            matrix.reset();
-            matrix.setRotationDegrees2D(degrees);
-            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+        it("Should set scale", () => {
+            matrix.setScale(new Vector2D(2, 3))/*?.*/;
+            expect(matrix.values.toString()).toBe("2,0,0,3,0,0");
+            matrix.setScale(4, 5)/*?.*/;
+            expect(matrix.values.toString()).toBe("4,0,0,5,0,0");
+            matrix.setScale(6)/*?.*/;
+            expect(matrix.values.toString()).toBe("6,0,0,6,0,0");
         });
 
         it.todo("Should apply transforms in the correct order");
         it.todo("Should do translation");
-        it.todo("Should do scale");
+        it.todo("Should do rotation");
         it.todo("Should do skew");
         it.todo("Should do x only skew");
         it.todo("Should do y only skew");
-        it.todo("Should do rotation");
+        it.todo("Should do scale");
         it.todo("Should combine transforms correctly");
         it.todo("Should calculate inverse translation");
-        it.todo("Should calculate inverse scale");
-        it.todo("Should calculate inverse skew");
         it.todo("Should calculate inverse rotation");
+        it.todo("Should calculate inverse skew");
+        it.todo("Should calculate inverse scale");
         it.todo("Should calculate inverse transformation");
         it.todo("Should transform a vector");
         it.todo("Should inverse transform a vector");
