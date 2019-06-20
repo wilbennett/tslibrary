@@ -285,11 +285,61 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
 
-        it.todo("Should push and pop correctly");
-        it.todo("Should push and set to identity");
-        it.todo("Should push and set values");
-        it.todo("Should push and multiply");
-        it.todo("Should set values and push");
-        it.todo("Should multiply and push");
+        it("Should push and pop correctly", () => {
+            const initial = [1, 2, 3, 4, 5, 6];
+            matrix.set(initial);
+            matrix.push();
+            matrix.setToIdentity();
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(initial.toString());
+        });
+
+        it("Should push and set to identity", () => {
+            const initial = [1, 2, 3, 4, 5, 6];
+            const identity = matrix.getIdentity([]);
+            matrix.set(initial);
+            matrix.pushThenIdentity();
+            expect(matrix.values.toString()).toBe(identity.toString());
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(initial.toString());
+        });
+
+        it("Should push and set values", () => {
+            const initial = [1, 2, 3, 4, 5, 6];
+            const second = [2, 4, 5, 6, 8, 10];
+            matrix.set(initial);
+            matrix.pushThenSet(second);
+            expect(matrix.values.toString()).toBe(second.toString());
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(initial.toString());
+        });
+
+        it("Should push and multiply", () => {
+            const value = [1, 2, 3, 4, 5, 6];
+            const identity = matrix.getIdentity([]);
+            matrix.pushThenMult(value);
+            expect(matrix.values.toString()).toBe(value.toString());
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(identity.toString());
+        });
+
+        it("Should set values and push", () => {
+            const initial = [1, 2, 3, 4, 5, 6];
+            matrix.setThenPush(initial);
+            expect(matrix.values.toString()).toBe(initial.toString());
+            matrix.setToIdentity();
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(initial.toString());
+        });
+
+        it("Should multiply and push", () => {
+            const value = [1, 2, 3, 4, 5, 6];
+            matrix.multThenPush(value);
+            expect(matrix.values.toString()).toBe(value.toString());
+            matrix.setToIdentity();
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(value.toString());
+        });
+
     }
 );
