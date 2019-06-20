@@ -304,14 +304,14 @@ export abstract class Matrix {
             if (this._translateData.length > 0)
                 this.applyTranslation(this._translateData, 0);
 
-            if (this._scaleData.length > 0)
-                this.applyScale(this._scaleData, 0);
+            if (this._rotateData.length > 0)
+                this.applyRotation(this._rotateData, 0);
 
             if (this._skewData.length > 0)
                 this.applySkew(this._skewData, 0);
 
-            if (this._rotateData.length > 0)
-                this.applyRotation(this._rotateData, 0);
+            if (this._scaleData.length > 0)
+                this.applyScale(this._scaleData, 0);
         }
 
         this.valuesUpdated();

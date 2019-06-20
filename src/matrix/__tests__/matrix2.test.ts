@@ -102,7 +102,14 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.values.toString()).toBe("6,0,0,6,0,0");
         });
 
-        it.todo("Should apply transforms in the correct order");
+        it("Should apply transforms in the correct order", () => {
+            matrix.setScale(0.5, 1.3)/*?.*/;
+            matrix.setTranslation(150, 150)/*?.*/;
+            matrix.setRotationDegrees2D(-45)/*?.*/;
+            matrix.setSkewDegrees(10, 0)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe("0.354,-0.354,1.08,0.757,150,150");
+        });
+
         it.todo("Should do translation");
         it.todo("Should do rotation");
         it.todo("Should do skew");
