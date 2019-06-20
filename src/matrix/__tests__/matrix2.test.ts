@@ -222,11 +222,69 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
 
-        it.todo("Should calculate inverse translation");
-        it.todo("Should calculate inverse rotation");
-        it.todo("Should calculate inverse skew");
-        it.todo("Should calculate inverse scale");
-        it.todo("Should calculate inverse transformation");
+        it("Should calculate inverse translation", () => {
+            const tx = 10;
+            const ty = 20;
+            const initial = new Vector2D(1, 0);
+
+            matrix.translate(tx, ty)/*?.*/;
+            const transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
+        it("Should calculate inverse rotation", () => {
+            const degrees = 10;
+            const initial = new Vector2D(1, 0);
+
+            matrix.rotateDegrees2D(degrees)/*?.*/;
+            const transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
+        it("Should calculate inverse skew", () => {
+            const kx = 10;
+            const ky = 20;
+            const initial = new Vector2D(1, 0);
+
+            matrix.skew(kx, ky)/*?.*/;
+            const transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
+        it("Should calculate inverse scale", () => {
+            const sx = 10;
+            const sy = 20;
+            const initial = new Vector2D(1, 0);
+
+            matrix.scale(sx, sy)/*?.*/;
+            const transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
+        it("Should calculate inverse transformation", () => {
+            const initial = new Vector2D(1, 0);
+
+            matrix.setTranslation(150, 150)/*?.*/;
+            matrix.setRotationDegrees2D(-45)/*?.*/;
+            matrix.setSkewDegrees(10, 0)/*?.*/;
+            matrix.setScale(0.5, 1.3)/*?.*/;
+            let transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+
+            matrix.translate(150, 150)/*?.*/;
+            matrix.rotateDegrees2D(-45)/*?.*/;
+            matrix.skewDegrees(10, 0)/*?.*/;
+            matrix.scale(0.5, 1.3)/*?.*/;
+            transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+        });
+
         it.todo("Should push and pop correctly");
         it.todo("Should push and set to identity");
         it.todo("Should push and set values");
