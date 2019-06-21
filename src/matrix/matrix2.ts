@@ -26,7 +26,7 @@ export abstract class Matrix2 extends Matrix {
     get elementCount() { return 6; }
 
     static create() {
-        if (!this._instanceConstructor)
+        if (!this.instanceConstructor)
             throw new Error(`instanceConstructor must me set before calling create.`);
 
         return new this._instanceConstructor();

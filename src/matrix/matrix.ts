@@ -295,7 +295,7 @@ export abstract class Matrix {
     protected updateValues() {
         this._data.isDirtyValues = false;
 
-        if (this._dataMode === DataMode.fixed) {
+        if (this.dataMode === DataMode.fixed) {
             this.getIdentity(this.values);
 
             if (this._translateData.length > 0)

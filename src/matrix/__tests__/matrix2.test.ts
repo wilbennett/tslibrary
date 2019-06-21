@@ -37,7 +37,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
 
         it(`Should be identity on reset`, () => {
             const initial = [1, 1, 1, 1, 1, 1];
-            const identity = matrix.getIdentity([]);
+            const identity = matrix.createIdentity();
             matrix.set(initial);
             expect(matrix.values.toString()).toEqual(initial.toString());
             matrix.reset();
@@ -122,13 +122,32 @@ describe.each([["Matrix2D", new Matrix2D()]])(
 
         it("Should do rotation", () => {
             const degrees = 10;
-            const expected = "0.985,0.174,-0.174,0.985,0.00,0.00";
+            let expected = "0.985,0.174,-0.174,0.985,0.00,0.00";
 
             matrix.rotate2D(MathEx.toRadians(degrees))/*?.*/;
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
 
             matrix.reset()/*?.*/;
             matrix.rotateDegrees2D(degrees)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            const center = new Vector2D(10, 10);
+            expected = "0.985,0.174,-0.174,0.985,1.89,-1.58";
+
+            matrix.reset()/*?.*/;
+            matrix.rotate2D(MathEx.toRadians(degrees), center)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            matrix.reset()/*?.*/;
+            matrix.rotate2D(MathEx.toRadians(degrees), center.x, center.y)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            matrix.reset()/*?.*/;
+            matrix.rotateDegrees2D(degrees, center)/*?.*/;
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+
+            matrix.reset()/*?.*/;
+            matrix.rotateDegrees2D(degrees, center.x, center.y)/*?.*/;
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
         });
 
