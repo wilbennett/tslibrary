@@ -6,12 +6,8 @@ export interface Matrix2Constructor {
 }
 
 export abstract class Matrix2 extends Matrix {
-    private _temp: Float32Array;
-
     constructor(data: MatrixData) {
         super(data);
-
-        this._temp = new Float32Array(6);
     }
 
     private static _instanceConstructor: Matrix2Constructor;
@@ -24,13 +20,7 @@ export abstract class Matrix2 extends Matrix {
 
     static get elementCount() { return 6; }
     get elementCount() { return 6; }
-
-    static create() {
-        if (!this.instanceConstructor)
-            throw new Error(`instanceConstructor must me set before calling create.`);
-
-        return new this._instanceConstructor();
-    }
+    static create() { return new this.instanceConstructor(); }
 
     setTranslation(value: Vector): this;
     setTranslation(px: number, py: number, pz?: number): this;
@@ -259,15 +249,21 @@ export abstract class Matrix2 extends Matrix {
     // 0 2 4
     // 1 3 5
     protected _mult(a: MatrixValues, b: MatrixValues) {
-        const temp = this._temp;
-        temp.set(a);
+        // const temp = this._temp;
+        // temp.set(a);
+        const a0 = a[0];
+        const a1 = a[1];
+        const a2 = a[2];
+        const a3 = a[3];
+        const a4 = a[4];
+        const a5 = a[5];
 
-        a[0] = temp[0] * b[0] + temp[2] * b[1];
-        a[1] = temp[1] * b[0] + temp[3] * b[1];
-        a[2] = temp[0] * b[2] + temp[2] * b[3];
-        a[3] = temp[1] * b[2] + temp[3] * b[3];
-        a[4] = temp[0] * b[4] + temp[2] * b[5] + temp[4];
-        a[5] = temp[1] * b[4] + temp[3] * b[5] + temp[5];
+        a[0] = a0 * b[0] + a2 * b[1];
+        a[1] = a1 * b[0] + a3 * b[1];
+        a[2] = a0 * b[2] + a2 * b[3];
+        a[3] = a1 * b[2] + a3 * b[3];
+        a[4] = a0 * b[4] + a2 * b[5] + a4;
+        a[5] = a1 * b[4] + a3 * b[5] + a5;
     }
 
     protected _translate(dx: number, dy: number): this {
@@ -287,15 +283,18 @@ export abstract class Matrix2 extends Matrix {
             this._translate(centerX, centerY);
 
         const values = this.values;
-        const temp = this._temp;
-        temp.set(values);
+        const value0 = values[0];
+        const value1 = values[1];
+        const value2 = values[2];
+        const value3 = values[3];
+
         const sin = Math.sin(radians);
         const cos = Math.cos(radians);
 
-        values[0] = temp[0] * cos + temp[2] * sin;
-        values[1] = temp[1] * cos + temp[3] * sin;
-        values[2] = temp[0] * -sin + temp[2] * cos;
-        values[3] = temp[1] * -sin + temp[3] * cos;
+        values[0] = value0 * cos + value2 * sin;
+        values[1] = value1 * cos + value3 * sin;
+        values[2] = value0 * -sin + value2 * cos;
+        values[3] = value1 * -sin + value3 * cos;
 
         if (centered)
             this._translate(-centerX, -centerY);
