@@ -304,6 +304,16 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
 
+        it("Should multiply two matricies", () => {
+            const expected = [2, 0, 0, 3, 10, 20];
+            matrix.setTranslation(10, 20);/*?.*/
+            const translation = matrix.getValues([]);/*?.*/
+            matrix.setScale(2, 3);/*?.*/
+            const scale = matrix.getValues([]);
+            matrix.mult(translation, scale);/*?.*/
+            expect(matrix.values.toString()).toBe(expected.toString());
+        });
+
         it("Should push and pop correctly", () => {
             matrix.setTranslation(10, 20);
             const expected = [1, 0, 0, 1, 10, 20];
