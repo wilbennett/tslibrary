@@ -241,9 +241,15 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             const initial = new Vector2D(1, 0);
 
             matrix.translate(tx, ty)/*?.*/;
-            const transformed = matrix.transform(initial);
+            let transformed = matrix.transform(initial);
             expect(transformed.toString()).not.toBe(initial.toString());
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+
+            matrix.reset();/*?.*/
+            matrix.set([0, 0, 0, 0, 0, 0, 0])/*?.*/;
+            transformed = matrix.transformInverse(initial);
+            expect(matrix.isInverseValid).toBeFalsy();
+            expect(transformed.isEmpty).toBeTruthy();
         });
 
         it("Should calculate inverse translation", () => {
@@ -308,11 +314,6 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             transformed = matrix.transform(initial);
             expect(transformed.toString()).not.toBe(initial.toString());
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
-        });
-
-        it("Should return false for isInverseValid when no valid inverse", () => {
-            matrix.set([0, 0, 0, 0, 0, 0, 0])/*?.*/;
-            expect(matrix.isInverseValid).toBeFalsy();
         });
 
         it("Should multiply two matricies", () => {

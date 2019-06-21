@@ -219,11 +219,7 @@ export abstract class Matrix {
     abstract transform(point: Vector, values?: MatrixValues): Vector;
 
     transformInverse(point: Vector): Vector {
-        const inverse = this.inverse;
-
-        if (!this.isInverseValid) return Vector.empty;
-
-        return this.transform(point, inverse);
+        return this.isInverseValid ? this.transform(point, this.inverse) : Vector.empty;
     }
 
     abstract calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined;
