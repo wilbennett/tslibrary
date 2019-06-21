@@ -1,6 +1,6 @@
 import { Matrix, Matrix2, Matrix2D, MatrixValues } from '..';
 import { MathEx } from '../../core';
-import { Vector2D } from '../../vectors';
+import { DVector2, PVector2, Vector2D } from '../../vectors';
 
 const DEFAULT_PREC = 3;
 
@@ -239,26 +239,28 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         it("Should transform a vector", () => {
             const tx = 10;
             const ty = 20;
-            const initial = new Vector2D(1, 0);
-            const expected = new Vector2D(initial.x + tx, initial.y + ty).toString();
+            const initialPosition = new Vector2D(1, 0, 2);
+            const initialDirection = new DVector2(1, 0);
+            const expectedPosition = initialPosition.asCartesianN().add(new Vector2D(tx, ty)).toString();
 
             matrix.translate(tx, ty)/*?.*/;
-            expect(matrix.transform(initial).toString()).toBe(expected);
+            expect(matrix.transform(initialPosition).asCartesian().toString()).toBe(expectedPosition);
+            expect(matrix.transform(initialDirection).toString()).toBe(initialDirection.toString());
         });
 
         it("Should inverse transform a vector", () => {
             const tx = 10;
             const ty = 20;
-            const initial = new Vector2D(1, 0);
+            const initialPosition = new Vector2D(1, 0, 2);
 
             matrix.translate(tx, ty)/*?.*/;
-            let transformed = matrix.transform(initial);
-            expect(transformed.toString()).not.toBe(initial.toString());
-            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+            let transformed = matrix.transform(initialPosition);
+            expect(transformed.toString()/*?*/).not.toBe(initialPosition.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initialPosition.toString());
 
             matrix.reset();/*?.*/
             matrix.set([0, 0, 0, 0, 0, 0, 0])/*?.*/;
-            transformed = matrix.transformInverse(initial);
+            transformed = matrix.transformInverse(initialPosition);
             expect(matrix.isInverseValid).toBeFalsy();
             expect(transformed.isEmpty).toBeTruthy();
         });
@@ -266,7 +268,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         it("Should calculate inverse translation", () => {
             const tx = 10;
             const ty = 20;
-            const initial = new Vector2D(1, 0);
+            const initial = new PVector2(1, 0);
 
             matrix.translate(tx, ty)/*?.*/;
             const transformed = matrix.transform(initial);

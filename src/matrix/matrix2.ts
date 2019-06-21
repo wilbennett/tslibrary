@@ -193,8 +193,9 @@ export abstract class Matrix2 extends Matrix {
         values = values || this.values;
 
         return new Vector2D(
-            values[0] * point.x + values[2] * point.y + values[4],
-            values[1] * point.x + values[3] * point.y + values[5]);
+            values[0] * point.x + values[2] * point.y + values[4] * point.w,
+            values[1] * point.x + values[3] * point.y + values[5] * point.w,
+            point.w);
     }
 
     calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined {
