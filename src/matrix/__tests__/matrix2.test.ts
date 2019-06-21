@@ -201,6 +201,17 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
         });
 
+        it("Should have no effect when skewing by z only", () => {
+            const degrees = 10;
+            const expected = matrix.createIdentity().toString();
+
+            matrix.skewZ(MathEx.toRadians(degrees))/*?.*/;
+            expect(matrix.values.toString()).toBe(expected);
+
+            matrix.skewZDegrees(degrees)/*?.*/;
+            expect(matrix.values.toString()).toBe(expected);
+        });
+
         it("Should do scale", () => {
             const vector = new Vector2D(2, 3);
             const expected = "2,0,0,3,0,0";
