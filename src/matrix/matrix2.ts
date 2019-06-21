@@ -35,7 +35,7 @@ export abstract class Matrix2 extends Matrix {
             py = param1.y;
         } else {
             px = param1;
-            py = py || 0;
+            py = py!;
         }
 
         this._translateData[0] = px;
@@ -65,7 +65,7 @@ export abstract class Matrix2 extends Matrix {
             radiansY = param1.y;
         } else {
             radiansX = param1;
-            radiansY = radiansY || 0;
+            radiansY = radiansY!;
         }
 
         this._skewData[0] = radiansX;
@@ -90,7 +90,7 @@ export abstract class Matrix2 extends Matrix {
             py = param1;
         } else {
             px = param1;
-            py = py || 1;
+            py = py!;
         }
 
         this._scaleData[0] = px;
@@ -110,7 +110,7 @@ export abstract class Matrix2 extends Matrix {
             py = param1.y;
         } else {
             px = param1;
-            py = py || 0;
+            py = py!;
         }
 
         return this._translate(px, py);
@@ -145,7 +145,7 @@ export abstract class Matrix2 extends Matrix {
             radiansY = param1.y;
         } else {
             radiansX = param1;
-            radiansY = radiansY || 0;
+            radiansY = radiansY!;
         }
 
         return this._skew(radiansX, radiansY);
@@ -170,7 +170,7 @@ export abstract class Matrix2 extends Matrix {
             py = param1;
         } else {
             px = param1;
-            py = py || 1;
+            py = py!;
         }
 
         return this._scale(px, py);

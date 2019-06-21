@@ -24,6 +24,11 @@ describe("Static Matrix2 members", () => {
         Matrix2.instance = matrix;
         expect(Matrix2.instance).toBe(matrix);
     });
+
+    test("elementCount should default to 6", () => {
+        expect(Matrix2.elementCount).toBe(6);
+        expect(Matrix2.instance.elementCount).toBe(6);
+    });
 });
 
 describe.each([["Matrix2D", new Matrix2D()]])(
