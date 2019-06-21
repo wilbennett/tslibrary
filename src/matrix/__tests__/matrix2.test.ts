@@ -286,12 +286,13 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should push and pop correctly", () => {
-            const initial = [1, 2, 3, 4, 5, 6];
-            matrix.set(initial);
-            matrix.push();
-            matrix.setToIdentity();
-            matrix.pop();
-            expect(matrix.values.toString()).toBe(initial.toString());
+            matrix.setTranslation(10, 20);
+            const expected = [1, 0, 0, 1, 10, 20];
+            matrix.push();/*?.*/
+            matrix.setToIdentity();/*?.*/
+            matrix.pop();/*?.*/
+            expect(matrix.values.toString()).toBe(expected.toString());
+            expect(() => matrix.pop()).toThrow();
         });
 
         it("Should push and set to identity", () => {
@@ -340,6 +341,5 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             matrix.pop();
             expect(matrix.values.toString()).toBe(value.toString());
         });
-
     }
 );

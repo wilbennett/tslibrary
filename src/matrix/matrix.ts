@@ -228,10 +228,7 @@ export abstract class Matrix {
 
     abstract calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined;
 
-    push(values?: MatrixValues): this {
-        if (values)
-            this.set(values);
-
+    push(): this {
         if (this._data.isDirtyValues)
             this.updateValues();
 
