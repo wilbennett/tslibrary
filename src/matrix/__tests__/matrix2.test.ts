@@ -291,6 +291,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             matrix.setRotationDegrees2D(-45)/*?.*/;
             matrix.setSkewDegrees(10, 0)/*?.*/;
             matrix.setScale(0.5, 1.3)/*?.*/;
+            expect(matrix.isInverseValid).toBeTruthy();
             let transformed = matrix.transform(initial);
             expect(transformed.toString()).not.toBe(initial.toString());
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());

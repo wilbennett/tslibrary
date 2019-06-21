@@ -20,19 +20,12 @@ export class MatrixData {
 
     flags: MatrixFlags = MatrixFlags.none;
 
-    isDirty(flags: MatrixFlags) {
-        return (flags & (MatrixFlags.valuesDirty | MatrixFlags.inverseDirty)) !== 0;
-    }
-
     get isDirtyValues() { return (this.flags & MatrixFlags.valuesDirty) !== 0; }
     set isDirtyValues(value) { this.updateFlag(MatrixFlags.valuesDirty, value); }
     get isDirtyInverse() { return (this.flags & MatrixFlags.inverseDirty) !== 0; }
     set isDirtyInverse(value) { this.updateFlag(MatrixFlags.inverseDirty, value); }
     get isInverseValid() { return (this.flags & MatrixFlags.inverseValid) !== 0; }
     set isInverseValid(value) { this.updateFlag(MatrixFlags.inverseValid, value); }
-
-    protected setFlag(flag: MatrixFlags) { this.flags |= flag; }
-    protected clearFlag(flag: MatrixFlags) { this.flags &= ~flag; }
 
     protected updateFlag(flag: MatrixFlags, value: boolean) {
         if (value)
@@ -84,7 +77,12 @@ export abstract class Matrix {
         return this._data.inverse;
     }
 
-    get isInverseValid() { return this._data.isInverseValid; }
+    get isInverseValid() {
+        if (this._data.isDirtyInverse)
+            this.updateInverse();
+
+        return this._data.isInverseValid;
+    }
 
     private _dataMode: DataMode = DataMode.fixed;
     protected get dataMode() { return this._dataMode; }
@@ -93,6 +91,8 @@ export abstract class Matrix {
 
         if (value === DataMode.fixed) {
             this.clearFixedData();
+            this._data.isDirtyInverse = true;
+            this._data.isInverseValid = false;
         }
 
         this._dataMode = value;
@@ -315,6 +315,9 @@ export abstract class Matrix {
     }
 
     protected updateInverse() {
+        if (this._data.isDirtyValues)
+            this.updateValues();
+
         this._data.isDirtyInverse = false;
         this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== null;
     }

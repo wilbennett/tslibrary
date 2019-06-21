@@ -198,17 +198,23 @@ export abstract class Matrix2 extends Matrix {
     }
 
     calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined {
-        let det = values[0] * values[3] - values[1] * values[2];
+        const value0 = values[0];
+        const value1 = values[1];
+        const value2 = values[2];
+        const value3 = values[3];
+        const value4 = values[4];
+        const value5 = values[5];
+        let det = value0 * value3 - value1 * value2;
 
         if (det === 0) return undefined;
 
         det = 1 / det;
-        result[0] = values[3] * det;
-        result[1] = -values[1] * det;
-        result[2] = -values[2] * det;
-        result[3] = values[0] * det;
-        result[4] = (values[2] * values[5] - values[3] * values[4]) * det;
-        result[5] = (values[1] * values[4] - values[0] * values[5]) * det;
+        result[0] = value3 * det;
+        result[1] = -value1 * det;
+        result[2] = -value2 * det;
+        result[3] = value0 * det;
+        result[4] = (value2 * value5 - value3 * value4) * det;
+        result[5] = (value1 * value4 - value0 * value5) * det;
 
         return result;
     }
