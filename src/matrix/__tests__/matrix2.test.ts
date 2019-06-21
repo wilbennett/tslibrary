@@ -305,6 +305,11 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
 
+        it("Should return false for isInverseValid when no valid inverse", () => {
+            matrix.set([0, 0, 0, 0, 0, 0, 0])/*?.*/;
+            expect(matrix.isInverseValid).toBeFalsy();
+        });
+
         it("Should multiply two matricies", () => {
             const expected = [2, 0, 0, 3, 10, 20];
             matrix.setTranslation(10, 20);/*?.*/

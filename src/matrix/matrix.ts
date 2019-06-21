@@ -315,11 +315,8 @@ export abstract class Matrix {
     }
 
     protected updateInverse() {
-        if (this._data.isDirtyValues)
-            this.updateValues();
-
         this._data.isDirtyInverse = false;
-        this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== null;
+        this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== undefined;
     }
 
     protected cloneData() {
