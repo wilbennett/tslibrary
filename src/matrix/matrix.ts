@@ -67,6 +67,8 @@ export abstract class Matrix {
     protected _data: MatrixData;
     protected _buffer: MatrixValues;
     protected _bufferIndex: number;
+    protected _dataStarts: MatrixValues;
+    protected _dataCount: number;
     protected _stack: MatrixData[] = [];
 
     constructor(data: MatrixData) {
@@ -74,6 +76,9 @@ export abstract class Matrix {
 
         this._buffer = new Array<number>(Matrix.bufferSize);
         this._bufferIndex = 0;
+        // Rough guesstimate of maximum number of data entries the buffer can contain.
+        this._dataStarts = new Array<number>(Matrix.bufferSize / 3);
+        this._dataCount = 0;
     }
 
     private static _bufferSize: number;
@@ -82,11 +87,11 @@ export abstract class Matrix {
 
     abstract get elementCount(): number;
 
-    protected get isBufferEmpty() { return this._bufferIndex === 0 && this._buffer[this._bufferIndex] === BUFFER_END; }
-    protected abstract get translateBufferLength(): number;
-    protected abstract get rotateBufferLength(): number;
-    protected abstract get skewBufferLength(): number;
-    protected abstract get scaleBufferLength(): number;
+    // protected get isBufferEmpty() { return this._bufferIndex === 0 && this._buffer[this._bufferIndex] === BUFFER_END; }
+    // protected abstract get translateBufferLength(): number;
+    // protected abstract get rotateBufferLength(): number;
+    // protected abstract get skewBufferLength(): number;
+    // protected abstract get scaleBufferLength(): number;
 
     get values() {
         if (this._data.isDirtyValues)
@@ -334,6 +339,7 @@ export abstract class Matrix {
     }
 
     protected clearBuffer() {
+        this._dataCount = 0;
         this._bufferIndex = 0;
         this._buffer[this._bufferIndex] = BUFFER_END;
     }
@@ -341,44 +347,47 @@ export abstract class Matrix {
     protected initializeFixedBuffer() {
         this.clearBuffer();
         const buffer = this._buffer;
+        const dataStarts = this._dataStarts;
         let index = 0;
+        let startIndex = 0;
+
+        dataStarts[startIndex++] = index;
         buffer[index++] = BUFFER_TRANSLATE;
         index = this.writeTranslation(buffer, index);
+
+        dataStarts[startIndex++] = index;
         buffer[index++] = BUFFER_ROTATE;
         index = this.writeRotation2D(buffer, index);
+
+        dataStarts[startIndex++] = index;
         buffer[index++] = BUFFER_SKEW;
         index = this.writeSkew(buffer, index);
+
+        dataStarts[startIndex] = index;
         buffer[index++] = BUFFER_SCALE;
         index = this.writeScale(buffer, index);
+
         buffer[index] = BUFFER_END;
         this._bufferIndex = index;
+        this._dataCount = 4;
     }
 
-    protected getNextDataStart(dataId: number, startIndex: number) {
-        let index = startIndex;
+    protected getDataStart(dataId: number) {
         const buffer = this._buffer;
-        let id = buffer[index++];
+        const dataStarts = this._dataStarts;
+        const maxIndex = this._dataCount - 1;
+        let dataIndex = 0;
+        let index = -1;
 
-        while (id !== dataId) {
-            switch (id) {
-                case BUFFER_TRANSLATE:
-                    index += this.translateBufferLength;
-                    break;
-                case BUFFER_ROTATE:
-                    index += this.rotateBufferLength;
-                    break;
-                case BUFFER_SKEW:
-                    index += this.skewBufferLength;
-                    break;
-                case BUFFER_SCALE:
-                    index += this.scaleBufferLength;
-                    break;
-                case BUFFER_END:
-                default:
-                    return -1;
+        while (dataIndex <= maxIndex) {
+            const startIndex = dataStarts[dataIndex];
+
+            if (buffer[startIndex] === dataId) {
+                index = startIndex + 1;
+                break;
             }
 
-            id = buffer[index++];
+            dataIndex++;
         }
 
         return index;

@@ -22,10 +22,10 @@ export abstract class Matrix2 extends Matrix {
     get elementCount() { return 6; }
     static create() { return new this.instanceConstructor(); }
 
-    protected get translateBufferLength() { return 2; }
-    protected get rotateBufferLength() { return 3; }
-    protected get skewBufferLength() { return 2; }
-    protected get scaleBufferLength() { return 2; }
+    // protected get translateBufferLength() { return 2; }
+    // protected get rotateBufferLength() { return 3; }
+    // protected get skewBufferLength() { return 2; }
+    // protected get scaleBufferLength() { return 2; }
 
     setTranslation(value: Vector): this;
     setTranslation(px: number, py: number, pz?: number): this;
@@ -44,7 +44,7 @@ export abstract class Matrix2 extends Matrix {
         }
 
         const buffer = this._buffer;
-        let index = this.getNextDataStart(Matrix.BUFFER_TRANSLATE, 0);
+        let index = this.getDataStart(Matrix.BUFFER_TRANSLATE);
         buffer[index++] = px;
         buffer[index] = py;
         return this;
@@ -54,7 +54,7 @@ export abstract class Matrix2 extends Matrix {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
         const buffer = this._buffer;
-        let index = this.getNextDataStart(Matrix.BUFFER_ROTATE, 0);
+        let index = this.getDataStart(Matrix.BUFFER_ROTATE);
         buffer[index++] = radians;
         buffer[index++] = 0;
         buffer[index] = 0;
@@ -78,7 +78,7 @@ export abstract class Matrix2 extends Matrix {
         }
 
         const buffer = this._buffer;
-        let index = this.getNextDataStart(Matrix.BUFFER_SKEW, 0);
+        let index = this.getDataStart(Matrix.BUFFER_SKEW);
         buffer[index++] = radiansX;
         buffer[index] = radiansY;
         return this;
@@ -105,7 +105,7 @@ export abstract class Matrix2 extends Matrix {
         }
 
         const buffer = this._buffer;
-        let index = this.getNextDataStart(Matrix.BUFFER_SCALE, 0);
+        let index = this.getDataStart(Matrix.BUFFER_SCALE);
         buffer[index++] = px;
         buffer[index] = py;
         return this;
