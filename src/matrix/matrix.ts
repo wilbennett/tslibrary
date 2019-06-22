@@ -49,19 +49,44 @@ export function copy(source: MatrixValues, result: MatrixValues) {
     return result;
 }
 
+const BUFFER_END = -1;
+const BUFFER_TRANSLATE = 1;
+const BUFFER_ROTATE = 2;
+const BUFFER_SKEW = 3;
+const BUFFER_SCALE = 4;
+const BUFFER_TRANSFORM = 4;
+
 export abstract class Matrix {
+    protected static readonly BUFFER_END = -BUFFER_END;
+    protected static readonly BUFFER_TRANSLATE = BUFFER_TRANSLATE;
+    protected static readonly BUFFER_ROTATE = BUFFER_ROTATE;
+    protected static readonly BUFFER_SKEW = BUFFER_SKEW;
+    protected static readonly BUFFER_SCALE = BUFFER_SCALE;
+    protected static readonly BUFFER_TRANSFORM = BUFFER_TRANSFORM;
+
     protected _data: MatrixData;
+    protected _buffer: MatrixValues;
+    protected _bufferIndex: number;
     protected _stack: MatrixData[] = [];
-    protected _translateData: number[] = [];
-    protected _rotateData: number[] = [];
-    protected _skewData: number[] = [];
-    protected _scaleData: number[] = [];
 
     constructor(data: MatrixData) {
         this._data = data;
+
+        this._buffer = new Array<number>(Matrix.bufferSize);
+        this._bufferIndex = 0;
     }
 
+    private static _bufferSize: number;
+    static get bufferSize() { return this._bufferSize; }
+    static set bufferSize(value) { this._bufferSize = Math.max(value, 255); }
+
     abstract get elementCount(): number;
+
+    protected get isBufferEmpty() { return this._bufferIndex === 0 && this._buffer[this._bufferIndex] === BUFFER_END; }
+    protected abstract get translateBufferLength(): number;
+    protected abstract get rotateBufferLength(): number;
+    protected abstract get skewBufferLength(): number;
+    protected abstract get scaleBufferLength(): number;
 
     get values() {
         if (this._data.isDirtyValues)
@@ -90,7 +115,7 @@ export abstract class Matrix {
         if (value === this._dataMode) return;
 
         if (value === DataMode.fixed) {
-            this.clearFixedData();
+            this.initializeFixedBuffer();
             this._data.isDirtyInverse = true;
             this._data.isInverseValid = false;
         }
@@ -110,7 +135,7 @@ export abstract class Matrix {
         this._data.isDirtyValues = false;
         this._data.isDirtyInverse = false;
         this._data.isInverseValid = true;
-        this.clearFixedData();
+        this.initializeFixedBuffer();
         this.dataMode = DataMode.fixed;
         return this;
     }
@@ -264,41 +289,32 @@ export abstract class Matrix {
         this.push();
     }
 
-    protected clearFixedData() {
-        this._translateData = [];
-        this._scaleData = [];
-        this._skewData = [];
-        this._rotateData = [];
-    }
-
     protected valuesUpdated() {
         this._data.isDirtyValues = false;
         this._data.isDirtyInverse = true;
         this._data.isInverseValid = false;
     }
 
-    protected abstract applyTranslation(data: MatrixValues, startIndex?: number): number;
-    protected abstract applyScale(data: MatrixValues, startIndex?: number): number;
-    protected abstract applySkew(data: MatrixValues, startIndex?: number): number;
-    protected abstract applyRotation(data: MatrixValues, startIndex?: number): number;
+    protected abstract writeTranslation(buffer: MatrixValues, startIndex: number, px?: number, py?: number, pz?: number): number;
+    protected abstract writeRotation2D(buffer: MatrixValues, startIndex: number, radians?: number, centerX?: number, centerY?: number): number;
+    protected abstract writeSkew(buffer: MatrixValues, startIndex: number, radiansX?: number, radiansY?: number, radiansZ?: number): number;
+    protected abstract writeScale(buffer: MatrixValues, startIndex: number, sx?: number, sy?: number, sz?: number): number;
+    protected abstract applyTranslation(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applyRotation(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applySkew(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applyScale(buffer: MatrixValues, startIndex?: number): number;
 
     protected updateValues() {
         this._data.isDirtyValues = false;
 
         if (this.dataMode === DataMode.fixed) {
             this.getIdentity(this.values);
-
-            if (this._translateData.length > 0)
-                this.applyTranslation(this._translateData, 0);
-
-            if (this._rotateData.length > 0)
-                this.applyRotation(this._rotateData, 0);
-
-            if (this._skewData.length > 0)
-                this.applySkew(this._skewData, 0);
-
-            if (this._scaleData.length > 0)
-                this.applyScale(this._scaleData, 0);
+            let index = 0;
+            const buffer = this._buffer;
+            index = this.applyTranslation(buffer, ++index);
+            index = this.applyRotation(buffer, ++index);
+            index = this.applySkew(buffer, ++index);
+            this.applyScale(buffer, ++index);
         }
 
         this.valuesUpdated();
@@ -316,4 +332,57 @@ export abstract class Matrix {
         result.flags = this._data.flags;
         return result;
     }
+
+    protected clearBuffer() {
+        this._bufferIndex = 0;
+        this._buffer[this._bufferIndex] = BUFFER_END;
+    }
+
+    protected initializeFixedBuffer() {
+        this.clearBuffer();
+        const buffer = this._buffer;
+        let index = 0;
+        buffer[index++] = BUFFER_TRANSLATE;
+        index = this.writeTranslation(buffer, index);
+        buffer[index++] = BUFFER_ROTATE;
+        index = this.writeRotation2D(buffer, index);
+        buffer[index++] = BUFFER_SKEW;
+        index = this.writeSkew(buffer, index);
+        buffer[index++] = BUFFER_SCALE;
+        index = this.writeScale(buffer, index);
+        buffer[index] = BUFFER_END;
+        this._bufferIndex = index;
+    }
+
+    protected getNextDataStart(dataId: number, startIndex: number) {
+        let index = startIndex;
+        const buffer = this._buffer;
+        let id = buffer[index++];
+
+        while (id !== dataId) {
+            switch (id) {
+                case BUFFER_TRANSLATE:
+                    index += this.translateBufferLength;
+                    break;
+                case BUFFER_ROTATE:
+                    index += this.rotateBufferLength;
+                    break;
+                case BUFFER_SKEW:
+                    index += this.skewBufferLength;
+                    break;
+                case BUFFER_SCALE:
+                    index += this.scaleBufferLength;
+                    break;
+                case BUFFER_END:
+                default:
+                    return -1;
+            }
+
+            id = buffer[index++];
+        }
+
+        return index;
+    }
 }
+
+Matrix.bufferSize = 255;

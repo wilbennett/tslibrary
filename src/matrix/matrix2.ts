@@ -22,6 +22,11 @@ export abstract class Matrix2 extends Matrix {
     get elementCount() { return 6; }
     static create() { return new this.instanceConstructor(); }
 
+    protected get translateBufferLength() { return 2; }
+    protected get rotateBufferLength() { return 3; }
+    protected get skewBufferLength() { return 2; }
+    protected get scaleBufferLength() { return 2; }
+
     setTranslation(value: Vector): this;
     setTranslation(px: number, py: number, pz?: number): this;
     // @ts-ignore - unused param.
@@ -38,17 +43,21 @@ export abstract class Matrix2 extends Matrix {
             py = py!;
         }
 
-        this._translateData[0] = px;
-        this._translateData[1] = py;
+        const buffer = this._buffer;
+        let index = this.getNextDataStart(Matrix.BUFFER_TRANSLATE, 0);
+        buffer[index++] = px;
+        buffer[index] = py;
         return this;
     }
 
     setRotation2D(radians: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
-        this._rotateData[0] = radians;
-        this._rotateData[1] = 0;
-        this._rotateData[2] = 0;
+        const buffer = this._buffer;
+        let index = this.getNextDataStart(Matrix.BUFFER_ROTATE, 0);
+        buffer[index++] = radians;
+        buffer[index++] = 0;
+        buffer[index] = 0;
         return this;
     }
 
@@ -68,8 +77,10 @@ export abstract class Matrix2 extends Matrix {
             radiansY = radiansY!;
         }
 
-        this._skewData[0] = radiansX;
-        this._skewData[1] = radiansY;
+        const buffer = this._buffer;
+        let index = this.getNextDataStart(Matrix.BUFFER_SKEW, 0);
+        buffer[index++] = radiansX;
+        buffer[index] = radiansY;
         return this;
     }
 
@@ -93,8 +104,10 @@ export abstract class Matrix2 extends Matrix {
             py = py!;
         }
 
-        this._scaleData[0] = px;
-        this._scaleData[1] = py;
+        const buffer = this._buffer;
+        let index = this.getNextDataStart(Matrix.BUFFER_SCALE, 0);
+        buffer[index++] = px;
+        buffer[index] = py;
         return this;
     }
 
@@ -220,37 +233,58 @@ export abstract class Matrix2 extends Matrix {
         return result;
     }
 
-    protected applyTranslation(data: MatrixValues, startIndex?: number): number {
-        let index = startIndex || 0;
+    protected writeTranslation(buffer: MatrixValues, index: number, px?: number, py?: number) {
+        buffer[index++] = px || 0;
+        buffer[index++] = py || 0;
+        return index;
+    }
+
+    protected writeRotation2D(buffer: MatrixValues, index: number, radians?: number, centerX?: number, centerY?: number) {
+        buffer[index++] = radians || 0;
+        buffer[index++] = centerX || 0;
+        buffer[index++] = centerY || 0;
+        return index;
+    }
+
+    protected writeSkew(buffer: MatrixValues, index: number, radiansX?: number, radiansY?: number) {
+        buffer[index++] = radiansX || 0;
+        buffer[index++] = radiansY || 0;
+        return index;
+    }
+
+    protected writeScale(buffer: MatrixValues, index: number, sx?: number, sy?: number) {
+        buffer[index++] = sx || 0;
+        buffer[index++] = sy || 0;
+        return index;
+    }
+
+    protected applyTranslation(data: MatrixValues, index: number): number {
         const px = data[index++];
         const py = data[index++];
         this._translate(px, py);
         return index;
     }
 
-    protected applyScale(data: MatrixValues, startIndex?: number): number {
-        let index = startIndex || 0;
-        const px = data[index++];
-        const py = data[index++];
-        this._scale(px, py);
-        return 0;
-    }
-
-    protected applySkew(data: MatrixValues, startIndex?: number): number {
-        let index = startIndex || 0;
-        const px = data[index++];
-        const py = data[index++];
-        this._skew(px, py);
-        return 0;
-    }
-
-    protected applyRotation(data: MatrixValues, startIndex?: number): number {
-        let index = startIndex || 0;
+    protected applyRotation(data: MatrixValues, index: number): number {
         const radians = data[index++];
         const px = data[index++];
         const py = data[index++];
         this._rotate2D(radians, px, py);
-        return 0;
+        return index;
+    }
+
+    protected applySkew(data: MatrixValues, index: number): number {
+        const px = data[index++];
+        const py = data[index++];
+        this._skew(px, py);
+        return index;
+    }
+
+    protected applyScale(data: MatrixValues, index: number): number {
+        const px = data[index++];
+        const py = data[index++];
+        this._scale(px, py);
+        return index;
     }
 
     // 0 2 4
@@ -274,6 +308,8 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _translate(dx: number, dy: number): this {
+        if (dx === 0 && dy === 0) return this;
+
         const values = this.values;
         values[4] += values[0] * dx + values[2] * dy;
         values[5] += values[1] * dx + values[3] * dy;
@@ -282,6 +318,8 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _rotate2D(radians: number, centerX?: number, centerY?: number): this {
+        if (radians === 0) return this;
+
         centerX = centerX || 0;
         centerY = centerY || 0;
         const centered = centerX !== 0 || centerY !== 0;
@@ -311,6 +349,8 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _skew(radiansX: number, radiansY: number): this {
+        if (radiansX === 0 && radiansY === 0) return this;
+
         const values = this.values;
         const values0 = values[0];
         const values1 = values[1];
@@ -332,6 +372,8 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _scale(sx: number, sy: number): this {
+        if (sx === 0 && sy === 0) return this;
+
         const values = this.values;
         values[0] *= sx;
         values[1] *= sx;
