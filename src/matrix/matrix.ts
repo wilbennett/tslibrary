@@ -35,15 +35,42 @@ export class MatrixData {
     }
 }
 
-export function copy(source: MatrixValues, result: MatrixValues) {
+export function copy(
+    source: MatrixValues,
+    result: MatrixValues,
+    sourceIndex: number = 0,
+    resultIndex: number = 0,
+    sourceLength?: number) {
+
+    sourceLength = sourceLength || source.length - sourceIndex;
+
     if (Array.isArray(result)) {
         if (Array.isArray(source)) {
-            result.splice(0, source.length, ...source);
+            if (sourceIndex === 0)
+                result.splice(resultIndex, sourceLength, ...source);
+            else
+                result.splice(resultIndex, sourceLength, ...source.slice(sourceIndex, sourceLength + 1));
         } else {
-            source.forEach((v, i) => result[i] = v);
+            let send = sourceIndex + sourceLength;
+            let ri = resultIndex;
+
+            for (let i = sourceIndex; i < send; i++) {
+                result[ri++] = source[i];
+            }
         }
-    } else {
-        result.set(source);
+
+        return result;
+    }
+
+    if (sourceIndex === 0)
+        result.set(source, resultIndex);
+    else {
+        let send = sourceIndex + sourceLength;
+        let ri = resultIndex;
+
+        for (let i = sourceIndex; i < send; i++) {
+            result[ri++] = source[i];
+        }
     }
 
     return result;
@@ -152,9 +179,19 @@ export abstract class Matrix {
     }
 
     set(values: MatrixValues) {
-        copy(values, this.values);
-        this.valuesUpdated();
         this.dataMode = DataMode.dynamic;
+        this.clearBuffer();
+        this._data.isDirtyValues = true;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
+        const buffer = this._buffer;
+        let index = this._bufferIndex;
+        this._dataStarts[this._dataCount++] = index;
+        buffer[index++] = Matrix.BUFFER_TRANSFORM;
+        copy(values, buffer, 0, index, this.elementCount);
+        index += this.elementCount;
+        buffer[index] = Matrix.BUFFER_END;
+        this._bufferIndex = index;
         return this;
     }
 
@@ -307,6 +344,13 @@ export abstract class Matrix {
     protected abstract applyRotation(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
     protected abstract applySkew(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
     protected abstract applyScale(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+    protected abstract applyTransform(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+
+    protected writeTransform(buffer: MatrixValues, startIndex: number, values: MatrixValues): number {
+        let index = startIndex;
+        copy(values, buffer, 0, startIndex, this.elementCount);
+        return index + this.elementCount;
+    }
 
     protected updateValues() {
         this._data.isDirtyValues = false;
@@ -316,8 +360,7 @@ export abstract class Matrix {
         let index = 0;
         let id = buffer[index++];
 
-        while (id !== Matrix.BUFFER_END) {
-            id;
+        while (id !== Matrix.BUFFER_END && index >= 0) {
             switch (id) {
                 case BUFFER_TRANSLATE:
                     index = this.applyTranslation(buffer, index);
@@ -330,6 +373,9 @@ export abstract class Matrix {
                     break;
                 case BUFFER_SCALE:
                     index = this.applyScale(buffer, index);
+                    break;
+                case BUFFER_TRANSFORM:
+                    index = this.applyTransform(buffer, index);
                     break;
             }
 
@@ -345,19 +391,20 @@ export abstract class Matrix {
 
         this._data.isDirtyInverse = false;
 
-        if (this.dataMode === DataMode.dynamic) {
-            this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== undefined;
-            return;
-        }
+        // if (this.dataMode === DataMode.dynamic) {
+        //     this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== undefined;
+        //     return;
+        // }
 
         const dataStarts = this._dataStarts;
         const buffer = this._buffer;
         const temp = this.values;
         const inverse = this.getIdentity(this._data.inverse);
         this._data.values = inverse;
+        let index = 0;
 
         for (let i = this._dataCount - 1; i >= 0; i--) {
-            let index = dataStarts[i];
+            index = dataStarts[i];
             const id = buffer[index++];
 
             switch (id) {
@@ -368,16 +415,27 @@ export abstract class Matrix {
                     this.applyRotation(buffer, index, true);
                     break;
                 case BUFFER_SKEW:
-                    this.applySkew(buffer, index, true);
+                    index = this.applySkew(buffer, index, true);
                     break;
                 case BUFFER_SCALE:
                     this.applyScale(buffer, index, true);
                     break;
+                case BUFFER_TRANSFORM:
+                    index = this.applyTransform(buffer, index, true);
+                    break;
             }
+
+            if (index < 0) break;
         }
 
         this._data.values = temp;
-        this._data.isInverseValid = true;
+
+        if (index < 0) {
+            if (this.calcInverse(this.values, this.inverse) !== undefined)
+                index = 0;
+        }
+
+        this._data.isInverseValid = index >= 0;
     }
 
     protected cloneData() {

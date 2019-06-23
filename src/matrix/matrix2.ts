@@ -1,4 +1,4 @@
-import { DataMode, Matrix, MatrixData, MatrixValues } from '.';
+import { copy, DataMode, Matrix, MatrixData, MatrixValues } from '.';
 import { Vector, Vector2D } from '../vectors';
 
 export interface Matrix2Constructor {
@@ -139,6 +139,7 @@ export abstract class Matrix2 extends Matrix {
 
         const buffer = this._buffer;
         let index = this._bufferIndex;
+        this._dataStarts[this._dataCount++] = index;
         buffer[index++] = Matrix.BUFFER_TRANSLATE;
         buffer[index++] = px;
         buffer[index++] = py;
@@ -167,6 +168,7 @@ export abstract class Matrix2 extends Matrix {
 
         const buffer = this._buffer;
         let index = this._bufferIndex;
+        this._dataStarts[this._dataCount++] = index;
         buffer[index++] = Matrix.BUFFER_ROTATE;
         buffer[index++] = radians;
         buffer[index++] = centerX;
@@ -196,6 +198,7 @@ export abstract class Matrix2 extends Matrix {
 
         const buffer = this._buffer;
         let index = this._bufferIndex;
+        this._dataStarts[this._dataCount++] = index;
         buffer[index++] = Matrix.BUFFER_SKEW;
         buffer[index++] = radiansX;
         buffer[index++] = radiansY;
@@ -231,6 +234,7 @@ export abstract class Matrix2 extends Matrix {
 
         const buffer = this._buffer;
         let index = this._bufferIndex;
+        this._dataStarts[this._dataCount++] = index;
         buffer[index++] = Matrix.BUFFER_SCALE;
         buffer[index++] = px;
         buffer[index++] = py;
@@ -246,7 +250,15 @@ export abstract class Matrix2 extends Matrix {
             this.dataMode = DataMode.dynamic;
             this._data.isDirtyValues = true;
             this._data.isDirtyInverse = true;
-            this._mult(this.values, param1);
+            this._data.isInverseValid = false;
+            const buffer = this._buffer;
+            let index = this._bufferIndex;
+            this._dataStarts[this._dataCount++] = index;
+            buffer[index++] = Matrix.BUFFER_TRANSFORM;
+            copy(param1, buffer, 0, index);
+            index += this.elementCount;
+            buffer[index] = Matrix.BUFFER_END;
+            this._bufferIndex = index;
             return this;
         }
 
@@ -339,15 +351,18 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected applySkew(data: MatrixValues, index: number, inverse: boolean = false): number {
-        let px = data[index++];
-        let py = data[index++];
+        let radiansX = data[index++];
+        let radiansY = data[index++];
 
         if (inverse) {
-            px = -px;
-            py = -py;
+            // Skewing both axes at the same time is not reversible directly.
+            if (radiansX !== 0 && radiansY !== 0) return -1;
+
+            radiansX = -radiansX;
+            radiansY = -radiansY;
         }
 
-        this._skew(px, py);
+        this._skew(radiansX, radiansY);
         return index;
     }
 
@@ -364,6 +379,21 @@ export abstract class Matrix2 extends Matrix {
 
         this._scale(px, py);
         return index;
+    }
+
+    protected applyTransform(buffer: MatrixValues, startIndex: number, inverse?: boolean): number {
+        const values = this.createValues();
+        copy(buffer, values, startIndex, 0, this.elementCount);
+
+        if (inverse) {
+            const isValid = this.calcInverse(values, values) != undefined;
+
+            if (!isValid)
+                return -1;
+        }
+
+        this._mult(this.values, values);
+        return startIndex + this.elementCount;
     }
 
     // 0 2 4

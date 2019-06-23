@@ -288,10 +288,15 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should calculate inverse skew", () => {
-            const initial = new Vector2D(1, 0);
+            const initial = new Vector2D(1, 1);
 
-            matrix.skew(10, 20)/*?.*/;
-            const transformed = matrix.transform(initial);
+            matrix.skewDegrees(10, 0)/*?.*/;
+            let transformed = matrix.transform(initial);
+            expect(transformed.toString()).not.toBe(initial.toString());
+            expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
+
+            matrix.skewDegrees(10, 20)/*?.*/;
+            transformed = matrix.transform(initial);
             expect(transformed.toString()).not.toBe(initial.toString());
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
