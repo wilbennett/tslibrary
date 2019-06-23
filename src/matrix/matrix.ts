@@ -57,7 +57,7 @@ const BUFFER_SCALE = 4;
 const BUFFER_TRANSFORM = 5;
 
 export abstract class Matrix {
-    protected static readonly BUFFER_END = -BUFFER_END;
+    protected static readonly BUFFER_END = BUFFER_END;
     protected static readonly BUFFER_TRANSLATE = BUFFER_TRANSLATE;
     protected static readonly BUFFER_ROTATE = BUFFER_ROTATE;
     protected static readonly BUFFER_SKEW = BUFFER_SKEW;
@@ -119,11 +119,10 @@ export abstract class Matrix {
     protected set dataMode(value) {
         if (value === this._dataMode) return;
 
-        if (value === DataMode.fixed) {
+        if (value === DataMode.fixed)
             this.initializeFixedBuffer();
-            this._data.isDirtyInverse = true;
-            this._data.isInverseValid = false;
-        }
+        else
+            this.clearBuffer();
 
         this._dataMode = value;
     }
@@ -312,14 +311,29 @@ export abstract class Matrix {
     protected updateValues() {
         this._data.isDirtyValues = false;
 
-        if (this.dataMode === DataMode.fixed) {
-            this.getIdentity(this.values);
-            let index = 0;
-            const buffer = this._buffer;
-            index = this.applyTranslation(buffer, ++index);
-            index = this.applyRotation(buffer, ++index);
-            index = this.applySkew(buffer, ++index);
-            this.applyScale(buffer, ++index);
+        const buffer = this._buffer;
+        this.getIdentity(this.values);
+        let index = 0;
+        let id = buffer[index++];
+
+        while (id !== Matrix.BUFFER_END) {
+            id;
+            switch (id) {
+                case BUFFER_TRANSLATE:
+                    index = this.applyTranslation(buffer, index);
+                    break;
+                case BUFFER_ROTATE:
+                    index = this.applyRotation(buffer, index);
+                    break;
+                case BUFFER_SKEW:
+                    index = this.applySkew(buffer, index);
+                    break;
+                case BUFFER_SCALE:
+                    index = this.applyScale(buffer, index);
+                    break;
+            }
+
+            id = buffer[index++];
         }
 
         this.valuesUpdated();

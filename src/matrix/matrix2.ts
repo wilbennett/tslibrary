@@ -124,6 +124,7 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     translate(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyValues = true;
         this._data.isDirtyInverse = true;
         this._data.isInverseValid = false;
         let px = 0;
@@ -136,7 +137,14 @@ export abstract class Matrix2 extends Matrix {
             py = py!;
         }
 
-        return this._translate(px, py);
+        const buffer = this._buffer;
+        let index = this._bufferIndex;
+        buffer[index++] = Matrix.BUFFER_TRANSLATE;
+        buffer[index++] = px;
+        buffer[index++] = py;
+        buffer[index] = Matrix.BUFFER_END;
+        this._bufferIndex = index;
+        return this;
     }
 
     rotate2D(radians: number): this;
@@ -144,6 +152,7 @@ export abstract class Matrix2 extends Matrix {
     rotate2D(radians: number, centerX: number, centerY: number): this;
     rotate2D(radians: number, param2?: Vector | number, centerY?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyValues = true;
         this._data.isDirtyInverse = true;
         this._data.isInverseValid = false;
         let centerX: number | undefined;
@@ -152,10 +161,19 @@ export abstract class Matrix2 extends Matrix {
             centerX = param2.x;
             centerY = param2.y;
         } else {
-            centerX = param2;
+            centerX = param2 || 0;
+            centerY = centerY || 0;
         }
 
-        return this._rotate2D(radians, centerX, centerY);
+        const buffer = this._buffer;
+        let index = this._bufferIndex;
+        buffer[index++] = Matrix.BUFFER_ROTATE;
+        buffer[index++] = radians;
+        buffer[index++] = centerX;
+        buffer[index++] = centerY;
+        buffer[index] = Matrix.BUFFER_END;
+        this._bufferIndex = index;
+        return this;
     }
 
     skew(value: Vector): this;
@@ -163,6 +181,7 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     skew(param1: Vector | number, radiansY?: number, radiansZ?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyValues = true;
         this._data.isDirtyInverse = true;
         this._data.isInverseValid = false;
         let radiansX = 0;
@@ -175,7 +194,14 @@ export abstract class Matrix2 extends Matrix {
             radiansY = radiansY!;
         }
 
-        return this._skew(radiansX, radiansY);
+        const buffer = this._buffer;
+        let index = this._bufferIndex;
+        buffer[index++] = Matrix.BUFFER_SKEW;
+        buffer[index++] = radiansX;
+        buffer[index++] = radiansY;
+        buffer[index] = Matrix.BUFFER_END;
+        this._bufferIndex = index;
+        return this;
     }
 
     skewX(radians: number): this { return this._skew(radians, 0); }
@@ -187,6 +213,7 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     scale(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyValues = true;
         this._data.isDirtyInverse = true;
         this._data.isInverseValid = false;
         let px = 0;
@@ -202,7 +229,14 @@ export abstract class Matrix2 extends Matrix {
             py = py!;
         }
 
-        return this._scale(px, py);
+        const buffer = this._buffer;
+        let index = this._bufferIndex;
+        buffer[index++] = Matrix.BUFFER_SCALE;
+        buffer[index++] = px;
+        buffer[index++] = py;
+        buffer[index] = Matrix.BUFFER_END;
+        this._bufferIndex = index;
+        return this;
     }
 
     mult(values: MatrixValues): this;
@@ -210,6 +244,7 @@ export abstract class Matrix2 extends Matrix {
     mult(param1: MatrixValues, values2?: MatrixValues): MatrixValues | this {
         if (!values2) {
             this.dataMode = DataMode.dynamic;
+            this._data.isDirtyValues = true;
             this._data.isDirtyInverse = true;
             this._mult(this.values, param1);
             return this;
@@ -294,7 +329,7 @@ export abstract class Matrix2 extends Matrix {
         let py = data[index++];
 
         if (inverse) {
-            radians = -radians;//?
+            radians = -radians;
             px = -px;
             py = -py;
         }
@@ -334,8 +369,6 @@ export abstract class Matrix2 extends Matrix {
     // 0 2 4
     // 1 3 5
     protected _mult(a: MatrixValues, b: MatrixValues) {
-        // const temp = this._temp;
-        // temp.set(a);
         const a0 = a[0];
         const a1 = a[1];
         const a2 = a[2];
@@ -416,8 +449,6 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _scale(sx: number, sy: number): this {
-        if (sx === 0 && sy === 0) return this;
-
         const values = this.values;
         values[0] *= sx;
         values[1] *= sx;
