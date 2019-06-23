@@ -111,12 +111,6 @@ export abstract class Matrix {
 
     abstract get elementCount(): number;
 
-    // protected get isBufferEmpty() { return this._bufferIndex === 0 && this._buffer[this._bufferIndex] === BUFFER_END; }
-    // protected abstract get translateBufferLength(): number;
-    // protected abstract get rotateBufferLength(): number;
-    // protected abstract get skewBufferLength(): number;
-    // protected abstract get scaleBufferLength(): number;
-
     get values() {
         if (this._data.isDirtyValues)
             this.updateValues();
@@ -141,7 +135,7 @@ export abstract class Matrix {
     private _dataMode: DataMode = DataMode.fixed;
     protected get dataMode() { return this._dataMode; }
     protected set dataMode(value) {
-        if (value === this._dataMode) return;
+        if (value === this.dataMode) return;
 
         if (value === DataMode.fixed)
             this.initializeFixedData();

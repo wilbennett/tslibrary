@@ -22,11 +22,6 @@ export abstract class Matrix2 extends Matrix {
     get elementCount() { return 6; }
     static create() { return new this.instanceConstructor(); }
 
-    // protected get translateBufferLength() { return 2; }
-    // protected get rotateBufferLength() { return 3; }
-    // protected get skewBufferLength() { return 2; }
-    // protected get scaleBufferLength() { return 2; }
-
     setTranslation(value: Vector): this;
     setTranslation(px: number, py: number, pz?: number): this;
     // @ts-ignore - unused param.
