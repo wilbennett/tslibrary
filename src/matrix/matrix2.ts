@@ -27,9 +27,6 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     setTranslation(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.fixed;
-        this._data.isDirtyValues = true;
-        this._data.isDirtyInverse = true;
-        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -49,9 +46,6 @@ export abstract class Matrix2 extends Matrix {
 
     setRotation2D(radians: number): this {
         this.dataMode = DataMode.fixed;
-        this._data.isDirtyValues = true;
-        this._data.isDirtyInverse = true;
-        this._data.isInverseValid = false;
         const buffer = this._rotationData;
         this._fixedData[Matrix.BUFFER_ROTATE] = buffer;
         buffer[0] = radians;
@@ -65,9 +59,6 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     setSkew(param1: Vector | number, radiansY?: number, radiansZ?: number): this {
         this.dataMode = DataMode.fixed;
-        this._data.isDirtyValues = true;
-        this._data.isDirtyInverse = true;
-        this._data.isInverseValid = false;
         let radiansX = 0;
 
         if (param1 instanceof Vector) {
@@ -91,9 +82,6 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     setScale(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.fixed;
-        this._data.isDirtyValues = true;
-        this._data.isDirtyInverse = true;
-        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -202,7 +190,7 @@ export abstract class Matrix2 extends Matrix {
     mult(param1: MatrixValues, values2?: MatrixValues): MatrixValues | this {
         if (!values2) {
             this.dataMode = DataMode.dynamic;
-            this._mult(this.values, param1);
+            this._mult(this._data.values, param1);
             this.valuesUpdated();
             return this;
         }
@@ -295,7 +283,7 @@ export abstract class Matrix2 extends Matrix {
     protected _translate(dx: number, dy: number): this {
         if (dx === 0 && dy === 0) return this;
 
-        const values = this.values;
+        const values = this._data.values;
         values[4] += values[0] * dx + values[2] * dy;
         values[5] += values[1] * dx + values[3] * dy;
         this.valuesUpdated();
@@ -312,7 +300,7 @@ export abstract class Matrix2 extends Matrix {
         if (centered)
             this._translate(centerX, centerY);
 
-        const values = this.values;
+        const values = this._data.values;
         const value0 = values[0];
         const value1 = values[1];
         const value2 = values[2];
@@ -336,7 +324,7 @@ export abstract class Matrix2 extends Matrix {
     protected _skew(radiansX: number, radiansY: number): this {
         if (radiansX === 0 && radiansY === 0) return this;
 
-        const values = this.values;
+        const values = this._data.values;
         const values0 = values[0];
         const values1 = values[1];
 
@@ -359,7 +347,7 @@ export abstract class Matrix2 extends Matrix {
     protected _scale(sx: number, sy: number): this {
         if (sx === 0 && sy === 0) return this;
 
-        const values = this.values;
+        const values = this._data.values;
         values[0] *= sx;
         values[1] *= sx;
         values[2] *= sy;

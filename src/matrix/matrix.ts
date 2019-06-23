@@ -22,8 +22,15 @@ export class MatrixData {
 
     get isDirtyValues() { return (this.flags & MatrixFlags.valuesDirty) !== 0; }
     set isDirtyValues(value) { this.updateFlag(MatrixFlags.valuesDirty, value); }
+
     get isDirtyInverse() { return (this.flags & MatrixFlags.inverseDirty) !== 0; }
-    set isDirtyInverse(value) { this.updateFlag(MatrixFlags.inverseDirty, value); }
+    set isDirtyInverse(value) {
+        this.updateFlag(MatrixFlags.inverseDirty, value);
+
+        if (value)
+            this.updateFlag(MatrixFlags.inverseValid, false);
+    }
+
     get isInverseValid() { return (this.flags & MatrixFlags.inverseValid) !== 0; }
     set isInverseValid(value) { this.updateFlag(MatrixFlags.inverseValid, value); }
 
@@ -135,6 +142,11 @@ export abstract class Matrix {
     private _dataMode: DataMode = DataMode.fixed;
     protected get dataMode() { return this._dataMode; }
     protected set dataMode(value) {
+        if (value === DataMode.fixed)
+            this._data.isDirtyValues = true;
+
+        this._data.isDirtyInverse = true;
+
         if (value === this.dataMode) return;
 
         if (value === DataMode.fixed)
@@ -150,8 +162,8 @@ export abstract class Matrix {
     getInverse(result: MatrixValues): MatrixValues { return copy(this.inverse, result); }
 
     setToIdentity() {
-        this.getIdentity(this.values);
-        this.getIdentity(this.inverse);
+        this.getIdentity(this._data.values);
+        this.getIdentity(this._data.inverse);
         this.initializeFixedData();
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = false;
@@ -349,11 +361,9 @@ export abstract class Matrix {
     }
 
     protected updateInverse() {
-        // TODO: Figure out how isDirtyInverse can be false when isInverseValid is true.
-        // if (!this._data.isDirtyInverse || this._data.isInverseValid) return;
-
+        const values = this.values; //! Make sure values is calculated before calculating inverse.
         this._data.isDirtyInverse = false;
-        this._data.isInverseValid = this.calcInverse(this.values, this._data.inverse) !== undefined;
+        this._data.isInverseValid = this.calcInverse(values, this._data.inverse) !== undefined;
     }
 
     protected cloneData() {
@@ -364,5 +374,5 @@ export abstract class Matrix {
         return result;
     }
 
-    protected initializeFixedData() { this._fixedData.splice(0, this._fixedData.length); }
+    protected initializeFixedData() { this._fixedData = []; }
 }
