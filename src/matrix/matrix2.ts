@@ -33,6 +33,8 @@ export abstract class Matrix2 extends Matrix {
     setTranslation(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -53,6 +55,8 @@ export abstract class Matrix2 extends Matrix {
     setRotation2D(radians: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         const buffer = this._buffer;
         let index = this.getDataStart(Matrix.BUFFER_ROTATE);
         buffer[index++] = radians;
@@ -67,6 +71,8 @@ export abstract class Matrix2 extends Matrix {
     setSkew(param1: Vector | number, radiansY?: number, radiansZ?: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let radiansX = 0;
 
         if (param1 instanceof Vector) {
@@ -91,6 +97,8 @@ export abstract class Matrix2 extends Matrix {
     setScale(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.fixed;
         this._data.isDirtyValues = true;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -116,6 +124,8 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     translate(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -134,6 +144,8 @@ export abstract class Matrix2 extends Matrix {
     rotate2D(radians: number, centerX: number, centerY: number): this;
     rotate2D(radians: number, param2?: Vector | number, centerY?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let centerX: number | undefined;
 
         if (param2 instanceof Vector) {
@@ -151,6 +163,8 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     skew(param1: Vector | number, radiansY?: number, radiansZ?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let radiansX = 0;
 
         if (param1 instanceof Vector) {
@@ -173,6 +187,8 @@ export abstract class Matrix2 extends Matrix {
     // @ts-ignore - unused param.
     scale(param1: Vector | number, py?: number, pz?: number): this {
         this.dataMode = DataMode.dynamic;
+        this._data.isDirtyInverse = true;
+        this._data.isInverseValid = false;
         let px = 0;
 
         if (param1 instanceof Vector) {
@@ -194,6 +210,7 @@ export abstract class Matrix2 extends Matrix {
     mult(param1: MatrixValues, values2?: MatrixValues): MatrixValues | this {
         if (!values2) {
             this.dataMode = DataMode.dynamic;
+            this._data.isDirtyInverse = true;
             this._mult(this.values, param1);
             return this;
         }
@@ -258,31 +275,58 @@ export abstract class Matrix2 extends Matrix {
         return index;
     }
 
-    protected applyTranslation(data: MatrixValues, index: number): number {
-        const px = data[index++];
-        const py = data[index++];
+    protected applyTranslation(data: MatrixValues, index: number, inverse: boolean = false): number {
+        let px = data[index++];
+        let py = data[index++];
+
+        if (inverse) {
+            px = -px;
+            py = -py;
+        }
+
         this._translate(px, py);
         return index;
     }
 
-    protected applyRotation(data: MatrixValues, index: number): number {
-        const radians = data[index++];
-        const px = data[index++];
-        const py = data[index++];
+    protected applyRotation(data: MatrixValues, index: number, inverse: boolean = false): number {
+        let radians = data[index++];
+        let px = data[index++];
+        let py = data[index++];
+
+        if (inverse) {
+            radians = -radians;//?
+            px = -px;
+            py = -py;
+        }
+
         this._rotate2D(radians, px, py);
         return index;
     }
 
-    protected applySkew(data: MatrixValues, index: number): number {
-        const px = data[index++];
-        const py = data[index++];
+    protected applySkew(data: MatrixValues, index: number, inverse: boolean = false): number {
+        let px = data[index++];
+        let py = data[index++];
+
+        if (inverse) {
+            px = -px;
+            py = -py;
+        }
+
         this._skew(px, py);
         return index;
     }
 
-    protected applyScale(data: MatrixValues, index: number): number {
-        const px = data[index++];
-        const py = data[index++];
+    protected applyScale(data: MatrixValues, index: number, inverse: boolean = false): number {
+        let px = data[index++];
+        let py = data[index++];
+
+        if (px === 0 && py === 0) return index;
+
+        if (inverse) {
+            px = 1 / px;
+            py = 1 / py;
+        }
+
         this._scale(px, py);
         return index;
     }

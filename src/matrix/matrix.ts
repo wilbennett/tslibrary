@@ -54,7 +54,7 @@ const BUFFER_TRANSLATE = 1;
 const BUFFER_ROTATE = 2;
 const BUFFER_SKEW = 3;
 const BUFFER_SCALE = 4;
-const BUFFER_TRANSFORM = 4;
+const BUFFER_TRANSFORM = 5;
 
 export abstract class Matrix {
     protected static readonly BUFFER_END = -BUFFER_END;
@@ -304,10 +304,10 @@ export abstract class Matrix {
     protected abstract writeRotation2D(buffer: MatrixValues, startIndex: number, radians?: number, centerX?: number, centerY?: number): number;
     protected abstract writeSkew(buffer: MatrixValues, startIndex: number, radiansX?: number, radiansY?: number, radiansZ?: number): number;
     protected abstract writeScale(buffer: MatrixValues, startIndex: number, sx?: number, sy?: number, sz?: number): number;
-    protected abstract applyTranslation(buffer: MatrixValues, startIndex?: number): number;
-    protected abstract applyRotation(buffer: MatrixValues, startIndex?: number): number;
-    protected abstract applySkew(buffer: MatrixValues, startIndex?: number): number;
-    protected abstract applyScale(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applyTranslation(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+    protected abstract applyRotation(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+    protected abstract applySkew(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+    protected abstract applyScale(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
 
     protected updateValues() {
         this._data.isDirtyValues = false;
@@ -326,8 +326,44 @@ export abstract class Matrix {
     }
 
     protected updateInverse() {
+        // TODO: Figure out how isDirtyInverse can be false when isInverseValid is true.
+        // if (!this._data.isDirtyInverse || this._data.isInverseValid) return;
+
         this._data.isDirtyInverse = false;
-        this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== undefined;
+
+        if (this.dataMode === DataMode.dynamic) {
+            this._data.isInverseValid = this.calcInverse(this.values, this.inverse) !== undefined;
+            return;
+        }
+
+        const dataStarts = this._dataStarts;
+        const buffer = this._buffer;
+        const temp = this.values;
+        const inverse = this.getIdentity(this._data.inverse);
+        this._data.values = inverse;
+
+        for (let i = this._dataCount - 1; i >= 0; i--) {
+            let index = dataStarts[i];
+            const id = buffer[index++];
+
+            switch (id) {
+                case BUFFER_TRANSLATE:
+                    this.applyTranslation(buffer, index, true);
+                    break;
+                case BUFFER_ROTATE:
+                    this.applyRotation(buffer, index, true);
+                    break;
+                case BUFFER_SKEW:
+                    this.applySkew(buffer, index, true);
+                    break;
+                case BUFFER_SCALE:
+                    this.applyScale(buffer, index, true);
+                    break;
+            }
+        }
+
+        this._data.values = temp;
+        this._data.isInverseValid = true;
     }
 
     protected cloneData() {
