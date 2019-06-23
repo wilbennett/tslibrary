@@ -321,11 +321,10 @@ export abstract class Matrix {
         this._data.isInverseValid = false;
     }
 
-    protected abstract applyTranslation(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
-    protected abstract applyRotation(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
-    protected abstract applySkew(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
-    protected abstract applyScale(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
-    protected abstract applyTransform(buffer: MatrixValues, startIndex: number, inverse?: boolean): number;
+    protected abstract applyTranslation(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applyRotation(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applySkew(buffer: MatrixValues, startIndex?: number): number;
+    protected abstract applyScale(buffer: MatrixValues, startIndex?: number): number;
 
     protected updateValues() {
         this._data.isDirtyValues = false;
@@ -338,16 +337,16 @@ export abstract class Matrix {
 
             switch (i) {
                 case BUFFER_TRANSLATE:
-                    this.applyTranslation(buffer, 0);//?
+                    this.applyTranslation(buffer);
                     break;
                 case BUFFER_ROTATE:
-                    this.applyRotation(buffer, 0);//?
+                    this.applyRotation(buffer);
                     break;
                 case BUFFER_SKEW:
-                    this.applySkew(buffer, 0);//?
+                    this.applySkew(buffer);
                     break;
                 case BUFFER_SCALE:
-                    this.applyScale(buffer, 0);//?
+                    this.applyScale(buffer);
                     break;
             }
         }

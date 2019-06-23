@@ -1,4 +1,4 @@
-import { copy, DataMode, Matrix, MatrixData, MatrixValues } from '.';
+import { DataMode, Matrix, MatrixData, MatrixValues } from '.';
 import { Vector, Vector2D } from '../vectors';
 
 export interface Matrix2Constructor {
@@ -250,78 +250,33 @@ export abstract class Matrix2 extends Matrix {
         return result;
     }
 
-    protected applyTranslation(data: MatrixValues, index: number, inverse: boolean = false): number {
+    protected applyTranslation(data: MatrixValues, index: number = 0): number {
         let px = data[index++];
         let py = data[index++];
-
-        if (inverse) {
-            px = -px;
-            py = -py;
-        }
-
         this._translate(px, py);
         return index;
     }
 
-    protected applyRotation(data: MatrixValues, index: number, inverse: boolean = false): number {
+    protected applyRotation(data: MatrixValues, index: number = 0): number {
         let radians = data[index++];
         let px = data[index++];
         let py = data[index++];
-
-        if (inverse) {
-            radians = -radians;
-            px = -px;
-            py = -py;
-        }
-
         this._rotate2D(radians, px, py);
         return index;
     }
 
-    protected applySkew(data: MatrixValues, index: number, inverse: boolean = false): number {
+    protected applySkew(data: MatrixValues, index: number = 0): number {
         let radiansX = data[index++];
         let radiansY = data[index++];
-
-        if (inverse) {
-            // Skewing both axes at the same time is not reversible directly.
-            if (radiansX !== 0 && radiansY !== 0) return -1;
-
-            radiansX = -radiansX;
-            radiansY = -radiansY;
-        }
-
         this._skew(radiansX, radiansY);
         return index;
     }
 
-    protected applyScale(data: MatrixValues, index: number, inverse: boolean = false): number {
+    protected applyScale(data: MatrixValues, index: number = 0): number {
         let px = data[index++];
         let py = data[index++];
-
-        if (px === 0 && py === 0) return index;
-
-        if (inverse) {
-            px = 1 / px;
-            py = 1 / py;
-        }
-
         this._scale(px, py);
         return index;
-    }
-
-    protected applyTransform(buffer: MatrixValues, startIndex: number, inverse?: boolean): number {
-        const values = this.createValues();
-        copy(buffer, values, startIndex, 0, this.elementCount);
-
-        if (inverse) {
-            const isValid = this.calcInverse(values, values) != undefined;
-
-            if (!isValid)
-                return -1;
-        }
-
-        this._mult(this.values, values);
-        return startIndex + this.elementCount;
     }
 
     // 0 2 4
@@ -407,6 +362,8 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _scale(sx: number, sy: number): this {
+        if (sx === 0 && sy === 0) return this;
+
         const values = this.values;
         values[0] *= sx;
         values[1] *= sx;
