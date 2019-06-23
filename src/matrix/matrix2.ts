@@ -234,7 +234,10 @@ export abstract class Matrix2 extends Matrix {
         const value5 = values[5];
         let det = value0 * value3 - value1 * value2;
 
-        if (det === 0) return undefined;
+        if (det === 0) {
+            this.getIdentity(result);
+            return undefined;
+        }
 
         det = 1 / det;
         result[0] = value3 * det;
