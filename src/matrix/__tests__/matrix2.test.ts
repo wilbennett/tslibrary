@@ -345,6 +345,133 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.transformInverse(transformed).toString()).toBe(initial.toString());
         });
 
+        it("Should have no effect when performing identity transforms", () => {
+            const identity = matrix.createIdentity().toString();
+            const trans = Vector2.create(0, 0);
+            const skew = Vector2.create(0, 0);
+            const scale = Vector2.create(1, 1);
+
+            matrix.setTranslation(trans);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setTranslation(trans.x, trans.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setRotation2D(0);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setRotationDegrees2D(0);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setSkew(skew);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setSkew(skew.x, skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setSkewDegrees(skew);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setSkewDegrees(skew.x, skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setScale(scale);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setScale(scale.x, scale.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setScale(scale.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.translate(trans);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.translate(trans.x, trans.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.rotate2D(0);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.rotate2D(0, 10, 10);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.rotateDegrees2D(0);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.rotateDegrees2D(0, 10, 10);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.setSkew(skew);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skew(skew.x, skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewDegrees(skew);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewDegrees(skew.x, skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewX(skew.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewXDegrees(skew.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewY(skew.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewYDegrees(skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewZ(skew.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.skewZDegrees(skew.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.scale(scale);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.scale(scale.x, scale.y);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+
+            matrix.scale(scale.x);
+            expect(matrix.values.toString()).toBe(identity);
+            expect(matrix.inverse.toString()).toBe(identity);
+        });
+
         it("Should multiply two matrices", () => {
             const expected = [2, 0, 0, 3, 10, 20];
             matrix.setTranslation(10, 20);//?.

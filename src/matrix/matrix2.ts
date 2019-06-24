@@ -345,7 +345,7 @@ export abstract class Matrix2 extends Matrix {
     }
 
     protected _scale(sx: number, sy: number): this {
-        if (sx === 0 && sy === 0) return this;
+        if (sx === 1 && sy === 1) return this;
 
         const values = this._data.values;
         values[0] *= sx;
