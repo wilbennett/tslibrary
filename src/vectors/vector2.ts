@@ -1,8 +1,18 @@
 import { Vector } from '.';
 
+export interface Vector2Constructor {
+    new(x: number, y: number, w?: number): Vector2;
+}
+
 export class Vector2 extends Vector {
+    private static _instanceConstructor: Vector2Constructor;
+    static get instanceConstructor() { return this._instanceConstructor; }
+    static set instanceConstructor(value: Vector2Constructor) { this._instanceConstructor = value; }
+
     get magSquared() { return this.x * this.x + this.y * this.y; }
     get mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+
+    static create(x: number, y: number, w: number = 0) { return new this.instanceConstructor(x, y, w); }
 
     dot(other: Vector) { return this.x * other.x + this.y * other.y; }
 

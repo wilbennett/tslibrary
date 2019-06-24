@@ -77,3 +77,5 @@ class Vector2ZeroDirection extends Vector2D {
 
     set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector2D(x, y, z, w); }
 }
+
+Vector2.instanceConstructor = Vector2D;
