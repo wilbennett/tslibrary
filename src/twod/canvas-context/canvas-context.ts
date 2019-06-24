@@ -122,18 +122,18 @@ export class CanvasContext {
     }
 
     pushProps() {
-        const styles = this.cloneData();
-        this._propsStack.push(styles);
+        const props = this.cloneData();
+        this._propsStack.push(props);
         return this;
     }
 
     popProps() {
-        const style = this._propsStack.pop();
+        const props = this._propsStack.pop();
 
-        if (!style)
+        if (!props)
             throw new Error("Unbalanced properties pop.");
 
-        this._props.assignFrom(style);
+        this._props.assignFrom(props);
         this._props.copyToContext(this.ctx);
         return this;
     }
