@@ -1,6 +1,6 @@
 import { Matrix, Matrix2, Matrix2D, MatrixValues } from '..';
 import { MathEx } from '../../core';
-import { DVector2, Vector2D } from '../../vectors';
+import { DVector2, Vector2 } from '../../vectors';
 
 const DEFAULT_PREC = 3;
 
@@ -59,7 +59,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should set translation", () => {
-            const vector = new Vector2D(10, 20);
+            const vector = Vector2.create(10, 20);
             const expected = "1,0,0,1,10,20";
             const expectedInverse = "1,0,0,1,-10,-20";
             matrix.setTranslation(vector);//?.
@@ -93,7 +93,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             const expected = "1.00,0.577,0.176,1.00,0.00,0.00";
             const expectedInverse = "1.11,-0.643,-0.196,1.11,0.00,0.00";
 
-            matrix.setSkew(new Vector2D(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)));//?.
+            matrix.setSkew(Vector2.create(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)));//?.
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
@@ -103,7 +103,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
             matrix.reset();//?.
-            matrix.setSkewDegrees(new Vector2D(degreesX, degreesY));//?.
+            matrix.setSkewDegrees(Vector2.create(degreesX, degreesY));//?.
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
@@ -114,7 +114,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should set scale", () => {
-            const vector = new Vector2D(2, 4);
+            const vector = Vector2.create(2, 4);
             const expected = "2,0,0,4,0,0";
             const expectedInverse = "0.5,0,0,0.25,0,0";
 
@@ -140,7 +140,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should do translation", () => {
-            const vector = new Vector2D(10, 20);
+            const vector = Vector2.create(10, 20);
             const expected = "1,0,0,1,10,20";
             const expectedInverse = "1,0,0,1,-10,-20";
 
@@ -168,7 +168,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
-            const center = new Vector2D(10, 10);
+            const center = Vector2.create(10, 10);
             expected = "0.985,0.174,-0.174,0.985,1.89,-1.58";
             expectedInverse = "0.985,-0.174,0.174,0.985,-1.58,1.89";
 
@@ -199,7 +199,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             const expected = "1.00,0.577,0.176,1.00,0.00,0.00";
             const expectedInverse = "1.11,-0.643,-0.196,1.11,0.00,0.00";
 
-            matrix.skew(new Vector2D(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)));//?.
+            matrix.skew(Vector2.create(MathEx.toRadians(degreesX), MathEx.toRadians(degreesY)));//?.
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
@@ -209,7 +209,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
             matrix.reset();//?.
-            matrix.skewDegrees(new Vector2D(degreesX, degreesY));//?.
+            matrix.skewDegrees(Vector2.create(degreesX, degreesY));//?.
             expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
             expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
 
@@ -263,7 +263,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should do scale", () => {
-            const vector = new Vector2D(2, 4);
+            const vector = Vector2.create(2, 4);
             const expected = "2,0,0,4,0,0";
             const expectedInverse = "0.5,0,0,0.25,0,0";
 
@@ -294,9 +294,9 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         it("Should transform a vector", () => {
             const tx = 10;
             const ty = 20;
-            const initialPosition = new Vector2D(1, 0, 2);
+            const initialPosition = Vector2.create(1, 0, 2);
             const initialDirection = new DVector2(1, 0);
-            const expectedPosition = initialPosition.asCartesianN().add(new Vector2D(tx, ty)).toString();
+            const expectedPosition = initialPosition.asCartesianN().add(Vector2.create(tx, ty)).toString();
 
             matrix.translate(tx, ty);//?.
             expect(matrix.transform(initialPosition).asCartesian().toString()).toBe(expectedPosition);
@@ -304,7 +304,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should inverse transform a vector", () => {
-            const initialPosition = new Vector2D(1, 0, 2);
+            const initialPosition = Vector2.create(1, 0, 2);
             const initialDirection = new DVector2(1, 0);
 
             matrix.translate(10, 20);//?.
@@ -325,7 +325,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should calculate inverse combined transformations", () => {
-            const initial = new Vector2D(1, 0);
+            const initial = Vector2.create(1, 0);
 
             matrix.setTranslation(150, 150);//?.
             matrix.setRotationDegrees2D(-45);//?.
