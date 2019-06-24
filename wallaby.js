@@ -16,6 +16,13 @@ module.exports = function (wallaby) {
             runner: 'node'
         },
 
-        testFramework: 'jest'
+        debug: true,
+        testFramework: 'jest',
+
+        preprocessors: {
+            '**/*.js?(x)': file => require('@babel/core').transform(
+                file.content,
+                { sourceMap: true, filename: file.path, presets: [require('babel-preset-jest')] })
+        }
     };
 };
