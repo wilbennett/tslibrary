@@ -292,7 +292,9 @@ export abstract class Matrix {
         if (!data)
             throw new Error("Unbalanced pop.");
 
-        this._data = data;
+        copy(data.values, this._data.values);
+        copy(data.inverse, this._data.inverse);
+        this._data.flags = data.flags;
         return this;
     }
 
