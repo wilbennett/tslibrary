@@ -126,6 +126,30 @@ describe.only("Should handle canvas transform operations", () => {
         transformed = context.transformPoint(original);
         expect(transformed.equals(expectedCentered)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.rotate(MathEx.toRadians(angle), center.x, center.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expectedCentered)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.rotateDegrees(angle);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.rotateDegrees(angle, center);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expectedCentered)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.rotateDegrees(angle, center.x, center.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expectedCentered)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
     });
 
     it("should handle skewing", () => {
@@ -154,6 +178,32 @@ describe.only("Should handle canvas transform operations", () => {
 
         context.setToIdentity();
         context.skewY(radians.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.y).toBeCloseTo(expected.y);
+        expect(transformed.x).toBe(original.x);
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewDegrees(angle);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewDegrees(angle.x, angle.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewXDegrees(angle.x);
+        transformed = context.transformPoint(original);
+        expect(transformed.x).toBeCloseTo(expected.x);
+        expect(transformed.y).toBe(original.y);
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewYDegrees(angle.y);
         transformed = context.transformPoint(original);
         expect(transformed.y).toBeCloseTo(expected.y);
         expect(transformed.x).toBe(original.x);

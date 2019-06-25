@@ -225,6 +225,16 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
+    rotateDegrees(degrees: number): this;
+    rotateDegrees(degrees: number, center: Vector): this;
+    rotateDegrees(degrees: number, centerX: number, centerY: number): this;
+    // @ts-ignore - unused param.
+    rotateDegrees(degrees: number, param2?: number | Vector, centerY?: number): this {
+        // @ts-ignore - arguments length.
+        this._matrix.rotateDegrees2D(...arguments);
+        return this.updateCtxTransform();
+    }
+
     skew(value: Vector): this;
     skew(radiansX: number, radiansY: number): this;
     // @ts-ignore - unused param.
@@ -234,13 +244,32 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
+    skewDegrees(value: Vector): this;
+    skewDegrees(degreesX: number, degreesY: number): this;
+    // @ts-ignore - unused param.
+    skewDegrees(param1: Vector | number, degreesY?: number): this {
+        // @ts-ignore - arguments length.
+        this._matrix.skewDegrees(...arguments);
+        return this.updateCtxTransform();
+    }
+
     skewX(radiansX: number): this {
         this._matrix.skewX(radiansX);
         return this.updateCtxTransform();
     }
 
+    skewXDegrees(radiansX: number): this {
+        this._matrix.skewXDegrees(radiansX);
+        return this.updateCtxTransform();
+    }
+
     skewY(radiansY: number): this {
         this._matrix.skewY(radiansY);
+        return this.updateCtxTransform();
+    }
+
+    skewYDegrees(degreesY: number): this {
+        this._matrix.skewYDegrees(degreesY);
         return this.updateCtxTransform();
     }
 
