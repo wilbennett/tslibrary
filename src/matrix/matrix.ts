@@ -151,6 +151,8 @@ export abstract class Matrix {
 
         if (value === DataMode.fixed)
             this.initializeFixedData();
+        else
+            this.getIdentity(this._data.values);
 
         this._dataMode = value;
     }

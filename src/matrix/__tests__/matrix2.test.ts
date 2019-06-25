@@ -130,15 +130,6 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             expect(matrix.inverse.toString()).toBe("0.5,0,0,0.5,0,0");
         });
 
-        it("Should apply transforms in the correct order", () => {
-            matrix.setScale(0.5, 1.3);//?.
-            matrix.setTranslation(150, 150);//?.
-            matrix.setRotationDegrees2D(-45);//?.
-            matrix.setSkewDegrees(10, 0);//?.
-            expect(prec(matrix.values, DEFAULT_PREC)).toBe("0.354,-0.354,1.08,0.757,150,150");
-            expect(prec(matrix.inverse, DEFAULT_PREC)).toBe("1.16,0.544,-1.66,0.544,74.8,-163");
-        });
-
         it("Should do translation", () => {
             const vector = Vector2.create(10, 20);
             const expected = "1,0,0,1,10,20";
@@ -283,12 +274,26 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should combine transforms correctly", () => {
-            matrix.translate(150, 150);//?.
-            matrix.rotateDegrees2D(-45);//?.
-            matrix.skewDegrees(10, 0);//?.
-            matrix.scale(0.5, 1.3);//?.
-            expect(prec(matrix.values, DEFAULT_PREC)).toBe("0.354,-0.354,1.08,0.757,150,150");
-            expect(prec(matrix.inverse, DEFAULT_PREC)).toBe("1.16,0.544,-1.66,0.544,74.8,-163");
+            const trans = Vector2.create(150, 150);
+            const angle = -45;
+            const skew = Vector2.create(10, 0);
+            const scale = Vector2.create(0.5, 1.3);
+            const expected = "0.354,-0.354,1.08,0.757,150,150";
+            const expectedInverse = "1.16,0.544,-1.66,0.544,74.8,-163";
+
+            matrix.setScale(scale);//?.
+            matrix.setTranslation(trans);//?.
+            matrix.setRotationDegrees2D(angle);//?.
+            matrix.setSkewDegrees(skew);//?.
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+            expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
+
+            matrix.translate(trans);//?.
+            matrix.rotateDegrees2D(angle);//?.
+            matrix.skewDegrees(skew);//?.
+            matrix.scale(scale);//?.
+            expect(prec(matrix.values, DEFAULT_PREC)).toBe(expected);
+            expect(prec(matrix.inverse, DEFAULT_PREC)).toBe(expectedInverse);
         });
 
         it("Should transform a vector", () => {
