@@ -97,8 +97,18 @@ describe.only("Should handle canvas transform operations", () => {
         const trans = Vector2.create(10, 10);
         const expected = new PVector2(original.x + trans.x, original.y + trans.y);
 
-        context.translate(trans);
+        context.setTranslation(trans);
         let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setTranslation(trans.x, trans.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.translate(trans);
+        transformed = context.transformPoint(original);
         expect(transformed.equals(expected)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
 
@@ -116,8 +126,18 @@ describe.only("Should handle canvas transform operations", () => {
         const expected = new PVector2(0, 1);
         const expectedCentered = new PVector2(20, 1);
 
-        context.rotate(MathEx.toRadians(angle));
+        context.setRotation(MathEx.toRadians(angle));
         let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setRotationDegrees(angle);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.rotate(MathEx.toRadians(angle));
+        transformed = context.transformPoint(original);
         expect(transformed.equals(expected)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
 
@@ -158,8 +178,29 @@ describe.only("Should handle canvas transform operations", () => {
         const radians = new PVector2(MathEx.toRadians(angle.x), MathEx.toRadians(angle.y));
         const expected = new PVector2(11.76, 13.64);
 
-        context.skew(radians);
+        context.setSkew(radians);
         let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setSkew(radians.x, radians.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.setSkewDegrees(angle);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setSkewDegrees(angle.x, angle.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.skew(radians);
+        transformed = context.transformPoint(original);
         expect(transformed.equals(expected, 0.01)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
 
@@ -215,8 +256,19 @@ describe.only("Should handle canvas transform operations", () => {
         const scale = Vector2.create(2, 4);
         let expected = new PVector2(original.x * scale.x, original.y * scale.y);
 
-        context.scale(scale);
+        context.setScale(scale);
         let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setScale(scale.x, scale.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.scale(scale);
+        transformed = context.transformPoint(original);//? $.toString()
         expect(transformed.equals(expected)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
 
@@ -228,6 +280,11 @@ describe.only("Should handle canvas transform operations", () => {
 
         expected = new PVector2(original.x * scale.x, original.y * scale.x);
         context.setToIdentity();
+        context.setScale(scale.x);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
         context.scale(scale.x);
         transformed = context.transformPoint(original);
         expect(transformed.equals(expected)).toBeTruthy();
