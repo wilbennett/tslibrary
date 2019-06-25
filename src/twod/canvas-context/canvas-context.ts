@@ -64,15 +64,16 @@ class CanvasProps {
     copyFromContext(ctx?: CanvasRenderingContext2D) {
         ctx = ctx || this.ctx;
 
-        if (!ctx) return this;
+        // if (!ctx) return this;
 
         return this;
     }
 
     copyToContext(ctx: CanvasRenderingContext2D) {
-        ctx = ctx || this.ctx;
+        ctx;
+        // ctx = ctx || this.ctx;
 
-        if (!ctx) return this;
+        // if (!ctx) return this;
 
         return this;
     }
@@ -101,25 +102,10 @@ export class CanvasContext {
         this._props = new CanvasProps(this, this.ctx);
         this._props.copyFromContext();
         this._propsStack = [];
+        this.updateCtxTransform();
     }
 
     readonly ctx: CanvasRenderingContext2D;
-
-    get transformation() { return this._matrix.values; }
-    get inverse() { return this._matrix.inverse; }
-
-    getTransform(result: MatrixValues): MatrixValues { return this._matrix.getValues(result); }
-    getInverse(result: MatrixValues): MatrixValues { return this._matrix.getInverse(result); }
-
-    setTransform(values: MatrixValues) {
-        this._matrix.set(values);
-        return this.updateCtxTransform();
-    }
-
-    transform(values: MatrixValues) {
-        this._matrix.mult(values);
-        return this.updateCtxTransform();
-    }
 
     pushProps() {
         const props = this.cloneData();
@@ -138,15 +124,7 @@ export class CanvasContext {
         return this;
     }
 
-    pushTransform() {
-        this._matrix.push();
-        return this;
-    }
-
-    popTransform() {
-        this._matrix.pop();
-        return this;
-    }
+    protected cloneData() { return this._props.clone(); }
 
     //================================================================================================================
     // Canvas State
@@ -166,6 +144,26 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasTransform
     //================================================================================================================
+    get transformation() { return this._matrix.values; }
+    get inverse() { return this._matrix.inverse; }
+
+    getTransform(result: MatrixValues) { return this._matrix.getValues(result); }
+    getInverse(result: MatrixValues) { return this._matrix.getInverse(result); }
+
+    createValues() { return this._matrix.createValues(); }
+    getIdentity(result: MatrixValues) { return this._matrix.getIdentity(result); }
+    createIdentity() { return this._matrix.createIdentity(); }
+
+    setTransform(values: MatrixValues) {
+        this._matrix.set(values);
+        return this.updateCtxTransform();
+    }
+
+    transform(values: MatrixValues) {
+        this._matrix.mult(values);
+        return this.updateCtxTransform();
+    }
+
     // getTransform(): DOMMatrix;
     // resetTransform(): void;
     // rotate(angle: number): void;
@@ -174,6 +172,22 @@ export class CanvasContext {
     // setTransform(transform?: DOMMatrix2DInit): void;
     // transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
     // translate(x: number, y: number): void;
+
+    pushTransform() {
+        this._matrix.push();
+        return this;
+    }
+
+    popTransform() {
+        this._matrix.pop();
+        return this.updateCtxTransform();
+    }
+
+    protected updateCtxTransform() {
+        const transform = this.transformation;
+        this.ctx.setTransform(transform[0], transform[1], transform[2], transform[3], transform[4], transform[5]);
+        return this;
+    }
     //================================================================================================================
     // CanvasCompositing
     //================================================================================================================
@@ -279,15 +293,4 @@ export class CanvasContext {
     // moveTo(x: number, y: number): void;
     // quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
     // rect(x: number, y: number, w: number, h: number): void;
-
-    //================================================================================================================
-    // Protected
-    //================================================================================================================
-    protected cloneData() { return this._props.clone(); }
-
-    protected updateCtxTransform() {
-        const transform = this.transformation;
-        this.ctx.setTransform(transform[0], transform[1], transform[2], transform[3], transform[4], transform[5]);
-        return this;
-    }
 }

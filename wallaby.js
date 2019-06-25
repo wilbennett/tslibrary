@@ -16,7 +16,7 @@ module.exports = function (wallaby) {
             runner: 'node'
         },
 
-        debug: true,
+        // debug: true,
         testFramework: 'jest',
 
         preprocessors: {

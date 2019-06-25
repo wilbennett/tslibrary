@@ -12,11 +12,14 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasTransform
     //================================================================================================================
+    transformation: number[] = [];
     // getTransform(): DOMMatrix;
     // resetTransform(): void;
     // rotate(angle: number): void;
     // scale(x: number, y: number): void;
-    // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+    setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void {
+        this.transformation = [a, b, c, d, e, f];
+    }
     // setTransform(transform?: DOMMatrix2DInit): void;
     // transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
     // translate(x: number, y: number): void;
