@@ -214,8 +214,17 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
+    scale(value: Vector): this;
+    scale(value: number): this;
+    scale(x: number, y: number): this;
+    // @ts-ignore - unused param.
+    scale(param1: Vector | number, y?: number): this {
+        // @ts-ignore - arguments length.
+        this._matrix.scale(...arguments);
+        return this.updateCtxTransform();
+    }
+
     // rotate(angle: number): void;
-    // scale(x: number, y: number): void;
     // getTransform(): DOMMatrix; //* Proposal.
     // setTransform(transform?: DOMMatrix2DInit): void; //* Proposal.
 

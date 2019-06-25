@@ -107,6 +107,30 @@ describe.only("Should handle canvas transform operations", () => {
         expect(transformed.equals(expected)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
     });
+
+    it("should handle scaling", () => {
+        const original = new PVector2(1, 2);
+        const scale = Vector2.create(2, 4);
+        let expected = new PVector2(original.x * scale.x, original.y * scale.y);
+
+        context.scale(scale);
+        let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.scale(scale.x, scale.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        expected = new PVector2(original.x * scale.x, original.y * scale.x);
+        context.setToIdentity();
+        context.scale(scale.x);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+    });
 });
 
 describe.only("Should handle pushing and popping", () => {
