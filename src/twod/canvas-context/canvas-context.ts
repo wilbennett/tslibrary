@@ -1,4 +1,5 @@
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
+import { Vector } from '../../vectors';
 
 class CanvasProps {
     constructor(public readonly context?: CanvasContext, public readonly ctx?: CanvasRenderingContext2D) {
@@ -201,10 +202,20 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
-    // transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+    transformPoint(point: Vector): Vector { return this._matrix.transform(point); }
+    transformPointInverse(point: Vector): Vector { return this._matrix.transformInverse(point); }
+
+    translate(value: Vector): this;
+    translate(x: number, y: number): this;
+    // @ts-ignore - unused param.
+    translate(param1: Vector | number, y?: number): this {
+        // @ts-ignore - arguments length.
+        this._matrix.translate(...arguments);
+        return this.updateCtxTransform();
+    }
+
     // rotate(angle: number): void;
     // scale(x: number, y: number): void;
-    // translate(x: number, y: number): void;
     // getTransform(): DOMMatrix; //* Proposal.
     // setTransform(transform?: DOMMatrix2DInit): void; //* Proposal.
 

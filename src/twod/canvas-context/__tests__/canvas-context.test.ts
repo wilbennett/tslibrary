@@ -1,3 +1,4 @@
+import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { CanvasContext } from '../canvas-context';
 
@@ -88,6 +89,23 @@ describe.only("Should handle canvas transform operations", () => {
         context.pushTransform();
         context.resetTransform();
         expect(() => context.popTransform()).toThrow();
+    });
+
+    it("should handle translation", () => {
+        const original = new PVector2(1, 0);
+        const trans = Vector2.create(10, 10);
+        const expected = new PVector2(original.x + trans.x, original.y + trans.y);
+
+        context.translate(trans);
+        let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.translate(trans.x, trans.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
     });
 });
 
