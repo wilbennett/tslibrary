@@ -80,6 +80,7 @@ class CanvasProps {
     }
 }
 
+// TODO: Lazy update canvas transform.
 export class CanvasContext {
     protected _matrix: Matrix;
     protected _props: CanvasProps;
@@ -221,6 +222,25 @@ export class CanvasContext {
     rotate(radians: number, param2?: number | Vector, centerY?: number): this {
         // @ts-ignore - arguments length.
         this._matrix.rotate2D(...arguments);
+        return this.updateCtxTransform();
+    }
+
+    skew(value: Vector): this;
+    skew(radiansX: number, radiansY: number): this;
+    // @ts-ignore - unused param.
+    skew(param1: Vector | number, radiansY?: number): this {
+        // @ts-ignore - arguments length.
+        this._matrix.skew(...arguments);
+        return this.updateCtxTransform();
+    }
+
+    skewX(radiansX: number): this {
+        this._matrix.skewX(radiansX);
+        return this.updateCtxTransform();
+    }
+
+    skewY(radiansY: number): this {
+        this._matrix.skewY(radiansY);
         return this.updateCtxTransform();
     }
 

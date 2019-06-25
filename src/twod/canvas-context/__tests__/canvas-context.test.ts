@@ -128,6 +128,38 @@ describe.only("Should handle canvas transform operations", () => {
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
     });
 
+    it("should handle skewing", () => {
+        const original = new PVector2(10, 10);
+        const angle = Vector2.create(10, 20);
+        const radians = new PVector2(MathEx.toRadians(angle.x), MathEx.toRadians(angle.y));
+        const expected = new PVector2(11.76, 13.64);
+
+        context.skew(radians);
+        let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skew(radians.x, radians.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expected, 0.01)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewX(radians.x);
+        transformed = context.transformPoint(original);
+        expect(transformed.x).toBeCloseTo(expected.x);
+        expect(transformed.y).toBe(original.y);
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.skewY(radians.y);
+        transformed = context.transformPoint(original);
+        expect(transformed.y).toBeCloseTo(expected.y);
+        expect(transformed.x).toBe(original.x);
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+    });
+
     it("should handle scaling", () => {
         const original = new PVector2(1, 2);
         const scale = Vector2.create(2, 4);
