@@ -49,12 +49,20 @@ describe.only("Should handle canvas transform operations", () => {
     });
 
     it("Should handle updating transform", () => {
+        const identity = context.createIdentity().toString();
         const translate = [1, 0, 0, 1, 10, 20];
         const scale = [2, 0, 0, 4, 0, 0];
+        const expected = "2,0,0,4,10,20";
 
         context.transform(translate);
         context.transform(scale);
-        expect(ctx.transformation.toString()).toBe("2,0,0,4,10,20");
+        expect(ctx.transformation.toString()).toBe(expected);
+
+        context.setToIdentity();
+        expect(ctx.transformation.toString()).toBe(identity);
+        context.transform(translate[0], translate[1], translate[2], translate[3], translate[4], translate[5]);
+        context.transform(scale[0], scale[1], scale[2], scale[3], scale[4], scale[5]);
+        expect(ctx.transformation.toString()).toBe(expected);
     });
 
     it("Should handle pushing and popping", () => {

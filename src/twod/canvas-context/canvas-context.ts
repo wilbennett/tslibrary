@@ -157,26 +157,37 @@ export class CanvasContext {
     setTransform(a: number, b: number, c: number, d: number, e: number, f: number): this;
     setTransform(values: MatrixValues): this;
     setTransform(param1: number | MatrixValues, b?: number, c?: number, d?: number, e?: number, f?: number): this {
-        let values: MatrixValues;
-
         if (typeof param1 === "number") {
-            values = this.transformation;
+            const transformation: MatrixValues = this.transformation;
+            transformation[0] = param1;
+            transformation[1] = b!;
+            transformation[2] = c!;
+            transformation[3] = d!;
+            transformation[4] = e!;
+            transformation[5] = f!;
+        } else {
+            this._matrix.set(param1);
+        }
+
+        return this.updateCtxTransform();
+    }
+
+    transform(a: number, b: number, c: number, d: number, e: number, f: number): this;
+    transform(values: MatrixValues): this;
+    transform(param1: number | MatrixValues, b?: number, c?: number, d?: number, e?: number, f?: number): this {
+        if (typeof param1 === "number") {
+            const values = this.createValues();
             values[0] = param1;
             values[1] = b!;
             values[2] = c!;
             values[3] = d!;
             values[4] = e!;
             values[5] = f!;
+            this._matrix.mult(values);
         } else {
-            values = param1;
+            this._matrix.mult(param1);
         }
 
-        this._matrix.set(values);
-        return this.updateCtxTransform();
-    }
-
-    transform(values: MatrixValues) {
-        this._matrix.mult(values);
         return this.updateCtxTransform();
     }
 
