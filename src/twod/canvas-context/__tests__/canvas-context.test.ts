@@ -61,11 +61,25 @@ describe.only("Should handle canvas transform operations", () => {
         const identity = context.createIdentity().toString();
         const initial = [1, 1, 1, 1, 1, 1];
 
+        expect(() => context.popTransform()).toThrow();
         context.pushTransform();
         context.setTransform(initial);
         expect(ctx.transformation.toString()).toBe(initial.toString());
         context.popTransform();
         expect(ctx.transformation.toString()).toBe(identity);
+        expect(() => context.popTransform()).toThrow();
+
+        context.setTransform(initial);
+        context.pushTransform();
+        context.setToIdentity();
+        expect(ctx.transformation.toString()).toBe(identity);
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(initial.toString());
+
+        context.setTransform(initial);
+        context.pushTransform();
+        context.resetTransform();
+        expect(() => context.popTransform()).toThrow();
     });
 });
 
@@ -81,10 +95,12 @@ describe.only("Should handle pushing and popping", () => {
         const identity = context.createIdentity().toString();
         const initial = [1, 1, 1, 1, 1, 1];
 
+        expect(() => context.restore()).toThrow();
         context.save();
-        context.setTransform(initial);
+        context.setTransform(initial[0], initial[1], initial[2], initial[3], initial[4], initial[5]);
         expect(ctx.transformation.toString()).toBe(initial.toString());
         context.restore();
         expect(ctx.transformation.toString()).toBe(identity);
+        expect(() => context.restore()).toThrow();
     });
 });

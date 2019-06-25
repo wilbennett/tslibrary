@@ -154,7 +154,23 @@ export class CanvasContext {
     getIdentity(result: MatrixValues) { return this._matrix.getIdentity(result); }
     createIdentity() { return this._matrix.createIdentity(); }
 
-    setTransform(values: MatrixValues) {
+    setTransform(a: number, b: number, c: number, d: number, e: number, f: number): this;
+    setTransform(values: MatrixValues): this;
+    setTransform(param1: number | MatrixValues, b?: number, c?: number, d?: number, e?: number, f?: number): this {
+        let values: MatrixValues;
+
+        if (typeof param1 === "number") {
+            values = this.transformation;
+            values[0] = param1;
+            values[1] = b!;
+            values[2] = c!;
+            values[3] = d!;
+            values[4] = e!;
+            values[5] = f!;
+        } else {
+            values = param1;
+        }
+
         this._matrix.set(values);
         return this.updateCtxTransform();
     }
@@ -164,14 +180,22 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
-    // getTransform(): DOMMatrix;
-    // resetTransform(): void;
+    setToIdentity() {
+        this._matrix.setToIdentity();
+        return this.updateCtxTransform();
+    }
+
+    resetTransform() {
+        this._matrix.reset();
+        return this.updateCtxTransform();
+    }
+
+    // transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
     // rotate(angle: number): void;
     // scale(x: number, y: number): void;
-    // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
-    // setTransform(transform?: DOMMatrix2DInit): void;
-    // transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
     // translate(x: number, y: number): void;
+    // getTransform(): DOMMatrix; //* Proposal.
+    // setTransform(transform?: DOMMatrix2DInit): void; //* Proposal.
 
     pushTransform() {
         this._matrix.push();
