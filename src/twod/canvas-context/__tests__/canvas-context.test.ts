@@ -1,3 +1,4 @@
+import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { CanvasContext } from '../canvas-context';
@@ -105,6 +106,25 @@ describe.only("Should handle canvas transform operations", () => {
         context.translate(trans.x, trans.y);
         transformed = context.transformPoint(original);
         expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+    });
+
+    it("should handle rotation", () => {
+        const original = new PVector2(1, 0);
+        const angle = 90;
+        const center = Vector2.create(10, 10);
+        const expected = new PVector2(0, 1);
+        const expectedCentered = new PVector2(20, 1);
+
+        context.rotate(MathEx.toRadians(angle));
+        let transformed = context.transformPoint(original);
+        expect(transformed.equals(expected)).toBeTruthy();
+        expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
+
+        context.setToIdentity();
+        context.rotate(MathEx.toRadians(angle), center);
+        transformed = context.transformPoint(original);
+        expect(transformed.equals(expectedCentered)).toBeTruthy();
         expect(context.transformPointInverse(transformed).equals(original)).toBeTruthy();
     });
 
