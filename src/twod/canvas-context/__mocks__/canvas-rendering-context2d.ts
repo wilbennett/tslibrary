@@ -31,8 +31,8 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
-    // imageSmoothingEnabled: boolean;
-    // imageSmoothingQuality: ImageSmoothingQuality;
+    imageSmoothingEnabled: boolean = false;
+    imageSmoothingQuality: ImageSmoothingQuality = "low";
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================

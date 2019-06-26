@@ -11,8 +11,8 @@ class CanvasProps {
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
-    // imageSmoothingEnabled: boolean;
-    // imageSmoothingQuality: ImageSmoothingQuality;
+    imageSmoothingEnabled!: boolean;
+    imageSmoothingQuality!: ImageSmoothingQuality;
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================
@@ -383,8 +383,10 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
-    // imageSmoothingEnabled: boolean;
-    // imageSmoothingQuality: ImageSmoothingQuality;
+    get imageSmoothingEnabled() { return this.ctx.imageSmoothingEnabled; }
+    set imageSmoothingEnabled(value) { this.ctx.imageSmoothingEnabled = value; }
+    get imageSmoothingQuality() { return this.ctx.imageSmoothingQuality; }
+    set imageSmoothingQuality(value) { this.ctx.imageSmoothingQuality = value; }
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================

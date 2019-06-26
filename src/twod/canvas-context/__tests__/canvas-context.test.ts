@@ -401,6 +401,7 @@ describe("Should handle pushing and popping", () => {
         context.setTransform(initial[0], initial[1], initial[2], initial[3], initial[4], initial[5]);
         expect(ctx.transformation.toString()).toBe(initial.toString());
         context.restore();
+        expect(getProperties()).toMatchObject(originalProps);
         expect(ctx.transformation.toString()).toBe(identity);
         expect(() => context.restore()).toThrow();
 
