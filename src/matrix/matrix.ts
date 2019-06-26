@@ -373,7 +373,7 @@ export abstract class Matrix {
     protected cloneData() {
         const result = new MatrixData(this.createValues(), this.createValues());
         this.getValues(result.values);
-        this.getInverse(result.inverse);
+        copy(this._data.inverse, result.inverse);
         result.flags = this._data.flags;
         return result;
     }
