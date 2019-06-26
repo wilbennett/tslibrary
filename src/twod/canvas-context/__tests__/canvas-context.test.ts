@@ -144,6 +144,14 @@ describe("Should handle canvas transform operations", () => {
         expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
         context.popTransform();
         expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
+
+        context.setToIdentity();
+        context.pushTransform(scale);
+        context.pushTransform(trans);
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+        context.popUpdate();
+        expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
     });
 
     it("should handle translation", () => {

@@ -368,6 +368,11 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
+    popUpdate() {
+        this._matrix.popMultiply();
+        return this.updateCtxTransform();
+    }
+
     protected updateCtxTransform() {
         const transform = this.transformation;
         this.ctx.setTransform(transform[0], transform[1], transform[2], transform[3], transform[4], transform[5]);
