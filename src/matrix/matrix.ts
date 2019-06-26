@@ -283,8 +283,16 @@ export abstract class Matrix {
 
     abstract calcInverse(values: MatrixValues, result: MatrixValues): MatrixValues | undefined;
 
-    push(): this {
-        this._stack.push(this.cloneData());
+    push(values?: MatrixValues): this {
+        if (!values) {
+            this._stack.push(this.cloneData());
+            return this;
+        }
+
+        const data = new MatrixData(values, this.createIdentity());
+        data.isDirtyValues = false;
+        data.isDirtyInverse = true;
+        this._stack.push(data);
         return this;
     }
 

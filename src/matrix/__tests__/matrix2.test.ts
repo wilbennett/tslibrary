@@ -488,10 +488,20 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should push and pop correctly", () => {
-            matrix.setTranslation(10, 20);
+            const identity = matrix.getIdentity([]);
             const expected = [1, 0, 0, 1, 10, 20];
+
+            matrix.setTranslation(10, 20);
+            expect(() => matrix.pop()).toThrow();
             matrix.push();//?.
             matrix.setToIdentity();//?.
+            matrix.pop();//?.
+            expect(matrix.values.toString()).toBe(expected.toString());
+            expect(() => matrix.pop()).toThrow();
+
+            matrix.reset();
+            matrix.push(expected);//?.
+            expect(matrix.values.toString()).toBe(identity.toString());
             matrix.pop();//?.
             expect(matrix.values.toString()).toBe(expected.toString());
             expect(() => matrix.pop()).toThrow();
