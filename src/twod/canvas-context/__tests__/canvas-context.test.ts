@@ -32,6 +32,25 @@ it("Should throw error when canvas context is null", () => {
 let context: CanvasContext;
 let ctx: CanvasRenderingContext2D;
 
+type PropertyHashTable = ({ [index: string]: any; });
+
+function getProperties() {
+    const result = <PropertyHashTable>{};
+
+    for (const propName of Object.getOwnPropertyNames(context.constructor.prototype)) {
+        const desc = Object.getOwnPropertyDescriptor(context.constructor.prototype, propName);
+
+        // if (propName.startsWith('_')) continue;
+        if (!desc || !desc["get"]) continue;
+        if (["ctx", "transformation", "inverse"].find(x => x === propName)) continue;
+
+        // @ts-ignore
+        result[propName] = context[propName];//?
+    }
+
+    return result;
+}
+
 beforeEach(() => {
     const canvas = document.createElement("canvas");
     context = new CanvasContext(canvas);
@@ -356,13 +375,23 @@ describe("Should handle canvas transform operations", () => {
 
 describe("Should handle pushing and popping", () => {
     it("Should handle pushing and popping properties", () => {
+        const originalProps = getProperties();
+
+        context.globalAlpha = 0.5;
+        context.globalCompositeOperation = "source-in";
         expect(() => context.popProps()).toThrow();
         context.pushProps();
+        context.globalAlpha = 0.8;
         context.popProps();
+        expect(getProperties()).toMatchSnapshot();
         expect(() => context.popProps()).toThrow();
+
+        context.resetProps();
+        expect(getProperties()).toMatchObject(originalProps);
     });
 
     it("Should handle pushing and popping properties and transforms", () => {
+        const originalProps = getProperties();
         const identity = context.createIdentity().toString();
         const initial = [1, 1, 1, 1, 1, 1];
 
@@ -373,5 +402,10 @@ describe("Should handle pushing and popping", () => {
         context.restore();
         expect(ctx.transformation.toString()).toBe(identity);
         expect(() => context.restore()).toThrow();
+
+        context.setTransform(initial[0], initial[1], initial[2], initial[3], initial[4], initial[5]);
+        context.reset();
+        expect(getProperties()).toMatchObject(originalProps);
+        expect(ctx.transformation.toString()).toBe(identity);
     });
 });

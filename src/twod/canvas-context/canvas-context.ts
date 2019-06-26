@@ -2,14 +2,11 @@ import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector } from '../../vectors';
 
 class CanvasProps {
-    constructor(public readonly context?: CanvasContext, public readonly ctx?: CanvasRenderingContext2D) {
-    }
-
     //================================================================================================================
     // CanvasCompositing
     //================================================================================================================
-    // globalAlpha: number;
-    // globalCompositeOperation: string;
+    globalAlpha!: number;
+    globalCompositeOperation!: string;
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
@@ -51,39 +48,15 @@ class CanvasProps {
 
     //================================================================================================================
     //================================================================================================================
-
-    clone(context?: CanvasContext, ctx?: CanvasRenderingContext2D) {
-        const result = new CanvasProps(context, ctx);
-        return result;
-    }
-
-    assignFrom(other: CanvasProps) {
-        other;
-        return this;
-    }
-
-    copyFromContext(ctx?: CanvasRenderingContext2D) {
-        ctx = ctx || this.ctx;
-
-        // if (!ctx) return this;
-
-        return this;
-    }
-
-    copyToContext(ctx: CanvasRenderingContext2D) {
-        ctx;
-        // ctx = ctx || this.ctx;
-
-        // if (!ctx) return this;
-
-        return this;
-    }
 }
+
+type PropsContainer = CanvasRenderingContext2D | CanvasProps | CanvasContext;
 
 // TODO: Lazy update canvas transform.
 export class CanvasContext {
     protected _matrix: Matrix;
     protected _props: CanvasProps;
+    protected _originalProps: CanvasProps;
     protected _propsStack: CanvasProps[];
 
     constructor(canvas: HTMLCanvasElement);
@@ -101,16 +74,19 @@ export class CanvasContext {
         }
 
         this._matrix = Matrix2.create();
-        this._props = new CanvasProps(this, this.ctx);
-        this._props.copyFromContext();
+        this._originalProps = new CanvasProps();
+        this._props = new CanvasProps();
         this._propsStack = [];
+        this.copyProps(this.ctx, this._originalProps);
+        this.copyProps(this.ctx, this._props);
         this.updateCtxTransform();
     }
 
     readonly ctx: CanvasRenderingContext2D;
 
     pushProps() {
-        const props = this.cloneData();
+        const props = new CanvasProps();
+        this.copyProps(this, props);
         this._propsStack.push(props);
         return this;
     }
@@ -121,12 +97,27 @@ export class CanvasContext {
         if (!props)
             throw new Error("Unbalanced properties pop.");
 
-        this._props.assignFrom(props);
-        this._props.copyToContext(this.ctx);
+        this.copyProps(props, this);
         return this;
     }
 
-    protected cloneData() { return this._props.clone(); }
+    resetProps() {
+        this.copyProps(this._originalProps, this);
+        this._propsStack = [];
+        return this;
+    }
+
+    reset() {
+        this.resetProps();
+        this.resetTransform();
+        return this;
+    }
+
+    protected copyProps(source: PropsContainer, dest: PropsContainer) {
+        dest.globalAlpha = source.globalAlpha;
+        dest.globalCompositeOperation = source.globalCompositeOperation;
+        return this;
+    }
 
     //================================================================================================================
     // Canvas State
@@ -383,6 +374,15 @@ export class CanvasContext {
     //================================================================================================================
     // globalAlpha: number;
     // globalCompositeOperation: string;
+    get globalAlpha() { return this.ctx.globalAlpha; }
+    set globalAlpha(value) { this.ctx.globalAlpha = value; }
+
+    get globalCompositeOperation(): string {
+        return this.ctx.globalCompositeOperation;
+    }
+    set globalCompositeOperation(value) {
+        this.ctx.globalCompositeOperation = value;
+    }
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
