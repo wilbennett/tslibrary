@@ -386,11 +386,16 @@ describe("Should handle pushing and popping", () => {
         context.fillStyle = "red";
         context.strokeStyle = WebColors.green;
         context.strokeStyle = "green";
-        context.shadowBlur = 0.5;
+        context.shadowBlur = 0.6;
         context.shadowColor = WebColors.blue;
         context.shadowColor = "blue";
         context.shadowOffsetX = 10;
         context.shadowOffsetY = 20;
+        context.lineCap = "round";
+        context.lineDashOffset = 2;
+        context.lineJoin = "bevel";
+        context.lineWidth = 3;
+        context.miterLimit = 4;
 
         expect(() => context.popProps()).toThrow();
         context.pushProps();

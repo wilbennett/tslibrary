@@ -52,7 +52,7 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
-    // filter: string;
+    // filter: string; //* Proposal.
     //================================================================================================================
     // CanvasRect
     //================================================================================================================
@@ -103,11 +103,12 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================
-    // lineCap: CanvasLineCap;
-    // lineDashOffset: number;
-    // lineJoin: CanvasLineJoin;
-    // lineWidth: number;
-    // miterLimit: number;
+    lineCap: CanvasLineCap = "butt";
+    lineDashOffset: number = 0;
+    lineJoin: CanvasLineJoin = "miter";
+    lineWidth: number = 1;
+    miterLimit: number = 10;
+    // lineDash: number[] = [];
     // getLineDash(): number[];
     // setLineDash(segments: number[]): void;
     //================================================================================================================

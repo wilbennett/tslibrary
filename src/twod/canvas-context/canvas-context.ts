@@ -29,17 +29,15 @@ class CanvasProps {
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
-    // filter: string;
+    // filter: string; //* Proposal.
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================
-    // lineCap: CanvasLineCap;
-    // lineDashOffset: number;
-    // lineJoin: CanvasLineJoin;
-    // lineWidth: number;
-    // miterLimit: number;
-    // getLineDash(): number[];
-    // setLineDash(segments: number[]): void;
+    lineCap!: CanvasLineCap;
+    lineDashOffset!: number;
+    lineJoin!: CanvasLineJoin;
+    lineWidth!: number;
+    miterLimit!: number;
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================
@@ -126,6 +124,11 @@ export class CanvasContext {
         dest.shadowColor = source.shadowColor;
         dest.shadowOffsetX = source.shadowOffsetX;
         dest.shadowOffsetY = source.shadowOffsetY;
+        dest.lineCap = source.lineCap;
+        dest.lineDashOffset = source.lineDashOffset;
+        dest.lineJoin = source.lineJoin;
+        dest.lineWidth = source.lineWidth;
+        dest.miterLimit = source.miterLimit;
         return this;
     }
 
@@ -469,11 +472,16 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================
-    // lineCap: CanvasLineCap;
-    // lineDashOffset: number;
-    // lineJoin: CanvasLineJoin;
-    // lineWidth: number;
-    // miterLimit: number;
+    get lineCap() { return this.ctx.lineCap; }
+    set lineCap(value) { this.ctx.lineCap = value; }
+    get lineDashOffset() { return this.ctx.lineDashOffset; }
+    set lineDashOffset(value) { this.ctx.lineDashOffset = value; }
+    get lineJoin() { return this.ctx.lineJoin; }
+    set lineJoin(value) { this.ctx.lineJoin = value; }
+    get lineWidth() { return this.ctx.lineWidth; }
+    set lineWidth(value) { this.ctx.lineWidth = value; }
+    get miterLimit() { return this.ctx.miterLimit; }
+    set miterLimit(value) { this.ctx.miterLimit = value; }
     // getLineDash(): number[];
     // setLineDash(segments: number[]): void;
     //================================================================================================================
