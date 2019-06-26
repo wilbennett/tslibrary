@@ -1,3 +1,4 @@
+import { Compositions } from '.';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector } from '../../vectors';
 
@@ -377,12 +378,8 @@ export class CanvasContext {
     get globalAlpha() { return this.ctx.globalAlpha; }
     set globalAlpha(value) { this.ctx.globalAlpha = value; }
 
-    get globalCompositeOperation(): string {
-        return this.ctx.globalCompositeOperation;
-    }
-    set globalCompositeOperation(value) {
-        this.ctx.globalCompositeOperation = value;
-    }
+    get globalCompositeOperation() { return <Compositions>this.ctx.globalCompositeOperation; }
+    set globalCompositeOperation(value) { this.ctx.globalCompositeOperation = value; }
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================

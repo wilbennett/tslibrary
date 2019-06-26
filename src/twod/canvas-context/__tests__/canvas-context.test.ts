@@ -1,3 +1,4 @@
+import { Composition } from '..';
 import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
@@ -378,7 +379,7 @@ describe("Should handle pushing and popping", () => {
         const originalProps = getProperties();
 
         context.globalAlpha = 0.5;
-        context.globalCompositeOperation = "source-in";
+        context.globalCompositeOperation = Composition.sourceIn;
         expect(() => context.popProps()).toThrow();
         context.pushProps();
         context.globalAlpha = 0.8;
