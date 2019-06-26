@@ -4,7 +4,7 @@ import { Color } from '../../colors';
 export type CanvasColor = string | Color;
 export type Brush = CanvasColor | CanvasGradient | CanvasPattern;
 
-export const enum CompositeOperation {
+export const enum CompositionOperation {
     sourceOver = "source-over",
     sourceIn = "source-in",
     sourceOut = "source-out",
