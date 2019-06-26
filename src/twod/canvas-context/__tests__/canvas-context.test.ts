@@ -1,4 +1,3 @@
-import { Composition } from '..';
 import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
@@ -46,7 +45,7 @@ function getProperties() {
         if (["ctx", "transformation", "inverse"].find(x => x === propName)) continue;
 
         // @ts-ignore
-        result[propName] = context[propName];//?
+        result[propName] = context[propName];
     }
 
     return result;
@@ -379,7 +378,10 @@ describe("Should handle pushing and popping", () => {
         const originalProps = getProperties();
 
         context.globalAlpha = 0.5;
-        context.globalCompositeOperation = Composition.sourceIn;
+        context.globalCompositeOperation = "source-in";
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = "high";
+
         expect(() => context.popProps()).toThrow();
         context.pushProps();
         context.globalAlpha = 0.8;

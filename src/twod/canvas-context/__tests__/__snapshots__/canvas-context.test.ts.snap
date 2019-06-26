@@ -4,7 +4,7 @@ exports[`Should handle pushing and popping Should handle pushing and popping pro
 Object {
   "globalAlpha": 0.5,
   "globalCompositeOperation": "source-in",
-  "imageSmoothingEnabled": false,
-  "imageSmoothingQuality": "low",
+  "imageSmoothingEnabled": true,
+  "imageSmoothingQuality": "high",
 }
 `;

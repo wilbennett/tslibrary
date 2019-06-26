@@ -117,6 +117,8 @@ export class CanvasContext {
     protected copyProps(source: PropsContainer, dest: PropsContainer) {
         dest.globalAlpha = source.globalAlpha;
         dest.globalCompositeOperation = source.globalCompositeOperation;
+        dest.imageSmoothingEnabled = source.imageSmoothingEnabled;
+        dest.imageSmoothingQuality = source.imageSmoothingQuality;
         return this;
     }
 
