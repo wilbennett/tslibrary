@@ -117,7 +117,7 @@ export abstract class Color {
     if (useWebName && this.isWebColor) {
       const color = Colors.get(this.id);
 
-      if (color)
+      if (color && color.name)
         return color.name;
     }
 
