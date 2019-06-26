@@ -88,6 +88,12 @@ describe("Should handle canvas transform operations", () => {
         context.popTransform();
         expect(ctx.transformation.toString()).toBe(trans.toString());
 
+        context.setToIdentity();
+        context.pushTransform(trans);
+        expect(ctx.transformation.toString()).toBe(identity);
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+
         context.setTransform(trans);
         context.pushTransform();
         context.resetTransform();

@@ -333,8 +333,8 @@ export class CanvasContext {
     // getTransform(): DOMMatrix; //* Proposal.
     // setTransform(transform?: DOMMatrix2DInit): void; //* Proposal.
 
-    pushTransform() {
-        this._matrix.push();
+    pushTransform(values?: MatrixValues) {
+        this._matrix.push(values);
         return this;
     }
 
