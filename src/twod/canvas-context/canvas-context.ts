@@ -1,4 +1,4 @@
-import { Brush, Compositions, Style } from '.';
+import { Brush, CanvasColor, Compositions, Style } from '.';
 import { Color } from '../../colors';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector } from '../../vectors';
@@ -22,10 +22,10 @@ class CanvasProps {
     //================================================================================================================
     // CanvasShadowStyles
     //================================================================================================================
-    // shadowBlur: number;
-    // shadowColor: string;
-    // shadowOffsetX: number;
-    // shadowOffsetY: number;
+    shadowBlur!: number;
+    shadowColor!: string;
+    shadowOffsetX!: number;
+    shadowOffsetY!: number;
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
@@ -122,6 +122,10 @@ export class CanvasContext {
         dest.imageSmoothingQuality = source.imageSmoothingQuality;
         dest.fillStyle = source.fillStyle;
         dest.strokeStyle = source.strokeStyle;
+        dest.shadowBlur = source.shadowBlur;
+        dest.shadowColor = source.shadowColor;
+        dest.shadowOffsetX = source.shadowOffsetX;
+        dest.shadowOffsetY = source.shadowOffsetY;
         return this;
     }
 
@@ -403,10 +407,14 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasShadowStyles
     //================================================================================================================
-    // shadowBlur: number;
-    // shadowColor: string;
-    // shadowOffsetX: number;
-    // shadowOffsetY: number;
+    get shadowBlur() { return this.ctx.shadowBlur; }
+    set shadowBlur(value) { this.ctx.shadowBlur = value; }
+    get shadowColor(): CanvasColor { return this.ctx.shadowColor; }
+    set shadowColor(value) { this.ctx.shadowColor = value instanceof Color ? value.toString() : value; }
+    get shadowOffsetX() { return this.ctx.shadowOffsetX; }
+    set shadowOffsetX(value) { this.ctx.shadowOffsetX = value; }
+    get shadowOffsetY() { return this.ctx.shadowOffsetY; }
+    set shadowOffsetY(value) { this.ctx.shadowOffsetY = value; }
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================

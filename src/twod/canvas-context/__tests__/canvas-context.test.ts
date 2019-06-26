@@ -1,3 +1,4 @@
+import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
@@ -381,8 +382,15 @@ describe("Should handle pushing and popping", () => {
         context.globalCompositeOperation = "source-in";
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
+        context.fillStyle = WebColors.red;
         context.fillStyle = "red";
+        context.strokeStyle = WebColors.green;
         context.strokeStyle = "green";
+        context.shadowBlur = 0.5;
+        context.shadowColor = WebColors.blue;
+        context.shadowColor = "blue";
+        context.shadowOffsetX = 10;
+        context.shadowOffsetY = 20;
 
         expect(() => context.popProps()).toThrow();
         context.pushProps();

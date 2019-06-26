@@ -7,6 +7,10 @@ Object {
   "globalCompositeOperation": "source-in",
   "imageSmoothingEnabled": true,
   "imageSmoothingQuality": "high",
+  "shadowBlur": 0.5,
+  "shadowColor": "blue",
+  "shadowOffsetX": 10,
+  "shadowOffsetY": 20,
   "strokeStyle": "green",
 }
 `;
