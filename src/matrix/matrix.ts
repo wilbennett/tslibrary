@@ -289,6 +289,7 @@ export abstract class Matrix {
             return this;
         }
 
+        this.dataMode = DataMode.dynamic;
         const data = new MatrixData(values, this.createIdentity());
         data.isDirtyValues = false;
         data.isDirtyInverse = true;
@@ -302,6 +303,7 @@ export abstract class Matrix {
         if (!data)
             throw new Error("Unbalanced pop.");
 
+        this.dataMode = DataMode.dynamic;
         copy(data.values, this._data.values);
         copy(data.inverse, this._data.inverse);
         this._data.flags = data.flags;
@@ -311,26 +313,42 @@ export abstract class Matrix {
     pushThenIdentity() {
         this.push();
         this.setToIdentity();
+        return this;
     }
 
     pushThenSet(values: MatrixValues) {
         this.push();
         this.set(values);
+        return this;
     }
 
     pushThenMult(values: MatrixValues) {
         this.push();
         this.mult(values);
+        return this;
     }
 
     setThenPush(values: MatrixValues) {
         this.set(values);
         this.push();
+        return this;
     }
 
     multThenPush(values: MatrixValues) {
         this.mult(values);
         this.push();
+        return this;
+    }
+
+    popMultiply() {
+        const data = this._stack.pop();
+
+        if (!data)
+            throw new Error("Unbalanced pop.");
+
+        this.dataMode = DataMode.dynamic;
+        this.mult(data.values);
+        return this;
     }
 
     protected valuesUpdated() {

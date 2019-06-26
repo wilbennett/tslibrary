@@ -479,12 +479,18 @@ describe.each([["Matrix2D", new Matrix2D()]])(
 
         it("Should multiply two matrices", () => {
             const expected = [2, 0, 0, 3, 10, 20];
+
             matrix.setTranslation(10, 20);//?.
             const translation = matrix.getValues([]);//?.
+
+            matrix.setToIdentity();
             matrix.setScale(2, 3);//?.
             const scale = matrix.getValues([]);
+
             matrix.mult(translation, scale);//?.
-            expect(matrix.values.toString()).toBe(expected.toString());
+            matrix.values.toString();//?
+            expect(matrix.values.toString()).toBe(scale.toString());
+            expect(translation.toString()).toBe(expected.toString());
         });
 
         it("Should push and pop correctly", () => {
@@ -546,12 +552,30 @@ describe.each([["Matrix2D", new Matrix2D()]])(
         });
 
         it("Should multiply and push", () => {
-            const value = [1, 2, 3, 4, 5, 6];
-            matrix.multThenPush(value);
-            expect(matrix.values.toString()).toBe(value.toString());
+            const trans = [1, 0, 0, 1, 10, 20];
+            const scale = [2, 0, 0, 4, 0, 0];
+            const scaleTrans = [2, 0, 0, 4, 10, 20].toString();
+
+            matrix.set(trans);
+            matrix.multThenPush(scale);
+            expect(matrix.values.toString()).toBe(scaleTrans);
             matrix.setToIdentity();
             matrix.pop();
-            expect(matrix.values.toString()).toBe(value.toString());
+            expect(matrix.values.toString()).toBe(scaleTrans);
+        });
+
+        it("Should pop and multiply", () => {
+            const trans = [1, 0, 0, 1, 10, 20];
+            const scale = [2, 0, 0, 4, 0, 0];
+            const scaleTrans = [2, 0, 0, 4, 10, 20].toString();
+
+            expect(() => matrix.popMultiply()).toThrow();
+            matrix.push(scale);
+            matrix.push(trans);
+            matrix.pop();
+            expect(matrix.values.toString()).toBe(trans.toString());
+            matrix.popMultiply();
+            expect(matrix.values.toString()).toBe(scaleTrans);
         });
     }
 );
