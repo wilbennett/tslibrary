@@ -381,6 +381,8 @@ describe("Should handle pushing and popping", () => {
         context.globalCompositeOperation = "source-in";
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
+        context.fillStyle = "red";
+        context.strokeStyle = "green";
 
         expect(() => context.popProps()).toThrow();
         context.pushProps();

@@ -1,4 +1,5 @@
-import { Compositions } from '.';
+import { Brush, Compositions, Style } from '.';
+import { Color } from '../../colors';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector } from '../../vectors';
 
@@ -16,8 +17,8 @@ class CanvasProps {
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================
-    // fillStyle: string | CanvasGradient | CanvasPattern;
-    // strokeStyle: string | CanvasGradient | CanvasPattern;
+    fillStyle!: Style;
+    strokeStyle!: Style;
     //================================================================================================================
     // CanvasShadowStyles
     //================================================================================================================
@@ -119,6 +120,8 @@ export class CanvasContext {
         dest.globalCompositeOperation = source.globalCompositeOperation;
         dest.imageSmoothingEnabled = source.imageSmoothingEnabled;
         dest.imageSmoothingQuality = source.imageSmoothingQuality;
+        dest.fillStyle = source.fillStyle;
+        dest.strokeStyle = source.strokeStyle;
         return this;
     }
 
@@ -375,8 +378,6 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasCompositing
     //================================================================================================================
-    // globalAlpha: number;
-    // globalCompositeOperation: string;
     get globalAlpha() { return this.ctx.globalAlpha; }
     set globalAlpha(value) { this.ctx.globalAlpha = value; }
 
@@ -392,8 +393,10 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================
-    // fillStyle: string | CanvasGradient | CanvasPattern;
-    // strokeStyle: string | CanvasGradient | CanvasPattern;
+    get fillStyle(): Brush { return this.ctx.fillStyle; }
+    set fillStyle(value) { this.ctx.fillStyle = value instanceof Color ? value.toString() : value; }
+    get strokeStyle(): Brush { return this.ctx.strokeStyle; }
+    set strokeStyle(value) { this.ctx.strokeStyle = value instanceof Color ? value.toString() : value; }
     // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
     // createPattern(image: CanvasImageSource, repetition: string): CanvasPattern | null;
     // createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
