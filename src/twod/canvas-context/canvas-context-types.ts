@@ -1,7 +1,9 @@
 import { Color } from '../../colors';
 
 
-export type CanvasColor = string | Color;
+export type ColorString = string;
+export type Style = string | CanvasGradient | CanvasPattern;
+export type CanvasColor = ColorString | Color;
 export type Brush = CanvasColor | CanvasGradient | CanvasPattern;
 
 export type Compositions =
