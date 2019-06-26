@@ -343,6 +343,31 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
+    pushThenIdentity() {
+        this._matrix.pushThenIdentity();
+        return this.updateCtxTransform();
+    }
+
+    pushThenSet(values: MatrixValues) {
+        this._matrix.pushThenSet(values);
+        return this.updateCtxTransform();
+    }
+
+    pushThenUpdate(values: MatrixValues) {
+        this._matrix.pushThenMult(values);
+        return this.updateCtxTransform();
+    }
+
+    setThenPush(values: MatrixValues) {
+        this._matrix.setThenPush(values);
+        return this.updateCtxTransform();
+    }
+
+    updateThenPush(values: MatrixValues) {
+        this._matrix.multThenPush(values);
+        return this.updateCtxTransform();
+    }
+
     protected updateCtxTransform() {
         const transform = this.transformation;
         this.ctx.setTransform(transform[0], transform[1], transform[2], transform[3], transform[4], transform[5]);

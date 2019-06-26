@@ -69,27 +69,76 @@ describe.only("Should handle canvas transform operations", () => {
 
     it("Should handle pushing and popping", () => {
         const identity = context.createIdentity().toString();
-        const initial = [1, 1, 1, 1, 1, 1];
+        const trans = [1, 0, 0, 1, 10, 20];
+        const scale = [2, 0, 0, 4, 0, 0];
+        const scaleTrans = [2, 0, 0, 4, 10, 20].toString();
+        const transScale = [2, 0, 0, 4, 10, 20].toString();
 
         expect(() => context.popTransform()).toThrow();
         context.pushTransform();
-        context.setTransform(initial);
-        expect(ctx.transformation.toString()).toBe(initial.toString());
+        context.setTransform(trans);
+        expect(ctx.transformation.toString()).toBe(trans.toString());
         context.popTransform();
         expect(ctx.transformation.toString()).toBe(identity);
         expect(() => context.popTransform()).toThrow();
 
-        context.setTransform(initial);
+        context.setTransform(trans);
         context.pushTransform();
         context.setToIdentity();
         expect(ctx.transformation.toString()).toBe(identity);
         context.popTransform();
-        expect(ctx.transformation.toString()).toBe(initial.toString());
+        expect(ctx.transformation.toString()).toBe(trans.toString());
 
-        context.setTransform(initial);
+        context.setTransform(trans);
         context.pushTransform();
         context.resetTransform();
         expect(() => context.popTransform()).toThrow();
+
+        context.setTransform(trans);
+        context.pushThenIdentity();
+        expect(ctx.transformation.toString()).toBe(identity);
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+
+        context.setToIdentity();
+        context.setTransform(trans);
+        context.pushTransform();
+        context.setTransform(scale);
+        context.pushTransform();
+        expect(ctx.transformation.toString()).toBe(scale.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(scale.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+        expect(() => context.popTransform()).toThrow();
+
+        context.setToIdentity();
+        context.setTransform(trans);
+        context.pushThenSet(scale);
+        expect(ctx.transformation.toString()).toBe(scale.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+
+        context.setToIdentity();
+        context.setTransform(trans);
+        context.pushThenUpdate(scale);
+        expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(trans.toString());
+
+        context.setToIdentity();
+        context.setTransform(trans);
+        context.setThenPush(scale);
+        expect(ctx.transformation.toString()).toBe(scale.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(scale.toString());
+
+        context.setToIdentity();
+        context.setTransform(trans);
+        context.updateThenPush(scale);
+        expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
+        context.popTransform();
+        expect(ctx.transformation.toString()).toBe(scaleTrans.toString());
     });
 
     it("should handle translation", () => {
