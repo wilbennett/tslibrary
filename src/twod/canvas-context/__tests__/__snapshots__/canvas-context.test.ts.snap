@@ -3,6 +3,7 @@
 exports[`Should handle pushing and popping Should handle pushing and popping properties 1`] = `
 Object {
   "fillStyle": "red",
+  "font": "20px Arial",
   "globalAlpha": 0.5,
   "globalCompositeOperation": "source-in",
   "imageSmoothingEnabled": true,
@@ -17,5 +18,7 @@ Object {
   "shadowOffsetX": 10,
   "shadowOffsetY": 20,
   "strokeStyle": "green",
+  "textAlign": "center",
+  "textBaseline": "bottom",
 }
 `;

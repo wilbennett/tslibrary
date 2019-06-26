@@ -41,10 +41,10 @@ class CanvasProps {
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================
-    // direction: CanvasDirection;
-    // font: string;
-    // textAlign: CanvasTextAlign;
-    // textBaseline: CanvasTextBaseline;
+    font!: string;
+    textAlign!: CanvasTextAlign;
+    textBaseline!: CanvasTextBaseline;
+    // direction: CanvasDirection; //* Proposal.
 
     //================================================================================================================
     //================================================================================================================
@@ -129,6 +129,9 @@ export class CanvasContext {
         dest.lineJoin = source.lineJoin;
         dest.lineWidth = source.lineWidth;
         dest.miterLimit = source.miterLimit;
+        dest.font = source.font;
+        dest.textAlign = source.textAlign;
+        dest.textBaseline = source.textBaseline;
         return this;
     }
 
@@ -487,10 +490,13 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================
-    // direction: CanvasDirection;
-    // font: string;
-    // textAlign: CanvasTextAlign;
-    // textBaseline: CanvasTextBaseline;
+    get font() { return this.ctx.font; }
+    set font(value) { this.ctx.font = value; }
+    get textAlign() { return this.ctx.textAlign; }
+    set textAlign(value) { this.ctx.textAlign = value; }
+    get textBaseline() { return this.ctx.textBaseline; }
+    set textBaseline(value) { this.ctx.textBaseline = value; }
+    // direction: CanvasDirection; //* Proposal.
     //================================================================================================================
     // CanvasPath
     //================================================================================================================

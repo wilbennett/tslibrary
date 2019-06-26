@@ -396,6 +396,9 @@ describe("Should handle pushing and popping", () => {
         context.lineJoin = "bevel";
         context.lineWidth = 3;
         context.miterLimit = 4;
+        context.font = "20px Arial";
+        context.textAlign = "center";
+        context.textBaseline = "bottom";
 
         expect(() => context.popProps()).toThrow();
         context.pushProps();

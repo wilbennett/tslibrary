@@ -114,10 +114,10 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================
-    // direction: CanvasDirection;
-    // font: string;
-    // textAlign: CanvasTextAlign;
-    // textBaseline: CanvasTextBaseline;
+    font: string = "10px sans-serif";
+    textAlign: CanvasTextAlign = "start";
+    textBaseline: CanvasTextBaseline = "alphabetic";
+    // direction: CanvasDirection; //* Proposal.
     //================================================================================================================
     // CanvasPath
     //================================================================================================================
