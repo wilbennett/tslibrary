@@ -15,14 +15,14 @@ HTMLCanvasElement.prototype.getContext = function (contextId: "2d", ...rest: any
     return new CanvasRenderingContext2D();
 }
 
-test.only("Create with context", () => {
+test("Create with context", () => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
     expect(() => { new CanvasContext(ctx!) }).not.toThrow();
 });
 
-it.only("Should throw error when canvas context is null", () => {
+it("Should throw error when canvas context is null", () => {
     shouldReturnNullContext = true;
     const canvas = document.createElement("canvas");
 
@@ -39,7 +39,7 @@ beforeEach(() => {
     ctx = context.ctx;
 });
 
-describe.only("Should handle canvas transform operations", () => {
+describe("Should handle canvas transform operations", () => {
     it("Should be identity on creation", () => {
         const identity = context.createIdentity().toString();
 
@@ -72,7 +72,6 @@ describe.only("Should handle canvas transform operations", () => {
         const trans = [1, 0, 0, 1, 10, 20];
         const scale = [2, 0, 0, 4, 0, 0];
         const scaleTrans = [2, 0, 0, 4, 10, 20].toString();
-        const transScale = [2, 0, 0, 4, 10, 20].toString();
 
         expect(() => context.popTransform()).toThrow();
         context.pushTransform();
@@ -341,7 +340,7 @@ describe.only("Should handle canvas transform operations", () => {
     });
 });
 
-describe.only("Should handle pushing and popping", () => {
+describe("Should handle pushing and popping", () => {
     it("Should handle pushing and popping properties", () => {
         expect(() => context.popProps()).toThrow();
         context.pushProps();
