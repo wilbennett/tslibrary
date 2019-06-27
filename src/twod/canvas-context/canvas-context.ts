@@ -557,10 +557,20 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasUserInterface
     //================================================================================================================
-    // drawFocusIfNeeded(element: Element): void;
-    // drawFocusIfNeeded(path: Path2D, element: Element): void;
-    // scrollPathIntoView(): void;
-    // scrollPathIntoView(path: Path2D): void;
+    drawFocusIfNeeded(element: Element): this;
+    drawFocusIfNeeded(path: Path2D, element: Element): this;
+    // @ts-ignore - unused param.
+    drawFocusIfNeeded(param1: any, element?: Element): this {
+        // if (param1 instanceof Element)
+        this.ctx.drawFocusIfNeeded(param1);
+        // else
+        //     this.ctx.drawFocusIfNeeded(param1, element!);
+
+        return this;
+    }
+
+    // scrollPathIntoView(): void; //* Experimental.
+    // scrollPathIntoView(path: Path2D): void; //* Experimental.
     //================================================================================================================
     // CanvasText
     //================================================================================================================

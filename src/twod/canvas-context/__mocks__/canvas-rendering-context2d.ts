@@ -103,10 +103,15 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasUserInterface
     //================================================================================================================
-    // drawFocusIfNeeded(element: Element): void;
-    // drawFocusIfNeeded(path: Path2D, element: Element): void;
-    // scrollPathIntoView(): void;
-    // scrollPathIntoView(path: Path2D): void;
+    drawFocusIfNeeded(element: Element): void;
+    drawFocusIfNeeded(path: Path2D, element: Element): void;
+    // @ts-ignore - unused param.
+    drawFocusIfNeeded(path: any, element?: Element): void { }
+
+    scrollPathIntoView(): void;
+    scrollPathIntoView(path: Path2D): void;
+    // @ts-ignore - unused param.
+    scrollPathIntoView(path?: Path2D): void { }
     //================================================================================================================
     // CanvasText
     //================================================================================================================

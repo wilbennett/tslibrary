@@ -490,4 +490,9 @@ describe("Should handle pushing and popping", () => {
         context.stroke();
         // context.stroke(new Path2D());
     });
+
+    test("User interface call signatures", () => {
+        context.drawFocusIfNeeded(document.createElement("element"));
+        // context.drawFocusIfNeeded(new Path2D(), document.createElement("element"));
+    });
 });
