@@ -443,4 +443,18 @@ describe("Should handle pushing and popping", () => {
         context.createRadialGradient(start, 1, end, 2);
         context.createRadialGradient(start.x, start.y, 3, end.x, end.y, 4);
     });
+
+    test("Rect call signatures", () => {
+        const position = Vector2.create(1, 1);
+        const size = Vector2.create(2, 2);
+
+        context.clearRect(position, size);
+        context.clearRect(position.x, position.y, size.x, size.y);
+
+        context.fillRect(position, size);
+        context.fillRect(position.x, position.y, size.x, size.y);
+
+        context.strokeRect(position, size);
+        context.strokeRect(position.x, position.y, size.x, size.y);
+    });
 });

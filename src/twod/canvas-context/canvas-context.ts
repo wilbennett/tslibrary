@@ -438,13 +438,42 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
-    // filter: string;
+    // filter: string; //* Proposal.
     //================================================================================================================
     // CanvasRect
     //================================================================================================================
-    // clearRect(x: number, y: number, w: number, h: number): void;
-    // fillRect(x: number, y: number, w: number, h: number): void;
-    // strokeRect(x: number, y: number, w: number, h: number): void;
+    clearRect(position: Vector, size: Vector): this;
+    clearRect(x: number, y: number, w: number, h: number): this;
+    clearRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.clearRect(param1.x, param1.y, param2.x, param2.y);
+        else
+            this.ctx.clearRect(param1, param2, w!, h!);
+
+        return this;
+    }
+
+    fillRect(position: Vector, size: Vector): this;
+    fillRect(x: number, y: number, w: number, h: number): this;
+    fillRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.fillRect(param1.x, param1.y, param2.x, param2.y);
+        else
+            this.ctx.fillRect(param1, param2, w!, h!);
+
+        return this;
+    }
+
+    strokeRect(position: Vector, size: Vector): this;
+    strokeRect(x: number, y: number, w: number, h: number): this;
+    strokeRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.strokeRect(param1.x, param1.y, param2.x, param2.y);
+        else
+            this.ctx.strokeRect(param1, param2, w!, h!);
+
+        return this;
+    }
     //================================================================================================================
     // CanvasDrawPath
     //================================================================================================================
