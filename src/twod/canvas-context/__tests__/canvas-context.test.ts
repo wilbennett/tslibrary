@@ -495,4 +495,20 @@ describe("Should handle pushing and popping", () => {
         context.drawFocusIfNeeded(document.createElement("element"));
         // context.drawFocusIfNeeded(new Path2D(), document.createElement("element"));
     });
+
+    test("Text call signatures", () => {
+        const position = Vector2.create(1, 1);
+
+        context.fillText("1", position);
+        context.fillText("2", position, 1);
+        context.fillText("3", position.x, position.y);
+        context.fillText("4", position.x, position.y, 2);
+
+        context.measureText("5");
+
+        context.strokeText("6", position);
+        context.strokeText("7", position, 3);
+        context.strokeText("8", position.x, position.y);
+        context.strokeText("9", position.x, position.y, 4);
+    });
 });

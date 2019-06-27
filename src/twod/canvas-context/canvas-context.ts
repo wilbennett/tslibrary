@@ -574,9 +574,29 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasText
     //================================================================================================================
-    // fillText(text: string, x: number, y: number, maxWidth?: number): void;
-    // measureText(text: string): TextMetrics;
-    // strokeText(text: string, x: number, y: number, maxWidth?: number): void;
+    fillText(text: string, position: Vector, maxWidth?: number): this;
+    fillText(text: string, x: number, y: number, maxWidth?: number): this;
+    fillText(text: string, param2: Vector | number, param3: number, maxWidth?: number): this {
+        if (param2 instanceof Vector)
+            this.ctx.fillText(text, param2.x, param2.y, param3);
+        else
+            this.ctx.fillText(text, param2, param3, maxWidth);
+
+        return this;
+    }
+
+    measureText(text: string): TextMetrics { return this.ctx.measureText(text); }
+
+    strokeText(text: string, position: Vector, maxWidth?: number): this;
+    strokeText(text: string, x: number, y: number, maxWidth?: number): this;
+    strokeText(text: string, param2: Vector | number, param3: number, maxWidth?: number): this {
+        if (param2 instanceof Vector)
+            this.ctx.strokeText(text, param2.x, param2.y, param3);
+        else
+            this.ctx.strokeText(text, param2, param3, maxWidth);
+
+        return this;
+    }
     //================================================================================================================
     // CanvasDrawImage
     //================================================================================================================

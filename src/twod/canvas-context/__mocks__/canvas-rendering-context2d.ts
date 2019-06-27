@@ -115,9 +115,12 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasText
     //================================================================================================================
-    // fillText(text: string, x: number, y: number, maxWidth?: number): void;
-    // measureText(text: string): TextMetrics;
-    // strokeText(text: string, x: number, y: number, maxWidth?: number): void;
+    // @ts-ignore - unused param.
+    fillText(text: string, x: number, y: number, maxWidth?: number): void { }
+    // @ts-ignore - unused param.
+    measureText(text: string): TextMetrics { }
+    // @ts-ignore - unused param.
+    strokeText(text: string, x: number, y: number, maxWidth?: number): void { }
     //================================================================================================================
     // CanvasDrawImage
     //================================================================================================================
