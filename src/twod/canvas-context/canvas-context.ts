@@ -45,9 +45,6 @@ class CanvasProps {
     textAlign!: CanvasTextAlign;
     textBaseline!: CanvasTextBaseline;
     // direction: CanvasDirection; //* Proposal.
-
-    //================================================================================================================
-    //================================================================================================================
 }
 
 type PropsContainer = CanvasRenderingContext2D | CanvasProps | CanvasContext;
@@ -407,9 +404,26 @@ export class CanvasContext {
     set fillStyle(value) { this.ctx.fillStyle = value instanceof Color ? value.toString() : value; }
     get strokeStyle(): Brush { return this.ctx.strokeStyle; }
     set strokeStyle(value) { this.ctx.strokeStyle = value instanceof Color ? value.toString() : value; }
-    // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
-    // createPattern(image: CanvasImageSource, repetition: string): CanvasPattern | null;
-    // createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
+
+    createLinearGradient(startPoint: Vector, endPoint: Vector): CanvasGradient;
+    createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
+    createLinearGradient(param1: Vector | number, param2: any, x1?: number, y1?: number): CanvasGradient {
+        return param1 instanceof Vector
+            ? this.ctx.createLinearGradient(param1.x, param1.y, param2.x, param2.y)
+            : this.ctx.createLinearGradient(param1, param2, x1!, y1!);
+    }
+
+    createPattern(image: CanvasImageSource, repetition: string): CanvasPattern | null {
+        return this.ctx.createPattern(image, repetition);
+    }
+
+    createRadialGradient(startCirclePos: Vector, startRadius: number, endCirclePos: Vector, endRadius: number): CanvasGradient;
+    createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
+    createRadialGradient(param1: Vector | number, param2: number, param3: any, param4: number, y1?: number, r1?: number): CanvasGradient {
+        return param1 instanceof Vector
+            ? this.ctx.createRadialGradient(param1.x, param1.y, param2, param3.x, param3.y, param4)
+            : this.ctx.createRadialGradient(param1, param2, param3, param4, y1!, r1!);
+    }
     //================================================================================================================
     // CanvasShadowStyles
     //================================================================================================================

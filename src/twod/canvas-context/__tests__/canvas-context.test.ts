@@ -430,4 +430,17 @@ describe("Should handle pushing and popping", () => {
         expect(getProperties()).toMatchObject(originalProps);
         expect(ctx.transformation.toString()).toBe(identity);
     });
+
+    test("Fill stroke styles call signatures", () => {
+        const start = Vector2.create(1, 1);
+        const end = Vector2.create(2, 2);
+
+        context.createLinearGradient(start, end);
+        context.createLinearGradient(start.x, start.y, end.x, end.y);
+
+        context.createPattern(new Image(), "");
+
+        context.createRadialGradient(start, 1, end, 2);
+        context.createRadialGradient(start.x, start.y, 3, end.x, end.y, 4);
+    });
 });

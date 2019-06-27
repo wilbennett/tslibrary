@@ -39,9 +39,19 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     fillStyle: Style = "#000000";
     strokeStyle: Style = "#000000";
-    // createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
-    // createPattern(image: CanvasImageSource, repetition: string): CanvasPattern | null;
-    // createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
+
+    // @ts-ignore - unused param.
+    createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient | null {
+        return null;
+    }
+
+    // @ts-ignore - unused param.
+    createPattern(image: CanvasImageSource, repetition: string): CanvasPattern | null { return null; }
+
+    // @ts-ignore - unused param.
+    createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient | null {
+        return null;
+    }
     //================================================================================================================
     // CanvasShadowStyles
     //================================================================================================================
