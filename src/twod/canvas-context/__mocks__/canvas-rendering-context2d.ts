@@ -124,9 +124,11 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasDrawImage
     //================================================================================================================
-    // drawImage(image: CanvasImageSource, dx: number, dy: number): void;
-    // drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
-    // drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+    drawImage(image: CanvasImageSource, dx: number, dy: number): void;
+    drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
+    drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+    // @ts-ignore - unused param.
+    drawImage(image: CanvasImageSource, sx: number, sy: number, sw?: number, sh?: number, dx?: number, dy?: number, dw?: number, dh?: number): void { }
     //================================================================================================================
     // CanvasImageData
     //================================================================================================================

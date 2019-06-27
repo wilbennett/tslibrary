@@ -600,9 +600,37 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasDrawImage
     //================================================================================================================
-    // drawImage(image: CanvasImageSource, dx: number, dy: number): void;
-    // drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): void;
-    // drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void;
+    drawImage(image: CanvasImageSource, destPosition: Vector): this;
+    drawImage(image: CanvasImageSource, dx: number, dy: number): this;
+    drawImage(image: CanvasImageSource, destPosition: Vector, destSize: Vector): this;
+    drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): this;
+    drawImage(image: CanvasImageSource, sourcePosition: Vector, sourceSize: Vector, destPosition: Vector, destSize: Vector): this;
+    drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): this;
+    drawImage(
+        image: CanvasImageSource,
+        param2: any,
+        param3?: any,
+        param4?: any,
+        param5?: any,
+        param6?: any,
+        param7?: any,
+        param8?: any,
+        param9?: any): this {
+        if (arguments.length === 2 && param2 instanceof Vector)
+            this.ctx.drawImage(image, param2.x, param2.y);
+        else if (arguments.length === 3 && typeof param2 === "number")
+            this.ctx.drawImage(image, param2, param3);
+        else if (arguments.length === 3 && param2 instanceof Vector)
+            this.ctx.drawImage(image, param2.x, param2.y);
+        else if (arguments.length === 5 && typeof param2 === "number")
+            this.ctx.drawImage(image, param2, param3, param4, param5);
+        else if (arguments.length === 5 && param2 instanceof Vector)
+            this.ctx.drawImage(image, param2.x, param2.y, param3.x, param3.y, param4.x, param4.y, param5.x, param5.y);
+        else
+            this.ctx.drawImage(image, param2, param3, param4, param5, param6, param7, param8, param9);
+
+        return this;
+    }
     //================================================================================================================
     // CanvasImageData
     //================================================================================================================

@@ -511,4 +511,19 @@ describe("Should handle pushing and popping", () => {
         context.strokeText("8", position.x, position.y);
         context.strokeText("9", position.x, position.y, 4);
     });
+
+    test("Draw image call signatures", () => {
+        const image = new Image();
+        const sourcePosition = Vector2.create(1, 1);
+        const sourceSize = Vector2.create(2, 2);
+        const destPosition = Vector2.create(3, 3);
+        const destSize = Vector2.create(4, 4);
+
+        context.drawImage(image, destPosition);
+        context.drawImage(image, destPosition.x, destPosition.y);
+        context.drawImage(image, destPosition, destSize);
+        context.drawImage(image, destPosition.x, destPosition.y, destSize.x, destSize.y);
+        context.drawImage(image, sourcePosition, sourceSize, destPosition, destSize);
+        context.drawImage(image, sourcePosition.x, sourcePosition.y, sourceSize.x, sourceSize.y, destPosition.x, destPosition.y, destSize.x, destSize.y);
+    });
 });
