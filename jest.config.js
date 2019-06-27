@@ -8,5 +8,6 @@ module.exports = {
     "coverageReporters": [
         "html",
         "text"
-    ]
+    ],
+    // "automock": true
 }

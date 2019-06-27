@@ -457,4 +457,37 @@ describe("Should handle pushing and popping", () => {
         context.strokeRect(position, size);
         context.strokeRect(position.x, position.y, size.x, size.y);
     });
+
+    test("Draw path call signatures", () => {
+        const point = Vector2.create(1, 1);
+
+        context.beginPath();
+
+        context.clip();
+        context.clip("evenodd");
+        // context.clip(new Path2D());
+        // context.clip(new Path2D(), "nonzero");
+
+        context.fill();
+        context.fill("nonzero");
+        // context.fill(new Path2D());
+        // context.fill(new Path2D(), "evenodd");
+
+        context.isPointInPath(point);
+        context.isPointInPath(point, "evenodd");
+        context.isPointInPath(point.x, point.y);
+        context.isPointInPath(point.x, point.y, "nonzero");
+        // context.isPointInPath(new Path2D(), point);
+        // context.isPointInPath(new Path2D(), point, "evenodd");
+        // context.isPointInPath(new Path2D(), point.x, point.y);
+        // context.isPointInPath(new Path2D(), point.x, point.y, "nonzero");
+
+        context.isPointInStroke(point);
+        context.isPointInStroke(point.x, point.y);
+        // context.isPointInStroke(new Path2D(), point);
+        // context.isPointInStroke(new Path2D(), point.x, point.y);
+
+        context.stroke();
+        // context.stroke(new Path2D());
+    });
 });

@@ -29,7 +29,7 @@ class CanvasProps {
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
-    // filter: string; //* Proposal.
+    // filter: string; //* Experimental.
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================
@@ -44,7 +44,7 @@ class CanvasProps {
     font!: string;
     textAlign!: CanvasTextAlign;
     textBaseline!: CanvasTextBaseline;
-    // direction: CanvasDirection; //* Proposal.
+    // direction: CanvasDirection; //* Experimental.
 }
 
 type PropsContainer = CanvasRenderingContext2D | CanvasProps | CanvasContext;
@@ -334,8 +334,8 @@ export class CanvasContext {
         return this.updateCtxTransform();
     }
 
-    // getTransform(): DOMMatrix; //* Proposal.
-    // setTransform(transform?: DOMMatrix2DInit): void; //* Proposal.
+    // getTransform(): DOMMatrix; //* Experimental.
+    // setTransform(transform?: DOMMatrix2DInit): void; //* Experimental.
 
     pushTransform(values?: MatrixValues) {
         this._matrix.push(values);
@@ -438,7 +438,7 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
-    // filter: string; //* Proposal.
+    // filter: string; //* Experimental.
     //================================================================================================================
     // CanvasRect
     //================================================================================================================
@@ -477,17 +477,83 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasDrawPath
     //================================================================================================================
-    // beginPath(): void;
-    // clip(fillRule?: CanvasFillRule): void;
-    // clip(path: Path2D, fillRule?: CanvasFillRule): void;
-    // fill(fillRule?: CanvasFillRule): void;
-    // fill(path: Path2D, fillRule?: CanvasFillRule): void;
-    // isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
-    // isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean;
-    // isPointInStroke(x: number, y: number): boolean;
-    // isPointInStroke(path: Path2D, x: number, y: number): boolean;
-    // stroke(): void;
-    // stroke(path: Path2D): void;
+    beginPath(): this {
+        this.ctx.beginPath();
+        return this;
+    }
+
+    clip(fillRule?: CanvasFillRule): this;
+    // clip(path: Path2D, fillRule?: CanvasFillRule): this; //* Experimental.
+    clip(param1?: any, fillRule?: CanvasFillRule): this {
+        if (!param1)
+            this.ctx.clip();
+        // else if (!(param1 instanceof Path2D))
+        //     this.ctx.clip(param1);
+        else
+            this.ctx.clip(param1, fillRule);
+
+        return this;
+    }
+
+    fill(fillRule?: CanvasFillRule): this;
+    // fill(path: Path2D, fillRule?: CanvasFillRule): this; //* Experimental.
+    fill(param1?: any, fillRule?: CanvasFillRule): this {
+        if (!param1)
+            this.ctx.fill();
+        // else if (!(param1 instanceof Path2D))
+        //     this.ctx.fill(param1);
+        else
+            this.ctx.fill(param1, fillRule);
+
+        return this;
+    }
+
+    isPointInPath(point: Vector, fillRule?: CanvasFillRule): boolean;
+    isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
+    // isPointInPath(path: Path2D, point: Vector, fillRule?: CanvasFillRule): boolean; //* Experimental.
+    // isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean; //* Experimental.
+    // @ts-ignore - unused param.
+    isPointInPath(param1: Vector | number, param2?: any, param3?: any, param4?: any): boolean {
+        if (param1 instanceof Vector)
+            return this.ctx.isPointInPath(param1.x, param1.y, param2);
+
+        // if (typeof param1 === "number")
+        return this.ctx.isPointInPath(param1, param2, param3);
+
+        // if (param2 instanceof Vector)
+        //     return this.ctx.isPointInPath(param1, param2.x, param2.y, param3);
+
+        // return this.ctx.isPointInPath(param1, param2, param3, param4);
+    }
+
+    isPointInStroke(point: Vector): boolean;
+    isPointInStroke(x: number, y: number): boolean;
+    // isPointInStroke(path: Path2D, point: Vector): boolean; //* Experimental.
+    // isPointInStroke(path: Path2D, x: number, y: number): boolean; //* Experimental.
+    // @ts-ignore - unused param.
+    isPointInStroke(param1: Vector | number, param2?: any, param3?: number): boolean {
+        if (param1 instanceof Vector)
+            return this.ctx.isPointInStroke(param1.x, param1.y);
+
+        // if (typeof param1 === "number")
+        return this.ctx.isPointInStroke(param1, param2);
+
+        // if (param2 instanceof Vector)
+        //     return this.ctx.isPointInStroke(param1, param2.x, param2.y);
+
+        // return this.ctx.isPointInStroke(param1, param2, param3!);
+    }
+
+    stroke(): this;
+    // stroke(path: Path2D): this; //* Experimental.
+    stroke(path?: Path2D): this {
+        if (!path)
+            this.ctx.stroke();
+        // else
+        //     this.ctx.stroke(path);
+
+        return this;
+    }
     //================================================================================================================
     // CanvasUserInterface
     //================================================================================================================
@@ -539,7 +605,7 @@ export class CanvasContext {
     set textAlign(value) { this.ctx.textAlign = value; }
     get textBaseline() { return this.ctx.textBaseline; }
     set textBaseline(value) { this.ctx.textBaseline = value; }
-    // direction: CanvasDirection; //* Proposal.
+    // direction: CanvasDirection; //* Experimental.
     //================================================================================================================
     // CanvasPath
     //================================================================================================================

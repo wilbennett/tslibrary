@@ -75,17 +75,31 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasDrawPath
     //================================================================================================================
-    // beginPath(): void;
-    // clip(fillRule?: CanvasFillRule): void;
-    // clip(path: Path2D, fillRule?: CanvasFillRule): void;
-    // fill(fillRule?: CanvasFillRule): void;
-    // fill(path: Path2D, fillRule?: CanvasFillRule): void;
-    // isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
-    // isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean;
-    // isPointInStroke(x: number, y: number): boolean;
-    // isPointInStroke(path: Path2D, x: number, y: number): boolean;
-    // stroke(): void;
-    // stroke(path: Path2D): void;
+    beginPath(): void { }
+    clip(fillRule?: CanvasFillRule): void;
+    clip(path: Path2D, fillRule?: CanvasFillRule): void;
+    // @ts-ignore - unused param.
+    clip(path?: any, fillRule?: CanvasFillRule): void { }
+
+    fill(fillRule?: CanvasFillRule): void;
+    fill(path: Path2D, fillRule?: CanvasFillRule): void;
+    // @ts-ignore - unused param.
+    fill(path?: any, fillRule?: CanvasFillRule): void { }
+
+    isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
+    isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean;
+    // @ts-ignore - unused param.
+    isPointInPath(path: any, x: number, y: any, fillRule?: CanvasFillRule): boolean { return true; }
+
+    isPointInStroke(x: number, y: number): boolean;
+    isPointInStroke(path: Path2D, x: number, y: number): boolean;
+    // @ts-ignore - unused param.
+    isPointInStroke(path: any, x: number, y?: number): boolean { return true; }
+
+    stroke(): void;
+    stroke(path: Path2D): void;
+    // @ts-ignore - unused param.
+    stroke(path?: Path2D): void { }
     //================================================================================================================
     // CanvasUserInterface
     //================================================================================================================
