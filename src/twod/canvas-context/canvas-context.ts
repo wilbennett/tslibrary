@@ -634,11 +634,51 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasImageData
     //================================================================================================================
-    // createImageData(sw: number, sh: number): ImageData;
-    // createImageData(imagedata: ImageData): ImageData;
-    // getImageData(sx: number, sy: number, sw: number, sh: number): ImageData;
-    // putImageData(imagedata: ImageData, dx: number, dy: number): void;
-    // putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void;
+    createImageData(size: Vector): ImageData;
+    createImageData(sw: number, sh: number): ImageData;
+    createImageData(imagedata: ImageData): ImageData;
+    createImageData(param1: Vector | ImageData | number, sh?: number): ImageData {
+        if (param1 instanceof Vector)
+            return this.ctx.createImageData(param1.x, param1.y);
+
+        if (typeof param1 === "number")
+            return this.ctx.createImageData(param1, sh!);
+
+        return this.ctx.createImageData(param1);
+    }
+
+    getImageData(sourcePosition: Vector, sourceSize: Vector): ImageData;
+    getImageData(sx: number, sy: number, sw: number, sh: number): ImageData;
+    getImageData(param1: Vector | number, param2: any, sw?: number, sh?: number): ImageData {
+        if (param1 instanceof Vector)
+            return this.ctx.getImageData(param1.x, param1.y, param2.x, param2.y);
+
+        return this.ctx.getImageData(param1, param2, sw!, sh!);
+    }
+
+    putImageData(imagedata: ImageData, destPosition: Vector): this;
+    putImageData(imagedata: ImageData, dx: number, dy: number): this;
+    putImageData(imagedata: ImageData, destPosition: Vector, dirtyPosition: Vector, dirtySize: Vector): this;
+    putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): this;
+    putImageData(
+        imagedata: ImageData,
+        param2: Vector | number,
+        param3?: any,
+        param4?: any,
+        param5?: any,
+        param6?: any,
+        param7?: any): this {
+        if (arguments.length == 2 && param2 instanceof Vector)
+            this.ctx.putImageData(imagedata, param2.x, param2.y);
+        else if (arguments.length == 3 && typeof param2 === "number")
+            this.ctx.putImageData(imagedata, param2, param3);
+        else if (param2 instanceof Vector)
+            this.ctx.putImageData(imagedata, param2.x, param2.y, param3.x, param3.y, param4.x, param4.y);
+        else
+            this.ctx.putImageData(imagedata, param2, param3, param4, param5, param6, param7);
+
+        return this;
+    }
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================

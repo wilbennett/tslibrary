@@ -1,4 +1,5 @@
 import { Style } from '..';
+import { ImageData } from './imagedata';
 
 export class CanvasRenderingContext2D {
     //================================================================================================================
@@ -132,11 +133,18 @@ export class CanvasRenderingContext2D {
     //================================================================================================================
     // CanvasImageData
     //================================================================================================================
-    // createImageData(sw: number, sh: number): ImageData;
-    // createImageData(imagedata: ImageData): ImageData;
-    // getImageData(sx: number, sy: number, sw: number, sh: number): ImageData;
-    // putImageData(imagedata: ImageData, dx: number, dy: number): void;
-    // putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void;
+    createImageData(sw: number, sh: number): ImageData;
+    createImageData(imagedata: ImageData): ImageData;
+    // @ts-ignore - unused param.
+    createImageData(sw: any, sh?: number): ImageData { return new ImageData(1, 1); }
+
+    // @ts-ignore - unused param.
+    getImageData(sx: number, sy: number, sw: number, sh: number): ImageData { return new ImageData(1, 1); }
+
+    putImageData(imagedata: ImageData, dx: number, dy: number): void;
+    putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void;
+    // @ts-ignore - unused param.
+    putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX?: number, dirtyY?: number, dirtyWidth?: number, dirtyHeight?: number): void { }
     //================================================================================================================
     // CanvasPathDrawingStyles
     //================================================================================================================

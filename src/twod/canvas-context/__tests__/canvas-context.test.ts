@@ -2,6 +2,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
+import { ImageData } from '../__mocks__/imagedata';
 import { CanvasContext } from '../canvas-context';
 
 let shouldReturnNullContext = false;
@@ -525,5 +526,26 @@ describe("Should handle pushing and popping", () => {
         context.drawImage(image, destPosition.x, destPosition.y, destSize.x, destSize.y);
         context.drawImage(image, sourcePosition, sourceSize, destPosition, destSize);
         context.drawImage(image, sourcePosition.x, sourcePosition.y, sourceSize.x, sourceSize.y, destPosition.x, destPosition.y, destSize.x, destSize.y);
+    });
+
+    test("Image data call signatures", () => {
+        const imageData = new ImageData(1, 1);
+        const sourcePosition = Vector2.create(1, 1);
+        const sourceSize = Vector2.create(2, 2);
+        const destPosition = Vector2.create(3, 3);
+        const dirtyPosition = Vector2.create(5, 5);
+        const dirtySize = Vector2.create(6, 6);
+
+        context.createImageData(sourceSize);
+        context.createImageData(imageData);
+        context.createImageData(sourceSize.x, sourceSize.y);
+
+        context.getImageData(sourcePosition, sourceSize);
+        context.getImageData(sourcePosition.x, sourcePosition.y, sourceSize.x, sourceSize.y);
+
+        context.putImageData(imageData, destPosition);
+        context.putImageData(imageData, destPosition.x, destPosition.y);
+        context.putImageData(imageData, destPosition, dirtyPosition, dirtySize);
+        context.putImageData(imageData, destPosition.x, destPosition.y, dirtyPosition.x, dirtyPosition.y, dirtySize.x, dirtySize.y);
     });
 });
