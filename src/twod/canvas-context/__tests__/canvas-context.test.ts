@@ -1,6 +1,6 @@
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
-import { PVector2, Vector2 } from '../../../vectors';
+import { PVector2, Vector2, Vector2Collection } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { ImageData } from '../__mocks__/image-data';
 import { CanvasContext } from '../canvas-context';
@@ -565,6 +565,8 @@ describe("Should handle pushing and popping", () => {
         const controlPoint2 = Vector2.create(5, 5);
         const endPoint = Vector2.create(6, 6);
         const size = Vector2.create(7, 7);
+        const points = [Vector2.create(0, 0), Vector2.create(10, 10), Vector2.create(20, 0)];
+        const collection = new Vector2Collection(...points);
 
         context.arc(center, radius.x, 0, twoPI);
         context.arc(center, radius.x, 0, twoPI, true);
@@ -618,5 +620,10 @@ describe("Should handle pushing and popping", () => {
 
         context.line(controlPoint1, endPoint);
         context.line(controlPoint1.x, controlPoint1.y, endPoint.x, endPoint.y);
+
+        context.poly(points);
+        context.poly(points, true);
+        context.poly(collection);
+        context.poly(collection, true);
     });
 });

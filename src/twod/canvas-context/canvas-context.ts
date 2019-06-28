@@ -2,7 +2,7 @@ import { Brush, CanvasColor, Compositions, Style } from '.';
 import { Color } from '../../colors';
 import { MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
-import { Vector } from '../../vectors';
+import { Vector, VectorCollection } from '../../vectors';
 
 class CanvasProps {
     //================================================================================================================
@@ -856,6 +856,34 @@ export class CanvasContext {
             this.ctx.moveTo(param1, param2);
             this.ctx.lineTo(endX!, endY!);
         }
+
+        return this;
+    }
+
+    poly(points: Vector[], close?: boolean): this;
+    poly(points: VectorCollection, close?: boolean): this;
+    poly(points: Vector[] | VectorCollection, close?: boolean): this {
+        close = close || false;
+        this.ctx.beginPath();
+
+        if (points instanceof Array) {
+            const length = points.length;
+            this.ctx.moveTo(points[0].x, points[0].y);
+
+            for (let i = 1; i < length; i++) {
+                this.ctx.lineTo(points[i].x, points[i].y);
+            }
+        } else {
+            const point = points.indexer.reset();
+            this.ctx.moveTo(point.x, point.y);
+
+            while (!point.next.isEmpty) {
+                this.ctx.lineTo(point.x, point.y);
+            }
+        }
+
+        if (close)
+            this.ctx.closePath();
 
         return this;
     }
