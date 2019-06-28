@@ -1,4 +1,4 @@
-import { ImageData } from './ImageData';
+import { ImageData } from './image-data';
 import { Path2D } from './path2d';
 
 declare global {

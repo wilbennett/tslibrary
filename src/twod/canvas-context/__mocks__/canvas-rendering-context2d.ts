@@ -1,5 +1,5 @@
 import { Style } from '..';
-import { ImageData } from './imagedata';
+import { ImageData } from './image-data';
 
 export class CanvasRenderingContext2D {
     constructor(public readonly canvas: HTMLCanvasElement) {

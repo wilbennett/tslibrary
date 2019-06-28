@@ -2,7 +2,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { PVector2, Vector2 } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
-import { ImageData } from '../__mocks__/imagedata';
+import { ImageData } from '../__mocks__/image-data';
 import { CanvasContext } from '../canvas-context';
 
 let shouldReturnNullContext = false;
