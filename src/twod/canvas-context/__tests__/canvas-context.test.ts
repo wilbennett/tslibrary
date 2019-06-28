@@ -460,41 +460,44 @@ describe("Should handle pushing and popping", () => {
     });
 
     test("Draw path call signatures", () => {
+        const path = new Path2D();
         const point = Vector2.create(1, 1);
 
         context.beginPath();
 
         context.clip();
         context.clip("evenodd");
-        // context.clip(new Path2D());
-        // context.clip(new Path2D(), "nonzero");
+        context.clip(path);
+        context.clip(path, "nonzero");
 
         context.fill();
         context.fill("nonzero");
-        // context.fill(new Path2D());
-        // context.fill(new Path2D(), "evenodd");
+        context.fill(path);
+        context.fill(path, "evenodd");
 
         context.isPointInPath(point);
         context.isPointInPath(point, "evenodd");
         context.isPointInPath(point.x, point.y);
         context.isPointInPath(point.x, point.y, "nonzero");
-        // context.isPointInPath(new Path2D(), point);
-        // context.isPointInPath(new Path2D(), point, "evenodd");
-        // context.isPointInPath(new Path2D(), point.x, point.y);
-        // context.isPointInPath(new Path2D(), point.x, point.y, "nonzero");
+        context.isPointInPath(path, point);
+        context.isPointInPath(path, point, "evenodd");
+        context.isPointInPath(path, point.x, point.y);
+        context.isPointInPath(path, point.x, point.y, "nonzero");
 
         context.isPointInStroke(point);
         context.isPointInStroke(point.x, point.y);
-        // context.isPointInStroke(new Path2D(), point);
-        // context.isPointInStroke(new Path2D(), point.x, point.y);
+        context.isPointInStroke(path, point);
+        context.isPointInStroke(path, point.x, point.y);
 
         context.stroke();
-        // context.stroke(new Path2D());
+        context.stroke(path);
     });
 
     test("User interface call signatures", () => {
+        const path = new Path2D();
+
         context.drawFocusIfNeeded(document.createElement("element"));
-        // context.drawFocusIfNeeded(new Path2D(), document.createElement("element"));
+        context.drawFocusIfNeeded(path, document.createElement("element"));
     });
 
     test("Text call signatures", () => {

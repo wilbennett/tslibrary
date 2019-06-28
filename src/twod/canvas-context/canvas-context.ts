@@ -484,12 +484,12 @@ export class CanvasContext {
     }
 
     clip(fillRule?: CanvasFillRule): this;
-    // clip(path: Path2D, fillRule?: CanvasFillRule): this; //* Experimental.
+    clip(path: Path2D, fillRule?: CanvasFillRule): this;
     clip(param1?: any, fillRule?: CanvasFillRule): this {
         if (!param1)
             this.ctx.clip();
-        // else if (!(param1 instanceof Path2D))
-        //     this.ctx.clip(param1);
+        else if (!(param1 instanceof Path2D))
+            this.ctx.clip(param1);
         else
             this.ctx.clip(param1, fillRule);
 
@@ -497,12 +497,12 @@ export class CanvasContext {
     }
 
     fill(fillRule?: CanvasFillRule): this;
-    // fill(path: Path2D, fillRule?: CanvasFillRule): this; //* Experimental.
+    fill(path: Path2D, fillRule?: CanvasFillRule): this;
     fill(param1?: any, fillRule?: CanvasFillRule): this {
         if (!param1)
             this.ctx.fill();
-        // else if (!(param1 instanceof Path2D))
-        //     this.ctx.fill(param1);
+        else if (!(param1 instanceof Path2D))
+            this.ctx.fill(param1);
         else
             this.ctx.fill(param1, fillRule);
 
@@ -511,47 +511,45 @@ export class CanvasContext {
 
     isPointInPath(point: Vector, fillRule?: CanvasFillRule): boolean;
     isPointInPath(x: number, y: number, fillRule?: CanvasFillRule): boolean;
-    // isPointInPath(path: Path2D, point: Vector, fillRule?: CanvasFillRule): boolean; //* Experimental.
-    // isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean; //* Experimental.
-    // @ts-ignore - unused param.
-    isPointInPath(param1: Vector | number, param2?: any, param3?: any, param4?: any): boolean {
+    isPointInPath(path: Path2D, point: Vector, fillRule?: CanvasFillRule): boolean;
+    isPointInPath(path: Path2D, x: number, y: number, fillRule?: CanvasFillRule): boolean;
+    isPointInPath(param1: Vector | number | Path2D, param2?: any, param3?: any, param4?: any): boolean {
         if (param1 instanceof Vector)
             return this.ctx.isPointInPath(param1.x, param1.y, param2);
 
-        // if (typeof param1 === "number")
-        return this.ctx.isPointInPath(param1, param2, param3);
+        if (typeof param1 === "number")
+            return this.ctx.isPointInPath(param1, param2, param3);
 
-        // if (param2 instanceof Vector)
-        //     return this.ctx.isPointInPath(param1, param2.x, param2.y, param3);
+        if (param2 instanceof Vector)
+            return this.ctx.isPointInPath(param1, param2.x, param2.y, param3);
 
-        // return this.ctx.isPointInPath(param1, param2, param3, param4);
+        return this.ctx.isPointInPath(param1, param2, param3, param4);
     }
 
     isPointInStroke(point: Vector): boolean;
     isPointInStroke(x: number, y: number): boolean;
-    // isPointInStroke(path: Path2D, point: Vector): boolean; //* Experimental.
-    // isPointInStroke(path: Path2D, x: number, y: number): boolean; //* Experimental.
-    // @ts-ignore - unused param.
-    isPointInStroke(param1: Vector | number, param2?: any, param3?: number): boolean {
+    isPointInStroke(path: Path2D, point: Vector): boolean;
+    isPointInStroke(path: Path2D, x: number, y: number): boolean;
+    isPointInStroke(param1: Vector | number | Path2D, param2?: any, param3?: number): boolean {
         if (param1 instanceof Vector)
             return this.ctx.isPointInStroke(param1.x, param1.y);
 
-        // if (typeof param1 === "number")
-        return this.ctx.isPointInStroke(param1, param2);
+        if (typeof param1 === "number")
+            return this.ctx.isPointInStroke(param1, param2);
 
-        // if (param2 instanceof Vector)
-        //     return this.ctx.isPointInStroke(param1, param2.x, param2.y);
+        if (param2 instanceof Vector)
+            return this.ctx.isPointInStroke(param1, param2.x, param2.y);
 
-        // return this.ctx.isPointInStroke(param1, param2, param3!);
+        return this.ctx.isPointInStroke(param1, param2, param3!);
     }
 
     stroke(): this;
-    // stroke(path: Path2D): this; //* Experimental.
+    stroke(path: Path2D): this;
     stroke(path?: Path2D): this {
         if (!path)
             this.ctx.stroke();
-        // else
-        //     this.ctx.stroke(path);
+        else
+            this.ctx.stroke(path);
 
         return this;
     }
@@ -560,12 +558,11 @@ export class CanvasContext {
     //================================================================================================================
     drawFocusIfNeeded(element: Element): this;
     drawFocusIfNeeded(path: Path2D, element: Element): this;
-    // @ts-ignore - unused param.
     drawFocusIfNeeded(param1: any, element?: Element): this {
-        // if (param1 instanceof Element)
-        this.ctx.drawFocusIfNeeded(param1);
-        // else
-        //     this.ctx.drawFocusIfNeeded(param1, element!);
+        if (param1 instanceof Element)
+            this.ctx.drawFocusIfNeeded(param1);
+        else
+            this.ctx.drawFocusIfNeeded(param1, element!);
 
         return this;
     }
@@ -784,7 +781,7 @@ export class CanvasContext {
             this.ctx.ellipse(param1.x, param1.y, param2.x, param2.y, param3, param4, param5, param6);
         else if (arguments.length >= 4 && param1 instanceof Vector)
             this.ctx.ellipse(param1.x, param1.y, param2, param3, param4 || 0, 0, MathEx.TWO_PI, param7);
-        else if (arguments.length >= 3 && param1 instanceof Vector)
+        else if (arguments.length >= 2 && param1 instanceof Vector)
             this.ctx.ellipse(param1.x, param1.y, param2.x, param2.y, param3 || 0, 0, MathEx.TWO_PI, param6);
         else if (arguments.length >= 7)
             this.ctx.ellipse(param1, param2, param3, param4, param5, param6, param7, param8);
