@@ -888,6 +888,28 @@ export class CanvasContext {
         return this;
     }
     //================================================================================================================
+    // CanvasCircle
+    //================================================================================================================
+    strokeCircle(center: Vector, radius: number, anticlockwise?: boolean): this;
+    strokeCircle(x: number, y: number, radius: number, anticlockwise?: boolean): this;
+    // @ts-ignore - unused param.
+    strokeCircle(param1: Vector | number, param2: number, param3?: any, param4?: any): this {
+        // @ts-ignore - arguments length.
+        this.circle(...arguments);
+        this.ctx.stroke();
+        return this;
+    }
+
+    fillCircle(center: Vector, radius: number, anticlockwise?: boolean): this;
+    fillCircle(x: number, y: number, radius: number, anticlockwise?: boolean): this;
+    // @ts-ignore - unused param.
+    fillCircle(param1: Vector | number, param2: number, param3?: any, param4?: any): this {
+        // @ts-ignore - arguments length.
+        this.circle(...arguments);
+        this.ctx.fill();
+        return this;
+    }
+    //================================================================================================================
     // CanvasPoly
     //================================================================================================================
     strokePoly(points: Vector[], close?: boolean): this;

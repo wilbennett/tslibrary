@@ -626,6 +626,16 @@ describe("Should handle pushing and popping", () => {
         context.poly(collection);
         context.poly(collection, true);
 
+        context.strokeCircle(center, radius.x);
+        context.strokeCircle(center, radius.x, true);
+        context.strokeCircle(center.x, center.y, radius.x);
+        context.strokeCircle(center.x, center.y, radius.x, false);
+
+        context.fillCircle(center, radius.x);
+        context.fillCircle(center, radius.x, true);
+        context.fillCircle(center.x, center.y, radius.x);
+        context.fillCircle(center.x, center.y, radius.x, false);
+
         context.strokePoly(points);
         context.strokePoly(points, true);
         context.strokePoly(collection);
