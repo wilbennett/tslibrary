@@ -553,4 +553,59 @@ describe("Should handle pushing and popping", () => {
         context.getLineDash();
         context.setLineDash([1, 2]);
     });
+
+    test("Path call signatures", () => {
+        const twoPI = MathEx.TWO_PI;
+        const center = Vector2.create(1, 1);
+        const radius = Vector2.create(2, 2);
+        const controlPoint1 = Vector2.create(3, 3);
+        const controlPoint2 = Vector2.create(5, 5);
+        const endPoint = Vector2.create(6, 6);
+        const size = Vector2.create(7, 7);
+
+        context.arc(center, radius.x, 0, twoPI);
+        context.arc(center, radius.x, 0, twoPI, true);
+        context.arc(center, radius.x);
+        context.arc(center, radius.x, false);
+        context.arc(center.x, center.y, radius.x, 0, twoPI);
+        context.arc(center.x, center.y, radius.x, 0, twoPI, true);
+        context.arc(center.x, center.y, radius.x);
+        context.arc(center.x, center.y, radius.x, false);
+
+        context.arcTo(controlPoint1, controlPoint2, radius.x);
+        context.arcTo(controlPoint1.x, controlPoint1.y, controlPoint2.x, controlPoint2.y, radius.x);
+
+        context.bezierCurveTo(controlPoint1, controlPoint2, endPoint);
+        context.bezierCurveTo(controlPoint1.x, controlPoint1.y, controlPoint2.x, controlPoint2.y, endPoint.x, endPoint.y);
+
+        context.closePath();
+
+        context.ellipse(center, radius.x, radius.y, 0, 0, twoPI);
+        context.ellipse(center, radius.x, radius.y, 1, 0, twoPI, true);
+        context.ellipse(center, radius, 2, 0, twoPI);
+        context.ellipse(center, radius, 3, 0, twoPI, false);
+        context.ellipse(center, radius.x, radius.y);
+        context.ellipse(center, radius.x, radius.y, 4);
+        context.ellipse(center, radius.x, radius.y, 5, true);
+        context.ellipse(center, radius);
+        context.ellipse(center, radius, 6);
+        context.ellipse(center, radius, 7, false);
+        context.ellipse(center.x, center.y, radius.x, radius.y, 8, 0, twoPI);
+        context.ellipse(center.x, center.y, radius.x, radius.y, 9, 0, twoPI, true);
+        context.ellipse(center.x, center.y, radius.x, radius.y);
+        context.ellipse(center.x, center.y, radius.x, radius.y, 10);
+        context.ellipse(center.x, center.y, radius.x, radius.y, 11, false);
+
+        context.lineTo(endPoint);
+        context.lineTo(endPoint.x, endPoint.y);
+
+        context.moveTo(controlPoint1);
+        context.moveTo(controlPoint1.x, controlPoint1.y);
+
+        context.quadraticCurveTo(controlPoint1, endPoint);
+        context.quadraticCurveTo(controlPoint1.x, controlPoint1.y, endPoint.x, endPoint.y);
+
+        context.rect(controlPoint1, size);
+        context.rect(controlPoint1.x, controlPoint1.y, size.x, size.y);
+    });
 });

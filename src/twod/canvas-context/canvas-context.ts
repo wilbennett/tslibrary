@@ -1,5 +1,6 @@
 import { Brush, CanvasColor, Compositions, Style } from '.';
 import { Color } from '../../colors';
+import { MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector } from '../../vectors';
 
@@ -712,13 +713,126 @@ export class CanvasContext {
     //================================================================================================================
     // CanvasPath
     //================================================================================================================
-    // arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
-    // arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void;
-    // bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
-    // closePath(): void;
-    // ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
-    // lineTo(x: number, y: number): void;
-    // moveTo(x: number, y: number): void;
-    // quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
-    // rect(x: number, y: number, w: number, h: number): void;
+    arc(center: Vector, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): this;
+    arc(center: Vector, radius: number, anticlockwise?: boolean): this;
+    arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): this;
+    arc(x: number, y: number, radius: number, anticlockwise?: boolean): this;
+    arc(
+        param1: Vector | number,
+        param2: number,
+        param3?: any,
+        param4?: any,
+        param5?: any,
+        param6?: any): this {
+        if (arguments.length >= 4 && param1 instanceof Vector)
+            this.ctx.arc(param1.x, param1.y, param2, param3, param4, param5);
+        else if (param1 instanceof Vector)
+            this.ctx.arc(param1.x, param1.y, param2, 0, MathEx.TWO_PI, param3);
+        else if (arguments.length >= 5)
+            this.ctx.arc(param1, param2, param3, param4, param5, param6);
+        else
+            this.ctx.arc(param1, param2, param3, 0, MathEx.TWO_PI, param4);
+
+        return this;
+    }
+
+    arcTo(controlPoint1: Vector, controlPoint2: Vector, radius: number): this;
+    arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): this;
+    arcTo(param1: Vector | number, param2: any, param3: number, y2?: number, radius?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.arcTo(param1.x, param1.y, param2.x, param2.y, param3);
+        else
+            this.ctx.arcTo(param1, param2, param3, y2!, radius!);
+
+        return this;
+    }
+
+    bezierCurveTo(controlPoint1: Vector, controlPoint2: Vector, endPoint: Vector): this;
+    bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): this;
+    bezierCurveTo(param1: Vector | number, param2: any, param3: any, cp2y?: number, x?: number, y?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.bezierCurveTo(param1.x, param1.y, param2.x, param2.y, param3.x, param3.y);
+        else
+            this.ctx.bezierCurveTo(param1, param2, param3, cp2y!, x!, y!);
+
+        return this;
+    }
+
+    closePath(): this {
+        this.ctx.closePath();
+        return this;
+    }
+
+    ellipse(center: Vector, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): this;
+    ellipse(center: Vector, radius: Vector, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): this;
+    ellipse(center: Vector, radiusX: number, radiusY: number, rotation?: number, anticlockwise?: boolean): this;
+    ellipse(center: Vector, radius: Vector, rotation?: number, anticlockwise?: boolean): this;
+    ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, anticlockwise?: boolean): this;
+    ellipse(x: number, y: number, radiusX: number, radiusY: number, rotation?: number, anticlockwise?: boolean): this;
+    ellipse(
+        param1: any,
+        param2: any,
+        param3: any,
+        param4?: any,
+        param5?: any,
+        param6?: any,
+        param7?: any,
+        param8?: boolean): this {
+        if (arguments.length >= 6 && param1 instanceof Vector)
+            this.ctx.ellipse(param1.x, param1.y, param2, param3, param4, param5, param6, param7);
+        else if (arguments.length >= 5 && param1 instanceof Vector)
+            this.ctx.ellipse(param1.x, param1.y, param2.x, param2.y, param3, param4, param5, param6);
+        else if (arguments.length >= 4 && param1 instanceof Vector)
+            this.ctx.ellipse(param1.x, param1.y, param2, param3, param4 || 0, 0, MathEx.TWO_PI, param7);
+        else if (arguments.length >= 3 && param1 instanceof Vector)
+            this.ctx.ellipse(param1.x, param1.y, param2.x, param2.y, param3 || 0, 0, MathEx.TWO_PI, param6);
+        else if (arguments.length >= 7)
+            this.ctx.ellipse(param1, param2, param3, param4, param5, param6, param7, param8);
+        else
+            this.ctx.ellipse(param1, param2, param3, param4, param5 || 0, 0, MathEx.TWO_PI, param6);
+
+        return this;
+    }
+
+    lineTo(point: Vector): this;
+    lineTo(x: number, y: number): this;
+    lineTo(param1: Vector | number, y?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.lineTo(param1.x, param1.y);
+        else
+            this.ctx.lineTo(param1, y!);
+
+        return this;
+    }
+
+    moveTo(point: Vector): this;
+    moveTo(x: number, y: number): this;
+    moveTo(param1: Vector | number, y?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.moveTo(param1.x, param1.y);
+        else
+            this.ctx.moveTo(param1, y!);
+
+        return this;
+    }
+    quadraticCurveTo(controlPoint: Vector, endPoint: Vector): this;
+    quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this;
+    quadraticCurveTo(param1: Vector | number, param2: any, x?: number, y?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.quadraticCurveTo(param1.x, param1.y, param2.x, param2.y);
+        else
+            this.ctx.quadraticCurveTo(param1, param2, x!, y!);
+
+        return this;
+    }
+    rect(position: Vector, size: Vector): this;
+    rect(x: number, y: number, w: number, h: number): this;
+    rect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+        if (param1 instanceof Vector)
+            this.ctx.rect(param1.x, param1.y, param2.x, param2.y);
+        else
+            this.ctx.rect(param1, param2, w!, h!);
+
+        return this;
+    }
 }
