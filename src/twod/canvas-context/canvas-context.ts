@@ -636,16 +636,16 @@ export class CanvasContext {
     // CanvasImageData
     //================================================================================================================
     createImageData(size: Vector): ImageData;
-    createImageData(sw: number, sh: number): ImageData;
     createImageData(imagedata: ImageData): ImageData;
+    createImageData(sw: number, sh: number): ImageData;
     createImageData(param1: Vector | ImageData | number, sh?: number): ImageData {
         if (param1 instanceof Vector)
             return this.ctx.createImageData(param1.x, param1.y);
 
-        if (typeof param1 === "number")
-            return this.ctx.createImageData(param1, sh!);
+        if (param1 instanceof ImageData)
+            return this.ctx.createImageData(param1);
 
-        return this.ctx.createImageData(param1);
+        return this.ctx.createImageData(param1, sh!);
     }
 
     getImageData(sourcePosition: Vector, sourceSize: Vector): ImageData;

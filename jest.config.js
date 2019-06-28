@@ -9,5 +9,8 @@ module.exports = {
         "html",
         "text"
     ],
+    "setupFiles": [
+        "./src/twod/canvas-context/__mocks__/setup.ts"
+    ]
     // "automock": true
 }

@@ -2,6 +2,9 @@ import { Style } from '..';
 import { ImageData } from './imagedata';
 
 export class CanvasRenderingContext2D {
+    constructor(public readonly canvas: HTMLCanvasElement) {
+    }
+
     //================================================================================================================
     // Canvas State
     //================================================================================================================

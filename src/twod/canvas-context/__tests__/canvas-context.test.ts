@@ -14,7 +14,7 @@ HTMLCanvasElement.prototype.getContext = function (contextId: "2d", ...rest: any
         return null;
     }
 
-    return new CanvasRenderingContext2D();
+    return new CanvasRenderingContext2D(this);
 }
 
 test("Create with context", () => {
