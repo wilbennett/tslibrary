@@ -548,4 +548,9 @@ describe("Should handle pushing and popping", () => {
         context.putImageData(imageData, destPosition, dirtyPosition, dirtySize);
         context.putImageData(imageData, destPosition.x, destPosition.y, dirtyPosition.x, dirtyPosition.y, dirtySize.x, dirtySize.y);
     });
+
+    test("Path drawing styles call signatures", () => {
+        context.getLineDash();
+        context.setLineDash([1, 2]);
+    });
 });

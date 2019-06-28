@@ -154,8 +154,9 @@ export class CanvasRenderingContext2D {
     lineWidth: number = 1;
     miterLimit: number = 10;
     // lineDash: number[] = [];
-    // getLineDash(): number[];
-    // setLineDash(segments: number[]): void;
+    getLineDash(): number[] { return []; }
+    // @ts-ignore - unused param.
+    setLineDash(segments: number[]): void { }
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================

@@ -692,8 +692,13 @@ export class CanvasContext {
     set lineWidth(value) { this.ctx.lineWidth = value; }
     get miterLimit() { return this.ctx.miterLimit; }
     set miterLimit(value) { this.ctx.miterLimit = value; }
-    // getLineDash(): number[];
-    // setLineDash(segments: number[]): void;
+
+    getLineDash(): number[] { return this.ctx.getLineDash(); }
+
+    setLineDash(segments: number[]): this {
+        this.ctx.setLineDash(segments);
+        return this;
+    }
     //================================================================================================================
     // CanvasTextDrawingStyles
     //================================================================================================================
