@@ -1,7 +1,15 @@
 import { NullVector } from '.';
 import { MathEx } from '../core';
 
+export interface VectorConstructor {
+    new(x: number, y: number, z: number, w: number): Vector;
+}
+
 export abstract class Vector {
+    private static _instanceFactory: VectorConstructor;
+    static get instanceConstructor() { return this._instanceFactory; }
+    static set instanceConstructor(value: VectorConstructor) { this._instanceFactory = value; }
+
     static get elementCount() { return 4; }
     get x() { return 0; }
     // @ts-ignore - unused params.
@@ -32,6 +40,18 @@ export abstract class Vector {
     protected get _mag(): number | undefined { return undefined; }
     // @ts-ignore - unused params.
     protected set _mag(value) { }
+
+    static create(x: number, y: number, z: number = 0, w: number = 0) {
+        return new this.instanceConstructor(x, y, z || 0, w);
+    }
+
+    static createPosition(x: number, y: number, z: number = 0) {
+        return new this.instanceConstructor(x, y, z || 0, 1);
+    }
+
+    static createDirection(x: number, y: number, z: number = 0) {
+        return new this.instanceConstructor(x, y, z || 0, 0);
+    }
 
     getCoord(index: number) {
         switch (index) {
