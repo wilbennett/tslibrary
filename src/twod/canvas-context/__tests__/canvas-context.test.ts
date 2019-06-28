@@ -34,19 +34,17 @@ it("Should throw error when canvas context is null", () => {
 let context: CanvasContext;
 let ctx: CanvasRenderingContext2D;
 
-type PropertyHashTable = ({ [index: string]: any; });
+type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
+type cp = NonFunctionPropertyNames<Omit<CanvasRenderingContext2D, "canvas" | "transformation">>;
+type ContextProps = Partial<Pick<CanvasRenderingContext2D, cp>>;
 
 function getProperties() {
-    const result = <PropertyHashTable>{};
+    const result: ContextProps = {};
 
-    for (const propName of Object.getOwnPropertyNames(context.constructor.prototype)) {
-        const desc = Object.getOwnPropertyDescriptor(context.constructor.prototype, propName);
+    for (const propName of Object.getOwnPropertyNames(ctx)) {
+        if (["canvas", "transformation"].find(x => x === propName)) continue;
 
-        // if (propName.startsWith('_')) continue;
-        if (!desc || !desc["get"]) continue;
-        if (["ctx", "transformation", "inverse"].find(x => x === propName)) continue;
-
-        // @ts-ignore
+        // @ts-ignore - indexer.
         result[propName] = context[propName];
     }
 
@@ -459,6 +457,29 @@ describe("Should handle pushing and popping", () => {
         expect(getProperties()).toMatchObject(originalProps);
         expect(ctx.transformation.toString()).toBe(identity);
     });
+});
+
+describe("Should handle context properties", () => {
+    it("Should handle setting properties", () => {
+        const originalProps = getProperties();
+
+        const props = {
+            globalAlpha: 0.7,
+            fillStyle: "orange",
+            shadowBlur: 0.8
+        };
+
+        context.strokeStyle = "yellow";
+        context.withProps(props);
+        expect(getProperties()).toMatchSnapshot();
+        expect(ctx.strokeStyle).toBe("yellow");
+        context.withProps(props, true);
+        expect(getProperties()).toMatchSnapshot();
+        expect(ctx.strokeStyle).toBe(originalProps.strokeStyle);
+    });
+});
+
+describe("Should handle context methods", () => {
 
     test("Fill stroke styles call signatures", () => {
         const start = Vector2.create(1, 1);

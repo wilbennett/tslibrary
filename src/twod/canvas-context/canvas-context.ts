@@ -4,7 +4,7 @@ import { MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector, VectorCollection } from '../../vectors';
 
-class CanvasProps {
+class CanvasContextProps {
     //================================================================================================================
     // CanvasCompositing
     //================================================================================================================
@@ -48,14 +48,18 @@ class CanvasProps {
     // direction: CanvasDirection; //* Experimental.
 }
 
-type PropsContainer = CanvasRenderingContext2D | CanvasProps | CanvasContext;
+type PropsContainer = CanvasRenderingContext2D | CanvasContextProps | CanvasContext;
+
+type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
+type cp = NonFunctionPropertyNames<Omit<CanvasContext, "ctx" | "transformation" | "inverse">>;
+type ContextProps = Partial<Pick<CanvasContext, cp>>;
 
 // TODO: Lazy update canvas transform.
 export class CanvasContext {
     protected _matrix: Matrix;
-    protected _props: CanvasProps;
-    protected _originalProps: CanvasProps;
-    protected _propsStack: CanvasProps[];
+    protected _props: CanvasContextProps;
+    protected _originalProps: CanvasContextProps;
+    protected _propsStack: CanvasContextProps[];
 
     constructor(canvas: HTMLCanvasElement);
     constructor(ctx: CanvasRenderingContext2D);
@@ -72,8 +76,8 @@ export class CanvasContext {
         }
 
         this._matrix = Matrix2.create();
-        this._originalProps = new CanvasProps();
-        this._props = new CanvasProps();
+        this._originalProps = new CanvasContextProps();
+        this._props = new CanvasContextProps();
         this._propsStack = [];
         this.copyProps(this.ctx, this._originalProps);
         this.copyProps(this.ctx, this._props);
@@ -83,7 +87,7 @@ export class CanvasContext {
     readonly ctx: CanvasRenderingContext2D;
 
     pushProps() {
-        const props = new CanvasProps();
+        const props = new CanvasContextProps();
         this.copyProps(this, props);
         this._propsStack.push(props);
         return this;
@@ -99,6 +103,11 @@ export class CanvasContext {
         return this;
     }
 
+    clearProps() {
+        this.copyProps(this._originalProps, this);
+        return this;
+    }
+
     resetProps() {
         this.copyProps(this._originalProps, this);
         this._propsStack = [];
@@ -108,6 +117,14 @@ export class CanvasContext {
     reset() {
         this.resetProps();
         this.resetTransform();
+        return this;
+    }
+
+    withProps(props: ContextProps, replace: boolean = false) {
+        if (replace)
+            this.clearProps();
+
+        Object.assign(this, props);
         return this;
     }
 

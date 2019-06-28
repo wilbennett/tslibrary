@@ -1,5 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Should handle context properties Should handle setting properties 1`] = `
+Object {
+  "fillStyle": "orange",
+  "font": "10px sans-serif",
+  "globalAlpha": 0.7,
+  "globalCompositeOperation": "source-over",
+  "imageSmoothingEnabled": false,
+  "imageSmoothingQuality": "low",
+  "lineCap": "butt",
+  "lineDashOffset": 0,
+  "lineJoin": "miter",
+  "lineWidth": 1,
+  "miterLimit": 10,
+  "shadowBlur": 0.8,
+  "shadowColor": "#000000",
+  "shadowOffsetX": 0,
+  "shadowOffsetY": 0,
+  "strokeStyle": "yellow",
+  "textAlign": "start",
+  "textBaseline": "alphabetic",
+}
+`;
+
+exports[`Should handle context properties Should handle setting properties 2`] = `
+Object {
+  "fillStyle": "orange",
+  "font": "10px sans-serif",
+  "globalAlpha": 0.7,
+  "globalCompositeOperation": "source-over",
+  "imageSmoothingEnabled": false,
+  "imageSmoothingQuality": "low",
+  "lineCap": "butt",
+  "lineDashOffset": 0,
+  "lineJoin": "miter",
+  "lineWidth": 1,
+  "miterLimit": 10,
+  "shadowBlur": 0.8,
+  "shadowColor": "#000000",
+  "shadowOffsetX": 0,
+  "shadowOffsetY": 0,
+  "strokeStyle": "#000000",
+  "textAlign": "start",
+  "textBaseline": "alphabetic",
+}
+`;
+
 exports[`Should handle pushing and popping Should handle pushing and popping properties 1`] = `
 Object {
   "fillStyle": "red",
