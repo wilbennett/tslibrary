@@ -18,6 +18,7 @@ export * from "./vectorb-collection";
 export * from "./vector1b-collection";
 export * from "./vectorb-indexer";
 export * from "./vector1b-indexer";
+export * from "./vector2-collection";
 export * from "./vector2b-collection";
 export * from "./vector2b-indexer";
 export * from "./vector3b-collection";
