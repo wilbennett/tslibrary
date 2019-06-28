@@ -1,6 +1,6 @@
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
-import { PVector2, Vector2, Vector2Collection } from '../../../vectors';
+import { PVector2, Vector, Vector2, Vector2Collection } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { ImageData } from '../__mocks__/image-data';
 import { CanvasContext } from '../canvas-context';
@@ -482,8 +482,8 @@ describe("Should handle context properties", () => {
 describe("Should handle context methods", () => {
 
     test("Fill stroke styles call signatures", () => {
-        const start = Vector2.create(1, 1);
-        const end = Vector2.create(2, 2);
+        const start = Vector.create(1, 1);
+        const end = Vector.create(2, 2);
 
         context.createLinearGradient(start, end);
         context.createLinearGradient(start.x, start.y, end.x, end.y);
@@ -495,8 +495,8 @@ describe("Should handle context methods", () => {
     });
 
     test("Rect call signatures", () => {
-        const position = Vector2.create(1, 1);
-        const size = Vector2.create(2, 2);
+        const position = Vector2.createPosition(1, 1);
+        const size = Vector2.createDirection(2, 2);
 
         context.clearRect(position, size);
         context.clearRect(position.x, position.y, size.x, size.y);
