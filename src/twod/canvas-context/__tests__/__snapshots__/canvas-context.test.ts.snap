@@ -22,3 +22,26 @@ Object {
   "textBaseline": "bottom",
 }
 `;
+
+exports[`Should handle pushing and popping Should handle pushing and popping properties 2`] = `
+Object {
+  "fillStyle": "red",
+  "font": "20px Arial",
+  "globalAlpha": 0.5,
+  "globalCompositeOperation": "source-in",
+  "imageSmoothingEnabled": true,
+  "imageSmoothingQuality": "high",
+  "lineCap": "round",
+  "lineDashOffset": 2,
+  "lineJoin": "bevel",
+  "lineWidth": 3,
+  "miterLimit": 4,
+  "shadowBlur": 0.6,
+  "shadowColor": "blue",
+  "shadowOffsetX": 10,
+  "shadowOffsetY": 20,
+  "strokeStyle": "green",
+  "textAlign": "center",
+  "textBaseline": "bottom",
+}
+`;

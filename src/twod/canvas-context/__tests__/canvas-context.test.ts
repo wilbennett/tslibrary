@@ -410,6 +410,34 @@ describe("Should handle pushing and popping", () => {
 
         context.resetProps();
         expect(getProperties()).toMatchObject(originalProps);
+
+        context
+            .withGlobalAlpha(0.5)
+            .withGlobalCompositeOperation("source-in")
+            .withImageSmoothingEnabled(true)
+            .withImageSmoothingQuality("high")
+            .withFillStyle(WebColors.red)
+            .withFillStyle("red")
+            .withStrokeStyle(WebColors.green)
+            .withStrokeStyle("green")
+            .withShadowBlur(0.6)
+            .withShadowColor(WebColors.blue)
+            .withShadowColor("blue")
+            .withShadowOffsetX(10)
+            .withShadowOffsetY(20)
+            .withLineCap("round")
+            .withLineDashOffset(2)
+            .withLineJoin("bevel")
+            .withLineWidth(3)
+            .withMiterLimit(4)
+            .withFont("20px Arial")
+            .withTextAlign("center")
+            .withTextBaseline("bottom");
+
+        context.pushProps();
+        context.globalAlpha = 0.8;
+        context.popProps();
+        expect(getProperties()).toMatchSnapshot();
     });
 
     it("Should handle pushing and popping properties and transforms", () => {

@@ -391,6 +391,16 @@ export class CanvasContext {
 
     get globalCompositeOperation() { return <Compositions>this.ctx.globalCompositeOperation; }
     set globalCompositeOperation(value) { this.ctx.globalCompositeOperation = value; }
+
+    withGlobalAlpha(value: number) {
+        this.globalAlpha = value;
+        return this;
+    }
+
+    withGlobalCompositeOperation(value: Compositions) {
+        this.globalCompositeOperation = value;
+        return this;
+    }
     //================================================================================================================
     // CanvasImageSmoothing
     //================================================================================================================
@@ -398,6 +408,16 @@ export class CanvasContext {
     set imageSmoothingEnabled(value) { this.ctx.imageSmoothingEnabled = value; }
     get imageSmoothingQuality() { return this.ctx.imageSmoothingQuality; }
     set imageSmoothingQuality(value) { this.ctx.imageSmoothingQuality = value; }
+
+    withImageSmoothingEnabled(value: boolean) {
+        this.imageSmoothingEnabled = value;
+        return this;
+    }
+
+    withImageSmoothingQuality(value: ImageSmoothingQuality) {
+        this.imageSmoothingQuality = value;
+        return this;
+    }
     //================================================================================================================
     // CanvasFillStrokeStyles
     //================================================================================================================
@@ -405,6 +425,16 @@ export class CanvasContext {
     set fillStyle(value) { this.ctx.fillStyle = value instanceof Color ? value.toString() : value; }
     get strokeStyle(): Brush { return this.ctx.strokeStyle; }
     set strokeStyle(value) { this.ctx.strokeStyle = value instanceof Color ? value.toString() : value; }
+
+    withFillStyle(value: Brush) {
+        this.fillStyle = value;
+        return this;
+    }
+
+    withStrokeStyle(value: Brush) {
+        this.strokeStyle = value;
+        return this;
+    }
 
     createLinearGradient(startPoint: Vector, endPoint: Vector): CanvasGradient;
     createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
@@ -436,6 +466,26 @@ export class CanvasContext {
     set shadowOffsetX(value) { this.ctx.shadowOffsetX = value; }
     get shadowOffsetY() { return this.ctx.shadowOffsetY; }
     set shadowOffsetY(value) { this.ctx.shadowOffsetY = value; }
+
+    withShadowBlur(value: number) {
+        this.shadowBlur = value;
+        return this;
+    }
+
+    withShadowColor(value: CanvasColor) {
+        this.shadowColor = value instanceof Color ? value.toString() : value;
+        return this;
+    }
+
+    withShadowOffsetX(value: number) {
+        this.shadowOffsetX = value;
+        return this;
+    }
+
+    withShadowOffsetY(value: number) {
+        this.shadowOffsetY = value;
+        return this;
+    }
     //================================================================================================================
     // CanvasFilters
     //================================================================================================================
@@ -691,6 +741,31 @@ export class CanvasContext {
     get miterLimit() { return this.ctx.miterLimit; }
     set miterLimit(value) { this.ctx.miterLimit = value; }
 
+    withLineCap(value: CanvasLineCap) {
+        this.lineCap = value;
+        return this;
+    }
+
+    withLineDashOffset(value: number) {
+        this.lineDashOffset = value;
+        return this;
+    }
+
+    withLineJoin(value: CanvasLineJoin) {
+        this.lineJoin = value;
+        return this;
+    }
+
+    withLineWidth(value: number) {
+        this.lineWidth = value;
+        return this;
+    }
+
+    withMiterLimit(value: number) {
+        this.miterLimit = value;
+        return this;
+    }
+
     getLineDash(): number[] { return this.ctx.getLineDash(); }
 
     setLineDash(segments: number[]): this {
@@ -706,6 +781,22 @@ export class CanvasContext {
     set textAlign(value) { this.ctx.textAlign = value; }
     get textBaseline() { return this.ctx.textBaseline; }
     set textBaseline(value) { this.ctx.textBaseline = value; }
+
+    withFont(value: string) {
+        this.font = value;
+        return this;
+    }
+
+    withTextAlign(value: CanvasTextAlign) {
+        this.textAlign = value;
+        return this;
+    }
+
+    withTextBaseline(value: CanvasTextBaseline) {
+        this.textBaseline = value;
+        return this;
+    }
+
     // direction: CanvasDirection; //* Experimental.
     //================================================================================================================
     // CanvasPath
