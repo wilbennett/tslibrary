@@ -887,4 +887,26 @@ export class CanvasContext {
 
         return this;
     }
+    //================================================================================================================
+    // CanvasPoly
+    //================================================================================================================
+    strokePoly(points: Vector[], close?: boolean): this;
+    strokePoly(points: VectorCollection, close?: boolean): this;
+    // @ts-ignore - unused param.
+    strokePoly(points: Vector[] | VectorCollection, close?: boolean): this {
+        // @ts-ignore - arguments length.
+        this.poly(...arguments);
+        this.ctx.stroke();
+        return this;
+    }
+
+    fillPoly(points: Vector[], close?: boolean): this;
+    fillPoly(points: VectorCollection, close?: boolean): this;
+    // @ts-ignore - unused param.
+    fillPoly(points: Vector[] | VectorCollection, close?: boolean): this {
+        // @ts-ignore - arguments length.
+        this.poly(...arguments);
+        this.ctx.fill();
+        return this;
+    }
 }

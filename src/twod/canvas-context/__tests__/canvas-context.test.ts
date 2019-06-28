@@ -625,5 +625,15 @@ describe("Should handle pushing and popping", () => {
         context.poly(points, true);
         context.poly(collection);
         context.poly(collection, true);
+
+        context.strokePoly(points);
+        context.strokePoly(points, true);
+        context.strokePoly(collection);
+        context.strokePoly(collection, true);
+
+        context.fillPoly(points);
+        context.fillPoly(points, true);
+        context.fillPoly(collection);
+        context.fillPoly(collection, true);
     });
 });
