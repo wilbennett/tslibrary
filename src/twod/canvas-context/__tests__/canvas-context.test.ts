@@ -610,5 +610,13 @@ describe("Should handle pushing and popping", () => {
 
         context.rect(controlPoint1, size);
         context.rect(controlPoint1.x, controlPoint1.y, size.x, size.y);
+
+        context.circle(center, radius.x);
+        context.circle(center, radius.x, true);
+        context.circle(center.x, center.y, radius.x);
+        context.circle(center.x, center.y, radius.x, false);
+
+        context.line(controlPoint1, endPoint);
+        context.line(controlPoint1.x, controlPoint1.y, endPoint.x, endPoint.y);
     });
 });

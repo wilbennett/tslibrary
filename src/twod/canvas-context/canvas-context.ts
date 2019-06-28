@@ -812,6 +812,7 @@ export class CanvasContext {
 
         return this;
     }
+
     quadraticCurveTo(controlPoint: Vector, endPoint: Vector): this;
     quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this;
     quadraticCurveTo(param1: Vector | number, param2: any, x?: number, y?: number): this {
@@ -822,6 +823,7 @@ export class CanvasContext {
 
         return this;
     }
+
     rect(position: Vector, size: Vector): this;
     rect(x: number, y: number, w: number, h: number): this;
     rect(param1: Vector | number, param2: any, w?: number, h?: number): this {
@@ -829,6 +831,31 @@ export class CanvasContext {
             this.ctx.rect(param1.x, param1.y, param2.x, param2.y);
         else
             this.ctx.rect(param1, param2, w!, h!);
+
+        return this;
+    }
+
+    circle(center: Vector, radius: number, anticlockwise?: boolean): this;
+    circle(x: number, y: number, radius: number, anticlockwise?: boolean): this;
+    circle(param1: Vector | number, param2: number, param3?: any, param4?: any): this {
+        if (param1 instanceof Vector)
+            this.ctx.arc(param1.x, param1.y, param2, 0, MathEx.TWO_PI, param3);
+        else
+            this.ctx.arc(param1, param2, param3, 0, MathEx.TWO_PI, param4);
+
+        return this;
+    }
+
+    line(start: Vector, end: Vector): this;
+    line(startX: number, startY: number, endX: number, endY: number): this;
+    line(param1: Vector | number, param2: any, endX?: number, endY?: number): this {
+        if (param1 instanceof Vector) {
+            this.ctx.moveTo(param1.x, param1.y);
+            this.ctx.lineTo(param2.x, param2.y);
+        } else {
+            this.ctx.moveTo(param1, param2);
+            this.ctx.lineTo(endX!, endY!);
+        }
 
         return this;
     }
