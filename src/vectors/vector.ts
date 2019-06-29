@@ -6,9 +6,9 @@ export interface VectorConstructor {
 }
 
 export abstract class Vector {
-    private static _instanceFactory: VectorConstructor;
-    static get instanceConstructor() { return this._instanceFactory; }
-    static set instanceConstructor(value: VectorConstructor) { this._instanceFactory = value; }
+    private static _instanceConstructor: VectorConstructor;
+    static get instanceConstructor() { return this._instanceConstructor; }
+    static set instanceConstructor(value: VectorConstructor) { this._instanceConstructor = value; }
 
     static get elementCount() { return 4; }
     get x() { return 0; }
@@ -365,6 +365,10 @@ export abstract class Vector {
     withXYZWO(x: number, y: number, z: number, w: number, result: Vector) { return result.set(x, y, z, w); }
     withXYZWN(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this.newVector()); }
     withXYZW(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this); }
+
+    withXYZO(x: number, y: number, z: number, result: Vector) { return result.set(x, y, z, this.w); }
+    withXYZN(x: number, y: number, z: number) { return this.withXYZO(x, y, z, this.newVector()); }
+    withXYZ(x: number, y: number, z: number) { return this.withXYZO(x, y, z, this); }
 
     withXYWO(x: number, y: number, w: number, result: Vector) { return result.set(x, y, this.z, w); }
     withXYWN(x: number, y: number, w: number) { return this.withXYWO(x, y, w, this.newVector()); }
