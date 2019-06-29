@@ -5,14 +5,16 @@ export interface Vector2Constructor {
 }
 
 export class Vector2 extends Vector {
-    private static _instanceConstructor: Vector2Constructor;
-    static get instanceConstructor() { return this._instanceConstructor; }
-    static set instanceConstructor(value: Vector2Constructor) { this._instanceConstructor = value; }
+    private static _instanceConstructor2: Vector2Constructor;
+    static get instanceConstructor() { return this._instanceConstructor2; }
+    static set instanceConstructor(value: Vector2Constructor) { this._instanceConstructor2 = value; }
 
     get magSquared() { return this.x * this.x + this.y * this.y; }
     get mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
 
     static create(x: number, y: number, w: number = 0) { return new this.instanceConstructor(x, y, w); }
+    static createPosition(x: number, y: number) { return new this.instanceConstructor(x, y, 1); }
+    static createDirection(x: number, y: number) { return new this.instanceConstructor(x, y, 0); }
 
     dot(other: Vector) { return this.x * other.x + this.y * other.y; }
 

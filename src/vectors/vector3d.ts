@@ -66,3 +66,5 @@ class Vector3ZeroDirection extends Vector3D {
 
     set(x: number, y: number, z: number, w: number = 0): Vector { return new Vector3D(x, y, z, w); }
 }
+
+Vector3.instanceConstructor = Vector3D;
