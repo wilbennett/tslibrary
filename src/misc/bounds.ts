@@ -86,39 +86,14 @@ export class Bounds {
     get position() { return this.center.subN(this.halfSize); }
     get size() { return this.halfSize.scaleN(2); }
     get max() { return this.center.addN(this.halfSize); }
-    get topLeft() {
-        const halfSize = this.halfSize;
-
-        return this.direction === "up"
-            ? this.center.addN(new Vector3D(-halfSize.x, halfSize.y, -halfSize.z))
-            : this.center.addN(new Vector3D(-halfSize.x, -halfSize.y, -halfSize.z));
-    }
-    get bottomLeft() {
-        const halfSize = this.halfSize;
-
-        return this.direction === "up"
-            ? this.center.addN(new Vector3D(-halfSize.x, -halfSize.y, -halfSize.z))
-            : this.center.addN(new Vector3D(-halfSize.x, halfSize.y, -halfSize.z));
-    }
-    get topRight() {
-        const halfSize = this.halfSize;
-
-        return this.direction === "up"
-            ? this.center.addN(new Vector3D(halfSize.x, halfSize.y, -halfSize.z))
-            : this.center.addN(new Vector3D(halfSize.x, -halfSize.y, -halfSize.z));
-    }
-    get bottomRight() {
-        const halfSize = this.halfSize;
-
-        return this.direction === "up"
-            ? this.center.addN(new Vector3D(halfSize.x, -halfSize.y, -halfSize.z))
-            : this.center.addN(new Vector3D(halfSize.x, halfSize.y, -halfSize.z));
-    }
     get left() { return this.center.x - this.halfSize.x; }
     get right() { return this.center.x + this.halfSize.x; }
-
     get top() { return this.direction === "up" ? this.center.y + this.halfSize.y : this.center.y - this.halfSize.y; }
     get bottom() { return this.direction === "up" ? this.center.y - this.halfSize.y : this.center.y + this.halfSize.y; }
+    get topLeft() { return this.center.withXYZWN(this.left, this.top, this.center.z - this.halfSize.z, 1); }
+    get bottomLeft() { return this.center.withXYZWN(this.left, this.bottom, this.center.z - this.halfSize.z, 1); }
+    get topRight() { return this.center.withXYZWN(this.right, this.top, this.center.z - this.halfSize.z, 1); }
+    get bottomRight() { return this.center.withXYZWN(this.right, this.bottom, this.center.z - this.halfSize.z, 1); }
 
     get centerX() { return this.center.x; }
     get centerY() { return this.center.y; }
