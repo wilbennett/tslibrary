@@ -1,67 +1,25 @@
-import { Brush, CanvasColor, Compositions, Style } from '.';
+import { Brush, CanvasColor, Compositions } from '.';
 import { Color } from '../../colors';
 import { BoundsLike, MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector, VectorCollection } from '../../vectors';
 
-class CanvasContextProps {
-    //================================================================================================================
-    // CanvasCompositing
-    //================================================================================================================
-    globalAlpha!: number;
-    globalCompositeOperation!: string;
-    //================================================================================================================
-    // CanvasImageSmoothing
-    //================================================================================================================
-    imageSmoothingEnabled!: boolean;
-    imageSmoothingQuality!: ImageSmoothingQuality;
-    //================================================================================================================
-    // CanvasFillStrokeStyles
-    //================================================================================================================
-    fillStyle!: Style;
-    strokeStyle!: Style;
-    //================================================================================================================
-    // CanvasShadowStyles
-    //================================================================================================================
-    shadowBlur!: number;
-    shadowColor!: string;
-    shadowOffsetX!: number;
-    shadowOffsetY!: number;
-    //================================================================================================================
-    // CanvasFilters
-    //================================================================================================================
-    // filter: string; //* Experimental.
-    //================================================================================================================
-    // CanvasPathDrawingStyles
-    //================================================================================================================
-    lineCap!: CanvasLineCap;
-    lineDashOffset!: number;
-    lineJoin!: CanvasLineJoin;
-    lineWidth!: number;
-    miterLimit!: number;
-    //================================================================================================================
-    // CanvasTextDrawingStyles
-    //================================================================================================================
-    font!: string;
-    textAlign!: CanvasTextAlign;
-    textBaseline!: CanvasTextBaseline;
-    // direction: CanvasDirection; //* Experimental.
-}
-
-type PropsContainer = CanvasRenderingContext2D | CanvasContextProps | CanvasContext;
-
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
-// TODO: Jest CLI doesn't find emit when running standalone.
+// TODO: Jest CLI doesn't find Omit when running standalone.
 type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+
+type rp = NonFunctionPropertyNames<Omit<CanvasRenderingContext2D, "canvas" | "transformation">>;
 type cp = NonFunctionPropertyNames<Omit<CanvasContext, "ctx" | "transformation" | "inverse">>;
-type ContextProps = Partial<Pick<CanvasContext, cp>>;
+export type RenderContextProps = Partial<Pick<CanvasRenderingContext2D, rp>>;
+export type ContextProps = Partial<Pick<CanvasContext, cp>>;
+type PropsContainer = CanvasRenderingContext2D | RenderContextProps | CanvasContext;
 
 // TODO: Lazy update canvas transform.
 export class CanvasContext {
     protected _matrix: Matrix;
-    protected _props: CanvasContextProps;
-    protected _originalProps: CanvasContextProps;
-    protected _propsStack: CanvasContextProps[];
+    protected _props: RenderContextProps;
+    protected _originalProps: RenderContextProps;
+    protected _propsStack: RenderContextProps[];
 
     constructor(canvas: HTMLCanvasElement);
     constructor(ctx: CanvasRenderingContext2D);
@@ -78,8 +36,8 @@ export class CanvasContext {
         }
 
         this._matrix = Matrix2.create();
-        this._originalProps = new CanvasContextProps();
-        this._props = new CanvasContextProps();
+        this._originalProps = {};
+        this._props = {};
         this._propsStack = [];
         this.copyProps(this.ctx, this._originalProps);
         this.copyProps(this.ctx, this._props);
@@ -89,7 +47,7 @@ export class CanvasContext {
     readonly ctx: CanvasRenderingContext2D;
 
     pushProps() {
-        const props = new CanvasContextProps();
+        const props: RenderContextProps = {};
         this.copyProps(this, props);
         this._propsStack.push(props);
         return this;

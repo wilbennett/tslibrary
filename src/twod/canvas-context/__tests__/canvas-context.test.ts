@@ -4,7 +4,7 @@ import { Bounds } from '../../../misc';
 import { PVector2, Vector, Vector2, Vector2Collection } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { ImageData } from '../__mocks__/image-data';
-import { CanvasContext } from '../canvas-context';
+import { CanvasContext, RenderContextProps } from '../canvas-context';
 
 let shouldReturnNullContext = false;
 
@@ -35,14 +35,8 @@ it("Should throw error when canvas context is null", () => {
 let context: CanvasContext;
 let ctx: CanvasRenderingContext2D;
 
-type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
-// TODO: Jest CLI doesn't find emit when running standalone.
-type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
-type cp = NonFunctionPropertyNames<Omit<CanvasRenderingContext2D, "canvas" | "transformation">>;
-type ContextProps = Partial<Pick<CanvasRenderingContext2D, cp>>;
-
 function getProperties() {
-    const result: ContextProps = {};
+    const result: RenderContextProps = {};
 
     for (const propName of Object.getOwnPropertyNames(ctx)) {
         if (["canvas", "transformation"].find(x => x === propName)) continue;
