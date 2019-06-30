@@ -108,6 +108,18 @@ export class Bounds {
             ? param1
             : this.position.withXYZN(param1, y!, z || 0);
 
+        this.center = position.displaceByN(this.halfSize);
+        return this;
+    }
+
+    withPositionN(position: Vector): Bounds;
+    withPositionN(x: number, y: number, z: number): Bounds;
+    withPositionN(x: number, y: number): Bounds;
+    withPositionN(param1: Vector | number, y?: number, z?: number): Bounds {
+        let position = param1 instanceof Vector
+            ? param1
+            : this.position.withXYZN(param1, y!, z || 0);
+
         return new Bounds(position, this.size, this.direction);
     }
 
@@ -125,6 +137,24 @@ export class Bounds {
         } else
             size = this.size.withXYZN(param1, param1, param1);
 
+        this.halfSize = size.scaleN(0.5);
+        return this;
+    }
+
+    withSizeN(size: Vector): Bounds;
+    withSizeN(width: number, height: number, depth: number): Bounds;
+    withSizeN(width: number, height: number): Bounds;
+    withSizeN(size: number): Bounds;
+    withSizeN(param1: Vector | number, h?: number, d?: number): Bounds {
+        let size: Vector;
+
+        if (param1 instanceof Vector) {
+            size = param1;
+        } else if (arguments.length >= 2) {
+            size = this.size.withXYZN(param1, h!, d || 0);
+        } else
+            size = this.size.withXYZN(param1, param1, param1);
+
         return new Bounds(this.position, size, this.direction);
     }
 
@@ -133,6 +163,26 @@ export class Bounds {
     inflate(dx: number, dy: number): Bounds;
     inflate(size: number): Bounds;
     inflate(param1: Vector | number, dy?: number, dz?: number): Bounds {
+        let halfSize: Vector = this.halfSize;
+
+        if (param1 instanceof Vector)
+            halfSize.displaceBy(param1);
+        else if (arguments.length === 3)
+            halfSize.displaceBy(new Vector3D(param1, dy!, dz));
+        else if (arguments.length === 2)
+            halfSize.displaceBy(new Vector2D(param1, dy!));
+        else
+            halfSize.displaceBy(new Vector3D(param1, param1, param1));
+
+        halfSize.withXYZ(Math.max(halfSize.x, 0), Math.max(halfSize.y, 0), Math.max(halfSize.z, 0));
+        return this;
+    }
+
+    inflateN(size: Vector): Bounds;
+    inflateN(dx: number, dy: number, dz: number): Bounds;
+    inflateN(dx: number, dy: number): Bounds;
+    inflateN(size: number): Bounds;
+    inflateN(param1: Vector | number, dy?: number, dz?: number): Bounds {
         let halfSize: Vector = this.halfSize.clone();
 
         if (param1 instanceof Vector)
