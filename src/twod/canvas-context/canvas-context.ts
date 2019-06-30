@@ -1,6 +1,6 @@
 import { Brush, CanvasColor, Compositions, Style } from '.';
 import { Color } from '../../colors';
-import { MathEx } from '../../core';
+import { BoundsLike, MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector, VectorCollection } from '../../vectors';
 
@@ -51,6 +51,8 @@ class CanvasContextProps {
 type PropsContainer = CanvasRenderingContext2D | CanvasContextProps | CanvasContext;
 
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
+// TODO: Jest CLI doesn't find emit when running standalone.
+type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 type cp = NonFunctionPropertyNames<Omit<CanvasContext, "ctx" | "transformation" | "inverse">>;
 type ContextProps = Partial<Pick<CanvasContext, cp>>;
 
@@ -512,33 +514,42 @@ export class CanvasContext {
     //================================================================================================================
     clearRect(position: Vector, size: Vector): this;
     clearRect(x: number, y: number, w: number, h: number): this;
-    clearRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+    clearRect(bounds: BoundsLike): this;
+    clearRect(param1: Vector | number | BoundsLike, param2?: any, w?: number, h?: number): this {
         if (param1 instanceof Vector)
             this.ctx.clearRect(param1.x, param1.y, param2.x, param2.y);
-        else
+        else if (typeof param1 === "number")
             this.ctx.clearRect(param1, param2, w!, h!);
+        else
+            this.ctx.clearRect(param1.x, param1.y, param1.w, param1.h);
 
         return this;
     }
 
     fillRect(position: Vector, size: Vector): this;
     fillRect(x: number, y: number, w: number, h: number): this;
-    fillRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+    fillRect(bounds: BoundsLike): this;
+    fillRect(param1: Vector | number | BoundsLike, param2?: any, w?: number, h?: number): this {
         if (param1 instanceof Vector)
             this.ctx.fillRect(param1.x, param1.y, param2.x, param2.y);
-        else
+        else if (typeof param1 === "number")
             this.ctx.fillRect(param1, param2, w!, h!);
+        else
+            this.ctx.fillRect(param1.x, param1.y, param1.w, param1.h);
 
         return this;
     }
 
     strokeRect(position: Vector, size: Vector): this;
     strokeRect(x: number, y: number, w: number, h: number): this;
-    strokeRect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+    strokeRect(bounds: BoundsLike): this;
+    strokeRect(param1: Vector | number | BoundsLike, param2?: any, w?: number, h?: number): this {
         if (param1 instanceof Vector)
             this.ctx.strokeRect(param1.x, param1.y, param2.x, param2.y);
-        else
+        else if (typeof param1 === "number")
             this.ctx.strokeRect(param1, param2, w!, h!);
+        else
+            this.ctx.strokeRect(param1.x, param1.y, param1.w, param1.h);
 
         return this;
     }
@@ -671,6 +682,8 @@ export class CanvasContext {
     drawImage(image: CanvasImageSource, dx: number, dy: number, dw: number, dh: number): this;
     drawImage(image: CanvasImageSource, sourcePosition: Vector, sourceSize: Vector, destPosition: Vector, destSize: Vector): this;
     drawImage(image: CanvasImageSource, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): this;
+    drawImage(image: CanvasImageSource, sourceBounds: BoundsLike, destBounds: BoundsLike): this;
+    drawImage(image: CanvasImageSource, destBounds: BoundsLike): this;
     drawImage(
         image: CanvasImageSource,
         param2: any,
@@ -691,8 +704,12 @@ export class CanvasContext {
             this.ctx.drawImage(image, param2, param3, param4, param5);
         else if (arguments.length === 5 && param2 instanceof Vector)
             this.ctx.drawImage(image, param2.x, param2.y, param3.x, param3.y, param4.x, param4.y, param5.x, param5.y);
-        else
+        else if (typeof param2 === "number")
             this.ctx.drawImage(image, param2, param3, param4, param5, param6, param7, param8, param9);
+        else if (arguments.length > 3)
+            this.ctx.drawImage(image, param2.x, param2.y, param2.w, param2.h, param3.x, param3.y, param3.w, param3.h);
+        else
+            this.ctx.drawImage(image, param2.x, param2.y, param2.w, param2.h);
 
         return this;
     }
@@ -714,17 +731,22 @@ export class CanvasContext {
 
     getImageData(sourcePosition: Vector, sourceSize: Vector): ImageData;
     getImageData(sx: number, sy: number, sw: number, sh: number): ImageData;
-    getImageData(param1: Vector | number, param2: any, sw?: number, sh?: number): ImageData {
+    getImageData(sourceBounds: BoundsLike): ImageData;
+    getImageData(param1: Vector | number | BoundsLike, param2?: any, sw?: number, sh?: number): ImageData {
         if (param1 instanceof Vector)
             return this.ctx.getImageData(param1.x, param1.y, param2.x, param2.y);
 
-        return this.ctx.getImageData(param1, param2, sw!, sh!);
+        if (typeof param1 === "number")
+            return this.ctx.getImageData(param1, param2, sw!, sh!);
+
+        return this.ctx.getImageData(param1.x, param1.y, param1.w, param1.h);
     }
 
     putImageData(imagedata: ImageData, destPosition: Vector): this;
     putImageData(imagedata: ImageData, dx: number, dy: number): this;
     putImageData(imagedata: ImageData, destPosition: Vector, dirtyPosition: Vector, dirtySize: Vector): this;
     putImageData(imagedata: ImageData, dx: number, dy: number, dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): this;
+    putImageData(imagedata: ImageData, destPosition: Vector, dirtyBounds: BoundsLike): this;
     putImageData(
         imagedata: ImageData,
         param2: Vector | number,
@@ -737,10 +759,12 @@ export class CanvasContext {
             this.ctx.putImageData(imagedata, param2.x, param2.y);
         else if (arguments.length == 3 && typeof param2 === "number")
             this.ctx.putImageData(imagedata, param2, param3);
-        else if (param2 instanceof Vector)
+        else if (param2 instanceof Vector && param3 instanceof Vector)
             this.ctx.putImageData(imagedata, param2.x, param2.y, param3.x, param3.y, param4.x, param4.y);
-        else
+        else if (typeof param2 === "number")
             this.ctx.putImageData(imagedata, param2, param3, param4, param5, param6, param7);
+        else if (param2 instanceof Vector)
+            this.ctx.putImageData(imagedata, param2.x, param2.y, param3.x, param3.y, param3.w, param3.h);
 
         return this;
     }
@@ -934,11 +958,14 @@ export class CanvasContext {
 
     rect(position: Vector, size: Vector): this;
     rect(x: number, y: number, w: number, h: number): this;
-    rect(param1: Vector | number, param2: any, w?: number, h?: number): this {
+    rect(bounds: BoundsLike): this;
+    rect(param1: Vector | number | BoundsLike, param2?: any, w?: number, h?: number): this {
         if (param1 instanceof Vector)
             this.ctx.rect(param1.x, param1.y, param2.x, param2.y);
-        else
+        else if (typeof param1 === "number")
             this.ctx.rect(param1, param2, w!, h!);
+        else
+            this.ctx.rect(param1.x, param1.y, param1.w, param1.h);
 
         return this;
     }

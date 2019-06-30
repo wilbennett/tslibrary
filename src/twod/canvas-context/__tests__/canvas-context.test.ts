@@ -1,5 +1,6 @@
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
+import { Bounds } from '../../../misc';
 import { PVector2, Vector, Vector2, Vector2Collection } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { ImageData } from '../__mocks__/image-data';
@@ -35,6 +36,8 @@ let context: CanvasContext;
 let ctx: CanvasRenderingContext2D;
 
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
+// TODO: Jest CLI doesn't find emit when running standalone.
+type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 type cp = NonFunctionPropertyNames<Omit<CanvasRenderingContext2D, "canvas" | "transformation">>;
 type ContextProps = Partial<Pick<CanvasRenderingContext2D, cp>>;
 
@@ -497,15 +500,19 @@ describe("Should handle context methods", () => {
     test("Rect call signatures", () => {
         const position = Vector2.createPosition(1, 1);
         const size = Vector2.createDirection(2, 2);
+        const bounds = new Bounds(position, size, "down");
 
         context.clearRect(position, size);
         context.clearRect(position.x, position.y, size.x, size.y);
+        context.clearRect(bounds);
 
         context.fillRect(position, size);
         context.fillRect(position.x, position.y, size.x, size.y);
+        context.fillRect(bounds);
 
         context.strokeRect(position, size);
         context.strokeRect(position.x, position.y, size.x, size.y);
+        context.strokeRect(bounds);
     });
 
     test("Draw path call signatures", () => {
@@ -571,6 +578,8 @@ describe("Should handle context methods", () => {
         const sourceSize = Vector2.create(2, 2);
         const destPosition = Vector2.create(3, 3);
         const destSize = Vector2.create(4, 4);
+        const sourceBounds = new Bounds(sourcePosition, sourceSize);
+        const destBounds = new Bounds(destPosition, destSize);
 
         context.drawImage(image, destPosition);
         context.drawImage(image, destPosition.x, destPosition.y);
@@ -578,6 +587,8 @@ describe("Should handle context methods", () => {
         context.drawImage(image, destPosition.x, destPosition.y, destSize.x, destSize.y);
         context.drawImage(image, sourcePosition, sourceSize, destPosition, destSize);
         context.drawImage(image, sourcePosition.x, sourcePosition.y, sourceSize.x, sourceSize.y, destPosition.x, destPosition.y, destSize.x, destSize.y);
+        context.drawImage(image, sourceBounds, destBounds);
+        context.drawImage(image, destBounds);
     });
 
     test("Image data call signatures", () => {
@@ -587,6 +598,8 @@ describe("Should handle context methods", () => {
         const destPosition = Vector2.create(3, 3);
         const dirtyPosition = Vector2.create(5, 5);
         const dirtySize = Vector2.create(6, 6);
+        const sourceBounds = new Bounds(sourcePosition, sourceSize);
+        const dirtyBounds = new Bounds(dirtyPosition, dirtySize);
 
         context.createImageData(sourceSize);
         context.createImageData(imageData);
@@ -594,11 +607,13 @@ describe("Should handle context methods", () => {
 
         context.getImageData(sourcePosition, sourceSize);
         context.getImageData(sourcePosition.x, sourcePosition.y, sourceSize.x, sourceSize.y);
+        context.getImageData(sourceBounds);
 
         context.putImageData(imageData, destPosition);
         context.putImageData(imageData, destPosition.x, destPosition.y);
         context.putImageData(imageData, destPosition, dirtyPosition, dirtySize);
         context.putImageData(imageData, destPosition.x, destPosition.y, dirtyPosition.x, dirtyPosition.y, dirtySize.x, dirtySize.y);
+        context.putImageData(imageData, destPosition, dirtyBounds);
     });
 
     test("Path drawing styles call signatures", () => {
@@ -614,6 +629,7 @@ describe("Should handle context methods", () => {
         const controlPoint2 = Vector2.create(5, 5);
         const endPoint = Vector2.create(6, 6);
         const size = Vector2.create(7, 7);
+        const bounds = new Bounds(controlPoint1, size);
         const points = [Vector2.create(0, 0), Vector2.create(10, 10), Vector2.create(20, 0)];
         const collection = new Vector2Collection(...points);
 
@@ -661,6 +677,7 @@ describe("Should handle context methods", () => {
 
         context.rect(controlPoint1, size);
         context.rect(controlPoint1.x, controlPoint1.y, size.x, size.y);
+        context.rect(bounds);
 
         context.circle(center, radius.x);
         context.circle(center, radius.x, true);
