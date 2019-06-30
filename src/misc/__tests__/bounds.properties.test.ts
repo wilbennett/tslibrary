@@ -29,8 +29,6 @@ describe.each([
         const expected_top = expected_topLeft.y;
         const expected_bottom = expected_bottomLeft.y;
 
-        expected_topLeft.toString();//?
-        bounds.topLeft.toString();//?
         expect(expected_halfSize.equals(bounds.halfSize)).toBeTruthy();
         expect(expected_max.equals(bounds.max)).toBeTruthy();
         expect(expected_topLeft.equals(bounds.topLeft)).toBeTruthy();
