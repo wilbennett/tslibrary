@@ -7,6 +7,7 @@ describe.each([
 ])("Should execute methods properly in %s", (_, pos, sz) => {
     const position = <Vector>pos;
     const size = <Vector>sz;
+    const halfSize = size.scaleN(0.5);
     // const is2D = position instanceof Vector2;
     const is3D = position instanceof Vector3;
 
@@ -30,64 +31,70 @@ describe.each([
         it("Should allow replacing position", () => {
             const newPosition = position.displaceByN(size);
             const expected_center = newPosition.addN(bounds.halfSize);
+            const expected_direction = bounds.direction;
 
             bounds.withPosition(newPosition);
-            expect(bounds.position.equals(newPosition)).toBeTruthy();
             expect(bounds.center.equals(expected_center)).toBeTruthy();
+            expect(bounds.position.equals(newPosition)).toBeTruthy();
             expect(bounds.size.equals(size)).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
 
             bounds.withPosition(newPosition.x, newPosition.y, newPosition.z);
             expect(bounds.position.equals(newPosition)).toBeTruthy();
             expect(bounds.center.equals(expected_center)).toBeTruthy();
             expect(bounds.size.equals(size)).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
 
             bounds.withPosition(newPosition.x, newPosition.y);
+            expect(bounds.center.equals(expected_center.withZN(halfSize.z))).toBeTruthy();
             expect(bounds.position.x).toBe(newPosition.x);
             expect(bounds.position.y).toBe(newPosition.y);
             expect(bounds.position.z).toBe(0);
-            expect(bounds.center.x).toBe(expected_center.x);
-            expect(bounds.center.y).toBe(expected_center.y);
-            expect(bounds.center.z).toBe(bounds.halfSize.z);
             expect(bounds.size.equals(size)).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
         });
 
         it("Should allow cloning with new position", () => {
             const newPosition = position.displaceByN(size);
+            const expected_center = newPosition.addN(bounds.halfSize);
+            const expected_direction = bounds.direction;
 
             let newBounds = bounds.withPositionN(newPosition);
+            expect(newBounds.center.equals(expected_center)).toBeTruthy();
             expect(newBounds.position.equals(newPosition)).toBeTruthy();
             expect(newBounds.size.equals(size)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.direction).toBe(expected_direction);
 
             newBounds = bounds.withPositionN(newPosition.x, newPosition.y, newPosition.z);
             expect(newBounds.position.equals(newPosition)).toBeTruthy();
+            expect(newBounds.center.equals(expected_center)).toBeTruthy();
             expect(newBounds.size.equals(size)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.direction).toBe(expected_direction);
 
             newBounds = bounds.withPositionN(newPosition.x, newPosition.y);
+            expect(newBounds.center.equals(expected_center.withZN(halfSize.z))).toBeTruthy();
             expect(newBounds.position.x).toBe(newPosition.x);
             expect(newBounds.position.y).toBe(newPosition.y);
             expect(newBounds.position.z).toBe(0);
             expect(newBounds.size.equals(size)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.direction).toBe(expected_direction);
         });
 
         it("Should allow replacing size", () => {
-            const newSize = size.scaleN(2);
-            const expected_position = bounds.center.subN(newSize.scaleN(0.5));
+            let newSize = size.scaleN(2);
+            let newHalfSize = newSize.scaleN(0.5);
+            let expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            const expected_direction = bounds.direction;
 
             bounds.withSize(newSize);
             expect(bounds.size.equals(newSize)).toBeTruthy();
             expect(bounds.position.equals(expected_position)).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
 
             bounds.withSize(newSize.x, newSize.y, newSize.z);
             expect(bounds.size.equals(newSize)).toBeTruthy();
             expect(bounds.position.equals(expected_position)).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
 
             bounds.withSize(newSize.x, newSize.y);
             expect(bounds.size.x).toBe(newSize.x);
@@ -96,42 +103,51 @@ describe.each([
             expect(bounds.position.x).toBe(expected_position.x);
             expect(bounds.position.y).toBe(expected_position.y);
             expect(bounds.position.z).toBe(bounds.center.z);
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.direction).toBe(expected_direction);
+
+            newSize = newSize.withY(newSize.x).withZ(newSize.x);
+            newHalfSize = newSize.scaleN(0.5);
+            expected_position = bounds.center.displaceByN(newHalfSize.negateN());
 
             bounds.withSize(newSize.x);
-            expect(bounds.size.x).toBe(newSize.x);
-            expect(bounds.size.y).toBe(newSize.x);
-            expect(bounds.size.z).toBe(is3D ? newSize.x : 0);
-            expect(bounds.position.equals(bounds.center.subN(bounds.halfSize))).toBeTruthy();
-            expect(bounds.direction).toBe(bounds.direction);
+            expect(bounds.size.equals(newSize)).toBeTruthy();
+            expect(bounds.position.equals(expected_position)).toBeTruthy();
+            expect(bounds.direction).toBe(expected_direction);
         });
 
         it("Should allow cloning with new size", () => {
-            const newSize = size.scaleN(2);
+            let newSize = size.scaleN(2);
+            let newHalfSize = newSize.scaleN(0.5);
+            let expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            const expected_direction = bounds.direction;
 
             let newBounds = bounds.withSizeN(newSize);
             expect(newBounds.size.equals(newSize)).toBeTruthy();
-            expect(newBounds.position.equals(position)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.position.equals(expected_position)).toBeTruthy();
+            expect(newBounds.direction).toBe(expected_direction);
 
             newBounds = bounds.withSizeN(newSize.x, newSize.y, newSize.z);
             expect(newBounds.size.equals(newSize)).toBeTruthy();
-            expect(newBounds.position.equals(position)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.position.equals(expected_position)).toBeTruthy();
+            expect(newBounds.direction).toBe(expected_direction);
 
             newBounds = bounds.withSizeN(newSize.x, newSize.y);
             expect(newBounds.size.x).toBe(newSize.x);
             expect(newBounds.size.y).toBe(newSize.y);
             expect(newBounds.size.z).toBe(0);
-            expect(newBounds.position.equals(position)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.position.x).toBe(expected_position.x);
+            expect(newBounds.position.y).toBe(expected_position.y);
+            expect(newBounds.position.z).toBe(bounds.center.z);
+            expect(newBounds.direction).toBe(expected_direction);
+
+            newSize = newSize.withY(newSize.x).withZ(newSize.x);
+            newHalfSize = newSize.scaleN(0.5);
+            expected_position = bounds.center.displaceByN(newHalfSize.negateN());
 
             newBounds = bounds.withSizeN(newSize.x);
-            expect(newBounds.size.x).toBe(newSize.x);
-            expect(newBounds.size.y).toBe(newSize.x);
-            expect(newBounds.size.z).toBe(is3D ? newSize.x : 0);
-            expect(newBounds.position.equals(position)).toBeTruthy();
-            expect(newBounds.direction).toBe(bounds.direction);
+            expect(newBounds.size.equals(newSize)).toBeTruthy();
+            expect(newBounds.position.equals(expected_position)).toBeTruthy();
+            expect(newBounds.direction).toBe(expected_direction);
         });
 
         it("Should inflate size", () => {

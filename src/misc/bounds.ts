@@ -58,8 +58,8 @@ export class Bounds {
                     this.direction = param4 || "up";
                 } else if (typeof param2 === "number") {
                     if (arguments.length >= 7) {
-                        this.center = Vector3D.createPosition(param2, param3, param4);
                         this.halfSize = Vector3D.createDirection(param5, param6, param7);
+                        this.center = Vector3D.createPosition(param2, param3, param4);
                         this.direction = param8 || "up";
                     } else {
                         this.center = Vector2D.createPosition(param2, param3);
@@ -74,31 +74,33 @@ export class Bounds {
     public center: Vector;
     public halfSize: Vector;
     public readonly direction: BoundsDirection;
-    get x() { return this.position.x; }
-    get y() { return this.position.y; }
-    get z() { return this.position.z; }
+    get size() { return this.halfSize.scaleN(2); }
+    get min() { return this.center.displaceByN(this.halfSize.negateN()); }
+    get max() { return this.center.addN(this.halfSize); }
+    get left() { return this.center.x - this.halfSize.x; }
+    get right() { return this.center.x + this.halfSize.x; }
+    get top() { return this.direction === "up" ? this.center.y + this.halfSize.y : this.center.y - this.halfSize.y; }
+    get bottom() { return this.direction === "up" ? this.center.y - this.halfSize.y : this.center.y + this.halfSize.y; }
+    get back() { return this.center.z - this.halfSize.z; }
+    get topLeft() { return this.center.withXYZWN(this.left, this.top, this.back, 1); }
+    get bottomLeft() { return this.center.withXYZWN(this.left, this.bottom, this.back, 1); }
+    get topRight() { return this.center.withXYZWN(this.right, this.top, this.back, 1); }
+    get bottomRight() { return this.center.withXYZWN(this.right, this.bottom, this.back, 1); }
+    get position() { return this.min; }
+    get x() { return this.min.x; }
+    get y() { return this.min.y; }
+    get z() { return this.min.z; }
     get width() { return this.size.x; }
     get height() { return this.size.y; }
     get depth() { return this.size.z; }
     get w() { return this.size.x; }
     get h() { return this.size.y; }
     get d() { return this.size.z; }
-    get position() { return this.center.subN(this.halfSize); }
-    get size() { return this.halfSize.scaleN(2); }
-    get max() { return this.center.addN(this.halfSize); }
-    get left() { return this.center.x - this.halfSize.x; }
-    get right() { return this.center.x + this.halfSize.x; }
-    get top() { return this.direction === "up" ? this.center.y + this.halfSize.y : this.center.y - this.halfSize.y; }
-    get bottom() { return this.direction === "up" ? this.center.y - this.halfSize.y : this.center.y + this.halfSize.y; }
-    get topLeft() { return this.center.withXYZWN(this.left, this.top, this.center.z - this.halfSize.z, 1); }
-    get bottomLeft() { return this.center.withXYZWN(this.left, this.bottom, this.center.z - this.halfSize.z, 1); }
-    get topRight() { return this.center.withXYZWN(this.right, this.top, this.center.z - this.halfSize.z, 1); }
-    get bottomRight() { return this.center.withXYZWN(this.right, this.bottom, this.center.z - this.halfSize.z, 1); }
 
     get centerX() { return this.center.x; }
     get centerY() { return this.center.y; }
 
-    toString() { return `(${this.position}, ${this.max})`; }
+    toString() { return `(${this.min}, ${this.max})`; }
 
     withPosition(position: Vector): Bounds;
     withPosition(x: number, y: number, z: number): Bounds;
@@ -106,7 +108,7 @@ export class Bounds {
     withPosition(param1: Vector | number, y?: number, z?: number): Bounds {
         let position = param1 instanceof Vector
             ? param1
-            : this.position.withXYZN(param1, y!, z || 0);
+            : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
 
         this.center = position.displaceByN(this.halfSize);
         return this;
@@ -118,7 +120,7 @@ export class Bounds {
     withPositionN(param1: Vector | number, y?: number, z?: number): Bounds {
         let position = param1 instanceof Vector
             ? param1
-            : this.position.withXYZN(param1, y!, z || 0);
+            : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
 
         return new Bounds(position, this.size, this.direction);
     }
@@ -133,7 +135,7 @@ export class Bounds {
         if (param1 instanceof Vector) {
             size = param1;
         } else if (arguments.length >= 2) {
-            size = this.size.withXYZN(param1, h!, d || 0);
+            size = this.size.withXYZN(param1, h!, d === undefined ? 0 : d);
         } else
             size = this.size.withXYZN(param1, param1, param1);
 
@@ -149,13 +151,13 @@ export class Bounds {
         let size: Vector;
 
         if (param1 instanceof Vector) {
-            size = param1;
+            size = param1.clone();
         } else if (arguments.length >= 2) {
-            size = this.size.withXYZN(param1, h!, d || 0);
+            size = this.size.withXYZN(param1, h!, d === undefined ? 0 : d);
         } else
             size = this.size.withXYZN(param1, param1, param1);
 
-        return new Bounds(this.position, size, this.direction);
+        return new Bounds("center", this.center, size, this.direction);
     }
 
     inflate(size: Vector): Bounds;
@@ -217,23 +219,26 @@ export class Bounds {
     isBelow(baseY: number, y: number) { return this.direction === "up" ? y < baseY : y > baseY; };
 
     contains(point: Vector) {
+        const min = this.min;
         const max = this.max;
 
-        return point.x >= this.x
+        return point.x >= min.x
             && point.x <= max.x
-            && point.y >= this.y
+            && point.y >= min.y
             && point.y <= max.y
-            && point.z >= this.z
+            && point.z >= min.z
             && point.z <= max.z;
     }
 
     intersectsWith(other: Bounds) {
+        const min = this.min;
         const max = this.max;
+        const otherMin = other.min;
         const otherMax = other.max;
 
-        return this.x <= otherMax.x && max.x >= other.x
-            && this.y <= otherMax.y && max.y >= other.y
-            && this.z <= otherMax.z && max.z >= other.z;
+        return min.x <= otherMax.x && max.x >= otherMin.x
+            && min.y <= otherMax.y && max.y >= otherMin.y
+            && min.z <= otherMax.z && max.z >= otherMin.z;
     }
 
     private static _zero: Bounds;

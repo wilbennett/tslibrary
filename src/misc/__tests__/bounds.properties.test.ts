@@ -18,12 +18,12 @@ describe.each([
     it("Should have the correct property values in the up direction", () => {
         let bounds = new Bounds(position, size, "up");
         const expected_halfSize = size.scaleN(0.5);
-        const expected_max = position.displaceByN(size);
-        const expected_topLeft = position.displaceByN(size.withXN(0).withZ(0));
-        const expected_topRight = position.displaceByN(size.withZN(0));
-        const expected_bottomRight = position.displaceByN(size.withYN(0).withZ(0));
-        const expected_bottomLeft = position;
         const expected_center = position.displaceByN(expected_halfSize);
+        const expected_max = expected_center.displaceByN(expected_halfSize);
+        const expected_topLeft = expected_center.displaceByN(expected_halfSize.withNegXN().withNegZN());
+        const expected_topRight = expected_center.displaceByN(expected_halfSize.withNegZN());
+        const expected_bottomRight = expected_center.displaceByN(expected_halfSize.withNegYN().withNegZN());
+        const expected_bottomLeft = position;
         const expected_left = expected_topLeft.x;
         const expected_right = expected_topRight.x;
         const expected_top = expected_topLeft.y;
@@ -57,12 +57,13 @@ describe.each([
         let bounds = new Bounds(position, size, "down");
 
         const expected_halfSize = size.scaleN(0.5);
-        const expected_max = position.displaceByN(size);
-        const expected_topLeft = position;
-        const expected_topRight = position.displaceByN(size.withYN(0).withZ(0));
-        const expected_bottomRight = position.displaceByN(size.withZN(0));
-        const expected_bottomLeft = position.displaceByN(size.withXN(0).withZ(0));
+        const negHalfSize = expected_halfSize.negateN();
         const expected_center = position.displaceByN(expected_halfSize);
+        const expected_max = expected_center.displaceByN(expected_halfSize);
+        const expected_topLeft = expected_center.displaceByN(negHalfSize);
+        const expected_topRight = expected_center.displaceByN(negHalfSize.withNegXN());
+        const expected_bottomRight = expected_center.displaceByN(expected_halfSize.withNegZN());
+        const expected_bottomLeft = expected_center.displaceByN(negHalfSize.withNegYN());
         const expected_left = expected_topLeft.x;
         const expected_right = expected_topRight.x;
         const expected_top = expected_topLeft.y;
