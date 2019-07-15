@@ -394,6 +394,18 @@ export abstract class Vector {
     withWN(w: number) { return this.withWO(w, this.newVector()); }
     withW(w: number) { return this.withWO(w, this); }
 
+    withNegXO(result: Vector) { return result.set(-this.x, this.y, this.z, this.w); }
+    withNegXN() { return this.withNegXO(this.newVector()); }
+    withNegX() { return this.withNegXO(this); }
+
+    withNegYO(result: Vector) { return result.set(this.x, -this.y, this.z, this.w); }
+    withNegYN() { return this.withNegYO(this.newVector()); }
+    withNegY() { return this.withNegYO(this); }
+
+    withNegZO(result: Vector) { return result.set(this.x, this.y, -this.z, this.w); }
+    withNegZN() { return this.withNegZO(this.newVector()); }
+    withNegZ() { return this.withNegZO(this); }
+
     equals(other: Vector, epsilon: number = Number.EPSILON) {
         if (this.isDirection && other.isDirection)
             return Math.abs(this.x - other.x) < epsilon
