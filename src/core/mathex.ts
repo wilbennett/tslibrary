@@ -70,6 +70,16 @@ export class MathEx {
     return value = (((value - low) % range) + range) % range + low;
   }
 
+  static mapRange(value: number, min: number, max: number, newMin: number, newMax: number) {
+    let run = max - min;
+
+    if (run === 0) run = 1;
+
+    const slope = (newMax - newMin) / run;
+    const intercept = newMax - (slope * max);
+    return value * slope + intercept;
+  }
+
   static sign(value: number) {
     return <any>(value > 0) - <any>(value < 0) || +value;
   }
