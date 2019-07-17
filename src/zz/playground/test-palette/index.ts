@@ -1,5 +1,5 @@
 import { Color, WebColors } from '../../../colors';
-import { Palette } from '../../../colors/palette';
+import { Palette, PaletteBuilder } from '../../../colors/palette';
 import { EaseManager } from '../../../easing';
 
 export { };
@@ -15,6 +15,10 @@ if (!ctx)
 ctx.fillStyle = "whitesmoke";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+var b = new PaletteBuilder(["red", "green"]);
+b = new PaletteBuilder("blue");
+b = new PaletteBuilder("green", "blue");
+
 let height = 30;
 let y = 0;
 
@@ -28,7 +32,8 @@ y += height + 2;
 palette = new Palette("lrgb", 100, WebColors.red, WebColors.green, WebColors.blue);
 drawPalette(ctx, palette.colors, y, height);
 y += height + 2;
-palette = new Palette("hsl", 100, WebColors.red, WebColors.green, WebColors.blue);
+// palette = new Palette("hsl", 100, WebColors.red, WebColors.green, WebColors.blue);
+palette = Palette.build(WebColors.red, WebColors.green, WebColors.blue).tween("hsl").count(100).palette;
 drawPalette(ctx, palette.colors, y, height);
 y += height + 2;
 height = 10;

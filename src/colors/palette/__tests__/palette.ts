@@ -1,4 +1,4 @@
-import { Palette } from '..';
+import { Palette, PaletteBuilder } from '..';
 import { CanvasColor, Color, ColorUtils, WebColors } from '../..';
 import { Ease } from '../../../easing';
 
@@ -49,10 +49,17 @@ describe.only("Should create palettes", () => {
         expect(() => validate(new Palette(paletteLength, Ease.linear, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette(paletteLength, ...refCanvasColors))).not.toThrow();
 
+        expect(() => validate(Palette.build(refCanvasColors).count(paletteLength).ease(Ease.linear).palette)).not.toThrow();
+        expect(() => validate(Palette.build(refCanvasColors).count(paletteLength).stops(stops).palette)).not.toThrow();
+        expect(() => validate(Palette.build(...refCanvasColors).count(paletteLength).ease(Ease.linear).palette)).not.toThrow();
+        expect(() => validate(Palette.build(...refCanvasColors).count(paletteLength).stops(...stops).palette)).not.toThrow();
+
         expect(() => validate(new Palette("", paletteLength, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette("invalid", paletteLength, ...refCanvasColors))).not.toThrow();
 
         expect(() => validate(Palette.getColors(paletteLength, refColors, stops, "rgb"))).not.toThrow();
+
+        expect(() => validate(Palette.build(refCanvasColors).count(paletteLength).colors)).not.toThrow();
 
         palette = new Palette("lrgb", paletteLength, stops, ...refCanvasColors);
         expect(palette.colors).toMatchSnapshot();
@@ -63,6 +70,8 @@ describe.only("Should create palettes", () => {
         expect(() => validate(new Palette("lrgb", paletteLength, Ease.linear, stops, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette("lrgb", paletteLength, Ease.linear, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette("lrgb", paletteLength, ...refCanvasColors))).not.toThrow();
+
+        expect(() => validate(Palette.build(refCanvasColors).count(paletteLength).tween("lrgb").colors)).not.toThrow();
 
         expect(() => validate(Palette.getColors(paletteLength, refColors, stops, "lrgb"))).not.toThrow();
 
@@ -75,6 +84,8 @@ describe.only("Should create palettes", () => {
         expect(() => validate(new Palette("hsl", paletteLength, Ease.linear, stops, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette("hsl", paletteLength, Ease.linear, ...refCanvasColors))).not.toThrow();
         expect(() => validate(new Palette("hsl", paletteLength, ...refCanvasColors))).not.toThrow();
+
+        expect(() => validate(new PaletteBuilder(...refCanvasColors).count(paletteLength).tween("hsl").colors)).not.toThrow();
 
         expect(() => validate(Palette.getColors(paletteLength, refColors, stops, "hsl"))).not.toThrow();
     });
