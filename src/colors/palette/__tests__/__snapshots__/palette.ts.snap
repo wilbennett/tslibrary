@@ -1,0 +1,166 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should create palettes Should allow creating Palette instance 1`] = `
+Array [
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": -16776961,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -971243265,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -1925709569,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 1431634175,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 477167871,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 7412991,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 5592319,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 3706367,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 1885951,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": 65535,
+  },
+]
+`;
+
+exports[`Should create palettes Should allow creating Palette instance 2`] = `
+Array [
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": -16776961,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -532938497,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -1101725441,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -1821900545,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 1433927935,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 7886335,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 6853631,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 5619455,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 3989759,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": 65535,
+  },
+]
+`;
+
+exports[`Should create palettes Should allow creating Palette instance 3`] = `
+Array [
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 8,
+    "_value": 1644900,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 58267236,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 112792548,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 169414884,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 226037348,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 280563300,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 337187044,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 393810916,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 1,
+    "_value": 448337508,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 8,
+    "_value": 504961380,
+  },
+]
+`;

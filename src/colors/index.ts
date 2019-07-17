@@ -5,3 +5,5 @@ export * from "./colors";
 export * from "./converters";
 export * from "./collections";
 export * from "./web-groups";
+export * from "./color-utils";
+export * from "./palette";
