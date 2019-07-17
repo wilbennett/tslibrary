@@ -1,3 +1,7 @@
+import { Color } from '.';
+
+export type CanvasColor = string | Color;
+
 export type ColorFormat = "hex" | "hexa" | "hexa255" | "hexfrac" | "hexafrac"
   | "rgb" | "rgba" | "rgbpct" | "rgbapct" | "rgba255" | "rgbfrac" | "rgbafrac"
   | "hsl" | "hsla" | "hslpct" | "hslapct"
