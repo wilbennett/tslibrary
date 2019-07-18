@@ -1,6 +1,6 @@
 import { PromiseEx } from '..';
 
-describe.only("Should allow working manually with promises", () => {
+describe("Should allow working manually with promises", () => {
     it("Should allow setting the result", () => {
         const promise = new PromiseEx<number>();
 
