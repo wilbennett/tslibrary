@@ -1,6 +1,7 @@
-import { isNumberArray, NumberArray } from '.';
+import { isNumberArray, NumberArray, Random } from '.';
 
 export class MathEx {
+  private static readonly _random = new Random();
   static readonly TWO_PI = 2 * Math.PI;
   static readonly HALF_PI = Math.PI / 2;
   static readonly QUARTER_PI: number = Math.PI / 4;
@@ -94,6 +95,10 @@ export class MathEx {
     return values.map((v) => v.toFixed(count));
   }
 
+  static get seed() { return this._random.seed; }
+
+  static randomize(seed?: number) { this._random.randomize(seed); }
+
   static random<T>(array: T[]): T;
   static random(): number;
   static random(max: number): number;
@@ -114,8 +119,8 @@ export class MathEx {
     }
 
     return array
-      ? array[Math.floor(Math.random() * (max - min + 1)) + min]
-      : Math.random() * (max - min) + min;
+      ? array[Math.floor(this._random.next() * (max - min + 1)) + min]
+      : this._random.next() * (max - min) + min;
   }
 
   static randomInt(max: number): number;
@@ -129,7 +134,76 @@ export class MathEx {
       max = Math.floor(max);
     }
 
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(this._random.next() * (max - min + 1)) + min;
+  }
+
+  static getRandomValues<T>(array: T[], count: number, result?: T[]): T[];
+  static getRandomValues(count: number, result?: NumberArray): NumberArray;
+  static getRandomValues(count: number, max: number, result?: NumberArray): NumberArray;
+  static getRandomValues(count: number, min: number, max: number, result?: NumberArray): NumberArray;
+  static getRandomValues<T>(param1: number | T[], param2?: number | NumberArray, param3?: T[] | number | NumberArray, result?: T[] | NumberArray) {
+    let array: T[] | null = null;
+    let count: number;
+    let min: number;
+    let max: number;
+
+    if (Array.isArray(param1)) {
+      array = param1;
+      count = <number>param2;
+      min = 0;
+      max = array.length - 1;
+      result = <T[]>param3 || new Array<T>(count);
+    } else if (param2 === undefined || isNumberArray(param2)) {
+      count = param1;
+      min = 0;
+      max = 1;
+      result = param2 || new Array<number>(count);
+    } else if (param3 === undefined || isNumberArray(param3)) {
+      count = param1;
+      max = param2;
+      min = 0;
+      result = param3 || new Array<number>(count);
+    } else {
+      count = param1;
+      min = param2;
+      max = <number>param3;
+      result = result || new Array<number>(count);
+    }
+
+    if (array) {
+      for (let i = 0; i < count; i++) {
+        result[i] = array[Math.floor(this._random.next() * (max - min + 1)) + min];
+      }
+    } else {
+      for (let i = 0; i < count; i++) {
+        result[i] = this._random.next() * (max - min) + min;
+      }
+    }
+
+    return result;
+  }
+
+  static getRandomInts(count: number, max: number, result?: NumberArray): NumberArray;
+  static getRandomInts(count: number, min: number, max: number, result?: NumberArray): NumberArray;
+  static getRandomInts(count: number, param2: number, param3?: number | NumberArray, result?: NumberArray) {
+    let min: number;
+    let max: number;
+
+    if (param3 === undefined || isNumberArray(param3)) {
+      max = Math.floor(param2);
+      min = 0;
+      result = param3 || new Array<number>(count);
+    } else {
+      min = Math.ceil(param2);
+      max = Math.floor(param3);
+      result = result || new Array<number>(count);
+    }
+
+    for (let i = 0; i < count; i++) {
+      result[i] = Math.floor(this._random.next() * (max - min + 1)) + min;
+    }
+
+    return result;
   }
 
   static stddev(values: NumberArray): number;
@@ -138,12 +212,18 @@ export class MathEx {
     const values = isNumberArray(param1) ? param1 : <number[]>Array.from(arguments);
 
     let sum = 0;
-    const length = values.length;
+    const length = values.length;//?
 
     for (let i = 0; i < length; i++) {
       sum += values[i];
+
+      if (isNaN(sum)) {
+        i;//?
+        // console.log(i);
+      }
     }
 
+    sum;
     const mean = sum / length;
     let sqrDiff = 0;
 
