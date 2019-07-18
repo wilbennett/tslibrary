@@ -26,7 +26,7 @@ function createRandomFloats(count: number, precision: number) {
     return nums.map(x => round(x));
 }
 
-describe.only("Random number generation", () => {
+describe("Random number generation", () => {
     it("Should generate random numbers", () => {
         const expected_deviation = 0.3;
         let nums: number[];
