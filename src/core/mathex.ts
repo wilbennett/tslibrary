@@ -1,4 +1,4 @@
-import { NumberArray, isNumberArray } from ".";
+import { isNumberArray, NumberArray } from '.';
 
 export class MathEx {
   static readonly TWO_PI = 2 * Math.PI;
@@ -139,7 +139,7 @@ export class MathEx {
 
     let sum = 0;
     const length = values.length;
-    
+
     for (let i = 0; i < length; i++) {
       sum += values[i];
     }
@@ -153,6 +153,30 @@ export class MathEx {
     }
 
     const variance = sqrDiff / length;
+    return Math.sqrt(variance);
+  }
+
+  static stddevsamp(values: NumberArray): number;
+  static stddevsamp(...values: number[]): number;
+  static stddevsamp(param1: any): number {
+    const values = isNumberArray(param1) ? param1 : <number[]>Array.from(arguments);
+
+    let sum = 0;
+    const length = values.length;
+
+    for (let i = 0; i < length; i++) {
+      sum += values[i];
+    }
+
+    const mean = sum / length;
+    let sqrDiff = 0;
+
+    for (let i = 0; i < length; i++) {
+      const diff = values[i] - mean;
+      sqrDiff += diff * diff;
+    }
+
+    const variance = sqrDiff / (length - 1);
     return Math.sqrt(variance);
   }
 
