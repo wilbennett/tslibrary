@@ -2,7 +2,7 @@ import { Palette, PaletteBuilder } from '..';
 import { CanvasColor, Color, ColorUtils, WebColors } from '../..';
 import { Ease } from '../../../easing';
 
-describe.only("Should create palettes", () => {
+describe("Should create palettes", () => {
     const paletteLength = 10;
     const refCanvasColors: CanvasColor[] = [WebColors.red, WebColors.green, "blue"];
     const refColors = ColorUtils.toColorArray(...refCanvasColors);
