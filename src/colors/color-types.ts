@@ -1,4 +1,5 @@
 import { Color } from '.';
+import { NumberArray } from '../core';
 
 export type CanvasColor = string | Color;
 
@@ -9,4 +10,4 @@ export type ColorFormat = "hex" | "hexa" | "hexa255" | "hexfrac" | "hexafrac"
   | "hslrad" | "hslarad" | "hslradpct" | "hslaradpct"
   | "hslturn" | "hslaturn" | "hslturnpct" | "hslaturnpct";
 
-export type ColorData = number[] | Float32Array;
+export type ColorData = NumberArray;
