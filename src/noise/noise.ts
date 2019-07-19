@@ -194,6 +194,11 @@ export abstract class Noise {
         return this._instance.getValue(x, scale);
     }
 
+    static getValue2D(x: number, y: number, scale?: number) {
+        this.ensureInstance();
+        return this._instance.getValue2D(x, y, scale);
+    }
+
     static fractal(
         x: number,
         scale?: number,
@@ -205,6 +210,20 @@ export abstract class Noise {
 
         this.ensureInstance();
         return this._instance.fractal(x, scale, octaves, amplitude, frequency, lacunarity, gain);
+    }
+
+    static fractal2D(
+        x: number,
+        y: number,
+        scale?: number,
+        octaves?: number,
+        amplitude?: number,
+        frequency?: number,
+        lacunarity?: number,
+        gain?: number) {
+
+        this.ensureInstance();
+        return this._instance.fractal2D(x, y, scale, octaves, amplitude, frequency, lacunarity, gain);
     }
 
     protected static ensureInstance() {
