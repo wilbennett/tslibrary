@@ -22,7 +22,6 @@ export class Perlin extends Noise {
         this.lacunarity = lacunarity;
         this.gain = gain;
         const permutations = Array.from({ length: 256 }, (_, i) => i);
-        const gradient2: number[][] = [];
         MathEx.randomize(this.seed);
 
         for (let i = 0; i < 256; i++) {
@@ -30,17 +29,9 @@ export class Perlin extends Noise {
             const value = permutations[index];
             permutations[index] = permutations[i];
             permutations[i] = value;
-
-            gradient2[i] = [];
-
-            for (let j = 0; j < 2; j++)
-                gradient2[i][j] = MathEx.randomInt(-256, 256) / 256;
-
-            this.normalize2(gradient2[i]);
         }
 
         this._permutations = permutations.concat(permutations);
-        this._gradient2 = gradient2.concat(gradient2);
     }
 
     readonly seed: number;
@@ -59,58 +50,48 @@ export class Perlin extends Noise {
     protected get highOutput2() { return Math.sqrt(1 / 4); }
     //*/
 
-    private setup(value: number): [number, number, number, number] {
-        const t = value + this.N;
-        const b0 = Math.floor(t) & 0xFF;// bx0
-        const b1 = (b0 + 1) & 0xFF;     // bx1
-        const r0 = t - Math.floor(t);   // rx0
-        const r1 = r0 - 1.0;            // rx1
-
-        return [b0, b1, r0, r1];
-    }
-
     protected getValueCore(x: number) {
+        const perm = this._permutations;
         const intVal = Math.floor(x);
         const X = intVal & 0xFF;
         x -= intVal;
 
         const sx = x * x * (3 - 2 * x);
-        const u = this.grad1d(this._permutations[X], x);
-        const v = this.grad1d(this._permutations[X + 1], x - 1);
-        // console.log(`u = ${u} = this.grad1d(${this._permutations[X]}, ${x})`);
-        // console.log(`v = ${v} = this.grad1d(${this._permutations[X + 1]}, ${x - 1})`);
+        // const sx = x * x * x * (x * (x * 6 - 15) + 10);
+        const u = this.grad1d(perm[X], x);
+        const v = this.grad1d(perm[X + 1], x - 1);
+        // console.log(`u = ${u} = this.grad1d(${perm[X]}, ${x})`);
+        // console.log(`v = ${v} = this.grad1d(${perm[X + 1]}, ${x - 1})`);
 
         return lerp(u, v, sx);
     }
 
     protected getValue2DCore(x: number, y: number) {
-        const [bx0, bx1, rx0, rx1] = this.setup(x);
-        const [by0, by1, ry0, ry1] = this.setup(y);
+        const perm = this._permutations;
+        let intVal = Math.floor(x);
+        const X = intVal & 0xFF;
+        x -= intVal;
 
-        const i = this._permutations[bx0];
-        const j = this._permutations[bx1];
+        const sx = x * x * (3 - 2 * x);
+        // const sx = x * x * x * (x * (x * 6 - 15) + 10);
 
-        const b00 = this._permutations[i + by0];
-        const b10 = this._permutations[j + by0];
-        const b01 = this._permutations[i + by1];
-        const b11 = this._permutations[j + by1];
+        intVal = Math.floor(y);
+        const Y = intVal & 0xFF;
+        y -= intVal;
 
-        const sx = rx0 * rx0 * (3.0 - 2.0 * rx0);
-        const sy = ry0 * ry0 * (3.0 - 2.0 * ry0);
+        const sy = y * y * (3 - 2 * y);
+        // const sy = y * y * y * (y * (y * 6 - 15) + 10);
 
-        let q: number[];
-        q = this._gradient2[b00];
-        let u = this.at2(rx0, ry0, q);
-        q = this._gradient2[b10];
-        let v = this.at2(rx1, ry0, q);
-        const a = lerp(u, v, sx);
+        const p0 = perm[X] + Y;
+        const p1 = perm[X + 1] + Y;
 
-        q = this._gradient2[b01];
-        u = this.at2(rx0, ry1, q);
-        q = this._gradient2[b11];
-        v = this.at2(rx1, ry1, q);
-        const b = lerp(u, v, sx);
+        const u1 = this.grad2d(perm[p0], x, y);
+        const v1 = this.grad2d(perm[p1], x - 1, y);
+        const u2 = this.grad2d(perm[p0 + 1], x, y - 1);
+        const v2 = this.grad2d(perm[p1 + 1], x - 1, y - 1);
 
+        const a = lerp(u1, v1, sx);
+        const b = lerp(u2, v2, sx);
         return lerp(a, b, sy);
     }
 
@@ -158,16 +139,11 @@ export class Perlin extends Noise {
         this.init();
     }
 
-    private readonly N = 0x1000;
-    private _gradient2!: number[][];
-
-    private at2(rx: number, ry: number, q: number[]) { return rx * q[0] + ry * q[1]; }
     private grad1d(hash: number, x: number) { return (hash & 1) === 0 ? -x : x; }
 
-    private normalize2(v: number[]) {
-        const s = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-        v[0] = v[0] / s;
-        v[1] = v[1] / s;
+    private grad2d(hash: number, x: number, y: number) {
+        const v = (hash & 1) === 0 ? x : y;
+        return (hash & 2) === 0 ? -v : v;
     }
 }
 
