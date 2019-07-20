@@ -1,9 +1,7 @@
 import { CanvasColor, Color, ColorUtils } from '..';
-import { isNumberArray, MathEx, NumberArray } from '../../core';
+import { isNumberArray, NumberArray } from '../../core';
 import { Ease, EaseFunction } from '../../easing';
 import { ColorTweeners, RgbTweener, TweenerKey } from '../tweeners';
-
-const { lerp } = MathEx;
 
 export class Palette {
     constructor(length: number, colorStops: NumberArray, ...colors: CanvasColor[]);
@@ -84,6 +82,16 @@ export class Palette {
         return result;
     }
 
+    static getColorStopIndex(t: number, colorStops: NumberArray, length: number = Infinity) {
+        length = Math.min(length, colorStops.length);
+
+        for (let i = 1; i < length; i++) {
+            if (colorStops[i] > t) return i - 1;
+        }
+
+        return length - 2;
+    }
+
     static getColors(count: number, colors: Color[], colorStops: NumberArray, tween?: TweenerKey, ease?: EaseFunction, result?: Color[]): Color[] {
         if (count < 2) throw new Error("count must be at least 2.");
         if (colors.length < 2) throw new Error("Must have at least 2 colors.");
@@ -92,22 +100,18 @@ export class Palette {
         tween = tween || "rgb";
         ease = ease || Ease.linear;
         const countMinus1 = count - 1;
-        const stopsMinus2 = colorStops.length - 2;
-        const colorsMinus2 = colors.length - 2;
+        const stopsLength = Math.min(colorStops.length, colors.length);
         result = result || new Array<Color>(length);
         const tweener = ColorTweeners.get(tween) || new RgbTweener();
 
         for (let i = 0; i < count; i++) {
             const colorStopT = ease(i / countMinus1);
-            let colorStopIndex = Math.round(lerp(0, stopsMinus2, colorStopT));
-            let startIndex = Math.round(lerp(0, colorsMinus2, colorStopT));
-            const startColor = colors[startIndex];
-            const endColor = colors[startIndex + 1];
-            const stopStart = colorStops[colorStopIndex];
-            const stopEnd = colorStops[colorStopIndex + 1];
+            let index = this.getColorStopIndex(colorStopT, colorStops, stopsLength);
+            const stopStart = colorStops[index];
+            const stopEnd = colorStops[index + 1];
 
             let t = (colorStopT - stopStart) / (stopEnd - stopStart);
-            result[i] = tweener.tween(startColor, endColor, t);
+            result[i] = tweener.tween(colors[index], colors[index + 1], t);
         }
 
         return result;

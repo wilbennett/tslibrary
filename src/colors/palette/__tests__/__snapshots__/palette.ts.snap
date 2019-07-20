@@ -2,56 +2,10 @@
 
 exports[`Should create palettes Should allow creating Palette instance 1`] = `
 Array [
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 8,
-    "_value": -16776961,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": -971243265,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": -1925709569,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 1431634175,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 477167871,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 7412991,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 5592319,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 3706367,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 1885951,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 8,
-    "_value": 65535,
-  },
+  0,
+  0.3333333333333333,
+  0.6666666666666666,
+  1,
 ]
 `;
 
@@ -65,42 +19,42 @@ Array [
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": -532938497,
+    "_value": -11184641,
   },
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": -1101725441,
+    "_value": -5592321,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": -1,
   },
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": -1821900545,
+    "_value": -1428903169,
   },
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": 1433927935,
+    "_value": 1420449023,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": 8388863,
   },
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": 7886335,
+    "_value": 5592575,
   },
   SColor {
     "_converter": RgbConverter {},
     "_flags": 1,
-    "_value": 6853631,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 5619455,
-  },
-  SColor {
-    "_converter": RgbConverter {},
-    "_flags": 1,
-    "_value": 3989759,
+    "_value": 2796031,
   },
   SColor {
     "_converter": RgbConverter {},
@@ -113,6 +67,61 @@ Array [
 exports[`Should create palettes Should allow creating Palette instance 3`] = `
 Array [
   SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": -16776961,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -7105537,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -3092225,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": -1,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -790834945,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": -1816882177,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": 8388863,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 6853631,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 1,
+    "_value": 4837631,
+  },
+  SColor {
+    "_converter": RgbConverter {},
+    "_flags": 8,
+    "_value": 65535,
+  },
+]
+`;
+
+exports[`Should create palettes Should allow creating Palette instance 4`] = `
+Array [
+  SColor {
     "_converter": HslConverter {},
     "_flags": 8,
     "_value": 1644900,
@@ -120,27 +129,32 @@ Array [
   SColor {
     "_converter": HslConverter {},
     "_flags": 1,
-    "_value": 58267236,
+    "_value": 1106404,
   },
   SColor {
     "_converter": HslConverter {},
     "_flags": 1,
-    "_value": 112792548,
+    "_value": 551396,
+  },
+  SColor {
+    "_converter": HslConverter {},
+    "_flags": 8,
+    "_value": 12900,
   },
   SColor {
     "_converter": HslConverter {},
     "_flags": 1,
-    "_value": 169414884,
+    "_value": 84436452,
   },
   SColor {
     "_converter": HslConverter {},
     "_flags": 1,
-    "_value": 226037348,
+    "_value": 168876388,
   },
   SColor {
     "_converter": HslConverter {},
-    "_flags": 1,
-    "_value": 280563300,
+    "_flags": 8,
+    "_value": 253299940,
   },
   SColor {
     "_converter": HslConverter {},
@@ -150,12 +164,7 @@ Array [
   SColor {
     "_converter": HslConverter {},
     "_flags": 1,
-    "_value": 393810916,
-  },
-  SColor {
-    "_converter": HslConverter {},
-    "_flags": 1,
-    "_value": 448337508,
+    "_value": 421074276,
   },
   SColor {
     "_converter": HslConverter {},

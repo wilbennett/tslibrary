@@ -2,17 +2,22 @@ import { Palette, PaletteBuilder } from '..';
 import { CanvasColor, Color, ColorUtils, WebColors } from '../..';
 import { Ease } from '../../../easing';
 
+function formatStops(stops: number[]) {
+    return stops.map(s => s.toFixed(2));
+}
+
 describe("Should create palettes", () => {
     const paletteLength = 10;
-    const refCanvasColors: CanvasColor[] = [WebColors.red, WebColors.green, "blue"];
+    const refCanvasColors: CanvasColor[] = [WebColors.red, "white", WebColors.green, "blue"];
     const refColors = ColorUtils.toColorArray(...refCanvasColors);
-    const stops = [0, 0.5, 1];
+    const stops: number[] = [];
+    Palette.calcColorStops(refCanvasColors.length, stops);
     let colors: Color[] = [];
 
     function validate(paletteOrColors: Palette | Color[]): void {
         if (paletteOrColors instanceof Palette) {
             expect(paletteOrColors.colors).toEqual(colors);
-            expect(paletteOrColors.colorStops).toEqual(stops);
+            expect(formatStops(paletteOrColors.colorStops)).toEqual(formatStops(stops));
         } else {
             expect(paletteOrColors).toEqual(colors);
         }
@@ -39,6 +44,8 @@ describe("Should create palettes", () => {
     });
 
     it("Should allow creating Palette instance", () => {
+        expect(stops).toMatchSnapshot();
+
         let palette = new Palette(paletteLength, stops, ...refCanvasColors);
         expect(palette.colors).toMatchSnapshot();
         expect(palette.colorStops).toEqual(stops);
