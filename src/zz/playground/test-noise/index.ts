@@ -79,6 +79,7 @@ class Tester1D extends NoiseTester {
 
     protected update() {
         let value = this.noise.getValue(this.offset);
+        // let value = this.noise.getValue(Math.round(this.offset));
         // console.log(`offset ${offset}: ${this.value}`);
         this.minV = Math.min(value, this.minV);
         this.maxV = Math.max(value, this.maxV);
@@ -93,6 +94,7 @@ class Tester1D extends NoiseTester {
         // this.ctx.popTransform();
 
         value = this.noise.fractal(this.offset);
+        // value = this.noise.fractal(Math.round(this.offset));
         this.valuesF.shift();
         this.valuesF.push(value);
     }
@@ -142,15 +144,14 @@ class Tester1DFluctuation extends Tester1D {
         this.valuesF = [];
 
         for (let i = this.left; i <= this.right; i += 1) {
-            const value = this.noise.getValue2D(i * this.step, this.offset);
+            const value = this.noise.getValue2D(i * this.step + this.offset, this.offset);
             this.values.push(value);
             this.minV = Math.min(value, this.minV);
             this.maxV = Math.max(value, this.maxV);
         }
 
         for (let i = this.left; i <= this.right; i += 1) {
-            // const value = this.noise.fractal2D(i * this.step, this.offset, this.range * 0.4, 5, 1, 2, 1, 0.5);
-            const value = this.noise.fractal2D(i * this.step, this.offset, undefined, 5, 1, 2, 1, 0.5);
+            const value = this.noise.fractal2D(i * this.step + this.offset, this.offset, undefined, 5, 1, 2, 1, 0.5);
             this.valuesF.push(value);
         }
     }

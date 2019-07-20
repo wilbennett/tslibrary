@@ -73,18 +73,16 @@ export class Perlin extends Noise {
     }
 
     protected getValueCore(x: number) {
-        const t = x + this.N;
-        const intT = Math.floor(t);
-        const bx0 = intT & 0xFF;
-        const bx1 = (bx0 + 1) & 0xFF;
-        const rx0 = t - intT;
-        const rx1 = rx0 - 1.0;
+        const intVal = Math.floor(x);
+        const px0 = intVal & 0xFF;
+        const px1 = (px0 + 1) & 0xFF;
+        x -= intVal;
 
-        const sx = rx0 * rx0 * (3.0 - 2.0 * rx0);
-        const u = rx0 * this._gradient1[this._permutations[bx0]];
-        const v = rx1 * this._gradient1[this._permutations[bx1]];
-        // console.log(`u = ${u} = ${rx0} * ${this._gradient1[this._permutations[bx0]]}`);
-        // console.log(`v = ${v} = ${rx1} * ${this._gradient1[this._permutations[bx1]]}`);
+        const sx = x * x * (3 - 2 * x);
+        const u = x * this._gradient1[this._permutations[px0]];
+        const v = (x - 1) * this._gradient1[this._permutations[px1]];
+        // console.log(`u = ${u} = ${x} * ${this._gradient1[this._permutations[px0]]}`);
+        // console.log(`v = ${v} = ${x - 1} * ${this._gradient1[this._permutations[px1]]}`);
 
         return lerp(u, v, sx);
     }
