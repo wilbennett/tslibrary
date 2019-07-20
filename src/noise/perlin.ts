@@ -22,7 +22,6 @@ export class Perlin extends Noise {
         this.lacunarity = lacunarity;
         this.gain = gain;
         const permutations = Array.from({ length: 256 }, (_, i) => i);
-        const gradient1: number[] = [];
         const gradient2: number[][] = [];
         MathEx.randomize(this.seed);
 
@@ -32,7 +31,6 @@ export class Perlin extends Noise {
             permutations[index] = permutations[i];
             permutations[i] = value;
 
-            gradient1[i] = MathEx.randomInt(-256, 256) / 256;
             gradient2[i] = [];
 
             for (let j = 0; j < 2; j++)
@@ -42,7 +40,6 @@ export class Perlin extends Noise {
         }
 
         this._permutations = permutations.concat(permutations);
-        this._gradient1 = gradient1.concat(gradient1);
         this._gradient2 = gradient2.concat(gradient2);
     }
 
@@ -74,15 +71,14 @@ export class Perlin extends Noise {
 
     protected getValueCore(x: number) {
         const intVal = Math.floor(x);
-        const px0 = intVal & 0xFF;
-        const px1 = (px0 + 1) & 0xFF;
+        const X = intVal & 0xFF;
         x -= intVal;
 
         const sx = x * x * (3 - 2 * x);
-        const u = x * this._gradient1[this._permutations[px0]];
-        const v = (x - 1) * this._gradient1[this._permutations[px1]];
-        // console.log(`u = ${u} = ${x} * ${this._gradient1[this._permutations[px0]]}`);
-        // console.log(`v = ${v} = ${x - 1} * ${this._gradient1[this._permutations[px1]]}`);
+        const u = this.grad1d(this._permutations[X], x);
+        const v = this.grad1d(this._permutations[X + 1], x - 1);
+        // console.log(`u = ${u} = this.grad1d(${this._permutations[X]}, ${x})`);
+        // console.log(`v = ${v} = this.grad1d(${this._permutations[X + 1]}, ${x - 1})`);
 
         return lerp(u, v, sx);
     }
@@ -163,10 +159,10 @@ export class Perlin extends Noise {
     }
 
     private readonly N = 0x1000;
-    private _gradient1!: number[];
     private _gradient2!: number[][];
 
     private at2(rx: number, ry: number, q: number[]) { return rx * q[0] + ry * q[1]; }
+    private grad1d(hash: number, x: number) { return (hash & 1) === 0 ? -x : x; }
 
     private normalize2(v: number[]) {
         const s = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
