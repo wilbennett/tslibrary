@@ -196,7 +196,7 @@ class Tester2DPattern extends NoiseTester {
 
                 const value = this.noise.getValue2D(x * this.step + this.offset, y * this.step * 10);
                 // const value = this.noise.fractal2D(x * this.step + this.offset, y * this.step);
-                const color = this.pcolors[Math.round(this.colorMap.convert(value))];
+                const color = this.pcolors[this.colorMap.convertAsIntClamp(value)];
                 this.rgbConvert.decode(color.rgbValue, image.data, index, "rgba255");
             }
         }
@@ -249,8 +249,7 @@ class Tester2DFluctuation extends Tester2DPattern {
 
                 const value = this.noise.getValue3D(x * this.step + this.offset, y * this.step * 10, this.offset);
                 // const value = this.noise.fractal3D(x * this.step + this.offset, y * this.step, this.offset);
-                let colorIdx = Math.abs(Math.round(this.colorMap.convert(value)));
-                colorIdx = MathEx.clamp(colorIdx, 0, this.pcolors.length - 1);
+                let colorIdx = this.colorMap.convertAsIntClamp(value);
                 const color = this.pcolors[colorIdx];
                 this.rgbConvert.decode(color.rgbValue, image.data, index, "rgba255");
             }
