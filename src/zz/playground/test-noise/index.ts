@@ -252,9 +252,6 @@ class Tester2DFluctuation extends Tester2DPattern {
                 let colorIdx = Math.abs(Math.round(this.colorMap.convert(value)));
                 colorIdx = MathEx.clamp(colorIdx, 0, this.pcolors.length - 1);
                 const color = this.pcolors[colorIdx];
-                if (!color) {
-                    console.log(`value ${value}, ${colorIdx}`);
-                }
                 this.rgbConvert.decode(color.rgbValue, image.data, index, "rgba255");
             }
         }
