@@ -1,3 +1,5 @@
+import { MathEx } from '.';
+
 export class RangeMapper {
     private _slope!: number;
     private _intercept!: number;
@@ -39,6 +41,27 @@ export class RangeMapper {
             this.calcSlopeIntercept();
 
         return value * this._slope + this._intercept;
+    }
+
+    convertClamp(value: number) { return MathEx.clamp(this.convert(value), this._newMin, this._newMax); }
+    convertAsInt(value: number) { return Math.round(this.convert(value)); }
+
+    convertAsIntClamp(value: number) {
+        return MathEx.clamp(Math.round(this.convert(value)), this._newMin, this._newMax);
+    }
+
+    reverse(value: number) {
+        if (this._dirty)
+            this.calcSlopeIntercept();
+
+        return this._slope !== 0 ? (value - this._intercept) / this._slope : this.min;
+    }
+
+    reverseClamp(value: number) { return MathEx.clamp(this.reverse(value), this._min, this._max); }
+    reverseAsInt(value: number) { return Math.round(this.reverse(value)); }
+
+    reverseAsIntClamp(value: number) {
+        return MathEx.clamp(Math.round(this.reverse(value)), this._min, this._max);
     }
 
     private calcSlopeIntercept() {
