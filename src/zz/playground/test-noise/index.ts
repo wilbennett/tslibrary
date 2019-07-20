@@ -166,7 +166,7 @@ class Tester2DPattern extends NoiseTester {
         // this.colors = [WebColors.red, WebColors.green, WebColors.blue];
 
         this.palette = new Palette("rgb", 200, Ease.smootherStep, ...this.colors);
-        this.colorMap = new RangeMapper(this.noise.minOutput2, this.noise.maxOutput2, 0, this.palette.colors.length - 1);
+        this.colorMap = new RangeMapper(-this.range, this.range, 0, this.palette.colors.length - 1);
         this.pcolors = this.palette.colors;
         this.rgbConvert = new RgbConverter();
     }
@@ -228,6 +228,47 @@ class Tester2DPattern extends NoiseTester {
     }
 }
 
+class Tester2DFluctuation extends Tester2DPattern {
+    constructor(canvas: HTMLCanvasElement) {
+        super(canvas);
+    }
+
+    protected renderCore(ctx: CanvasContext) {
+        const rand = MathEx.random();
+
+        if (rand < 0.1)
+            this.pcolors.push(this.pcolors.shift()!);
+        else if (rand < 0.15)
+            this.pcolors.unshift(this.pcolors.pop()!);
+
+        const image = ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let y = 0; y < this.canvas.height; y++) {
+            for (let x = 0; x < this.canvas.width; x++) {
+                const index = y * (this.canvas.width * 4) + x * 4;
+
+                const value = this.noise.getValue3D(x * this.step + this.offset, y * this.step * 10, this.offset);
+                // const value = this.noise.fractal3D(x * this.step + this.offset, y * this.step, this.offset);
+                let colorIdx = Math.abs(Math.round(this.colorMap.convert(value)));
+                colorIdx = MathEx.clamp(colorIdx, 0, this.pcolors.length - 1);
+                const color = this.pcolors[colorIdx];
+                if (!color) {
+                    console.log(`value ${value}, ${colorIdx}`);
+                }
+                this.rgbConvert.decode(color.rgbValue, image.data, index, "rgba255");
+            }
+        }
+
+        ctx.putImageData(image, 0, 0);
+        this.drawPalette(ctx, this.palette.colors, this.bottom, 20);
+
+        this.offset += this.step;
+
+        if (this.offset > 100000000)
+            this.offset = 0;
+    }
+}
+
 console.clear();
 const w = 150;
 const h = 100;
@@ -243,12 +284,17 @@ const canvas3 = <HTMLCanvasElement>document.getElementById("canvas3");
 canvas3.width = w;
 canvas3.height = h;
 
+const canvas4 = <HTMLCanvasElement>document.getElementById("canvas4");
+canvas4.width = w;
+canvas4.height = h;
+
 let frame = 0;
 
 const tests = [
     new Tester1D(canvas1),
     new Tester1DFluctuation(canvas2),
     new Tester2DPattern(canvas3),
+    new Tester2DFluctuation(canvas4),
 ];
 
 function loop() {

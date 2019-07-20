@@ -49,6 +49,8 @@ export class Perlin extends Noise {
     protected get lowOutput2() { return -Math.sqrt(1 / 4); }
     protected get highOutput2() { return Math.sqrt(1 / 4); }
     //*/
+    protected get lowOutput3() { return -Math.sqrt(3 / 4); }
+    protected get highOutput3() { return Math.sqrt(3 / 4); }
 
     protected getValueCore(x: number) {
         const perm = this._permutations;
@@ -93,6 +95,56 @@ export class Perlin extends Noise {
         const a = lerp(u1, v1, sx);
         const b = lerp(u2, v2, sx);
         return lerp(a, b, sy);
+    }
+
+    protected getValue3DCore(x: number, y: number, z: number) {
+        const perm = this._permutations;
+        let intVal = Math.floor(x);
+        const X = intVal & 0xFF;
+        x -= intVal;
+
+        const sx = x * x * (3 - 2 * x);
+        // const sx = x * x * x * (x * (x * 6 - 15) + 10);
+
+        intVal = Math.floor(y);
+        const Y = intVal & 0xFF;
+        y -= intVal;
+
+        const sy = y * y * (3 - 2 * y);
+        // const sy = y * y * y * (y * (y * 6 - 15) + 10);
+
+        intVal = Math.floor(z);
+        const Z = intVal & 0xFF;
+        z -= intVal;
+
+        const sz = z * z * (3 - 2 * z);
+        // const sz = z * z * z * (z * (z * 6 - 15) + 10);
+
+        const p0 = perm[X] + Y;
+        const p00 = perm[p0] + Z;
+        const p01 = perm[p0 + 1] + Z;
+        const p1 = perm[X + 1] + Y;
+        const p10 = perm[p1] + Z;
+        const p11 = perm[p1 + 1] + Z;
+
+        const u1 = this.grad3d(perm[p00], x, y, z);
+        const v1 = this.grad3d(perm[p10], x - 1, y, z);
+        const u2 = this.grad3d(perm[p01], x, y - 1, z);
+        const v2 = this.grad3d(perm[p11], x - 1, y - 1, z);
+        const u3 = this.grad3d(perm[p00 + 1], x, y, z - 1);
+        const v3 = this.grad3d(perm[p10 + 1], x - 1, y, z - 1);
+        const u4 = this.grad3d(perm[p01 + 1], x, y - 1, z - 1);
+        const v4 = this.grad3d(perm[p11 + 1], x - 1, y - 1, z - 1);
+
+        const a = lerp(u1, v1, sx);
+        const b = lerp(u2, v2, sx);
+        const c = lerp(u3, v3, sx);
+        const d = lerp(u4, v4, sx);
+
+        const e = lerp(a, b, sy);
+        const f = lerp(c, d, sy);
+
+        return lerp(e, f, sz);
     }
 
     static get octaves() { this.ensureInstance(); return this._instance.octaves; }
@@ -144,6 +196,14 @@ export class Perlin extends Noise {
     private grad2d(hash: number, x: number, y: number) {
         const v = (hash & 1) === 0 ? x : y;
         return (hash & 2) === 0 ? -v : v;
+    }
+
+    private grad3d(hash: number, x: number, y: number, z: number) {
+        // Convert lo 4 bits of hash code into 12 gradient directions.
+        hash = hash & 15;
+        const u = hash < 8 ? x : y;
+        const v = hash < 4 ? y : hash == 12 || hash == 14 ? x : z;
+        return ((hash & 1) == 0 ? u : -u) + ((hash & 2) == 0 ? v : -v);
     }
 }
 
