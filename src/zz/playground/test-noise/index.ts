@@ -1,4 +1,4 @@
-import { CanvasColor, Color, Palette, RgbConverter, SColor, WebColors } from '../../../colors';
+import { CanvasColor, Color, Palette, RgbConverter, SColor } from '../../../colors';
 import { MathEx, RangeMapper } from '../../../core';
 import { Ease } from '../../../easing';
 import { Noise, Perlin } from '../../../noise';
@@ -160,8 +160,8 @@ class Tester2DPattern extends NoiseTester {
     constructor(canvas: HTMLCanvasElement) {
         super(canvas);
 
-        this.colors = [new SColor(235, 250, 225), new SColor(0, 0, 255), new SColor(235, 250, 225), new SColor(25, 25, 255)];
-        this.colors = [WebColors.blue, WebColors.white, WebColors.blue];
+        this.colors = [new SColor(235, 250, 225), new SColor(0, 0, 255), new SColor(235, 250, 225), new SColor(25, 25, 255), new SColor(235, 250, 225)];
+        // this.colors = [WebColors.blue, WebColors.white, WebColors.blue];
         // this.colors = [WebColors.red, WebColors.green, WebColors.blue];
 
         this.palette = new Palette("rgb", 200, Ease.smootherStep, ...this.colors);
@@ -244,17 +244,17 @@ canvas3.height = h;
 
 let frame = 0;
 
-const test1D = new Tester1D(canvas1);
-const test1DFluctuation = new Tester1DFluctuation(canvas2);
-const test2DPattern = new Tester2DPattern(canvas3);
+const tests = [
+    new Tester1D(canvas1),
+    new Tester1DFluctuation(canvas2),
+    new Tester2DPattern(canvas3),
+];
 
 function loop() {
     try {
-        test1D.render();
-        test1DFluctuation.render();
-        test2DPattern.render();
+        tests.forEach(t => t.render());
 
-        // if (frame < 100)
+        // if (frame < 10)
         requestAnimationFrame(loop);
         frame++;
     } catch (e) {

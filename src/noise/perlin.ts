@@ -62,11 +62,29 @@ export class Perlin extends Noise {
     protected get highOutput2() { return Math.sqrt(1 / 4); }
     //*/
 
+    private setup(value: number): [number, number, number, number] {
+        const t = value + this.N;
+        const b0 = Math.floor(t) & 0xFF;// bx0
+        const b1 = (b0 + 1) & 0xFF;     // bx1
+        const r0 = t - Math.floor(t);   // rx0
+        const r1 = r0 - 1.0;            // rx1
+
+        return [b0, b1, r0, r1];
+    }
+
     protected getValueCore(x: number) {
-        const [bx0, bx1, rx0, rx1] = this.setup(x);
-        const sx = this.s_curve(rx0);
+        const t = x + this.N;
+        const intT = Math.floor(t);
+        const bx0 = intT & 0xFF;
+        const bx1 = (bx0 + 1) & 0xFF;
+        const rx0 = t - intT;
+        const rx1 = rx0 - 1.0;
+
+        const sx = rx0 * rx0 * (3.0 - 2.0 * rx0);
         const u = rx0 * this._gradient1[this._permutations[bx0]];
         const v = rx1 * this._gradient1[this._permutations[bx1]];
+        // console.log(`u = ${u} = ${rx0} * ${this._gradient1[this._permutations[bx0]]}`);
+        // console.log(`v = ${v} = ${rx1} * ${this._gradient1[this._permutations[bx1]]}`);
 
         return lerp(u, v, sx);
     }
@@ -83,8 +101,8 @@ export class Perlin extends Noise {
         const b01 = this._permutations[i + by1];
         const b11 = this._permutations[j + by1];
 
-        const sx = this.s_curve(rx0);
-        const sy = this.s_curve(ry0);
+        const sx = rx0 * rx0 * (3.0 - 2.0 * rx0);
+        const sy = ry0 * ry0 * (3.0 - 2.0 * ry0);
 
         let q: number[];
         q = this._gradient2[b00];
@@ -150,18 +168,7 @@ export class Perlin extends Noise {
     private _gradient1!: number[];
     private _gradient2!: number[][];
 
-    private s_curve(t: number) { return t * t * (3.0 - 2.0 * t); }
     private at2(rx: number, ry: number, q: number[]) { return rx * q[0] + ry * q[1]; }
-
-    private setup(value: number): [number, number, number, number] {
-        const t = value + this.N;
-        const b0 = Math.floor(t) & 0xFF;// bx0
-        const b1 = (b0 + 1) & 0xFF;     // bx1
-        const r0 = t - Math.floor(t);   // rx0
-        const r1 = r0 - 1.0;            // rx1
-
-        return [b0, b1, r0, r1];
-    }
 
     private normalize2(v: number[]) {
         const s = Math.sqrt(v[0] * v[0] + v[1] * v[1]);
