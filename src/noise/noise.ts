@@ -122,6 +122,18 @@ export abstract class Noise {
         return output / denom;
     }
 
+    // https://www.nvidia.com/docs/IO/8228/GDC2003_OGL_ProceduralNoise.pdf
+    // float turbulence(float3 p, int octaves, float lacunarity, float gain) {
+    //     float sum = 0;
+    //     float amp = 1;
+    //     for (int i = 0; i < octaves; i++) {
+    //         sum += amp * abs(noise(p));
+    //         p *= lacunarity;
+    //         amp *= gain;
+    //     }
+    //     return sum;
+    // }
+
     fractal2D(
         x: number,
         y: number,
