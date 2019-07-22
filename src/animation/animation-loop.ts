@@ -1,4 +1,6 @@
-export type AnimCallback = (now: DOMHighResTimeStamp, timestep: number) => void;
+import { TimeStep } from '../core';
+
+export type AnimCallback = (now: DOMHighResTimeStamp, step: TimeStep) => void;
 
 export class AnimationLoop {
   private _active: boolean = false;
@@ -64,12 +66,12 @@ export class AnimationLoop {
     // Update in secondsPerFrame increments. This reduces floating point errors and allows
     // catching up on missed updates without rendering each.
     while (this._secondsToUpdate >= this.secondsPerFrame) {
-      this._updaters.forEach(update => update(this.now, this.secondsPerFrame));
+      this._updaters.forEach(update => update(this.now, TimeStep.DT_60_FPS));
 
       this._secondsToUpdate -= this.secondsPerFrame;
       this.now += this.secondsPerFrame;
     }
 
-    this._renderers.forEach(render => render(this.now, this.secondsPerFrame));
+    this._renderers.forEach(render => render(this.now, TimeStep.DT_60_FPS));
   }
 }
