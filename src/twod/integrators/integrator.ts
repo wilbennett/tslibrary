@@ -1,6 +1,8 @@
 import { DEFAULT_MATERIAL, MassInfo, TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 
+export type ForcesApplier = (now: number, position: Vector, velocity: Vector) => void;
+
 export class Integrator {
     get isNull() { return true; }
     get isDirty() { return false; }
@@ -16,18 +18,22 @@ export class Integrator {
     get velocity() { return Vector.empty; }
     get acceleration() { return Vector.empty; }
     get angle() { return 0; }
+    // @ts-ignore - unused param.
+    set angle(value) { }
     get angularVelocity() { return 0; }
     get angularAcceleration() { return 0; }
+    get applyForces(): ForcesApplier { return () => { }; }
+    // @ts-ignore - unused param.
+    set applyForces(value) { }
 
     dirty() { }
     clean() { }
-    reset() { }
     // @ts-ignore - unused param.
-    applyForce(force: Vector): void { }
+    applyForce(force: Vector) { }
     // @ts-ignore - unused param.
-    applyTorque(radians: number): void { }
+    applyTorque(radians: number) { }
     // @ts-ignore - unused param.
-    applyImpulse(impulse: Vector, contactVector: Vector): void { }
+    applyImpulse(impulse: Vector, contactVector: Vector) { }
     // @ts-ignore - unused param.
-    integrate(timestep: TimeStep): void { }
+    integrate(now: number, step: TimeStep) { }
 }
