@@ -1,5 +1,5 @@
-import { Brush, CanvasColor, Compositions } from '.';
-import { Color } from '../../colors';
+import { Brush, Compositions } from '.';
+import { Color, CanvasColor } from '../../colors';
 import { BoundsLike, MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
 import { Vector, VectorCollection } from '../../vectors';
