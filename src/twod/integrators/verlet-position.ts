@@ -26,7 +26,7 @@ export class VerletPosition extends IntegratorBase {
 
     const temp = pos.clone();
     this.updateForces(now, pos, this.velocity);
-    const acc = this._force.scale(this.massInfo.massInverse);
+    const acc = this._force.scaleN(this.massInfo.massInverse);
     pos.add(pos).sub(oldPos).addScaled(acc, dtSqr);
     oldPos.copyFrom(temp);
 

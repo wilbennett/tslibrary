@@ -30,12 +30,12 @@ export class VerletPositionTime extends IntegratorBase {
     const pos = this.position;
     const oldPos = this.oldPosition;
 
-    const temp = pos.clone(); // store current position in temp variable.
+    const temp = pos.clone();
     this.updateForces(now, pos, this.velocity);
-    const acc = this._force.scale(this.massInfo.massInverse); // acceleration based on current pos and velocity.
-    pos.addScaled(pos.subN(oldPos), dt / olddt).addScaled(acc, dtSqr); // update position.
-    this._velocity.copyFrom(pos.subN(oldPos).scale(halfDivDt));	// estimate new velocity.
-    oldPos.copyFrom(temp); // store pos before update; will be pos at previous timestep next time.
+    const acc = this._force.scaleN(this.massInfo.massInverse);
+    pos.addScaled(pos.subN(oldPos), dt / olddt).addScaled(acc, dtSqr);
+    this._velocity.copyFrom(pos.subN(oldPos).scale(halfDivDt));
+    oldPos.copyFrom(temp);
 
     // TODO: Update.
     this._angle += this._angularVelocity * dt;
