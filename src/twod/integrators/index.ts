@@ -7,3 +7,4 @@ export * from "./rk2";
 export * from "./rk4";
 export * from "./verlet-position-time";
 export * from "./verlet-position";
+export * from "./verlet-velocity";
