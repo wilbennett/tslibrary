@@ -21,6 +21,8 @@ export class DataList {
   readonly elementCount: number;
   readonly values: NumberArray;
 
+  getStartIndex(index: number) { return index * this.elementCount; }
+
   clone() {
     const values = isTypedArray(this.values)
       // @ts-ignore - constructor call.

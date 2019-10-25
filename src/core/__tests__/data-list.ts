@@ -6,7 +6,7 @@ function fillValues(values: NumberArray) {
   }
 }
 
-describe.only("Should allow working with data list", () => {
+describe("Should allow working with data list", () => {
   const elementCount = 3;
   const count1 = 2;
   const count2 = 1;
@@ -72,5 +72,14 @@ describe.only("Should allow working with data list", () => {
         list2.copyFrom(list1);
         expect(list2.values.toString()).toMatchSnapshot();
       });
+  });
+
+  it("Should calculate start index", () => {
+    const list = createArray1();
+
+    expect(list.getStartIndex(0)).toBe(0);
+    expect(list.getStartIndex(1)).toBe(elementCount);
+    expect(list.getStartIndex(2)).toBe(elementCount * 2);
+    expect(list.getStartIndex(3)).toBe(elementCount * 3);
   });
 });
