@@ -3,3 +3,4 @@ lib/
 tsconfig.tsbuildinfo
 .cache/
 dist/
+src/quokka.ts

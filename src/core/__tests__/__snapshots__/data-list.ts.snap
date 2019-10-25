@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should allow working with data list Should allow copying values Should copy array to array 1`] = `"0,1,2,3,4,5"`;
+
+exports[`Should allow working with data list Should allow copying values Should copy large array to small array 1`] = `"0,1,2"`;
+
+exports[`Should allow working with data list Should allow copying values Should copy large typed array to small typed array 1`] = `"0,1,2"`;
+
+exports[`Should allow working with data list Should allow copying values Should copy small array to large array 1`] = `"0,1,2,,,"`;
+
+exports[`Should allow working with data list Should allow copying values Should copy small typed array to large typed array 1`] = `"0,1,2,0,0,0"`;
+
+exports[`Should allow working with data list Should allow copying values Should copy typed array to typed array 1`] = `"0,1,2,3,4,5"`;
