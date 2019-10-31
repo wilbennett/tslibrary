@@ -11,16 +11,17 @@ describe("Should allow working with data list", () => {
   const count1 = 2;
   const count2 = 1;
 
-  function createArray1() { return new DataList(count1, elementCount); }
-  function createArray2() { return new DataList(count2, elementCount); }
-  function createFloat32Array1() { return new DataList(new Float32Array(count1 * elementCount), elementCount); }
-  function createFloat32Array2() { return new DataList(new Float32Array(count2 * elementCount), elementCount); }
+  function create1() { return new DataList(count1, elementCount); }
+  function create2() { return new DataList(count2, elementCount); }
+  function createArray1() { return new DataList(count1, elementCount, new Array<number>(count1 * elementCount)); }
+  function createFloat32Array1() { return new DataList(count1, elementCount, new Float32Array(count1 * elementCount)); }
+  function createFloat32Array2() { return new DataList(count2, elementCount, new Float32Array(count2 * elementCount)); }
 
   describe("Should allow creating instances", () => {
     it.each([
-      ["count and element count", createArray1()],
-      ["existing array and element count", new DataList(new Array<number>(count1 * elementCount), elementCount)],
-      ["existing typed array and element count", new DataList(new Float32Array(count1 * elementCount), elementCount)],
+      ["count and element count", create1()],
+      ["existing array", createArray1()],
+      ["existing typed array", createFloat32Array1()],
     ])(
       "Should allow creating with %s",
       (_, l) => {
@@ -34,7 +35,7 @@ describe("Should allow working with data list", () => {
 
   describe("Should allow cloning", () => {
     it.each([
-      ["array values", createArray1()],
+      ["array values", create1()],
       ["typed array values", createFloat32Array1()]
     ])(
       "Should clone with %s",
@@ -55,9 +56,9 @@ describe("Should allow working with data list", () => {
 
   describe("Should allow copying values", () => {
     it.each([
-      ["array to array", createArray1(), createArray1()],
-      ["small array to large array", createArray2(), createArray1()],
-      ["large array to small array", createArray1(), createArray2()],
+      ["array to array", create1(), create1()],
+      ["small array to large array", create2(), create1()],
+      ["large array to small array", create1(), create2()],
       ["typed array to typed array", createFloat32Array1(), createFloat32Array1()],
       ["small typed array to large typed array", createFloat32Array2(), createFloat32Array1()],
       ["large typed array to small typed array", createFloat32Array1(), createFloat32Array2()]
@@ -75,7 +76,7 @@ describe("Should allow working with data list", () => {
   });
 
   it("Should calculate start index", () => {
-    const list = createArray1();
+    const list = create1();
 
     expect(list.getStartIndex(0)).toBe(0);
     expect(list.getStartIndex(1)).toBe(elementCount);

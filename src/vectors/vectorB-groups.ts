@@ -1,7 +1,8 @@
-import { VectorBCollection, VectorGroups } from '.';
+import { VectorGroups } from '.';
+import { DataList } from '../core';
 
 export class VectorBGroups extends VectorGroups {
-    add(groupName: string, group: VectorBCollection) {
-        this._groups.set(groupName, group);
-    }
+  constructor(public readonly data: DataList) {
+    super();
+  }
 }

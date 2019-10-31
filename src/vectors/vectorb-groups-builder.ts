@@ -1,54 +1,58 @@
 import {
-    Vector1BCollection,
-    Vector2BCollection,
-    Vector3BCollection,
-    VectorBCollection,
-    VectorBGroups,
-    VectorData,
-    VectorDimension,
-    VectorGroups,
-    VectorGroupsBuilder,
+  GroupInfo,
+  VectorBCollection,
+  VectorBGroups,
+  VectorDataXYW,
+  VectorDataXYZW,
+  VectorGroups,
+  VectorGroupsBuilder,
 } from '.';
+import { DataList } from '../core';
+import { VectorDataX } from './vector-datax';
 
-export abstract class VectorBGroupsBuilder extends VectorGroupsBuilder {
-    protected _groups = new VectorBGroups();
+export class VectorBGroupsBuilder extends VectorGroupsBuilder {
+  get Groups(): VectorGroups {
+    let size = this.calcSize(this._groupInfos);
+    const buffer = this.createBuffer(size);
+    const bufferValues = buffer.values;
+    const groups = new VectorBGroups(buffer);
+    let index = 0;
 
-    get Groups(): VectorGroups {
-        const buffer = this.createBuffer(this._groups.elementCount);
-        const array = this.createValues(buffer);
-        let index = 0;
-        let collections = this._groups.groups.values();
+    for (const [name, count, elementCount] of this._groupInfos) {
+      let data: DataList;
 
-        for (const collection of collections) {
-            const item = <VectorBCollection>collection;
-            item.setStorage(array, index);
-            index += item.elementCount;
-        }
+      switch (elementCount) {
+        case 1:
+          data = new VectorDataX(count, bufferValues, index);
+          break;
+        case 3:
+          data = new VectorDataXYW(count, bufferValues, index);
+          break;
+        case 4:
+          data = new VectorDataXYZW(count, bufferValues, index);
+          break;
+        default: throw new Error(`Unsupported element count (${elementCount}).`);
+      }
 
-        return this._groups;
+      const group = new VectorBCollection(data);
+      groups.add(name, group);
+      index += data.elementCount;
     }
 
-    add(groupName: string, dimensions: VectorDimension, count: number) {
-        switch (dimensions) {
-            case 1:
-                this._groups.add(groupName, new Vector1BCollection(count));
-                break;
+    return groups;
+  }
 
-            case 2:
-                this._groups.add(groupName, new Vector2BCollection(count));
-                break;
+  protected calcSize(groupInfos: GroupInfo[]) {
+    let size = 0;
 
-            case 3:
-                this._groups.add(groupName, new Vector3BCollection(count));
-                break;
-
-            default:
-                this.unsupportedDimension(dimensions);
-        }
-
-        return this;
+    for (let [, count, elementCount] of groupInfos) {
+      size += count * elementCount;
     }
 
-    protected abstract createBuffer(elementCount: number): ArrayBuffer;
-    protected abstract createValues(buffer: ArrayBuffer): VectorData;
+    return size;
+  }
+
+  protected createBuffer(size: number): DataList {
+    return new DataList(size, 1);
+  }
 }

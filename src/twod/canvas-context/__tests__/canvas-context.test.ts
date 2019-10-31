@@ -1,7 +1,7 @@
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Bounds } from '../../../misc';
-import { PVector2, Vector, Vector2, Vector2Collection } from '../../../vectors';
+import { PVector2, Vector, Vector2, VectorCollection } from '../../../vectors';
 import { CanvasRenderingContext2D } from '../__mocks__/canvas-rendering-context2d';
 import { ImageData } from '../__mocks__/image-data';
 import { CanvasContext, RenderContextProps } from '../canvas-context';
@@ -625,7 +625,7 @@ describe("Should handle context methods", () => {
         const size = Vector2.create(7, 7);
         const bounds = new Bounds(controlPoint1, size);
         const points = [Vector2.create(0, 0), Vector2.create(10, 10), Vector2.create(20, 0)];
-        const collection = new Vector2Collection(...points);
+        const collection = new VectorCollection(...points);
 
         context.arc(center, radius.x, 0, twoPI);
         context.arc(center, radius.x, 0, twoPI, true);

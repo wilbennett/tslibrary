@@ -4,16 +4,16 @@ import { DataList } from '../../core';
 describe("Should allow working with vector data", () => {
   const count = 2;
 
-  function createX() { return new VectorDataX(count); }
-  function createXYW() { return new VectorDataXYW(count); }
-  function createXYZW() { return new VectorDataXYZW(count); }
-  function createArrayX() { return new VectorDataX(new Array<number>(count)); }
-  function createArrayXYW() { return new VectorDataXYW(new Array<number>(count * 3)); }
-  function createArrayXYZW() { return new VectorDataXYZW(new Array<number>(count * 4)); }
+  function createX(): DataList { return new VectorDataX(count); }
+  function createXYW(): DataList { return new VectorDataXYW(count); }
+  function createXYZW(): DataList { return new VectorDataXYZW(count); }
+  function createArrayX(): DataList { return new VectorDataX(count, new Array<number>(count)); }
+  function createArrayXYW(): DataList { return new VectorDataXYW(count, new Array<number>(count * 3)); }
+  function createArrayXYZW(): DataList { return new VectorDataXYZW(count, new Array<number>(count * 4)); }
 
-  function createFloat32X() { return new VectorDataX(new Float32Array(count)); }
-  function createFloat32XYW() { return new VectorDataXYW(new Float32Array(count * 3)); }
-  function createFloat32XYZW() { return new VectorDataXYZW(new Float32Array(count * 4)); }
+  function createFloat32X(): DataList { return new VectorDataX(count, new Float32Array(count)); }
+  function createFloat32XYW(): DataList { return new VectorDataXYW(count, new Float32Array(count * 3)); }
+  function createFloat32XYZW(): DataList { return new VectorDataXYZW(count, new Float32Array(count * 4)); }
 
   describe("Should allow creating instances", () => {
     it.each([
