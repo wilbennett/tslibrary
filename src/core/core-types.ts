@@ -1,3 +1,10 @@
+export type Tristate<T> = T | undefined | null;
+export type Constructor<T> = new (...args: any[]) => T;
+
+export interface IDisposable {
+  dispose(): void;
+}
+
 export type TypedArray
   = Float32Array
   | Float64Array
