@@ -117,17 +117,17 @@ export class CanvasContext {
   //================================================================================================================
   save() {
     // NOTE: Need to call original context save and restore to properly remove clip region.
-    // this.pushProps();
-    // this.pushTransform();
     this.ctx.save();
+    this.pushProps();
+    this.pushTransform();
     return this;
   }
 
   restore() {
     // NOTE: Need to call original context save and restore to properly remove clip region.
-    // this.popProps();
-    // this.popTransform();
     this.ctx.restore();
+    this.popProps();
+    this.popTransform();
     return this;
   }
 
