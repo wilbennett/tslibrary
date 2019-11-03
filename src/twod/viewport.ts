@@ -33,14 +33,23 @@ export class Viewport {
   get transform() { return this.matrix.values; }
   get transformInverse() { return this.matrix.inverse; }
 
+  protected _scale?: number;
   get scale() {
-    const viewSize = this.viewBounds.size;
-    return this.screenBounds.size.multN(1 / viewSize.x, 1 / viewSize.y, 1);
+    if (this._scale === undefined) {
+      const viewSize = this.viewBounds.size;
+      const screenSize = this.screenBounds.size;
+      this._scale = Math.max(screenSize.x, screenSize.y) / Math.max(viewSize.x, viewSize.y);
+    }
+
+    return this._scale;
   }
 
   protected _isTransformed: boolean = false;
 
-  resetTransform() { this._matrix = undefined; }
+  resetTransform() {
+    this._matrix = undefined;
+    this._scale = undefined;
+  }
 
   applyTransform() {
     this.ctx
