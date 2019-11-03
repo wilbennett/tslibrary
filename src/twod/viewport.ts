@@ -10,6 +10,16 @@ export class Viewport {
     viewBounds: Bounds,
     worldBounds: Bounds) {
     this.ctx = ctx;
+
+    if (screenBounds.direction !== "down")
+      screenBounds.withDirection("down");
+
+    if (viewBounds.direction !== "up")
+      viewBounds.withDirection("up");
+
+    if (worldBounds.direction !== "up")
+      worldBounds.withDirection("up");
+
     this.screenBounds = screenBounds;
     this.viewBounds = viewBounds;
     this.worldBounds = worldBounds;

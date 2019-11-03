@@ -15,39 +15,39 @@ export class Bounds {
   constructor(param1: Vector | number | string, param2: any, param3?: any, param4?: any, param5?: any, param6?: any, param7?: any, param8?: any) {
     this.center = Vector.empty;
     this.halfSize = Vector.empty;
-    this.direction = "up";
+    this._direction = "up";
 
     if (param1 instanceof Vector && param2 instanceof Vector) {
       const position = param1;
       this.halfSize = param2.scaleN(0.5);
       this.center = position.displaceByN(this.halfSize);
-      this.direction = param3 || "up";
+      this._direction = param3 || "up";
     } else if (typeof param1 === "number") {
       if (arguments.length >= 6) {
         const position = Vector3D.createPosition(param1, param2, param3);
         this.halfSize = Vector3D.createDirection(param4 * 0.5, param5 * 0.5, param6 * 0.5);
         this.center = position.displaceByN(this.halfSize);
-        this.direction = param7 || "up";
+        this._direction = param7 || "up";
       } else {
         const position = Vector2D.createPosition(param1, param2);
         this.halfSize = Vector2D.createDirection(param3 * 0.5, param4 * 0.5);
         this.center = position.displaceByN(this.halfSize);
-        this.direction = param5 || "up";
+        this._direction = param5 || "up";
       }
     } else if (typeof param1 === "string") { // center or centerhalf.
       if (param1 === "center") {
         if (param2 instanceof Vector && param3 instanceof Vector) {
           this.halfSize = param3.scaleN(0.5);
           this.center = param2;
-          this.direction = param4 || "up";
+          this._direction = param4 || "up";
         } else if (typeof param2 === "number") {
           if (arguments.length >= 7) {
             this.halfSize = Vector3D.createDirection(param5 * 0.5, param6 * 0.5, param7 * 0.5);
-            this.direction = param8 || "up";
+            this._direction = param8 || "up";
             this.center = Vector3D.createPosition(param2, param3, param4);
           } else {
             this.halfSize = Vector2D.createDirection(param4 * 0.5, param5 * 0.5);
-            this.direction = param6 || "up";
+            this._direction = param6 || "up";
             this.center = Vector2D.createPosition(param2, param3);
           }
         }
@@ -55,16 +55,16 @@ export class Bounds {
         if (param2 instanceof Vector && param3 instanceof Vector) {
           this.center = param2;
           this.halfSize = param3;
-          this.direction = param4 || "up";
+          this._direction = param4 || "up";
         } else if (typeof param2 === "number") {
           if (arguments.length >= 7) {
             this.halfSize = Vector3D.createDirection(param5, param6, param7);
             this.center = Vector3D.createPosition(param2, param3, param4);
-            this.direction = param8 || "up";
+            this._direction = param8 || "up";
           } else {
             this.center = Vector2D.createPosition(param2, param3);
             this.halfSize = Vector2D.createDirection(param4, param5);
-            this.direction = param6 || "up";
+            this._direction = param6 || "up";
           }
         }
       }
@@ -73,7 +73,8 @@ export class Bounds {
 
   public center: Vector;
   public halfSize: Vector;
-  public readonly direction: BoundsDirection;
+  protected _direction: BoundsDirection;
+  get direction() { return this._direction; }
   get size() { return this.halfSize.scaleN(2); }
   get min() { return this.center.displaceByN(this.halfSize.negateN()); }
   get max() { return this.center.addN(this.halfSize); }
@@ -101,6 +102,15 @@ export class Bounds {
   get centerY() { return this.center.y; }
 
   toString() { return `(${this.min}, ${this.max})`; }
+
+  withDirection(direction: BoundsDirection): Bounds {
+    this._direction = direction;
+    return this;
+  }
+
+  withDirectionN(direction: BoundsDirection): Bounds {
+    return new Bounds("centerhalf", this.center, this.halfSize, direction);
+  }
 
   withCenter(center: Vector): Bounds;
   withCenter(x: number, y: number, z: number): Bounds;
