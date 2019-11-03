@@ -2,6 +2,7 @@ import { Brush, Compositions } from '.';
 import { CanvasColor, Color } from '../../colors';
 import { BoundsLike, MathEx } from '../../core';
 import { Matrix, Matrix2, MatrixValues } from '../../matrix';
+import { Bounds } from '../../misc';
 import { Vector, VectorCollection } from '../../vectors';
 
 type NonFunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? never : K }[keyof T];
@@ -45,6 +46,7 @@ export class CanvasContext {
   }
 
   readonly ctx: CanvasRenderingContext2D;
+  get bounds() { return new Bounds(0, 0, this.ctx.canvas.width, this.ctx.canvas.height, "down"); }
 
   pushProps() {
     const props: RenderContextProps = {};
