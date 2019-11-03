@@ -1,5 +1,5 @@
 import { WebColors } from '../../../colors';
-import { Ease, EaseRunner, NumberEaser, PingPongEaser, RepeatEaser, SequentialEaser } from '../../../easing';
+import { Ease, EaseRunner, NumberEaser, SequentialEaser, VectorEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { CanvasContext, ContextProps, Viewport } from '../../../twod';
 import { UiUtils } from '../../../utils';
@@ -29,7 +29,6 @@ ctx2.fillRect(0, 0, width, height);
 ctx2.translate(width * 0.5, height * 0.5);
 
 const radius = 20;
-const diameter = radius * 2;
 const halfWidth = width * 0.5;
 const halfHeight = height * 0.5;
 const origin = Vector2D.zeroPosition;
@@ -37,11 +36,13 @@ const screenCenter = Vector.create(halfWidth, halfHeight);
 const screenBounds = Bounds.fromCenter(halfWidth, halfHeight, 50, 50);
 const viewBounds = Bounds.fromCenter(0, 0, 50, 50);
 const worldBounds = new Bounds(-halfWidth, -halfHeight, width, height);
+const inset = ctx.bounds.inflateN(screenBounds.halfSize.negateN());
+const worldInset = worldBounds.inflateN(-radius, -radius);
 
-const corner1 = Vector.create(-halfWidth + radius, -halfHeight + radius);
-const corner2 = Vector.create(-halfWidth + radius, halfHeight - radius);
-const corner3 = Vector.create(halfWidth - radius, halfHeight - radius);
-const corner4 = Vector.create(halfWidth - radius, -halfHeight + radius);
+const corner1 = worldInset.bottomLeft;
+const corner2 = worldInset.bottomRight;
+const corner3 = worldInset.topRight;
+const corner4 = worldInset.topLeft;
 
 const viewportProps: ContextProps = { strokeStyle: WebColors.black, lineWidth: 4 };
 const centerProps: ContextProps = { fillStyle: WebColors.orange };
@@ -53,71 +54,40 @@ const corner4Props: ContextProps = { fillStyle: WebColors.black, strokeStyle: We
 const viewport = new Viewport(ctx, screenBounds, viewBounds, worldBounds);
 const duration = 1.5;
 
-const scaleX = new NumberEaser(0.5, 1.5, duration * 5, Ease.linear, v =>
-  viewport.viewBounds.withSize(v * screenBounds.width, viewport.viewBounds.height));
+const scale = new NumberEaser(0.5, 1.5, duration * 5, Ease.linear, v =>
+  viewport.viewBounds.withSize(screenBounds.size.scaleN(1 / v)));
 
-const scaleY = new NumberEaser(0.5, 1.5, duration * 5, Ease.linear, v =>
-  viewport.viewBounds.withSize(viewport.viewBounds.width, v * screenBounds.height));
+const centerTo1S = new VectorEaser(screenCenter, screenBounds.halfSize, duration, Ease.linear, v =>
+  viewport.screenBounds.withCenter(v));
 
-const centerTo1SX = new NumberEaser(screenCenter.x, screenBounds.halfSize.x, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(v, viewport.screenBounds.centerY));
+const c1ToC2S = new VectorEaser(inset.topLeft, inset.bottomLeft, duration, Ease.linear, v =>
+  viewport.screenBounds.withCenter(v));
 
-const centerTo1SY = new NumberEaser(screenCenter.y, screenBounds.halfSize.y, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(viewport.screenBounds.centerX, v));
+const c2ToCS = new VectorEaser(inset.bottomLeft, screenCenter, duration, Ease.linear, v =>
+  viewport.screenBounds.withCenter(v));
 
-const c1ToC2SX = new NumberEaser(screenBounds.halfSize.x, screenBounds.halfSize.x, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(v, viewport.screenBounds.centerY));
+const centerTo1V = new VectorEaser(origin, worldBounds.bottomLeft, duration, Ease.linear, v =>
+  viewport.viewBounds.withCenter(v));
 
-const c1ToC2SY = new NumberEaser(screenBounds.halfSize.y, height - screenBounds.halfSize.y, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(viewport.screenBounds.centerX, v));
+const c1ToC2V = new VectorEaser(worldBounds.bottomLeft, worldBounds.bottomRight, duration, Ease.linear, v =>
+  viewport.viewBounds.withCenter(v));
 
-const c2ToCSX = new NumberEaser(screenBounds.halfSize.x, screenCenter.x, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(v, viewport.screenBounds.centerY));
+const c2ToCV = new VectorEaser(worldBounds.bottomRight, origin, duration, Ease.linear, v =>
+  viewport.viewBounds.withCenter(v));
 
-const c2ToCSY = new NumberEaser(height - screenBounds.halfSize.y, screenCenter.y, duration, Ease.linear, v =>
-  viewport.screenBounds.withCenter(viewport.screenBounds.centerX, v));
-
-const centerTo1VX = new NumberEaser(origin.x, corner1.x - diameter, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(v, viewport.viewBounds.centerY));
-
-const centerTo1VY = new NumberEaser(origin.y, corner1.y - diameter, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(viewport.viewBounds.centerX, v));
-
-const c1ToC2VX = new NumberEaser(corner1.x - diameter, corner2.x - diameter, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(v, viewport.viewBounds.centerY));
-
-const c1ToC2VY = new NumberEaser(corner1.y - diameter, corner2.y + diameter, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(viewport.viewBounds.centerX, v));
-
-const c2ToCVX = new NumberEaser(corner2.x - diameter, origin.x, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(v, viewport.viewBounds.centerY));
-
-const c2ToCVY = new NumberEaser(corner2.y + diameter, origin.y, duration, Ease.linear, v =>
-  viewport.viewBounds.withCenter(viewport.viewBounds.centerX, v));
-
-const easesX = new RepeatEaser(new SequentialEaser([
-  centerTo1SX,
-  c1ToC2SX,
-  c2ToCSX,
-  centerTo1VX,
-  c1ToC2VX,
-  c2ToCVX
-]), Infinity);
-
-const easesY = new RepeatEaser(new SequentialEaser([
-  centerTo1SY,
-  c1ToC2SY,
-  c2ToCSY,
-  centerTo1VY,
-  c1ToC2VY,
-  c2ToCVY
-]), Infinity);
+const easesV = new SequentialEaser([
+  centerTo1S,
+  c1ToC2S,
+  c2ToCS,
+  centerTo1V,
+  c1ToC2V,
+  c2ToCV,
+]).repeat(Infinity);
 
 const runner = new EaseRunner();
-runner.add(new RepeatEaser(new PingPongEaser(scaleX), Infinity));
-runner.add(new RepeatEaser(new PingPongEaser(scaleY), Infinity));
-runner.add(easesX);
-runner.add(easesY);
+runner.add(
+  scale.pingPong().repeat(Infinity),
+  easesV);
 runner.start();
 
 drawPattern(ctx2);
