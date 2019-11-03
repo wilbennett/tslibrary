@@ -5,8 +5,6 @@ import { Vector } from '../vectors';
 
 export class Viewport {
   constructor(ctx: CanvasContext, screenBounds: Bounds, viewBounds: Bounds, worldBounds?: Bounds) {
-    this.ctx = ctx;
-
     if (!worldBounds)
       worldBounds = new Bounds("center", 0, 0, Infinity, Infinity, "up");
 
@@ -19,6 +17,7 @@ export class Viewport {
     if (worldBounds.direction !== "up")
       worldBounds.withDirection("up");
 
+    this._ctx = ctx;
     this.screenBounds = screenBounds;
     this.viewBounds = viewBounds;
     this.worldBounds = worldBounds;
@@ -26,7 +25,9 @@ export class Viewport {
 
   protected _matrix?: Matrix2D;
   protected get matrix() { return this._matrix || (this._matrix = this.calcTransform()); }
-  readonly ctx: CanvasContext;
+  protected _ctx: CanvasContext;
+  get ctx() { return this._ctx; }
+  set ctx(value) { this._ctx = value; }
   readonly screenBounds: Bounds;
   readonly viewBounds: Bounds;
   readonly worldBounds: Bounds;
