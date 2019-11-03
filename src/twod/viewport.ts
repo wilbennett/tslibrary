@@ -4,12 +4,11 @@ import { Bounds } from '../misc';
 import { Vector } from '../vectors';
 
 export class Viewport {
-  constructor(
-    ctx: CanvasContext,
-    screenBounds: Bounds,
-    viewBounds: Bounds,
-    worldBounds: Bounds) {
+  constructor(ctx: CanvasContext, screenBounds: Bounds, viewBounds: Bounds, worldBounds?: Bounds) {
     this.ctx = ctx;
+
+    if (!worldBounds)
+      worldBounds = new Bounds("center", 0, 0, Infinity, Infinity, "up");
 
     if (screenBounds.direction !== "down")
       screenBounds.withDirection("down");

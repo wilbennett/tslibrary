@@ -52,6 +52,7 @@ const corner3Props: ContextProps = { fillStyle: WebColors.blue, strokeStyle: Web
 const corner4Props: ContextProps = { fillStyle: WebColors.black, strokeStyle: WebColors.black, lineWidth: 2 };
 
 const viewport = new Viewport(ctx, screenBounds, viewBounds, worldBounds);
+// const viewport = new Viewport(ctx, screenBounds, viewBounds);
 const duration = 1.5;
 
 const scale = new NumberEaser(0.5, 1.5, duration * 5, Ease.linear, v =>
