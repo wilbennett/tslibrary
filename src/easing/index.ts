@@ -7,6 +7,7 @@ export * from "./value-easer";
 export * from "./easer-decorator";
 export * from "./collection-easer";
 export * from "./number-easer";
+export * from "./vector-easer";
 export * from "./ping-pong-easer";
 export * from "./repeat-easer";
 export * from "./sequential-easer";
