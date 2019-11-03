@@ -126,7 +126,7 @@ requestAnimationFrame(loop);
 function loop() {
   requestAnimationFrame(loop);
 
-  ctx.beginPath().withFillStyle("whitesmoke").fillRect(0, 0, width, height);
+  ctx.beginPath().withFillStyle("whitesmoke").fillRect(ctx.bounds);
   drawViewport(ctx);
 
   viewport.resetTransform();
