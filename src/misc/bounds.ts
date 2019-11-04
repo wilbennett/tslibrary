@@ -109,7 +109,7 @@ export class Bounds {
   }
 
   withDirectionN(direction: BoundsDirection): Bounds {
-    return new Bounds("centerhalf", this.center, this.halfSize, direction);
+    return new Bounds("centerhalf", this.center.clone(), this.halfSize.clone(), direction);
   }
 
   withCenter(center: Vector): Bounds;
@@ -120,7 +120,7 @@ export class Bounds {
       ? param1
       : this.center.withXYZN(param1, y!, z === undefined ? 0 : z);
 
-    this.center = center;
+    this.center.copyFrom(center);
     return this;
   }
 
@@ -132,7 +132,7 @@ export class Bounds {
       ? param1
       : this.center.withXYZN(param1, y!, z === undefined ? 0 : z);
 
-    return new Bounds("centerhalf", center, this.halfSize, this.direction);
+    return new Bounds("centerhalf", center, this.halfSize.clone(), this.direction);
   }
 
   withPosition(position: Vector): Bounds;
@@ -143,7 +143,7 @@ export class Bounds {
       ? param1
       : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
 
-    this.center = position.displaceByN(this.halfSize);
+    this.center.copyFrom(position.displaceByN(this.halfSize));
     return this;
   }
 
@@ -155,7 +155,7 @@ export class Bounds {
       ? param1
       : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
 
-    return new Bounds(position, this.size, this.direction);
+    return new Bounds(position, this.size.clone(), this.direction);
   }
 
   withSize(size: Vector): Bounds;
@@ -172,7 +172,7 @@ export class Bounds {
     } else
       size = this.size.withXYZN(param1, param1, param1);
 
-    this.halfSize = size.scaleN(0.5);
+    this.halfSize.copyFrom(size.scaleN(0.5));
     return this;
   }
 
@@ -190,7 +190,7 @@ export class Bounds {
     } else
       size = this.size.withXYZN(param1, param1, param1);
 
-    return new Bounds("center", this.center, size, this.direction);
+    return new Bounds("center", this.center.clone(), size, this.direction);
   }
 
   inflate(size: Vector): Bounds;
@@ -230,7 +230,7 @@ export class Bounds {
       halfSize.displaceBy(new Vector3D(param1, param1, param1));
 
     halfSize.withXYZ(Math.max(halfSize.x, 0), Math.max(halfSize.y, 0), Math.max(halfSize.z, 0));
-    return Bounds.fromCenterHalf(this.center, halfSize, this.direction);
+    return Bounds.fromCenterHalf(this.center.clone(), halfSize, this.direction);
   }
 
   leftOffsetIn(x: number) { return this.left + x; }
