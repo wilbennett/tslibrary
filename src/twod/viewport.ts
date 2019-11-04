@@ -58,7 +58,7 @@ export class Viewport {
       .beginPath()
       .rect(this.screenBounds)
       .clip()
-      .setTransform(this.transform);
+      .transform(this.transform);
 
     this._isTransformed = true;
   }
@@ -67,6 +67,8 @@ export class Viewport {
     this.ctx.restore();
     this._isTransformed = false;
   }
+
+  calcLineWidth(width: number) { return width / this.scale; }
 
   toScreen(vector: Vector, force: boolean = false) {
     return force || !this._isTransformed ? this.matrix.transform(vector) : vector;
