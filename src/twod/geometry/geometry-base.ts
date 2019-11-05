@@ -1,6 +1,7 @@
+import { IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
 
-export class GeometryBase {
+export class GeometryBase implements IGeometry {
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "black", fillStyle: "black" }; }
   set props(value) { this._props = value; }

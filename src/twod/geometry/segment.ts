@@ -1,8 +1,10 @@
-import { GeometryBase } from '.';
+import { GeometryBase, ISegment } from '.';
 import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Segment extends GeometryBase {
+export class Segment extends GeometryBase implements ISegment {
+  kind!: "segment";
+
   constructor(start: Vector, end: Vector) {
     super();
 
@@ -24,13 +26,13 @@ export class Segment extends GeometryBase {
     this.setEnd(value);
   }
 
-  protected _vector?: Vector;
-  get vector() { return this._vector || (this._vector = this.end.subN(this.start)); }
+  protected _edgeVector?: Vector;
+  get edgeVector() { return this._edgeVector || (this._edgeVector = this.end.subN(this.start)); }
   protected _direction?: Vector;
-  get direction() { return this._direction || (this._direction = this.vector.normalizeN()); }
+  get direction() { return this._direction || (this._direction = this.edgeVector.normalizeN()); }
 
   reset() {
-    this._vector = undefined;
+    this._edgeVector = undefined;
     this._direction = undefined;
   }
 
@@ -66,11 +68,11 @@ export class Segment extends GeometryBase {
     const t = this.getSegmentIntersection(other);
 
     if (t === null || t === null) return t;
-    if (t < 0 || t * t > this.vector.dot(this.vector)) return null;
+    if (t < 0 || t * t > this.edgeVector.dot(this.edgeVector)) return null;
 
     const u = other.getSegmentIntersection(this);
 
-    if (!u || u < 0 || u * u > other.vector.dot(other.vector)) return null;
+    if (!u || u < 0 || u * u > other.edgeVector.dot(other.edgeVector)) return null;
 
     return this.start.addN(this.direction.scaleN(t));
   }

@@ -1,8 +1,10 @@
-import { GeometryBase } from '.';
+import { GeometryBase, IRay } from '.';
 import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Ray extends GeometryBase {
+export class Ray extends GeometryBase implements IRay {
+  kind!: "ray";
+
   constructor(start: Vector, direction: Vector) {
     super();
 

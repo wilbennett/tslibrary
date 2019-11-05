@@ -2,7 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser, VectorEaser } from '../../../easing';
-import { CanvasContext, ContextProps, GeometryBase, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
+import { CanvasContext, ContextProps, Geometry, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -36,7 +36,7 @@ ray2.props = { strokeStyle: "magenta", fillStyle: "magenta" };
 segment1.props = { strokeStyle: "red", fillStyle: "red" };
 segment2.props = { strokeStyle: "green", fillStyle: "green" };
 
-const geometries: GeometryBase[] = [
+const geometries: Geometry[] = [
   line1,
   line2,
   ray1,

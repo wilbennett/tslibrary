@@ -1,8 +1,10 @@
-import { GeometryBase } from '.';
+import { GeometryBase, ILine } from '.';
 import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Line extends GeometryBase {
+export class Line extends GeometryBase implements ILine {
+  kind!: "line";
+
   constructor(point: Vector, direction: Vector) {
     super();
 
