@@ -2,7 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser, VectorEaser } from '../../../easing';
-import { CanvasContext, ContextProps, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
+import { CanvasContext, ContextProps, GeometryBase, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -29,12 +29,21 @@ const ray2 = new Ray(Vector.createPosition(-1, -2), Vector.createDirection(1, -2
 const segment1 = new Segment(Vector.createPosition(1, -2), Vector.createPosition(2, 0));
 const segment2 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
 
-const line1Props: ContextProps = { strokeStyle: "blue" };
-const line2Props: ContextProps = { strokeStyle: "purple" };
-const ray1Props: ContextProps = { strokeStyle: "orange" };
-const ray2Props: ContextProps = { strokeStyle: "magenta" };
-const segment1Props: ContextProps = { strokeStyle: "red" };
-const segment2Props: ContextProps = { strokeStyle: "green" };
+line1.props = { strokeStyle: "blue", fillStyle: "blue" };
+line2.props = { strokeStyle: "purple", fillStyle: "purple" };
+ray1.props = { strokeStyle: "orange", fillStyle: "orange" };
+ray2.props = { strokeStyle: "magenta", fillStyle: "magenta" };
+segment1.props = { strokeStyle: "red", fillStyle: "red" };
+segment2.props = { strokeStyle: "green", fillStyle: "green" };
+
+const geometries: GeometryBase[] = [
+  line1,
+  line2,
+  ray1,
+  ray2,
+  segment1,
+  segment2,
+];
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
 // const rotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, v => angle = v);
@@ -76,13 +85,8 @@ function render() {
 
   const viewport = graph.getViewport(ctx);
   viewport.applyTransform();
-  line1.render(viewport, line1Props);
-  line2.render(viewport, line2Props);
-  ray1.render(viewport, ray1Props);
-  ray2.render(viewport, ray2Props);
-  segment1.render(viewport, segment1Props);
-  segment2.render(viewport, segment2Props);
 
+  geometries.forEach(geometry => geometry.render(viewport));
   renderIntersections(viewport);
   viewport.restoreTransform();
 
@@ -100,7 +104,7 @@ function renderLineIntersection(viewport: Viewport) {
 
   if (!point) return;
 
-  beginPath(line1Props, viewport);
+  beginPath(line1.props, viewport);
   ctx.strokeCircle(point, 0.1);
 }
 
@@ -109,7 +113,7 @@ function renderRayIntersection(viewport: Viewport) {
 
   if (!point) return;
 
-  beginPath(ray1Props, viewport);
+  beginPath(ray1.props, viewport);
   ctx.strokeCircle(point, 0.1);
 }
 
@@ -118,7 +122,7 @@ function renderSegmentIntersection(viewport: Viewport) {
 
   if (!point) return;
 
-  beginPath(segment1Props, viewport);
+  beginPath(segment1.props, viewport);
   ctx.strokeCircle(point, 0.1);
 }
 

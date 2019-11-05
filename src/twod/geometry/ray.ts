@@ -1,8 +1,11 @@
-import { ContextProps, Viewport } from '..';
+import { GeometryBase } from '.';
+import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Ray {
+export class Ray extends GeometryBase {
   constructor(start: Vector, direction: Vector) {
+    super();
+
     this.start = start;
     this.direction = direction;
   }
@@ -24,8 +27,6 @@ export class Ray {
 
     this._direction = value.normalize();
   }
-
-  lineDash: number[] = [];
 
   getRayIntersection(other: Ray) {
     const denom = other.direction.cross2D(this.direction);
@@ -50,24 +51,11 @@ export class Ray {
     return this.start.addN(this.direction.scaleN(t));
   }
 
-  render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
-    const ctx = viewport.ctx;
+  protected renderCore(viewport: Viewport) {
     const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).mag;
     const dir = this.direction.scaleN(mag);
     const point2 = this.start.displaceByN(dir);
 
-    let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
-
-    const origLineDash = ctx.getLineDash();
-    ctx.setLineDash(this.lineDash);
-    ctx.withProps(props).withLineWidth(lineWidth);
-
-    ctx
-      .beginPath()
-      .withProps(props)
-      .line(this.start, point2)
-      .stroke();
-
-    ctx.setLineDash(origLineDash);
+    viewport.ctx.beginPath().line(this.start, point2).stroke();
   }
 }

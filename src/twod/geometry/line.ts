@@ -1,8 +1,11 @@
-import { ContextProps, Viewport } from '..';
+import { GeometryBase } from '.';
+import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Line {
+export class Line extends GeometryBase {
   constructor(point: Vector, direction: Vector) {
+    super();
+
     this.point = point;
     this.direction = direction;
   }
@@ -25,8 +28,6 @@ export class Line {
     this._direction = value.normalize();
   }
 
-  lineDash: number[] = [];
-
   getLineIntersection(other: Line) {
     const denom = other.direction.cross2D(this.direction);
 
@@ -44,25 +45,12 @@ export class Line {
     return this.point.addN(this.direction.scaleN(t));
   }
 
-  render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
-    const ctx = viewport.ctx;
+  protected renderCore(viewport: Viewport) {
     const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).magSquared;
     const dir = this.direction.scaleN(mag);
     const point1 = this.point.displaceByN(dir);
     const point2 = this.point.displaceByN(dir.negate());
 
-    let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
-
-    const origLineDash = ctx.getLineDash();
-    ctx.setLineDash(this.lineDash);
-    ctx.withProps(props).withLineWidth(lineWidth);
-
-    ctx
-      .beginPath()
-      .withProps(props)
-      .line(point1, point2)
-      .stroke();
-
-    ctx.setLineDash(origLineDash);
+    viewport.ctx.beginPath().line(point1, point2).stroke();
   }
 }

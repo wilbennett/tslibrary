@@ -1,8 +1,11 @@
-import { ContextProps, Viewport } from '..';
+import { GeometryBase } from '.';
+import { Viewport } from '..';
 import { Vector } from '../../vectors';
 
-export class Segment {
+export class Segment extends GeometryBase {
   constructor(start: Vector, end: Vector) {
+    super();
+
     this.start = start;
     this.end = end;
   }
@@ -25,8 +28,6 @@ export class Segment {
   get vector() { return this._vector || (this._vector = this.end.subN(this.start)); }
   protected _direction?: Vector;
   get direction() { return this._direction || (this._direction = this.vector.normalizeN()); }
-
-  lineDash: number[] = [];
 
   reset() {
     this._vector = undefined;
@@ -74,20 +75,7 @@ export class Segment {
     return this.start.addN(this.direction.scaleN(t));
   }
 
-  render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
-    const ctx = viewport.ctx;
-    let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
-
-    const origLineDash = ctx.getLineDash();
-    ctx.setLineDash(this.lineDash);
-    ctx.withProps(props).withLineWidth(lineWidth);
-
-    ctx
-      .beginPath()
-      .withProps(props)
-      .line(this.start, this.end)
-      .stroke();
-
-    ctx.setLineDash(origLineDash);
+  protected renderCore(viewport: Viewport) {
+    viewport.ctx.beginPath().line(this.start, this.end).stroke();
   }
 }
