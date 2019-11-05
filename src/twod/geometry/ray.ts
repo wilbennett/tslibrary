@@ -37,6 +37,7 @@ export class Ray {
   }
 
   getRayIntersectionPoint(other: Ray) {
+    // TODO: Optimize.
     const t = this.getRayIntersection(other);
 
     if (t === undefined || t === null) return t;
