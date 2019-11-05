@@ -30,7 +30,7 @@ export class Ray {
   getRayIntersection(other: Ray) {
     const denom = other.direction.cross2D(this.direction);
 
-    if (denom === 0) return undefined;
+    if (denom === 0) return null;
 
     const c = other.start.subN(this.start);
     return other.direction.cross2D(c) / denom;
@@ -40,12 +40,12 @@ export class Ray {
     // TODO: Optimize.
     const t = this.getRayIntersection(other);
 
-    if (t === undefined || t === null) return t;
-    if (t < 0) return undefined;
+    if (t === null || t === null) return t;
+    if (t < 0) return null;
 
     const otherT = other.getRayIntersection(this);
 
-    if (!otherT || otherT < 0) return undefined;
+    if (!otherT || otherT < 0) return null;
 
     return this.start.addN(this.direction.scaleN(t));
   }

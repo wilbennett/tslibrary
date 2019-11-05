@@ -60,7 +60,7 @@ export class Segment {
   getSegmentIntersection(other: Segment) {
     const denom = other.direction.cross2D(this.direction);
 
-    if (denom === 0) return undefined;
+    if (denom === 0) return null;
 
     const c = other.start.subN(this.start);
     return other.direction.cross2D(c) / denom;
@@ -70,12 +70,12 @@ export class Segment {
     // TODO: Optimize.
     const t = this.getSegmentIntersection(other);
 
-    if (t === undefined || t === null) return t;
-    if (t < 0 || t * t > this.vector.dot(this.vector)) return undefined;
+    if (t === null || t === null) return t;
+    if (t < 0 || t * t > this.vector.dot(this.vector)) return null;
 
     const u = other.getSegmentIntersection(this);
 
-    if (!u || u < 0 || u * u > other.vector.dot(other.vector)) return undefined;
+    if (!u || u < 0 || u * u > other.vector.dot(other.vector)) return null;
 
     return this.start.addN(this.direction.scaleN(t));
   }
