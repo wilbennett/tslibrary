@@ -48,10 +48,10 @@ const geometries: Geometry[] = [
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
 // const rotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, v => angle = v);
 const lineRotate = new NumberEaser(0, 360, duration / 360, Ease.smoothStep, _ => { }, () => {
-  line1.direction.rotateOneDegree();
-  line2.direction.rotateNegativeOneDegree();
+  line1.direction.rotate(MathEx.ONE_DEGREE);
+  line2.direction.rotate(-Math.random() * 2 * MathEx.ONE_DEGREE);
   ray1.direction.rotateOneDegree();
-  ray2.direction.rotateNegativeOneDegree();
+  ray2.direction.rotate(-Math.random() * 2 * MathEx.ONE_DEGREE);
 });
 const segment1Move = new VectorEaser(
   Vector.createPosition(2, 0),
@@ -97,6 +97,8 @@ function renderIntersections(viewport: Viewport) {
   renderIntersection(line1, line2, viewport);
   renderIntersection(ray1, ray2, viewport);
   renderIntersection(segment1, segment2, viewport);
+
+  renderIntersection(line2, ray1, viewport);
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {

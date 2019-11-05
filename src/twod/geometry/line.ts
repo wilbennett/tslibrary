@@ -1,7 +1,8 @@
-import { Geometry, GeometryBase, ILine } from '.';
+import { Geometry, GeometryBase, ILine, IRay } from '.';
 import { Viewport } from '..';
 import { Utils } from '../../utils';
 import { Vector } from '../../vectors';
+import { calcIntersectionTime } from '../utils';
 
 const { assertNever } = Utils;
 
@@ -34,19 +35,32 @@ export class Line extends GeometryBase implements ILine {
   }
 
   getLineIntersection(other: ILine) {
-    const denom = other.direction.cross2D(this.direction);
+    return calcIntersectionTime(this.point, this.direction, other.point, other.direction);
+  }
 
-    if (denom === 0) return null;
+  getRayIntersection(other: IRay) {
+    const s = calcIntersectionTime(other.start, other.direction, this.point, this.direction);
 
-    const c = other.point.subN(this.point);
-    return other.direction.cross2D(c) / denom;
+    if (s === null || s === undefined) return s;
+    if (s < 0) return null;
+
+    return calcIntersectionTime(this.point, this.direction, other.start, other.direction);
   }
 
   getLineIntersectionPoint(other: ILine, result?: Vector) {
     result = result || Vector.createPosition(0, 0);
-    const t = this.getLineIntersection(other);
+    const t = calcIntersectionTime(this.point, this.direction, other.point, other.direction);
 
-    if (t === null || t === null) return t;
+    if (t === null || t === undefined) return t;
+
+    return this.point.addO(this.direction.scaleN(t), result);
+  }
+
+  getRayIntersectionPoint(ray: IRay, result?: Vector) {
+    result = result || Vector.createPosition(0, 0);
+    const t = this.getRayIntersection(ray);
+
+    if (t === null || t === undefined) return t;
 
     return this.point.addO(this.direction.scaleN(t), result);
   }
@@ -54,7 +68,7 @@ export class Line extends GeometryBase implements ILine {
   getIntersectionPoint(other: Geometry, result?: Vector) {
     switch (other.kind) {
       case "line": return this.getLineIntersectionPoint(other, result);
-      case "ray": return undefined;
+      case "ray": return this.getRayIntersectionPoint(other, result);
       case "segment": return undefined;
       default: return assertNever(other);
     }
