@@ -39,12 +39,13 @@ export class Line extends GeometryBase implements ILine {
     return other.direction.cross2D(c) / denom;
   }
 
-  getLineIntersectionPoint(other: Line) {
+  getLineIntersectionPoint(other: Line, result?: Vector) {
+    result = result || Vector.createPosition(0, 0);
     const t = this.getLineIntersection(other);
 
     if (t === null || t === null) return t;
 
-    return this.point.addN(this.direction.scaleN(t));
+    return this.point.addO(this.direction.scaleN(t), result);
   }
 
   protected renderCore(viewport: Viewport) {

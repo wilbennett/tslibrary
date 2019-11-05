@@ -63,8 +63,9 @@ export class Segment extends GeometryBase implements ISegment {
     return other.direction.cross2D(c) / denom;
   }
 
-  getSegmentIntersectionPoint(other: Segment) {
+  getSegmentIntersectionPoint(other: Segment, result?: Vector) {
     // TODO: Optimize.
+    result = result || Vector.createPosition(0, 0);
     const t = this.getSegmentIntersection(other);
 
     if (t === null || t === null) return t;
@@ -74,7 +75,7 @@ export class Segment extends GeometryBase implements ISegment {
 
     if (!u || u < 0 || u * u > other.edgeVector.dot(other.edgeVector)) return null;
 
-    return this.start.addN(this.direction.scaleN(t));
+    return this.start.addO(this.direction.scaleN(t), result);
   }
 
   protected renderCore(viewport: Viewport) {

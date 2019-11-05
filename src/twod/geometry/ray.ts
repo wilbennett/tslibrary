@@ -39,8 +39,9 @@ export class Ray extends GeometryBase implements IRay {
     return other.direction.cross2D(c) / denom;
   }
 
-  getRayIntersectionPoint(other: Ray) {
+  getRayIntersectionPoint(other: Ray, result?: Vector) {
     // TODO: Optimize.
+    result = result || Vector.createPosition(0, 0);
     const t = this.getRayIntersection(other);
 
     if (t === null || t === null) return t;
@@ -50,7 +51,7 @@ export class Ray extends GeometryBase implements IRay {
 
     if (!otherT || otherT < 0) return null;
 
-    return this.start.addN(this.direction.scaleN(t));
+    return this.start.addO(this.direction.scaleN(t), result);
   }
 
   protected renderCore(viewport: Viewport) {
