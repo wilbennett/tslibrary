@@ -10,21 +10,15 @@ export class Segment {
   protected _start!: Vector;
   get start() { return this._start; }
   set start(value) {
-    if (!value.isPosition)
-      value = value.asPosition();
-
     this._start = value;
-    this.reset();
+    this.setStart(value);
   }
 
   protected _end!: Vector;
   get end() { return this._end; }
   set end(value) {
-    if (!value.isPosition)
-      value = value.asPosition();
-
     this._end = value;
-    this.reset();
+    this.setEnd(value);
   }
 
   protected _vector?: Vector;
