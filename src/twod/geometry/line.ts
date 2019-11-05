@@ -1,9 +1,12 @@
-import { GeometryBase, ILine } from '.';
+import { Geometry, GeometryBase, ILine } from '.';
 import { Viewport } from '..';
+import { Utils } from '../../utils';
 import { Vector } from '../../vectors';
 
+const { assertNever } = Utils;
+
 export class Line extends GeometryBase implements ILine {
-  kind!: "line";
+  kind: "line" = "line";
 
   constructor(point: Vector, direction: Vector) {
     super();
@@ -30,7 +33,7 @@ export class Line extends GeometryBase implements ILine {
     this._direction = value.normalize();
   }
 
-  getLineIntersection(other: Line) {
+  getLineIntersection(other: ILine) {
     const denom = other.direction.cross2D(this.direction);
 
     if (denom === 0) return null;
@@ -39,13 +42,22 @@ export class Line extends GeometryBase implements ILine {
     return other.direction.cross2D(c) / denom;
   }
 
-  getLineIntersectionPoint(other: Line, result?: Vector) {
+  getLineIntersectionPoint(other: ILine, result?: Vector) {
     result = result || Vector.createPosition(0, 0);
     const t = this.getLineIntersection(other);
 
     if (t === null || t === null) return t;
 
     return this.point.addO(this.direction.scaleN(t), result);
+  }
+
+  getIntersectionPoint(other: Geometry, result?: Vector) {
+    switch (other.kind) {
+      case "line": return this.getLineIntersectionPoint(other, result);
+      case "ray": return undefined;
+      case "segment": return undefined;
+      default: return assertNever(other);
+    }
   }
 
   protected renderCore(viewport: Viewport) {

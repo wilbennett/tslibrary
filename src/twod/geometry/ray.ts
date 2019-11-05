@@ -1,9 +1,12 @@
-import { GeometryBase, IRay } from '.';
+import { Geometry, GeometryBase, IRay } from '.';
 import { Viewport } from '..';
+import { Utils } from '../../utils';
 import { Vector } from '../../vectors';
 
+const { assertNever } = Utils;
+
 export class Ray extends GeometryBase implements IRay {
-  kind!: "ray";
+  kind: "ray" = "ray";
 
   constructor(start: Vector, direction: Vector) {
     super();
@@ -30,28 +33,39 @@ export class Ray extends GeometryBase implements IRay {
     this._direction = value.normalize();
   }
 
-  getRayIntersection(other: Ray) {
-    const denom = other.direction.cross2D(this.direction);
+  protected getRayRayIntersection(first: IRay, other: IRay) {
+    const denom = other.direction.cross2D(first.direction);
 
     if (denom === 0) return null;
 
-    const c = other.start.subN(this.start);
+    const c = other.start.subN(first.start);
     return other.direction.cross2D(c) / denom;
   }
 
-  getRayIntersectionPoint(other: Ray, result?: Vector) {
+  getRayIntersection(other: IRay) { return this.getRayRayIntersection(this, other); }
+
+  getRayIntersectionPoint(other: IRay, result?: Vector) {
     // TODO: Optimize.
     result = result || Vector.createPosition(0, 0);
-    const t = this.getRayIntersection(other);
+    const t = this.getRayRayIntersection(this, other);
 
     if (t === null || t === null) return t;
     if (t < 0) return null;
 
-    const otherT = other.getRayIntersection(this);
+    const otherT = this.getRayRayIntersection(other, this);
 
     if (!otherT || otherT < 0) return null;
 
     return this.start.addO(this.direction.scaleN(t), result);
+  }
+
+  getIntersectionPoint(other: Geometry, result?: Vector) {
+    switch (other.kind) {
+      case "ray": return this.getRayIntersectionPoint(other, result);
+      case "line": return undefined;
+      case "segment": return undefined;
+      default: return assertNever(other);
+    }
   }
 
   protected renderCore(viewport: Viewport) {

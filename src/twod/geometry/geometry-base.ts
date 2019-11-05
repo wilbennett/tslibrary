@@ -1,12 +1,17 @@
-import { IGeometry } from '.';
+import { Geometry, IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
+import { Tristate } from '../../core';
+import { Vector } from '../../vectors';
 
-export class GeometryBase implements IGeometry {
+export abstract class GeometryBase implements IGeometry {
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "black", fillStyle: "black" }; }
   set props(value) { this._props = value; }
 
   lineDash?: number[];
+
+  // @ts-ignore - unused param.
+  getIntersectionPoint(other: Geometry, result?: Vector): Tristate<Vector> { return undefined; }
 
   // @ts-ignore - unused param.
   protected renderCore(viewport: Viewport) { }

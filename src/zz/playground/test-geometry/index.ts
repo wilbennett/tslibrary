@@ -94,35 +94,17 @@ function render() {
 }
 
 function renderIntersections(viewport: Viewport) {
-  renderLineIntersection(viewport);
-  renderRayIntersection(viewport);
-  renderSegmentIntersection(viewport);
+  renderIntersection(line1, line2, viewport);
+  renderIntersection(ray1, ray2, viewport);
+  renderIntersection(segment1, segment2, viewport);
 }
 
-function renderLineIntersection(viewport: Viewport) {
-  const point = line1.getLineIntersectionPoint(line2);
+function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
+  const point = a.getIntersectionPoint(b);
 
   if (!point) return;
 
-  beginPath(line1.props, viewport);
-  ctx.strokeCircle(point, 0.1);
-}
-
-function renderRayIntersection(viewport: Viewport) {
-  const point = ray1.getRayIntersectionPoint(ray2);
-
-  if (!point) return;
-
-  beginPath(ray1.props, viewport);
-  ctx.strokeCircle(point, 0.1);
-}
-
-function renderSegmentIntersection(viewport: Viewport) {
-  const point = segment1.getSegmentIntersectionPoint(segment2);
-
-  if (!point) return;
-
-  beginPath(segment1.props, viewport);
+  beginPath(a.props, viewport);
   ctx.strokeCircle(point, 0.1);
 }
 

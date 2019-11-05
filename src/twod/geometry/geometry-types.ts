@@ -1,10 +1,12 @@
 import { ContextProps, Viewport } from '..';
+import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
 
 export interface IGeometry {
   props: ContextProps;
   lineDash?: number[];
 
+  getIntersectionPoint(other: Geometry, result?: Vector): Tristate<Vector>;
   render(viewport: Viewport): void;
 }
 
