@@ -52,6 +52,17 @@ export class Graph {
     this._seriesList.remove(series);
   }
 
+  getViewport(ctx: CanvasContext) {
+    const viewport = this._viewport || this.createViewport(ctx);
+
+    if (viewport.ctx !== ctx)
+      viewport.ctx = ctx;
+
+    viewport.worldBounds.withSize(viewport.viewBounds.size);
+    this._viewport = viewport;
+    return viewport;
+  }
+
   render(ctx: CanvasContext) {
     const viewport = this.getViewport(ctx);
 
@@ -141,16 +152,5 @@ export class Graph {
     const gridScale = 1 / this.gridSize;
     this._viewBounds.withSize(this.bounds.size.scaleN(gridScale));
     return new Viewport(ctx, this.bounds, this._viewBounds);
-  }
-
-  protected getViewport(ctx: CanvasContext) {
-    const viewport = this._viewport || this.createViewport(ctx);
-
-    if (viewport.ctx !== ctx)
-      viewport.ctx = ctx;
-
-    viewport.worldBounds.withSize(viewport.viewBounds.size);
-    this._viewport = viewport;
-    return viewport;
   }
 }
