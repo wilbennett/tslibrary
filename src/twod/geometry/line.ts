@@ -4,7 +4,7 @@ import { Vector } from '../../vectors';
 export class Line {
   constructor(point: Vector, direction: Vector) {
     this.point = point;
-    this.direction = direction.normalize();
+    this.direction = direction;
   }
 
   protected _point!: Vector;
