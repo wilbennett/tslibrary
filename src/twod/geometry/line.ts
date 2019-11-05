@@ -46,7 +46,7 @@ export class Line {
 
   render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
     const ctx = viewport.ctx;
-    const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).mag;
+    const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).magSquared;
     const dir = this.direction.scaleN(mag);
     const point1 = this.point.displaceByN(dir);
     const point2 = this.point.displaceByN(dir.negate());
