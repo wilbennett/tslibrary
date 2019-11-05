@@ -27,6 +27,23 @@ export class Line {
 
   lineDash: number[] = [];
 
+  getLineIntersection(other: Line) {
+    const denom = other.direction.cross2D(this.direction);
+
+    if (denom === 0) return undefined;
+
+    const c = other.point.subN(this.point);
+    return other.direction.cross2D(c) / denom;
+  }
+
+  getLineIntersectionPoint(other: Line) {
+    const t = this.getLineIntersection(other);
+
+    if (t === undefined || t === null) return t;
+
+    return this.point.addN(this.direction.scaleN(t));
+  }
+
   render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
     const ctx = viewport.ctx;
     const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).mag;

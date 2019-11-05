@@ -1,7 +1,8 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
+import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
-import { CanvasContext, ContextProps, Graph, Line, Ray, Segment } from '../../../twod';
+import { CanvasContext, ContextProps, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -21,8 +22,8 @@ let angle = 0;
 const duration = 5;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const line1 = new Line(Vector.createPosition(0.5, 0), Vector.createDirection(1, 1));
-const line2 = new Line(Vector.createPosition(-0.5, 2), Vector.createDirection(1, -2));
+const line1 = new Line(Vector.createPosition(0.5, 0.5), Vector.createDirection(1, 1).rotate(20 * MathEx.ONE_DEGREE));
+const line2 = new Line(Vector.createPosition(-0.5, 2), Vector.createDirection(1.5, -2));
 const ray1 = new Ray(Vector.createPosition(1, 1), Vector.createDirection(1, 1));
 const ray2 = new Ray(Vector.createPosition(-2, -1), Vector.createDirection(1, -2));
 const segment1 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
@@ -74,7 +75,30 @@ function render() {
   ray2.render(viewport, ray2Props);
   segment1.render(viewport, segment1Props);
   segment2.render(viewport, segment2Props);
+
+  renderIntersections(viewport);
   viewport.restoreTransform();
 
   ctx.restore();
+}
+
+function renderIntersections(viewport: Viewport) {
+  renderLineIntersection(viewport);
+}
+
+function renderLineIntersection(viewport: Viewport) {
+  const point = line1.getLineIntersectionPoint(line2);
+
+  if (!point) return;
+
+  beginPath(line1Props, viewport);
+  ctx.strokeCircle(point, 0.1);
+}
+
+function beginPath(props: ContextProps, viewport: Viewport) {
+  ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
+}
+
+function getLineWidth(props: ContextProps, viewport: Viewport) {
+  return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 }
