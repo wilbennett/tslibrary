@@ -3,18 +3,28 @@ import { Vector } from '../../vectors';
 
 export class Line {
   constructor(point: Vector, direction: Vector) {
-    if (!point.isPosition)
-      point = point.asPosition();
-
-    if (!direction.isDirection)
-      direction = direction.asDirection();
-
     this.point = point;
     this.direction = direction.normalize();
   }
 
-  point: Vector;
-  direction: Vector;
+  protected _point!: Vector;
+  get point() { return this._point; }
+  set point(value) {
+    if (!value.isPosition)
+      value = value.asPosition();
+
+    this._point = value;
+  }
+
+  protected _direction!: Vector;
+  get direction() { return this._direction; }
+  set direction(value) {
+    if (!value.isDirection)
+      value = value.asDirection();
+
+    this._direction = value.normalize();
+  }
+
   lineDash: number[] = [];
 
   render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
