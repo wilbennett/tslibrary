@@ -27,6 +27,28 @@ export class Ray {
 
   lineDash: number[] = [];
 
+  getRayIntersection(other: Ray) {
+    const denom = other.direction.cross2D(this.direction);
+
+    if (denom === 0) return undefined;
+
+    const c = other.start.subN(this.start);
+    return other.direction.cross2D(c) / denom;
+  }
+
+  getRayIntersectionPoint(other: Ray) {
+    const t = this.getRayIntersection(other);
+
+    if (t === undefined || t === null) return t;
+    if (t < 0) return undefined;
+
+    const otherT = other.getRayIntersection(this);
+
+    if (!otherT || otherT < 0) return undefined;
+
+    return this.start.addN(this.direction.scaleN(t));
+  }
+
   render(viewport: Viewport, props: ContextProps = { strokeStyle: "black" }) {
     const ctx = viewport.ctx;
     const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).mag;

@@ -38,7 +38,7 @@ const segment2Props: ContextProps = { strokeStyle: "green" };
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
 // const rotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, v => angle = v);
-const lineRotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, _ => {
+const lineRotate = new NumberEaser(0, 360, duration / 360, Ease.smoothStep, _ => { }, () => {
   line1.direction.rotateOneDegree();
   line2.direction.rotateNegativeOneDegree();
   ray1.direction.rotateOneDegree();
@@ -84,6 +84,7 @@ function render() {
 
 function renderIntersections(viewport: Viewport) {
   renderLineIntersection(viewport);
+  renderRayIntersection(viewport);
 }
 
 function renderLineIntersection(viewport: Viewport) {
@@ -92,6 +93,15 @@ function renderLineIntersection(viewport: Viewport) {
   if (!point) return;
 
   beginPath(line1Props, viewport);
+  ctx.strokeCircle(point, 0.1);
+}
+
+function renderRayIntersection(viewport: Viewport) {
+  const point = ray1.getRayIntersectionPoint(ray2);
+
+  if (!point) return;
+
+  beginPath(ray1Props, viewport);
   ctx.strokeCircle(point, 0.1);
 }
 
