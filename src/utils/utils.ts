@@ -12,6 +12,7 @@ export class Utils {
         : "" + value;
   }
 
+  static assertNever(x: never) { throw new Error("Unexpected value: " + x); }
   static isNull(value: any) { return value === null; }
   static isUndefined(value: any) { return value === undefined; }
   static isEmpty(value: any) { return value === undefined || value === null; }
