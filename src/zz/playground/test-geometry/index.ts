@@ -1,7 +1,7 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
-import { CanvasContext, Graph, Line } from '../../../twod';
+import { CanvasContext, ContextProps, Graph, Line, Segment } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -23,6 +23,13 @@ const duration = 5;
 const graph = new Graph(ctx.bounds, gridSize);
 const line1 = new Line(Vector.createPosition(0.5, 0), Vector.createDirection(1, 1));
 const line2 = new Line(Vector.createPosition(-0.5, 2), Vector.createDirection(1, -2));
+const segment1 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
+const segment2 = new Segment(Vector.createPosition(1, -2), Vector.createPosition(2, 0));
+
+const line1Props: ContextProps = { strokeStyle: "blue" };
+const line2Props: ContextProps = { strokeStyle: "purple" };
+const segment1Props: ContextProps = { strokeStyle: "red" };
+const segment2Props: ContextProps = { strokeStyle: "green" };
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
 // const rotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, v => angle = v);
@@ -55,8 +62,10 @@ function render() {
 
   const viewport = graph.getViewport(ctx);
   viewport.applyTransform();
-  line1.render(viewport);
-  line2.render(viewport);
+  line1.render(viewport, line1Props);
+  line2.render(viewport, line2Props);
+  segment1.render(viewport, segment1Props);
+  segment2.render(viewport, segment2Props);
   viewport.restoreTransform();
 
   ctx.restore();
