@@ -154,15 +154,34 @@ export function calcSegmentSegmentIntersection(a: ISegment, b: ISegment) {
   return t;
 }
 
+export function calcSegmentLineIntersection(segment: ISegment, line: ILine) {
+  // TODO: Optimize.
+  let t = calcIntersectionTime(line.point, line.direction, segment.start, segment.direction);
+
+  if (t === null || t === undefined) return t;
+
+  t = calcIntersectionTime(segment.start, segment.direction, line.point, line.direction);
+
+  if (t === null || t === undefined) return t;
+  if (t < 0 || t * t > segment.edgeVector.dot(segment.edgeVector)) return null;
+
+  return t;
+}
+
 export function calcSegmentSegmentIntersectionPoint(a: ISegment, b: ISegment, result?: Vector) {
   const t = calcSegmentSegmentIntersection(a, b);
   return calcPoint(t, a.start, a.direction, result);
 }
 
+export function calcSegmentLineIntersectionPoint(segment: ISegment, line: ILine, result?: Vector) {
+  const t = calcSegmentLineIntersection(segment, line);
+  return calcPoint(t, segment.start, segment.direction, result);
+}
+
 function calcSegmentIntersectionPoint(segment: ISegment, b: Geometry, result?: Vector) {
   switch (b.kind) {
     case "segment": return calcSegmentSegmentIntersectionPoint(segment, b, result);
-    case "line": return undefined;
+    case "line": return calcSegmentLineIntersectionPoint(segment, b, result);
     case "ray": return undefined;
     default: return assertNever(b);
   }
