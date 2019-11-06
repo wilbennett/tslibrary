@@ -2,6 +2,7 @@ import { Geometry, IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
+import { calcIntersectionPoint } from './geo-intersect';
 
 export abstract class GeometryBase implements IGeometry {
   protected _props?: ContextProps;
@@ -10,8 +11,10 @@ export abstract class GeometryBase implements IGeometry {
 
   lineDash?: number[];
 
-  // @ts-ignore - unused param.
-  getIntersectionPoint(other: Geometry, result?: Vector): Tristate<Vector> { return undefined; }
+  getIntersectionPoint(other: Geometry, result?: Vector): Tristate<Vector> {
+    // @ts-ignore - assigment compatibility.
+    return calcIntersectionPoint(this, other, result);
+  }
 
   // @ts-ignore - unused param.
   protected renderCore(viewport: Viewport) { }
