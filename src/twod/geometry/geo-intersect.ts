@@ -1,4 +1,5 @@
 import { Geometry, ILine, IRay, ISegment } from '..';
+import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
 import { calcIntersectionTime } from '../utils';
@@ -12,7 +13,7 @@ export function calcIntersectionPoint(a: Geometry, b: Geometry, result?: Vector)
   }
 }
 
-export function calcPoint(t: number, start: Vector, direction: Vector, result?: Vector) {
+export function calcPoint(t: Tristate<number>, start: Vector, direction: Vector, result?: Vector) {
   if (t === null || t === undefined) return t;
 
   result = result || Vector.createPosition(0, 0);
@@ -27,37 +28,43 @@ export function calcLineLineIntersection(a: ILine, b: ILine) {
 }
 
 export function calcLineRayIntersection(line: ILine, ray: IRay) {
-  const s = calcIntersectionTime(ray.start, ray.direction, line.point, line.direction);
+  const t = calcIntersectionTime(ray.start, ray.direction, line.point, line.direction);
 
-  if (s === null || s === undefined) return s;
-  if (s < 0) return null;
+  if (t === null || t === undefined) return t;
+  if (t < 0) return null;
 
   return calcIntersectionTime(line.point, line.direction, ray.start, ray.direction);
 }
 
-export function calcLineLineIntersectionPoint(a: ILine, b: ILine, result?: Vector) {
-  const t = calcIntersectionTime(a.point, a.direction, b.point, b.direction);
+export function calcLineSegmentIntersection(line: ILine, segment: ISegment) {
+  const t = calcIntersectionTime(segment.start, segment.direction, line.point, line.direction);
 
   if (t === null || t === undefined) return t;
+  if (t < 0 || t * t > segment.edgeVector.dot(segment.edgeVector)) return null;
 
-  result = result || Vector.createPosition(0, 0);
-  return a.point.addO(a.direction.scaleN(t), result);
+  return calcIntersectionTime(line.point, line.direction, segment.start, segment.direction);
+}
+
+export function calcLineLineIntersectionPoint(a: ILine, b: ILine, result?: Vector) {
+  const t = calcIntersectionTime(a.point, a.direction, b.point, b.direction);
+  return calcPoint(t, a.point, a.direction, result);
 }
 
 export function calcLineRayIntersectionPoint(line: ILine, ray: IRay, result?: Vector) {
   const t = calcLineRayIntersection(line, ray);
+  return calcPoint(t, line.point, line.direction, result);
+}
 
-  if (t === null || t === undefined) return t;
-
-  result = result || Vector.createPosition(0, 0);
-  return line.point.addO(line.direction.scaleN(t), result);
+export function calcLineSegmentIntersectionPoint(line: ILine, segment: ISegment, result?: Vector) {
+  const t = calcLineSegmentIntersection(line, segment);
+  return calcPoint(t, line.point, line.direction, result);
 }
 
 function calcLineIntersectionPoint(line: ILine, b: Geometry, result?: Vector) {
   switch (b.kind) {
     case "line": return calcLineLineIntersectionPoint(line, b, result);
     case "ray": return calcLineRayIntersectionPoint(line, b, result);
-    case "segment": return undefined;
+    case "segment": return calcLineSegmentIntersectionPoint(line, b, result);
     default: return assertNever(b);
   }
 }
@@ -81,11 +88,7 @@ export function calcRayRayIntersection(a: IRay, b: IRay) {
 
 export function calcRayRayIntersectionPoint(a: IRay, b: IRay, result?: Vector) {
   let t = calcRayRayIntersection(a, b);
-
-  if (t === null || t === undefined) return t;
-
-  result = result || Vector.createPosition(0, 0);
-  return a.start.addO(a.direction.scaleN(t), result);
+  return calcPoint(t, a.start, a.direction, result);
 }
 
 function calcRayIntersectionPoint(ray: IRay, b: Geometry, result?: Vector) {
@@ -116,11 +119,7 @@ export function calcSegmentSegmentIntersection(a: ISegment, b: ISegment) {
 
 export function calcSegmentSegmentIntersectionPoint(a: ISegment, b: ISegment, result?: Vector) {
   const t = calcSegmentSegmentIntersection(a, b);
-
-  if (t === null || t === undefined) return t;
-
-  result = result || Vector.createPosition(0, 0);
-  return a.start.addO(a.direction.scaleN(t), result);
+  return calcPoint(t, a.start, a.direction, result);
 }
 
 function calcSegmentIntersectionPoint(segment: ISegment, b: Geometry, result?: Vector) {
