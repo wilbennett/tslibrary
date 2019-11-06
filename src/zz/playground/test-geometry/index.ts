@@ -105,6 +105,7 @@ function renderIntersections(viewport: Viewport) {
   renderIntersection(ray2, segment1, viewport);
 
   renderIntersection(segment2, line1, viewport);
+  renderIntersection(segment2, ray1, viewport);
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
