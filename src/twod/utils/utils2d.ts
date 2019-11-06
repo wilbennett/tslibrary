@@ -1,6 +1,6 @@
 import { Vector } from '../../vectors';
 
-export function calcIntersectionTime(point: Vector, direction: Vector, otherPoint: Vector, otherDirection: Vector) {
+export function calcIntersectTime(point: Vector, direction: Vector, otherPoint: Vector, otherDirection: Vector) {
   const denom = otherDirection.cross2D(direction);
 
   if (denom === 0) return null;

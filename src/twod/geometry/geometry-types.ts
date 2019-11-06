@@ -6,7 +6,7 @@ export interface IGeometry {
   props: ContextProps;
   lineDash?: number[];
 
-  getIntersectionPoint(other: Geometry, result?: Vector): Tristate<Vector>;
+  getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector>;
   render(viewport: Viewport): void;
 }
 

@@ -108,7 +108,7 @@ function renderIntersections(viewport: Viewport) {
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
-  const point = a.getIntersectionPoint(b);
+  const point = a.getIntersectPoint(b);
 
   if (!point) return;
 
