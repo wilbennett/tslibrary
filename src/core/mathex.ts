@@ -14,7 +14,7 @@ export class MathEx {
   static readonly SINN1 = Math.sin(-MathEx.ONE_DEGREE);
   static readonly COSN1 = Math.cos(-MathEx.ONE_DEGREE);
 
-  static readonly EPSILON = 0.00001;
+  static epsilon = 0.00001;
 
   static toRadians(degrees: number) { return degrees * this.ONE_DEGREE; }
   static toDegrees(radians: number) {
@@ -87,8 +87,16 @@ export class MathEx {
     return <any>(value > 0) - <any>(value < 0) || +value;
   }
 
-  static equals(value1: number, value2: number, epsilon: number = this.EPSILON) {
+  static isEqualTo(value1: number, value2: number, epsilon: number = this.epsilon) {
     return Math.abs(value1 - value2) <= epsilon;
+  }
+
+  static isGreaterOrEqualTo(value1: number, value2: number, epsilon: number = this.epsilon) {
+    return value1 > value2 || Math.abs(value1 - value2) <= epsilon;
+  }
+
+  static isLessOrEqualTo(value1: number, value2: number, epsilon: number = this.epsilon) {
+    return value1 < value2 || Math.abs(value1 - value2) <= epsilon;
   }
 
   static toFixed(count: number, ...values: number[]) {
