@@ -4,6 +4,7 @@ import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 export interface IShape extends IGeometry {
   isWorld: boolean;
   readonly position: Vector;
+  readonly angle: number;
   data: VectorGroups;
   vertices: VectorCollection;
   edgeVectors: VectorCollection;
@@ -13,8 +14,8 @@ export interface IShape extends IGeometry {
   setPosition(position: Vector): void;
   setAngle(radians: number): void;
   containsPoint(point: Vector): boolean;
-  getSupport(direction: Vector, result?: Vector[]): Vector;
-  getSupport(radians: number, result?: Vector[]): Vector;
+  getSupport(direction: Vector, result?: Vector): Vector;
+  getSupport(radians: number, result?: Vector): Vector;
   getAxes(other: Shape, result?: Vector[]): Vector[];
   toWorld(point: Vector, result?: Vector): Vector;
   toLocal(point: Vector, result?: Vector): Vector;
