@@ -70,12 +70,20 @@ export class Viewport {
 
   calcLineWidth(width: number) { return this._isTransformed ? width / this.scale : width; }
 
-  toScreen(vector: Vector, force: boolean = false) {
-    return force || !this._isTransformed ? this.matrix.transform(vector) : vector;
+  toScreen(vector: Vector, force: boolean = false, result?: Vector) {
+    result = result || Vector.create(0, 0);
+
+    return force || !this._isTransformed
+      ? this.matrix.transform(vector, undefined, result)
+      : result.copyFrom(vector);
   }
 
-  toWorld(vector: Vector, force: boolean = false) {
-    return force || !this._isTransformed ? this.matrix.transformInverse(vector) : vector;
+  toWorld(vector: Vector, force: boolean = false, result?: Vector) {
+    result = result || Vector.create(0, 0);
+
+    return force || !this._isTransformed
+      ? this.matrix.transformInverse(vector, result)
+      : result.copyFrom(vector);
   }
 
   adjustView() {
