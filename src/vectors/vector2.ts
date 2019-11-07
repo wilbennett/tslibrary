@@ -10,8 +10,21 @@ export class Vector2 extends Vector {
   static get instanceConstructor() { return this._instanceConstructor2; }
   static set instanceConstructor(value: Vector2Constructor) { this._instanceConstructor2 = value; }
 
-  get magSquared() { return this.x * this.x + this.y * this.y; }
-  get mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+  get magSquared() {
+    if (this._magSquared !== undefined) return this._magSquared;
+
+    const result = this.x * this.x + this.y * this.y;
+    this._magSquared = result;
+    return result;
+  }
+
+  get mag() {
+    if (this._mag !== undefined) return this._mag;
+
+    const result = Math.sqrt(this.x * this.x + this.y * this.y);
+    this._mag = result;
+    return result;
+  }
 
   static create(x: number, y: number, w: number = 0) { return new this.instanceConstructor(x, y, w); }
   static createPosition(x: number, y: number) { return new this.instanceConstructor(x, y, 1); }

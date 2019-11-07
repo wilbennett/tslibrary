@@ -41,6 +41,9 @@ export abstract class Vector {
   protected get _mag(): number | undefined { return undefined; }
   // @ts-ignore - unused params.
   protected set _mag(value) { }
+  protected get _radians(): number | undefined { return undefined; }
+  // @ts-ignore - unused params.
+  protected set _radians(value) { }
 
   static create(x: number, y: number, z: number = 0, w: number = 0) {
     return new this.instanceConstructor(x, y, z || 0, w);
@@ -72,17 +75,34 @@ export abstract class Vector {
     }
   }
 
-  get magSquared() { return this.x * this.x + this.y * this.y + this.z * this.z; }
-  get mag() { return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z); }
+  get magSquared() {
+    if (this._magSquared !== undefined) return this._magSquared;
+
+    const result = this.x * this.x + this.y * this.y + this.z * this.z;
+    this._magSquared = result;
+    return result;
+  }
+
+  get mag() {
+    if (this._mag !== undefined) return this._mag;
+
+    const result = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    this._mag = result;
+    return result;
+  }
   get normal() { return this.perp(); }
 
   // TODO: Proper 3D implementation.
   get radians() {
-    const res = Math.atan2(this.y, this.x);
-    return res >= 0 ? res : res + MathEx.TWO_PI;
+    if (this._radians !== undefined) return this._radians;
+
+    let result = Math.atan2(this.y, this.x);
+    result = result >= 0 ? result : result + MathEx.TWO_PI;
+    this._radians = result;
+    return result;
   }
 
-  get degrees() { return this.radians * MathEx.ONE_DEGREE; }
+  get degrees() { return this.radians * MathEx.ONE_RADIAN; }
 
   static pixelsPerMeter = 30;
   private static _empty: Vector;
@@ -458,6 +478,9 @@ export abstract class Vector {
 
     if (instance._mag !== undefined)
       instance._mag = undefined;
+
+    if (instance._radians !== undefined)
+      instance._radians = undefined;
 
     return instance;
   }

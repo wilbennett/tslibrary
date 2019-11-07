@@ -67,5 +67,8 @@ export class Vector2B extends Vector2 {
   protected set _magSquared(value) { this.__magSquared = value; }
   private __mag?: number;
   protected get _mag(): number | undefined { return this.__mag; }
-  protected set _mag(value) { this.__magSquared = value; }
+  protected set _mag(value) { this.__mag = value; }
+  private __radians?: number;
+  protected get _radians(): number | undefined { return this.__radians; }
+  protected set _radians(value) { this.__radians = value; }
 }

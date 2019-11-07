@@ -80,5 +80,5 @@ export class Vector3B extends Vector3 {
   protected set _magSquared(value) { this.__magSquared = value; }
   private __mag?: number;
   protected get _mag(): number | undefined { return this.__mag; }
-  protected set _mag(value) { this.__magSquared = value; }
+  protected set _mag(value) { this.__mag = value; }
 }

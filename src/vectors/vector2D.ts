@@ -33,7 +33,10 @@ export class Vector2D extends Vector2 {
   protected set _magSquared(value) { this.__magSquared = value; }
   private __mag?: number;
   protected get _mag(): number | undefined { return this.__mag; }
-  protected set _mag(value) { this.__magSquared = value; }
+  protected set _mag(value) { this.__mag = value; }
+  private __radians?: number;
+  protected get _radians(): number | undefined { return this.__radians; }
+  protected set _radians(value) { this.__radians = value; }
 
   private static _zeroPosition: Vector;
   static get zeroPosition() { return Vector2D._zeroPosition || (Vector2D._zeroPosition = new Vector2ZeroPosition()); }
@@ -44,7 +47,7 @@ export class Vector2D extends Vector2 {
     return new Vector2D(Math.cos(angle), Math.sin(angle)).scale(radius);
   }
 
-  static fromDegrees(angle: number, mag: number = 1) { return this.fromRadians(angle * MathEx.ONE_RADIAN, mag); }
+  static fromDegrees(angle: number, mag: number = 1) { return this.fromRadians(angle * MathEx.ONE_DEGREE, mag); }
 }
 
 export class PVector2 extends Vector2D {
