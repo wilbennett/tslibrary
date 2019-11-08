@@ -109,14 +109,59 @@ export class Vector2 extends Vector {
   }
 
   displaceByO(other: Vector, result: Vector) {
-    return result.set(this.x + other.x, this.y + other.y, 0, this.w);
+    let ox = other.x;
+    let oy = other.y;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+    }
+
+    return result.set(x + ox, y + oy, 0, w);
   }
+
+  displaceByScaledO(other: Vector, scale: number, result: Vector) {
+    let ox = other.x * scale;
+    let oy = other.y * scale;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+    }
+
+    return result.set(x + ox, y + oy, 0, w);
+  }
+
   addO(other: Vector, result: Vector) { return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w); }
   subO(other: Vector, result: Vector) { return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
   scaleO(scale: number, result: Vector) { return result.set(this.x * scale, this.y * scale, 0, this.w); }
+
   addScaledO(other: Vector, scale: number, result: Vector) {
     return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
   }
+
   normalizeScaleO(scale: number, result: Vector) {
     let x = this.x;
     let y = this.y;

@@ -237,11 +237,62 @@ export abstract class Vector {
   asDirection() { return this.asDirectionO(this); }
 
   displaceByO(other: Vector, result: Vector) {
-    // TODO: Account for w.
-    return result.set(this.x + other.x, this.y + other.y, this.z + other.z, this.w);
+    let ox = other.x;
+    let oy = other.y;
+    let oz = other.z;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+      oz *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+      oz *= w;
+    }
+
+    return result.set(x + ox, y + oy, z + oz, w);
   }
   displaceByN(other: Vector) { return this.displaceByO(other, this.newVector()); }
   displaceBy(other: Vector) { return this.displaceByO(other, this); }
+
+  displaceByScaledO(other: Vector, scale: number, result: Vector) {
+    let ox = other.x * scale;
+    let oy = other.y * scale;
+    let oz = other.z * scale;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+      oz *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+      oz *= w;
+    }
+
+    return result.set(x + ox, y + oy, z + oz, w);
+  }
+  displaceByScaledN(other: Vector, scale: number) { return this.displaceByScaledO(other, scale, this.newVector()); }
+  displaceByScaled(other: Vector, scale: number) { return this.displaceByScaledO(other, scale, this); }
 
   addO(other: Vector, result: Vector) { return result.set(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w); }
   addN(other: Vector) { return this.addO(other, this.newVector()); }
