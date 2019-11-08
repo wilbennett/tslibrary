@@ -16,7 +16,6 @@ export interface IShape extends IGeometry {
 
   setPosition(position: Vector): void;
   setAngle(radians: number): void;
-  containsPoint(point: Vector): boolean; // Local space.
   getSupport(direction: Vector, result?: SupportInfo): SupportInfo; // Local space.
   getSupport(radians: number, result?: SupportInfo): SupportInfo;
   getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.

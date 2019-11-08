@@ -1,4 +1,4 @@
-import { Geometry, IGeometry } from '.';
+import { containsPoint, Geometry, IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -10,6 +10,11 @@ export abstract class GeometryBase implements IGeometry {
   set props(value) { this._props = value; }
 
   lineDash?: number[];
+
+  containsPoint(point: Vector) {
+    // @ts-ignore - assigment compatibility.
+    return containsPoint(this, point);
+  }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {
     // @ts-ignore - assigment compatibility.

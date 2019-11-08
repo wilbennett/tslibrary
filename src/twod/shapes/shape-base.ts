@@ -24,8 +24,6 @@ export abstract class ShapeBase implements IShape {
   setPosition(position: Vector) { }
   // @ts-ignore - unused param.
   setAngle(radians: number) { }
-  // @ts-ignore - unused param.
-  containsPoint(point: Vector) { return false; }
 
   getSupport(direction: Vector, result?: SupportInfo): SupportInfo;
   getSupport(radians: number, result?: SupportInfo): SupportInfo;
@@ -55,6 +53,9 @@ export abstract class ShapeBase implements IShape {
   }
 
   // abstract createWorldShape(): this;
+
+  // @ts-ignore - unused param.
+  containsPoint(point: Vector) { return false; }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {
     // @ts-ignore - assigment compatibility.
