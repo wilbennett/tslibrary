@@ -2,7 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser, VectorEaser } from '../../../easing';
-import { CanvasContext, ContextProps, Geometry, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
+import { CanvasContext, Circle, ContextProps, Geometry, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -31,6 +31,7 @@ const ray1 = new Ray(Vector.createPosition(1, 1), Vector.createDirection(1, 1));
 const ray2 = new Ray(Vector.createPosition(-1, -2), Vector.createDirection(1, -2));
 const segment1 = new Segment(Vector.createPosition(0.3, -2), Vector.createPosition(2, 0));
 const segment2 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
+const circle1 = new Circle(Vector.createPosition(-1, 0), 0.5);
 const point1 = Vector.createPosition(0.5, 0.5);
 const point2 = Vector.createPosition(2, 1);
 const point3 = Vector.createPosition(2, -2);
@@ -41,6 +42,7 @@ ray1.props = { strokeStyle: "orange", fillStyle: "orange" };
 ray2.props = { strokeStyle: "magenta", fillStyle: "magenta" };
 segment1.props = { strokeStyle: "red", fillStyle: "red" };
 segment2.props = { strokeStyle: "green", fillStyle: "green" };
+circle1.props = { strokeStyle: "red" };
 
 const point1Props = { strokeStyle: "black", fillStyle: "black" };
 const point2Props = { strokeStyle: "black", fillStyle: "black" };
@@ -53,6 +55,7 @@ const geometries: Geometry[] = [
   ray2,
   segment1,
   segment2,
+  circle1,
 ];
 
 const points: [Vector, ContextProps][] = [
@@ -87,6 +90,12 @@ const point3Move = new VectorEaser(
   duration,
   Ease.smoothStep,
   v => point3.copyFrom(v));
+const circle1Move = new VectorEaser(
+  Vector.createPosition(-1, 0),
+  Vector.createPosition(2.5, 1),
+  duration * 0.5,
+  Ease.smoothStep,
+  v => circle1.position.copyFrom(v));
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
@@ -99,6 +108,7 @@ runner.add(
   rayRotate2.pingPong().repeat(Infinity),
   segment1Move.pingPong().repeat(Infinity),
   point3Move.pingPong().repeat(Infinity),
+  circle1Move.pingPong().repeat(Infinity),
 );
 
 loop.start();
@@ -146,6 +156,8 @@ function renderPointContainments(viewport: Viewport) {
   renderPointContainment(line1, point1, viewport);
   renderPointContainment(ray1, point2, viewport);
   renderPointContainment(segment2, point3, viewport);
+  renderPointContainment(circle1, point1, viewport);
+  renderPointContainment(circle1, point2, viewport);
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
@@ -161,6 +173,7 @@ function renderPointContainment(a: Geometry, point: Vector, viewport: Viewport) 
   if (!a.containsPoint(point)) return;
 
   beginPath(a.props, viewport);
+  viewport.ctx.fillStyle = a.props.fillStyle || a.props.strokeStyle || "gray";
   ctx.fillCircle(point, 0.2);
 }
 

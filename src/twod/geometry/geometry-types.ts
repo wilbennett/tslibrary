@@ -31,4 +31,10 @@ export interface ISegment extends IGeometry {
   direction: Vector;
 }
 
-export type Geometry = ILine | IRay | ISegment;
+export interface ICircle extends IGeometry {
+  kind: "circle";
+  position: Vector;
+  radius: number;
+}
+
+export type Geometry = ILine | IRay | ISegment | ICircle;

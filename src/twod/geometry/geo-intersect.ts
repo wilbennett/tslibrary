@@ -1,14 +1,15 @@
-import { Geometry, ILine, IRay, ISegment } from '..';
+import { Geometry, ICircle, ILine, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
 import { calcIntersectTime } from '../utils';
 
-export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector) {
+export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector): Tristate<Vector> {
   switch (a.kind) {
     case "line": return calcLineIntersectPoint(a, b, result);
     case "ray": return calcRayIntersectPoint(a, b, result);
     case "segment": return calcSegmentIntersectPoint(a, b, result);
+    case "circle": return calcCircleIntersectPoint(a, b, result);
     default: return assertNever(a);
   }
 }
@@ -65,6 +66,7 @@ function calcLineIntersectPoint(line: ILine, b: Geometry, result?: Vector) {
     case "line": return calcLineLineIntersectPoint(line, b, result);
     case "ray": return calcLineRayIntersectPoint(line, b, result);
     case "segment": return calcLineSegmentIntersectPoint(line, b, result);
+    case "circle": return undefined;
     default: return assertNever(b);
   }
 }
@@ -133,6 +135,7 @@ function calcRayIntersectPoint(ray: IRay, b: Geometry, result?: Vector) {
     case "ray": return calcRayRayIntersectPoint(ray, b, result);
     case "line": return calcRayLineIntersectPoint(ray, b, result);
     case "segment": return calcRaySegmentIntersectPoint(ray, b, result);
+    case "circle": return undefined;
     default: return assertNever(b);
   }
 }
@@ -203,6 +206,15 @@ function calcSegmentIntersectPoint(segment: ISegment, b: Geometry, result?: Vect
     case "segment": return calcSegmentSegmentIntersectPoint(segment, b, result);
     case "line": return calcSegmentLineIntersectPoint(segment, b, result);
     case "ray": return calcSegmentRayIntersectPoint(segment, b, result);
+    case "circle": return undefined;
     default: return assertNever(b);
   }
+}
+
+// *************************************************************************************
+// Circle
+// *************************************************************************************
+// @ts-ignore - unused param.
+function calcCircleIntersectPoint(circle: ICircle, b: Geometry, result?: Vector) {
+  return undefined;
 }
