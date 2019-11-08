@@ -177,7 +177,40 @@ export abstract class Vector {
   crossN(other: Vector) { return this.crossO(other, this.newVector()); }
   cross(other: Vector) { return this.crossO(other, this); }
 
-  asCartesianO(result: Vector) { return result.set(this.x / this.w, this.y / this.w, this.z / this.w, 1); }
+  normalizeWO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+      w = 1;
+    }
+
+    return result.set(x, y, z, w);
+  }
+  normalizeWN() { return this.normalizeWO(this.newVector()); }
+  normalizeW() { return this.normalizeWO(this); }
+
+  asCartesianO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+    }
+
+    return result.set(x, y, z, 1);
+  }
   asCartesianN() { return this.asCartesianO(this.newVector()); }
   asCartesian() { return this.asCartesianO(this); }
 
@@ -185,11 +218,26 @@ export abstract class Vector {
   asPositionN() { return this.asPositionO(this.newVector()); }
   asPosition() { return this.asPositionO(this); }
 
-  asDirectionO(result: Vector) { return result.set(this.x, this.y, this.z, 0); }
+  asDirectionO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+    }
+
+    return result.set(x, y, z, 0);
+  }
   asDirectionN() { return this.asDirectionO(this.newVector()); }
   asDirection() { return this.asDirectionO(this); }
 
   displaceByO(other: Vector, result: Vector) {
+    // TODO: Account for w.
     return result.set(this.x + other.x, this.y + other.y, this.z + other.z, this.w);
   }
   displaceByN(other: Vector) { return this.displaceByO(other, this.newVector()); }

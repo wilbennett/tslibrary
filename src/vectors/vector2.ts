@@ -62,9 +62,52 @@ export class Vector2 extends Vector {
 
   cross2D(other: Vector) { return this.x * other.y - this.y * other.x; }
   crossO(other: Vector, result: Vector) { return result.set(this.cross2D(other), 0, 0, 0); }
-  asCartesianO(result: Vector) { return result.set(this.x / this.w, this.y / this.w, 0, 1); }
+
+  normalizeWO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      w = 1;
+    }
+
+    return result.set(x, y, 0, w);
+  }
+
+  asCartesianO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+    }
+
+    return result.set(x, y, 0, 1);
+  }
+
   asPositionO(result: Vector) { return result.set(this.x, this.y, 0, 1); }
-  asDirectionO(result: Vector) { return result.set(this.x, this.y, 0, 0); }
+
+  asDirectionO(result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+    }
+
+    return result.set(x, y, 0, 0);
+  }
+
   displaceByO(other: Vector, result: Vector) {
     return result.set(this.x + other.x, this.y + other.y, 0, this.w);
   }
