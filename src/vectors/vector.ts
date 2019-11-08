@@ -1,5 +1,6 @@
 import { NullVector } from '.';
 import { MathEx, NumberArray } from '../core';
+import { ContextProps, Viewport } from '../twod';
 
 export interface VectorConstructor {
   new(x: number, y: number, z: number, w: number): Vector;
@@ -10,6 +11,7 @@ export abstract class Vector {
   static get instanceConstructor() { return this._instanceConstructor; }
   static set instanceConstructor(value: VectorConstructor) { this._instanceConstructor = value; }
 
+  static tipDrawHeight = 5;
   static get elementCount() { return 4; }
   get elementCount() { return Vector.elementCount; }
   get x() { return 0; }
@@ -670,10 +672,17 @@ export abstract class Vector {
       && Math.abs(this.z - other.z / other.w) < epsilon;
   }
 
-  draw(ctx: CanvasRenderingContext2D, radius: number) {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, radius, 0, MathEx.TWO_PI);
-    ctx.fill();
+  // @ts-ignore - unused param.
+  renderCore(viewport: Viewport, origin: Vector) { }
+
+  // @ts-ignore - unused param.
+  render(viewport: Viewport, origin?: Vector, props?: ContextProps) {
+    origin = origin || Vector.createPosition(0, 0);
+    props = props || { strokeStyle: "black", fillStyle: "black" };
+    let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+    viewport.ctx.withProps(props).withLineWidth(lineWidth);
+
+    this.renderCore(viewport, origin);
   }
 
   toString(precision: number = 2) {

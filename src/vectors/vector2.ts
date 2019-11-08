@@ -1,5 +1,6 @@
 import { Vector } from '.';
-import { NumberArray } from '../core';
+import { MathEx, NumberArray } from '../core';
+import { Viewport } from '../twod';
 
 export interface Vector2Constructor {
   new(x: number, y: number, w?: number): Vector2;
@@ -263,5 +264,35 @@ export class Vector2 extends Vector {
     return this.isPosition
       ? `[${this.x.toFixed(precision)}, ${this.y.toFixed(precision)}, ${this.w.toFixed(precision)}]`
       : `<${this.x.toFixed(precision)}, ${this.y.toFixed(precision)}, ${this.w.toFixed(precision)}>`;
+  }
+
+  renderCore(viewport: Viewport, origin: Vector) {
+    const ctx = viewport.ctx;
+
+    if (this.isPosition) {
+      ctx.beginPath().fillCircle(this, Vector.tipDrawHeight * 0.5);
+      return;
+    }
+
+    const mag = this.mag;
+    const triHeight = Math.min(mag * 0.25, Vector.tipDrawHeight);
+    const angle = -90 * MathEx.ONE_DEGREE + this.radians;
+
+    ctx.pushTransform();
+
+    ctx.translate(origin.x, origin.y)
+      .rotate(angle)
+      .beginPath()
+      .line(0, 0, 0, mag - triHeight);
+
+    ctx.translate(0, mag - triHeight)
+      .lineTo(triHeight * 0.5, 0)
+      .lineTo(0, triHeight)
+      .lineTo(-triHeight * 0.5, 0)
+      .lineTo(0, 0)
+      .stroke()
+      .fill();
+
+    ctx.popTransform();
   }
 }
