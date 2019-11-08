@@ -13,7 +13,17 @@ export class Vector2 extends Vector {
   get magSquared() {
     if (this._magSquared !== undefined) return this._magSquared;
 
-    const result = this.x * this.x + this.y * this.y;
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+    }
+
+    const result = x * x + y * y;
     this._magSquared = result;
     return result;
   }
@@ -21,7 +31,12 @@ export class Vector2 extends Vector {
   get mag() {
     if (this._mag !== undefined) return this._mag;
 
-    const result = Math.sqrt(this.x * this.x + this.y * this.y);
+    const w = this.w;
+    let result = Math.sqrt(this.x * this.x + this.y * this.y);
+
+    if (w !== 0 && w !== 1)
+      result /= w;
+
     this._mag = result;
     return result;
   }
@@ -60,8 +75,19 @@ export class Vector2 extends Vector {
     return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
   }
   normalizeScaleO(scale: number, result: Vector) {
-    const len = 1 / this.mag;
-    return result.set(this.x * len * scale, this.y * len * scale, 0, this.w);
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+    return result.set(x * magInv * scale, y * magInv * scale, 0, w);
   }
 
   multO(other: Vector, result: Vector): Vector;
@@ -102,8 +128,19 @@ export class Vector2 extends Vector {
   negateO(result: Vector) { return result.set(-this.x, -this.y, 0, this.w); }
 
   normalizeO(result: Vector) {
-    const len = 1 / this.mag;
-    return result.set(this.x * len, this.y * len, 0, this.w);
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+    return result.set(x * magInv, y * magInv, 0, w);
   }
 
   perpLeftO(result: Vector) { return result.set(-this.y, this.x, 0, this.w); }

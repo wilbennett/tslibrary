@@ -44,7 +44,7 @@ export class Vector2D extends Vector2 {
   static get zeroDirection() { return Vector2D._zeroDirection || (Vector2D._zeroDirection = new Vector2ZeroDirection()); }
 
   static fromRadians(angle: number, radius: number = 1) {
-    return new Vector2D(Math.cos(angle), Math.sin(angle)).scale(radius);
+    return new Vector2D().withRadiansMag(angle, radius);
   }
 
   static fromDegrees(angle: number, mag: number = 1) { return this.fromRadians(angle * MathEx.ONE_DEGREE, mag); }

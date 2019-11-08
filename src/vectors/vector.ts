@@ -78,7 +78,19 @@ export abstract class Vector {
   get magSquared() {
     if (this._magSquared !== undefined) return this._magSquared;
 
-    const result = this.x * this.x + this.y * this.y + this.z * this.z;
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+    }
+
+    const result = x * x + y * y + z * z;
     this._magSquared = result;
     return result;
   }
@@ -86,10 +98,16 @@ export abstract class Vector {
   get mag() {
     if (this._mag !== undefined) return this._mag;
 
-    const result = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    const w = this.w;
+    let result = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+
+    if (w !== 0 && w !== 1)
+      result /= w;
+
     this._mag = result;
     return result;
   }
+
   get normal() { return this.perp(); }
 
   // TODO: Proper 3D implementation.
@@ -196,8 +214,21 @@ export abstract class Vector {
   addScaled(other: Vector, scale: number) { return this.addScaledO(other, scale, this); }
 
   normalizeScaleO(scale: number, result: Vector) {
-    const len = 1 / this.mag;
-    return result.set(this.x * len * scale, this.y * len * scale, this.z * len * scale, this.w);
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+    return result.set(x * magInv * scale, y * magInv * scale, z * magInv * scale, w);
   }
   normalizeScaleN(scale: number) { return this.normalizeScaleO(scale, this.newVector()); }
   normalizeScale(scale: number) { return this.normalizeScaleO(scale, this); }
@@ -273,8 +304,21 @@ export abstract class Vector {
   negate() { return this.negateO(this); }
 
   normalizeO(result: Vector) {
-    const len = 1 / this.mag;
-    return result.set(this.x * len, this.y * len, this.z * len, this.w);
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+    return result.set(x * magInv, y * magInv, z * magInv, w);
   }
   normalizeN() { return this.normalizeO(this.newVector()); }
   normalize() { return this.normalizeO(this); }
@@ -436,7 +480,74 @@ export abstract class Vector {
   withNegZN() { return this.withNegZO(this.newVector()); }
   withNegZ() { return this.withNegZO(this); }
 
-  equals(other: Vector, epsilon: number = Number.EPSILON) {
+  withRadiansO(radians: number, result: Vector) {
+    // TODO: Not valid for 3D.
+    if (result === this) {
+      this.set(Math.cos(radians), Math.sin(radians), 0, this.w);
+      this._radians = radians;
+      return this;
+    }
+
+    result.w = this.w;
+    result.withRadiansO(radians, result);
+    return result;
+  }
+  withRadiansN(radians: number) { return this.withRadiansO(radians, this.newVector()); }
+  withRadians(radians: number) { return this.withRadiansO(radians, this); }
+
+  withDegreesO(degrees: number, result: Vector) {
+    // TODO: Not valid for 3D.
+    return this.withRadiansO(degrees * MathEx.ONE_DEGREE, result);
+  }
+  withDegreesN(degrees: number) { return this.withDegreesO(degrees, this.newVector()); }
+  withDegrees(degrees: number) { return this.withDegreesO(degrees, this); }
+
+  withRadiansMagO(radians: number, mag: number, result: Vector) {
+    // TODO: Not valid for 3D.
+    if (result === this) {
+      this.set(Math.cos(radians) * mag, Math.sin(radians) * mag, 0, this.w);
+      this._radians = radians;
+      this._mag = mag;
+      this._magSquared = mag * mag;
+      return this;
+    }
+
+    result.w = this.w;
+    result.withRadiansMagO(radians, mag, result);
+    return result;
+  }
+
+  withRadiansMagN(radians: number, mag: number) { return this.withRadiansMagO(radians, mag, this.newVector()); }
+  withRadiansMag(radians: number, mag: number) { return this.withRadiansMagO(radians, mag, this); }
+
+  withDegreesMagO(degrees: number, mag: number, result: Vector) {
+    // TODO: Not valid for 3D.
+    return this.withRadiansMagO(degrees * MathEx.ONE_DEGREE, mag, result);
+  }
+  withDegreesMagN(degrees: number, mag: number) { return this.withDegreesMagO(degrees, mag, this.newVector()); }
+  withDegreesMag(degrees: number, mag: number) { return this.withDegreesMagO(degrees, mag, this); }
+
+  withMagO(mag: number, result: Vector) {
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+    return result.set(x * magInv * mag, y * magInv * mag, z * magInv * mag, w);
+  }
+  withMagN(scale: number) { return this.withMagO(scale, this.newVector()); }
+  withMag(scale: number) { return this.withMagO(scale, this); }
+
+  equals(other: Vector, epsilon: number = MathEx.epsilon) {
     if (this.isDirection && other.isDirection)
       return Math.abs(this.x - other.x) < epsilon
         && Math.abs(this.y - other.y) < epsilon
