@@ -33,6 +33,7 @@ const segment1 = new Segment(Vector.createPosition(0.3, -2), Vector.createPositi
 const segment2 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
 const point1 = Vector.createPosition(0.5, 0.5);
 const point2 = Vector.createPosition(2, 1);
+const point3 = Vector.createPosition(2, -2);
 
 line1.props = { strokeStyle: "blue", fillStyle: "blue" };
 line2.props = { strokeStyle: "purple", fillStyle: "purple" };
@@ -43,6 +44,7 @@ segment2.props = { strokeStyle: "green", fillStyle: "green" };
 
 const point1Props = { strokeStyle: "black", fillStyle: "black" };
 const point2Props = { strokeStyle: "black", fillStyle: "black" };
+const point3Props = { strokeStyle: "black", fillStyle: "black" };
 
 const geometries: Geometry[] = [
   line1,
@@ -56,6 +58,7 @@ const geometries: Geometry[] = [
 const points: [Vector, ContextProps][] = [
   [point1, point1Props],
   [point2, point2Props],
+  [point3, point3Props],
 ];
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
@@ -78,6 +81,12 @@ const segment1Move = new VectorEaser(
   duration,
   Ease.smoothStep,
   v => segment1.setEnd(v));
+const point3Move = new VectorEaser(
+  Vector.createPosition(2, -2),
+  Vector.createPosition(-2, 2),
+  duration,
+  Ease.smoothStep,
+  v => point3.copyFrom(v));
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
@@ -89,6 +98,7 @@ runner.add(
   rayRotate.pingPong().repeat(Infinity),
   rayRotate2.pingPong().repeat(Infinity),
   segment1Move.pingPong().repeat(Infinity),
+  point3Move.pingPong().repeat(Infinity),
 );
 
 loop.start();
@@ -135,6 +145,7 @@ function renderIntersections(viewport: Viewport) {
 function renderPointContainments(viewport: Viewport) {
   renderPointContainment(line1, point1, viewport);
   renderPointContainment(ray1, point2, viewport);
+  renderPointContainment(segment2, point3, viewport);
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {

@@ -5,9 +5,9 @@ import { Vector } from '../../vectors';
 
 export function containsPoint(geometry: Geometry, point: Vector, epsilon: number = MathEx.epsilon) {
   switch (geometry.kind) {
-    case "line": return lineContainsPoint(geometry, point);
-    case "ray": return rayContainsPoint(geometry, point);
-    case "segment": return segmentContainsPoint(geometry, point);
+    case "line": return lineContainsPoint(geometry, point, epsilon);
+    case "ray": return rayContainsPoint(geometry, point, epsilon);
+    case "segment": return segmentContainsPoint(geometry, point, epsilon);
     default: return assertNever(geometry);
   }
 }
@@ -29,7 +29,13 @@ export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = Mat
 
 // Segment.
 export function segmentContainsPoint(segment: ISegment, point: Vector, epsilon: number = MathEx.epsilon) {
-  return false;
+  const vector = point.subN(segment.start);
+
+  if (!MathEx.isEqualTo(vector.cross2D(segment.direction), 0, epsilon)) return false;
+
+  const edge = segment.edgeVector;
+  const dot = vector.dot(edge);
+  return dot >= 0 && dot <= edge.dot(edge);
 }
 
 // Circle.
