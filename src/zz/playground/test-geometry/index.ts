@@ -32,6 +32,7 @@ const ray2 = new Ray(Vector.createPosition(-1, -2), Vector.createDirection(1, -2
 const segment1 = new Segment(Vector.createPosition(0.3, -2), Vector.createPosition(2, 0));
 const segment2 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
 const point1 = Vector.createPosition(0.5, 0.5);
+const point2 = Vector.createPosition(2, 1);
 
 line1.props = { strokeStyle: "blue", fillStyle: "blue" };
 line2.props = { strokeStyle: "purple", fillStyle: "purple" };
@@ -40,7 +41,8 @@ ray2.props = { strokeStyle: "magenta", fillStyle: "magenta" };
 segment1.props = { strokeStyle: "red", fillStyle: "red" };
 segment2.props = { strokeStyle: "green", fillStyle: "green" };
 
-const point1Props = { strokeStyle: "gray", fillStyle: "gray" };
+const point1Props = { strokeStyle: "black", fillStyle: "black" };
+const point2Props = { strokeStyle: "black", fillStyle: "black" };
 
 const geometries: Geometry[] = [
   line1,
@@ -53,6 +55,7 @@ const geometries: Geometry[] = [
 
 const points: [Vector, ContextProps][] = [
   [point1, point1Props],
+  [point2, point2Props],
 ];
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
@@ -131,6 +134,7 @@ function renderIntersections(viewport: Viewport) {
 
 function renderPointContainments(viewport: Viewport) {
   renderPointContainment(line1, point1, viewport);
+  renderPointContainment(ray1, point2, viewport);
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {

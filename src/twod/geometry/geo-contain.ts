@@ -20,7 +20,11 @@ export function lineContainsPoint(line: ILine, point: Vector, epsilon: number = 
 
 // Ray.
 export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = MathEx.epsilon) {
-  return false;
+  const vector = point.subN(ray.start);
+
+  if (!MathEx.isEqualTo(vector.cross2D(ray.direction), 0, epsilon)) return false;
+
+  return ray.direction.dot(vector) > 0;
 }
 
 // Segment.
