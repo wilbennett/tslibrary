@@ -1,6 +1,6 @@
 import { containsPoint, Geometry, IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
-import { Tristate } from '../../core';
+import { MathEx, Tristate } from '../../core';
 import { Vector } from '../../vectors';
 import { calcIntersectPoint } from './geo-intersect';
 
@@ -11,9 +11,9 @@ export abstract class GeometryBase implements IGeometry {
 
   lineDash?: number[];
 
-  containsPoint(point: Vector) {
+  containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
-    return containsPoint(this, point);
+    return containsPoint(this, point, epsilon);
   }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {
