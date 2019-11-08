@@ -1,26 +1,29 @@
-import { IGeometry, ILine, IRay, ISegment } from '..';
+import { ContextProps, IGeometry, ILine, IRay, ISegment } from '..';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
+
+export type SupportInfo = [Vector, number]; // Vertext, index.
 
 export interface IShape extends IGeometry {
   isWorld: boolean;
-  readonly position: Vector;
+  position: Vector; // World space.
   readonly angle: number;
-  data: VectorGroups;
-  vertices: VectorCollection;
-  edgeVectors: VectorCollection;
-  normals: VectorCollection;
+  readonly data: VectorGroups;
+  vertices: VectorCollection | undefined;
+  edgeVectors: VectorCollection | undefined;
+  normals: VectorCollection | undefined;
   boundingShape?: Shape;
+  props: ContextProps;
 
   setPosition(position: Vector): void;
   setAngle(radians: number): void;
-  containsPoint(point: Vector): boolean;
-  getSupport(direction: Vector, result?: Vector): Vector;
-  getSupport(radians: number, result?: Vector): Vector;
-  getAxes(other: Shape, result?: Vector[]): Vector[];
+  containsPoint(point: Vector): boolean; // Local space.
+  getSupport(direction: Vector, result?: SupportInfo): SupportInfo; // Local space.
+  getSupport(radians: number, result?: SupportInfo): SupportInfo;
+  getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.
   toWorld(point: Vector, result?: Vector): Vector;
   toLocal(point: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, point: Vector, result?: Vector): Vector;
-  createWorldShape(): this;
+  // createWorldShape(): this;
 }
 
 export interface ILineShape extends IShape, ILine {
