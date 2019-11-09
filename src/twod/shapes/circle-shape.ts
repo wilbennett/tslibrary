@@ -1,23 +1,32 @@
 import { ICircleShape, ShapeBase } from '.';
-import { ContextProps, Viewport } from '..';
+import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";
 
-  constructor(radius: number, isWorld?: boolean) {
+  constructor(
+    radius: number,
+    isWorld?: boolean,
+    integratorType: IntegratorConstructor = EulerSemiImplicit) {
     super();
 
     if (isWorld)
       this._isWorld = true;
 
-    this._position = Vector.createPosition(0, 0);
     this.radius = radius;
+
+    this._integratorType = integratorType;
+    this._integrator = new integratorType();
+    this._integrators = [this._integrator];
   }
 
-  protected _position: Vector;
-  get position() { return this._position; }
-  set position(value) { this._position = value; }
+  protected _integratorType: IntegratorConstructor;
+  protected _integrator: Integrator;
+  protected _integrators: Integrator[];
+  get integrators() { return this._integrators; }
+  get position() { return this._integrator.position; }
+  set position(value) { this._integrator.position = value; }
   radius: number;
 
   protected renderCore(view: Viewport, props: ContextProps) {

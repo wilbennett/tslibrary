@@ -1,15 +1,20 @@
 import { IShape, Shape, SupportInfo } from '.';
-import { calcIntersectPoint, containsPoint, ContextProps, Geometry, Viewport } from '..';
+import { calcIntersectPoint, containsPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Vector, VectorGroups } from '../../vectors';
 
 export abstract class ShapeBase implements IShape {
   protected _isWorld?: boolean = false;
   get isWorld() { return !!this._isWorld; }
+  get integrators(): Integrator[] { return []; }
   get position() { return Vector.empty; }
   // @ts-ignore - unused param.
   set position(value) { }
-  get angle() { return 0; }
+  get angle() {
+    const integrators = this.integrators;
+    return integrators.length > 0 ? integrators[0].angle : 0;
+  }
+  set angle(value) { this.setAngle(value); }
   protected _data?: VectorGroups;
   get data(): VectorGroups { return this._data || (this._data = new VectorGroups()); }
   get vertices() { return this.data.get("vertex"); }
@@ -20,10 +25,13 @@ export abstract class ShapeBase implements IShape {
   get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
 
-  // @ts-ignore - unused param.
-  setPosition(position: Vector) { this.position.copyFrom(position); }
-  // @ts-ignore - unused param.
-  setAngle(radians: number) { }
+  setPosition(position: Vector) {
+    this.position.copyFrom(position);
+  }
+
+  setAngle(radians: number) {
+    this.integrators.forEach(integrator => integrator.angle = radians);
+  }
 
   getSupport(direction: Vector, result?: SupportInfo): SupportInfo;
   getSupport(radians: number, result?: SupportInfo): SupportInfo;

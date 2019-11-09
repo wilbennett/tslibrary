@@ -1,12 +1,13 @@
-import { ContextProps, IGeometry, ILine, IRay, ISegment } from '..';
+import { ContextProps, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
 export interface IShape extends IGeometry {
   isWorld: boolean;
+  readonly integrators: Integrator[];
   position: Vector; // World space.
-  readonly angle: number;
+  angle: number;
   readonly data: VectorGroups;
   vertices: VectorCollection | undefined;
   edgeVectors: VectorCollection | undefined;
