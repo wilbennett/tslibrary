@@ -1,6 +1,6 @@
 import { IShape, Shape, SupportInfo } from '.';
-import { calcIntersectPoint, ContextProps, Geometry, Viewport } from '..';
-import { Tristate } from '../../core';
+import { calcIntersectPoint, containsPoint, ContextProps, Geometry, Viewport } from '..';
+import { MathEx, Tristate } from '../../core';
 import { Vector, VectorGroups } from '../../vectors';
 
 export abstract class ShapeBase implements IShape {
@@ -21,7 +21,7 @@ export abstract class ShapeBase implements IShape {
   set props(value) { this._props = value; }
 
   // @ts-ignore - unused param.
-  setPosition(position: Vector) { }
+  setPosition(position: Vector) { this.position.copyFrom(position); }
   // @ts-ignore - unused param.
   setAngle(radians: number) { }
 
@@ -54,8 +54,10 @@ export abstract class ShapeBase implements IShape {
 
   // abstract createWorldShape(): this;
 
-  // @ts-ignore - unused param.
-  containsPoint(point: Vector) { return false; }
+  containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
+    // @ts-ignore - assigment compatibility.
+    return containsPoint(this, point, epsilon);
+  }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {
     // @ts-ignore - assigment compatibility.
@@ -63,7 +65,7 @@ export abstract class ShapeBase implements IShape {
   }
 
   // @ts-ignore - unused param.
-  protected renderCore(viewport: Viewport) { }
+  protected renderCore(viewport: Viewport, props: ContextProps) { }
 
   render(viewport: Viewport) {
     const ctx = viewport.ctx;
@@ -72,6 +74,6 @@ export abstract class ShapeBase implements IShape {
 
     ctx.withProps(props).withLineWidth(lineWidth);
 
-    this.renderCore(viewport);
+    this.renderCore(viewport, props);
   }
 }
