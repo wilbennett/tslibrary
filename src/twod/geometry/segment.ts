@@ -1,5 +1,5 @@
 import { GeometryBase, ISegment } from '.';
-import { Viewport } from '..';
+import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class Segment extends GeometryBase implements ISegment {
@@ -54,7 +54,8 @@ export class Segment extends GeometryBase implements ISegment {
     this.reset();
   }
 
-  protected renderCore(viewport: Viewport) {
-    viewport.ctx.beginPath().line(this.start, this.end).stroke();
+  // @ts-ignore - unused param.
+  protected renderCore(view: Viewport, props: ContextProps) {
+    view.ctx.beginPath().line(this.start, this.end).stroke();
   }
 }

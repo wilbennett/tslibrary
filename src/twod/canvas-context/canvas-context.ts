@@ -12,7 +12,7 @@ type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 type rp = NonFunctionPropertyNames<Omit<CanvasRenderingContext2D, "canvas" | "transformation">>;
 type cp = NonFunctionPropertyNames<Omit<CanvasContext, "ctx" | "transformation" | "inverse">>;
 export type RenderContextProps = Partial<Pick<CanvasRenderingContext2D, rp>>;
-export type ContextProps = Partial<Pick<CanvasContext, cp>>;
+export type ContextProps = Partial<Pick<CanvasContext, cp>> & { lineDash?: number[] };
 type PropsContainer = CanvasRenderingContext2D | RenderContextProps | CanvasContext;
 
 // TODO: Lazy update canvas transform.
@@ -87,6 +87,7 @@ export class CanvasContext {
       this.clearProps();
 
     Object.assign(this, props);
+    props.lineDash && this.setLineDash(props.lineDash);
     return this;
   }
 

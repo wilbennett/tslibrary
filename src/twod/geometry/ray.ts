@@ -1,5 +1,5 @@
 import { GeometryBase, IRay } from '.';
-import { Viewport } from '..';
+import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class Ray extends GeometryBase implements IRay {
@@ -30,11 +30,12 @@ export class Ray extends GeometryBase implements IRay {
     this._direction = value.normalize();
   }
 
-  protected renderCore(viewport: Viewport) {
-    const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).mag;
+  // @ts-ignore - unused param.
+  protected renderCore(view: Viewport, props: ContextProps) {
+    const mag = view.viewBounds.max.subN(view.viewBounds.min).mag;
     const dir = this.direction.scaleN(mag);
-    const point2 = this.start.displaceByN(dir);
+    const end = this.start.displaceByN(dir);
 
-    viewport.ctx.beginPath().line(this.start, point2).stroke();
+    view.ctx.beginPath().line(this.start, end).stroke();
   }
 }

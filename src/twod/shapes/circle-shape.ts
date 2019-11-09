@@ -19,7 +19,6 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   get position() { return this._position; }
   set position(value) { this._position = value; }
   radius: number;
-  lineDash?: number[];
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;

@@ -17,7 +17,7 @@ export abstract class ShapeBase implements IShape {
   get normals() { return this.data.get("normal"); }
   boundingShape?: Shape;
   protected _props?: ContextProps;
-  get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black" }; }
+  get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
 
   // @ts-ignore - unused param.

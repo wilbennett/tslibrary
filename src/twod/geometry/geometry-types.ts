@@ -4,11 +4,10 @@ import { Vector } from '../../vectors';
 
 export interface IGeometry {
   props: ContextProps;
-  lineDash?: number[];
 
   containsPoint(point: Vector, epsilon?: number): boolean;
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector>;
-  render(viewport: Viewport): void;
+  render(view: Viewport): void;
 }
 
 export interface ILine extends IGeometry {

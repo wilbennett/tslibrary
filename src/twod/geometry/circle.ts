@@ -1,5 +1,5 @@
 import { GeometryBase, ICircle } from '.';
-import { Viewport } from '..';
+import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class Circle extends GeometryBase implements ICircle {
@@ -23,14 +23,14 @@ export class Circle extends GeometryBase implements ICircle {
 
   radius: number;
 
-  protected renderCore(viewport: Viewport) {
-    const props = this.props;
-    viewport.ctx.beginPath().circle(this.position, this.radius);
+  // @ts-ignore - unused param.
+  protected renderCore(view: Viewport, props: ContextProps) {
+    view.ctx.beginPath().circle(this.position, this.radius);
 
     if (props.fillStyle)
-      viewport.ctx.fill();
+      view.ctx.fill();
 
     if (props.strokeStyle)
-      viewport.ctx.stroke();
+      view.ctx.stroke();
   }
 }

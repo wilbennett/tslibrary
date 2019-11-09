@@ -1,5 +1,5 @@
 import { GeometryBase, ILine } from '.';
-import { Viewport } from '..';
+import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class Line extends GeometryBase implements ILine {
@@ -30,12 +30,13 @@ export class Line extends GeometryBase implements ILine {
     this._direction = value.normalize();
   }
 
-  protected renderCore(viewport: Viewport) {
-    const mag = viewport.viewBounds.max.subN(viewport.viewBounds.min).magSquared;
+  // @ts-ignore - unused param.
+  protected renderCore(view: Viewport, props: ContextProps) {
+    const mag = view.viewBounds.max.subN(view.viewBounds.min).magSquared;
     const dir = this.direction.scaleN(mag);
-    const point1 = this.point.displaceByN(dir);
-    const point2 = this.point.displaceByN(dir.negate());
+    const start = this.point.displaceByN(dir);
+    const end = this.point.displaceByN(dir.negate());
 
-    viewport.ctx.beginPath().line(point1, point2).stroke();
+    view.ctx.beginPath().line(start, end).stroke();
   }
 }

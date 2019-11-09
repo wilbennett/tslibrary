@@ -6,10 +6,8 @@ import { calcIntersectPoint } from './geo-intersect';
 
 export abstract class GeometryBase implements IGeometry {
   protected _props?: ContextProps;
-  get props() { return this._props || { strokeStyle: "black", fillStyle: "black" }; }
+  get props() { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
-
-  lineDash?: number[];
 
   containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
@@ -22,19 +20,15 @@ export abstract class GeometryBase implements IGeometry {
   }
 
   // @ts-ignore - unused param.
-  protected renderCore(viewport: Viewport) { }
+  protected renderCore(view: Viewport, props: ContextProps) { }
 
-  render(viewport: Viewport) {
-    const ctx = viewport.ctx;
+  render(view: Viewport) {
+    const ctx = view.ctx;
     const props = this.props;
-    let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+    let lineWidth = view.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 
-    const origLineDash = ctx.getLineDash();
-    this.lineDash && ctx.setLineDash(this.lineDash);
     ctx.withProps(props).withLineWidth(lineWidth);
 
-    this.renderCore(viewport);
-
-    ctx.setLineDash(origLineDash);
+    this.renderCore(view, props);
   }
 }
