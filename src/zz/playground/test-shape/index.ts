@@ -42,14 +42,19 @@ const shapes: Shape[] = [
   circle,
 ];
 
-const rotate1 = new NumberEaser(0, 360, duration * 1, Ease.smootherStep, v => {
+const rotateV1 = new NumberEaser(0, 360, duration * 1, Ease.smootherStep, v => {
   vector1.withRadiansMag(v * ONE_DEGREE, vector1.mag);
+});
+
+const rotateShape = new NumberEaser(0, 360, duration * 1, Ease.smootherStep, v => {
+  shapes.forEach(shape => shape.angle = v * ONE_DEGREE);
 });
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
 runner.add(
-  rotate1.repeat(Infinity),
+  rotateV1.repeat(Infinity),
+  rotateShape.repeat(Infinity),
 );
 
 loop.start();

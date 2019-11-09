@@ -16,13 +16,12 @@ export interface IShape extends IGeometry {
   props: ContextProps;
 
   setPosition(position: Vector): void;
-  setAngle(radians: number): void;
   getSupport(direction: Vector, result?: SupportInfo): SupportInfo; // Local space.
   getSupport(radians: number, result?: SupportInfo): SupportInfo;
   getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.
-  toWorld(point: Vector, result?: Vector): Vector;
-  toLocal(point: Vector, result?: Vector): Vector;
-  toLocalOf(other: Shape, point: Vector, result?: Vector): Vector;
+  toWorld(localPoint: Vector, result?: Vector): Vector;
+  toLocal(worldPoint: Vector, result?: Vector): Vector;
+  toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
   // createWorldShape(): this;
 }
 
