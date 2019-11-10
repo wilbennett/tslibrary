@@ -33,7 +33,7 @@ export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = Mat
 export function segmentContainsPoint(segment: ISegment, point: Vector, epsilon: number = MathEx.epsilon) {
   const vector = point.subN(segment.start);
 
-  if (!MathEx.isEqualTo(vector.cross2D(segment.direction), 0, epsilon)) return false;
+  if (!MathEx.isEqualTo(vector.dot(segment.edgeVector.perpN()), 0, epsilon)) return false;
 
   const edge = segment.edgeVector;
   const dot = vector.dot(edge);
