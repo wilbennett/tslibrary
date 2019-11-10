@@ -7,7 +7,7 @@ export class VectorCollection {
     if (params.length === 0)
       this._items = [];
     else if (typeof params[0] === "number") {
-      const count = params[0];
+      const count = <number>params[0];
       const vectorClass = <VectorClass>params[1];
       const items = new Array<Vector>(count);
       this._items = items;
