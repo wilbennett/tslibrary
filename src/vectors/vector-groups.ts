@@ -1,4 +1,4 @@
-import { VectorCollection } from '.';
+import { VectorCollection, EMPTY_VECTOR_COLLECTION } from '.';
 
 export class VectorGroups {
   constructor() {
@@ -18,7 +18,7 @@ export class VectorGroups {
     return sum;
   }
 
-  get(name: string) { return this.groups.get(name); }
+  get(name: string) { return this.groups.get(name) || EMPTY_VECTOR_COLLECTION; }
 
   add(groupName: string, group: VectorCollection) {
     this._groups.set(groupName, group);
