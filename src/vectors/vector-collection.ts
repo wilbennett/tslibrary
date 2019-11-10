@@ -35,3 +35,5 @@ export class VectorCollection {
   get(index: number) { return index >= 0 && index < this.length ? this.items[index] : Vector.empty; }
   createIndexer(): VectorIndexer { return new VectorIndexer(this); }
 }
+
+export const EMPTY_VECTOR_COLLECTION = new VectorCollection();
