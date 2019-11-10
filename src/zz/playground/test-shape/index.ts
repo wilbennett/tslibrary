@@ -91,7 +91,7 @@ function renderPointContainment(a: Geometry, point: Vector, viewport: Viewport) 
 
   beginPath(a.props, viewport);
   viewport.ctx.fillStyle = a.props.fillStyle || a.props.strokeStyle || "gray";
-  ctx.fillCircle(point, 0.2);
+  ctx.fillCircle(point, 0.1);
 }
 
 function beginPath(props: ContextProps, viewport: Viewport) {

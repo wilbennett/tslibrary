@@ -1,4 +1,5 @@
 import { ContextProps, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
+import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
@@ -16,8 +17,8 @@ export interface IShape extends IGeometry {
   props: ContextProps;
 
   setPosition(position: Vector): void;
-  getSupport(direction: Vector, result?: SupportInfo): SupportInfo; // Local space.
-  getSupport(radians: number, result?: SupportInfo): SupportInfo;
+  getSupport(direction: Vector, result?: SupportInfo): Tristate<SupportInfo>; // Local space.
+  getSupport(radians: number, result?: SupportInfo): Tristate<SupportInfo>;
   getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;

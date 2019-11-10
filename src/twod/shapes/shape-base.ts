@@ -62,15 +62,10 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupport(direction: Vector, result?: SupportInfo): SupportInfo;
-  getSupport(radians: number, result?: SupportInfo): SupportInfo;
+  getSupport(direction: Vector, result?: SupportInfo): Tristate<SupportInfo>;
+  getSupport(radians: number, result?: SupportInfo): Tristate<SupportInfo>;
   // @ts-ignore - unused param.
-  getSupport(direction: Vector | number, result?: SupportInfo) {
-    result = result || [Vector.create(0, 0), -1];
-    result[0].copyFrom(Vector.empty);
-    result[1] = -1;
-    return result;
-  }
+  getSupport(direction: Vector | number, result?: SupportInfo) { return undefined; }
 
   // @ts-ignore - unused param.
   getAxes(other: Shape, result?: Vector[]): Vector[] { return []; }
