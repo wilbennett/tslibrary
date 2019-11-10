@@ -41,4 +41,12 @@ export interface IPolygon extends IGeometry {
   points: VectorCollection;
 }
 
+export interface ITriangle extends IGeometry {
+  kind: "triangle";
+  points: VectorCollection;
+  a: Vector;
+  b: Vector;
+  c: Vector;
+}
+
 export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon;
