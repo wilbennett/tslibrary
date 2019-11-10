@@ -21,6 +21,8 @@ export class PolygonShape extends ShapeBase implements IPolygonShape {
     integratorType: IntegratorConstructor = EulerSemiImplicit) {
     super();
 
+    this.radius = radius;
+
     const builder = new VectorGroupsBuilder();
     builder.add("vertex", vertexCount, ShapeBase.vectorClass);
     builder.add("edge", vertexCount, ShapeBase.vectorClass);
@@ -43,12 +45,8 @@ export class PolygonShape extends ShapeBase implements IPolygonShape {
     this._integrator.position = value;
     this.dirtyTransform();
   }
-  get points() {
-    const result = this.vertices;
-
-    if (!result) throw new Error("Vertices must be populated");
-    return result;
-  }
+  get points() { return this.vertices; }
+  readonly radius: number;
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;

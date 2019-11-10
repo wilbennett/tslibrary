@@ -39,14 +39,15 @@ export interface ICircle extends IGeometry {
 export interface IPolygon extends IGeometry {
   kind: "polygon";
   points: VectorCollection;
+  radius: number;
 }
 
 export interface ITriangle extends IGeometry {
   kind: "triangle";
-  points: VectorCollection;
   a: Vector;
   b: Vector;
   c: Vector;
+  radius: number;
 }
 
 export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon;
