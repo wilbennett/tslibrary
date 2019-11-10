@@ -18,10 +18,10 @@ export class VectorBGroupsBuilder extends VectorGroupsBuilder {
     const groups = new VectorBGroups(buffer);
     let index = 0;
 
-    for (const [name, count, elementCount] of this._groupInfos) {
+    for (const [name, count, vectorClass] of this._groupInfos) {
       let data: DataList;
 
-      switch (elementCount) {
+      switch (vectorClass.elementCount) {
         case 1:
           data = new VectorDataX(count, bufferValues, index);
           break;
@@ -31,7 +31,7 @@ export class VectorBGroupsBuilder extends VectorGroupsBuilder {
         case 4:
           data = new VectorDataXYZW(count, bufferValues, index);
           break;
-        default: throw new Error(`Unsupported element count (${elementCount}).`);
+        default: throw new Error(`Unsupported element count (${vectorClass.elementCount}).`);
       }
 
       const group = new VectorBCollection(data);
@@ -45,8 +45,8 @@ export class VectorBGroupsBuilder extends VectorGroupsBuilder {
   protected calcSize(groupInfos: GroupInfo[]) {
     let size = 0;
 
-    for (let [, count, elementCount] of groupInfos) {
-      size += count * elementCount;
+    for (let [, count, vectorClass] of groupInfos) {
+      size += count * vectorClass.elementCount;
     }
 
     return size;

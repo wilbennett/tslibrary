@@ -1,6 +1,7 @@
 import { Vector, Vector1B, Vector2B, Vector3B, VectorCollection, VectorIndexer } from '.';
 import { DataList } from '../core';
 
+// TODO: Refactor to use VectorBClass.
 export class VectorBCollection extends VectorCollection {
   constructor(data: DataList);
   constructor(...vectors: Vector[]);
