@@ -975,10 +975,12 @@ export class CanvasContext {
       }
     } else {
       const point = points.indexer.reset();
-      this.ctx.moveTo(point.x, point.y);
+      if (!point.next.isEmpty) {
+        this.ctx.moveTo(point.x, point.y);
 
-      while (!point.next.isEmpty) {
-        this.ctx.lineTo(point.x, point.y);
+        while (!point.next.isEmpty) {
+          this.ctx.lineTo(point.x, point.y);
+        }
       }
     }
 
