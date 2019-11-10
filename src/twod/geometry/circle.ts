@@ -23,14 +23,14 @@ export class Circle extends GeometryBase implements ICircle {
 
   radius: number;
 
-  // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
-    view.ctx.beginPath().circle(this.position, this.radius);
+    const ctx = view.ctx;
+    ctx.beginPath().circle(this.position, this.radius);
 
     if (props.fillStyle)
-      view.ctx.fill();
+      ctx.fill();
 
     if (props.strokeStyle)
-      view.ctx.stroke();
+      ctx.stroke();
   }
 }
