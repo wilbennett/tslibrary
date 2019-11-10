@@ -10,6 +10,7 @@ export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector): T
     case "ray": return calcRayIntersectPoint(a, b, result);
     case "segment": return calcSegmentIntersectPoint(a, b, result);
     case "circle": return calcCircleIntersectPoint(a, b, result);
+    case "polygon": return calcPolygonIntersectPoint(a, b, result);
     default: return assertNever(a);
   }
 }
@@ -67,6 +68,7 @@ function calcLineIntersectPoint(line: ILine, b: Geometry, result?: Vector) {
     case "ray": return calcLineRayIntersectPoint(line, b, result);
     case "segment": return calcLineSegmentIntersectPoint(line, b, result);
     case "circle": return undefined;
+    case "polygon": return undefined;
     default: return assertNever(b);
   }
 }
@@ -136,6 +138,7 @@ function calcRayIntersectPoint(ray: IRay, b: Geometry, result?: Vector) {
     case "line": return calcRayLineIntersectPoint(ray, b, result);
     case "segment": return calcRaySegmentIntersectPoint(ray, b, result);
     case "circle": return undefined;
+    case "polygon": return undefined;
     default: return assertNever(b);
   }
 }
@@ -207,6 +210,7 @@ function calcSegmentIntersectPoint(segment: ISegment, b: Geometry, result?: Vect
     case "line": return calcSegmentLineIntersectPoint(segment, b, result);
     case "ray": return calcSegmentRayIntersectPoint(segment, b, result);
     case "circle": return undefined;
+    case "polygon": return undefined;
     default: return assertNever(b);
   }
 }
@@ -216,5 +220,13 @@ function calcSegmentIntersectPoint(segment: ISegment, b: Geometry, result?: Vect
 // *************************************************************************************
 // @ts-ignore - unused param.
 function calcCircleIntersectPoint(circle: ICircle, b: Geometry, result?: Vector) {
+  return undefined;
+}
+
+// *************************************************************************************
+// Polygon
+// *************************************************************************************
+// @ts-ignore - unused param.
+function calcPolygonIntersectPoint(poly: IPolygon, b: Geometry, result?: Vector) {
   return undefined;
 }

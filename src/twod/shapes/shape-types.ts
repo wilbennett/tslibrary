@@ -1,6 +1,7 @@
-import { ContextProps, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
+import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
+import { IPolygon } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
@@ -10,9 +11,9 @@ export interface IShape extends IGeometry {
   position: Vector; // World space.
   angle: number;
   readonly data: VectorGroups;
-  vertices: VectorCollection | undefined;
-  edgeVectors: VectorCollection | undefined;
-  normals: VectorCollection | undefined;
+  vertices: VectorCollection;
+  edgeVectors: VectorCollection;
+  normals: VectorCollection;
   boundingShape?: Shape;
   props: ContextProps;
 
@@ -41,13 +42,10 @@ export interface IPlaneShape extends IShape {
   normal: Vector;
 }
 
-export interface ICircleShape extends IShape {
-  kind: "circle";
-  radius: number;
+export interface ICircleShape extends IShape, ICircle {
 }
 
-export interface IPolygonShape extends IShape {
-  kind: "polygon";
+export interface IPolygonShape extends IShape, IPolygon {
 }
 
 export interface ITriangleShape extends IShape {
@@ -67,7 +65,7 @@ export type Shape =
   // | ISegmentShape
   // | IPlaneShape
   | ICircleShape
-  // | IPolygonShape
+  | IPolygonShape
   // | ITriangleShape
   // | IAABBShape
   ;

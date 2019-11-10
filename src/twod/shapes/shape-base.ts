@@ -1,8 +1,8 @@
-import { IShape, Shape, SupportInfo } from '.';
-import { calcIntersectPoint, containsPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
+import { IShape, Shape, shapeContainsPoint, SupportInfo } from '.';
+import { calcIntersectPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
-import { Vector, VectorGroups } from '../../vectors';
+import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 
 export abstract class ShapeBase implements IShape {
   constructor() {
@@ -11,6 +11,7 @@ export abstract class ShapeBase implements IShape {
     this._transformInverse = matrix.createValues();
   }
 
+  static vectorClass: VectorClass = Vector2D;
   protected get matrix() { return Matrix2D.instance; /* TODO: Make dimension agnostic. */ }
   protected _isWorld?: boolean = false;
   get isWorld() { return !!this._isWorld; }
@@ -96,7 +97,7 @@ export abstract class ShapeBase implements IShape {
 
   containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
-    return containsPoint(this, point, epsilon);
+    return shapeContainsPoint(this, point, epsilon);
   }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {

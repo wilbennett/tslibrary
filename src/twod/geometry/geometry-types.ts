@@ -1,6 +1,6 @@
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
-import { Vector } from '../../vectors';
+import { Vector, VectorCollection } from '../../vectors';
 
 export interface IGeometry {
   props: ContextProps;
@@ -36,4 +36,9 @@ export interface ICircle extends IGeometry {
   radius: number;
 }
 
-export type Geometry = ILine | IRay | ISegment | ICircle;
+export interface IPolygon extends IGeometry {
+  kind: "polygon";
+  points: VectorCollection;
+}
+
+export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon;
