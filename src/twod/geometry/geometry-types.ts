@@ -39,7 +39,9 @@ export interface ICircle extends IGeometry {
 export interface IPolygon extends IGeometry {
   kind: "polygon";
   points: VectorCollection;
+  position: Vector;
   radius: number;
+  setPosition(position: Vector): void;
 }
 
 export interface ITriangle extends IGeometry {

@@ -46,7 +46,21 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
   return result;
 }
 
-export function centerPoly(vertexList: VectorCollection, areaMaxRadius?: [number, number]) {
+export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
+  const vertices = vertexList.items;
+  const vertexCount = vertices.length;
+  const amt = offset.withWN(0);
+
+  for (let i = 0; i < vertexCount; i++) {
+    vertices[i].displaceBy(amt);
+  }
+}
+
+export function movePoly(vertexList: VectorCollection, currentCenter: Vector, newCenter: Vector) {
+  offsetPoly(vertexList, newCenter.subN(currentCenter));
+}
+
+export function normalizePolyCenter(vertexList: VectorCollection, areaMaxRadius?: [number, number]) {
   const vertices = vertexList.items;
   const vertexCount = vertices.length;
 
@@ -108,7 +122,7 @@ export function generateIrregularPoly(vertexList: VectorCollection, radius: numb
     index++;
   }
 
-  const [area, maxRadius] = centerPoly(vertexList);
+  const [area, maxRadius] = normalizePolyCenter(vertexList);
   const scale = radius / maxRadius;
 
   for (i = 0; i < vertexCount; i++) {

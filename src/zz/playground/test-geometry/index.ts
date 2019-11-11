@@ -1,5 +1,6 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
+import { MathEx } from '../../../core';
 import { ConcurrentEaser, Ease, EaseRunner, NumberEaser, SequentialEaser, VectorEaser } from '../../../easing';
 import {
   Brush,
@@ -9,12 +10,15 @@ import {
   Geometry,
   Graph,
   Line,
+  Polygon,
   Ray,
   Segment,
   Viewport,
 } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
+
+const { ONE_DEGREE } = MathEx;
 
 // console.clear();
 
@@ -52,6 +56,10 @@ const ray2 = new Ray(Vector.createPosition(-1, 1.2), Vector.createDirection(-1, 
 const segment1 = new Segment(Vector.createPosition(-1, 0.7), Vector.createPosition(1.7, 0.7));
 const segment2 = new Segment(Vector.createPosition(-1, 0.2), Vector.createPosition(-2.5, 1.7));
 const circle1 = new Circle(Vector.createPosition(0.5, -1.5), 0.5);
+const poly1 = new Polygon(5, 0.5, 90 * ONE_DEGREE);
+poly1.setPosition(Vector.createPosition(-0.5, -1.5));
+const poly2 = new Polygon(5, 0.5, 0, false);
+poly2.setPosition(Vector.createPosition(-1.5, -0.5));
 const point1 = Vector.createPosition(1.7, 0);
 // const point2 = Vector.createPosition(2, 1);
 // const point3 = Vector.createPosition(2, -2);
@@ -63,6 +71,8 @@ ray2.props = { strokeStyle: refBrush, fillStyle: refBrush };
 segment1.props = { strokeStyle: refBrush, fillStyle: refBrush };
 segment2.props = { strokeStyle: refBrush, fillStyle: refBrush };
 circle1.props = { strokeStyle: refBrush };
+poly1.props = { strokeStyle: refBrush };
+poly2.props = { strokeStyle: refBrush };
 
 const iline1 = new Line(Vector.createPosition(0.7, 3), Vector.createDirection(1, 0));
 const iline2 = new Line(Vector.createPosition(3, 3), Vector.createDirection(1, -1));
@@ -90,6 +100,8 @@ const testers: Geometry[] = [
   segment1,
   segment2,
   circle1,
+  poly1,
+  poly2,
 ];
 
 const intersectors: Geometry[] = [
