@@ -1,8 +1,18 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
-import { MathEx } from '../../../core';
-import { Ease, EaseRunner, NumberEaser, VectorEaser } from '../../../easing';
-import { CanvasContext, Circle, ContextProps, Geometry, Graph, Line, Ray, Segment, Viewport } from '../../../twod';
+import { ConcurrentEaser, Ease, EaseRunner, NumberEaser, SequentialEaser, VectorEaser } from '../../../easing';
+import {
+  Brush,
+  CanvasContext,
+  Circle,
+  ContextProps,
+  Geometry,
+  Graph,
+  Line,
+  Ray,
+  Segment,
+  Viewport,
+} from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -16,6 +26,17 @@ const ctx = new CanvasContext(canvas);
 ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
 
+const colors: Brush[] = [
+  "red",
+  "orange",
+  "yellowgreen",
+  "green",
+  "blue",
+  "indigo",
+  "violet",
+];
+
+const refBrush = "teal";
 Vector.tipDrawHeight = 0.1;
 const screenBounds = ctx.bounds;
 const origin = Vector.createPosition(0, 0);
@@ -24,31 +45,44 @@ let angle = 0;
 const duration = 10;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const line1 = new Line(Vector.createPosition(0.7, 0.7), Vector.createDirection(1, 1).rotate(20 * MathEx.ONE_DEGREE));
-// const line1 = new Line(Vector.createPosition(0, 0), Vector.createDirection(1, 1));
-const line2 = new Line(Vector.createPosition(-0.5, 2), Vector.createDirection(1.5, -2));
-const ray1 = new Ray(Vector.createPosition(1, 1), Vector.createDirection(1, 1));
-const ray2 = new Ray(Vector.createPosition(-1, -2), Vector.createDirection(1, -2));
-const segment1 = new Segment(Vector.createPosition(0.3, -2), Vector.createPosition(2, 0));
-const segment2 = new Segment(Vector.createPosition(-1, 1), Vector.createPosition(1, -1));
-const circle1 = new Circle(Vector.createPosition(-1, 0), 0.5);
-const point1 = Vector.createPosition(0.5, 0.5);
-const point2 = Vector.createPosition(2, 1);
-const point3 = Vector.createPosition(2, -2);
+const line1 = new Line(Vector.createPosition(0.7, 1.5), Vector.createDirection(1, 0));
+const line2 = new Line(Vector.createPosition(-1, 2), Vector.createDirection(1, -1));
+const ray1 = new Ray(Vector.createPosition(0.5, 1.2), Vector.createDirection(1, 0));
+const ray2 = new Ray(Vector.createPosition(-1, 1.2), Vector.createDirection(-1, 1));
+const segment1 = new Segment(Vector.createPosition(-1, 0.7), Vector.createPosition(1.7, 0.7));
+const segment2 = new Segment(Vector.createPosition(-1, 0.2), Vector.createPosition(-2.5, 1.7));
+const circle1 = new Circle(Vector.createPosition(0.5, -1.5), 0.5);
+const point1 = Vector.createPosition(1.7, 0);
+// const point2 = Vector.createPosition(2, 1);
+// const point3 = Vector.createPosition(2, -2);
 
-line1.props = { strokeStyle: "blue", fillStyle: "blue" };
-line2.props = { strokeStyle: "purple", fillStyle: "purple" };
-ray1.props = { strokeStyle: "orange", fillStyle: "orange" };
-ray2.props = { strokeStyle: "magenta", fillStyle: "magenta" };
-segment1.props = { strokeStyle: "red", fillStyle: "red" };
-segment2.props = { strokeStyle: "green", fillStyle: "green" };
-circle1.props = { strokeStyle: "red" };
+line1.props = { strokeStyle: refBrush, fillStyle: refBrush };
+line2.props = { strokeStyle: refBrush, fillStyle: refBrush };
+ray1.props = { strokeStyle: refBrush, fillStyle: refBrush };
+ray2.props = { strokeStyle: refBrush, fillStyle: refBrush };
+segment1.props = { strokeStyle: refBrush, fillStyle: refBrush };
+segment2.props = { strokeStyle: refBrush, fillStyle: refBrush };
+circle1.props = { strokeStyle: refBrush };
 
-const point1Props = { strokeStyle: "black", fillStyle: "black" };
-const point2Props = { strokeStyle: "black", fillStyle: "black" };
-const point3Props = { strokeStyle: "black", fillStyle: "black" };
+const iline1 = new Line(Vector.createPosition(0.7, 3), Vector.createDirection(1, 0));
+const iline2 = new Line(Vector.createPosition(3, 3), Vector.createDirection(1, -1));
+const iray1 = new Ray(Vector.createPosition(2, 3), Vector.createDirection(-1, 0));
+const iray2 = new Ray(Vector.createPosition(4, 3), Vector.createDirection(-1, 1));
+const isegment1 = new Segment(Vector.createPosition(-2, 2.5), Vector.createPosition(1.5, 2.5));
+const isegment2 = new Segment(Vector.createPosition(1, 3), Vector.createPosition(3, 1));
 
-const geometries: Geometry[] = [
+iline1.props = { strokeStyle: colors[0], fillStyle: colors[0] };
+iline2.props = { strokeStyle: colors[1], fillStyle: colors[1] };
+iray1.props = { strokeStyle: colors[0], fillStyle: colors[0] };
+iray2.props = { strokeStyle: colors[1], fillStyle: colors[1] };
+isegment1.props = { strokeStyle: colors[0], fillStyle: colors[0] };
+isegment2.props = { strokeStyle: colors[1], fillStyle: colors[1] };
+
+const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
+// const point2Props = { strokeStyle: "black", fillStyle: "black" };
+// const point3Props = { strokeStyle: "black", fillStyle: "black" };
+
+const testers: Geometry[] = [
   line1,
   line2,
   ray1,
@@ -58,57 +92,83 @@ const geometries: Geometry[] = [
   circle1,
 ];
 
+const intersectors: Geometry[] = [
+  iline1,
+  iline2,
+  iray1,
+  iray2,
+  isegment1,
+  isegment2,
+];
+
+const geometries: Geometry[] = [...testers, ...intersectors];
+
 const points: [Vector, ContextProps][] = [
   [point1, point1Props],
-  [point2, point2Props],
-  [point3, point3Props],
+  // [point2, point2Props],
+  // [point3, point3Props],
 ];
 
 // const scale = new NumberEaser(5, 40, duration, Ease.outCatmullRom2N1, v => graph.gridSize = v);
 // const rotate = new NumberEaser(0, 360, duration * 5, Ease.smoothStep, v => angle = v);
-const lineRotate = new NumberEaser(0, 90, duration * 0.5, Ease.linear, v => {
-  line1.direction.withDegrees(v);
-});
-const lineRotate2 = new NumberEaser(360, 0, duration * 2, Ease.smoothStep, v => {
-  line2.direction.withDegrees(v);
-});
-const rayRotate = new NumberEaser(0, 360, duration, Ease.smoothStep, v => {
-  ray1.direction.withDegrees(v);
-});
-const rayRotate2 = new NumberEaser(360, 0, duration, Ease.smoothStep, v => {
-  ray2.direction.withDegrees(v);
-});
-const segment1Move = new VectorEaser(
-  Vector.createPosition(2, 0),
-  Vector.createPosition(-2, 2),
+
+const iline1Move = new VectorEaser(
+  Vector.createPosition(0.7, 3),
+  Vector.createPosition(0.7, -3),
   duration,
   Ease.smoothStep,
-  v => segment1.setEnd(v));
-const point3Move = new VectorEaser(
-  Vector.createPosition(2, -2),
-  Vector.createPosition(-2, 2),
+  v => iline1.point.copyFrom(v));
+const iline2Move = new VectorEaser(
+  Vector.createPosition(3, 3),
+  Vector.createPosition(-3, -3),
   duration,
   Ease.smoothStep,
-  v => point3.copyFrom(v));
-const circle1Move = new VectorEaser(
-  Vector.createPosition(-1, 0),
-  Vector.createPosition(2.5, 1),
-  duration * 0.5,
+  v => iline2.point.copyFrom(v));
+const iray1Move = new VectorEaser(
+  Vector.createPosition(2, 3),
+  Vector.createPosition(2, -3),
+  duration,
   Ease.smoothStep,
-  v => circle1.position.copyFrom(v));
+  v => iray1.start.copyFrom(v));
+const iray2Move = new VectorEaser(
+  Vector.createPosition(4, 3),
+  Vector.createPosition(-3, -4),
+  duration,
+  Ease.smoothStep,
+  v => iray2.start.copyFrom(v)
+);
+const isegment1Move = new VectorEaser(
+  Vector.createPosition(-2, 3),
+  Vector.createPosition(-2, -3),
+  duration,
+  Ease.smoothStep,
+  v => {
+    isegment1.start.copyFrom(v);
+    isegment1.end.withY(v.y);
+  });
+const isegment2Move = new VectorEaser(
+  Vector.createPosition(3, 5),
+  Vector.createPosition(-5, -3),
+  duration,
+  Ease.smoothStep,
+  v => {
+    isegment2.start.copyFrom(v);
+    isegment2.end.withXY(v.x + 2, v.y - 2);
+  });
+const point1Rotate = new NumberEaser(0, 360, duration * 1.2, Ease.linear, v => {
+  point1.withDegreesMag(v, point1.mag);
+});
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
-runner.add(
+runner.add(new SequentialEaser([
+  new ConcurrentEaser([iline1Move, iline2Move]),
+  new ConcurrentEaser([iray1Move, iray2Move]),
+  new ConcurrentEaser([isegment1Move, isegment2Move]),
+]).repeat(Infinity),
+  new ConcurrentEaser([point1Rotate]).repeat(Infinity),
   // scale.pingPong().repeat(Infinity),
   // rotate.pingPong().repeat(Infinity),
-  lineRotate.pingPong().repeat(Infinity),
-  lineRotate2.pingPong().repeat(Infinity),
-  rayRotate.pingPong().repeat(Infinity),
-  rayRotate2.pingPong().repeat(Infinity),
-  segment1Move.pingPong().repeat(Infinity),
-  point3Move.pingPong().repeat(Infinity),
-  circle1Move.pingPong().repeat(Infinity),
 );
 
 loop.start();
@@ -138,26 +198,19 @@ function render() {
 }
 
 function renderIntersections(viewport: Viewport) {
-  renderIntersection(line1, line2, viewport);
-  renderIntersection(ray1, ray2, viewport);
-  renderIntersection(segment1, segment2, viewport);
-
-  renderIntersection(line2, ray1, viewport);
-  renderIntersection(line2, segment1, viewport);
-
-  renderIntersection(ray2, line1, viewport);
-  renderIntersection(ray2, segment1, viewport);
-
-  renderIntersection(segment1, line1, viewport);
-  renderIntersection(segment2, ray1, viewport);
+  for (var intersector of intersectors) {
+    for (var tester of testers) {
+      renderIntersection(intersector, tester, viewport);
+    }
+  }
 }
 
 function renderPointContainments(viewport: Viewport) {
-  renderPointContainment(line1, point1, viewport);
-  renderPointContainment(ray1, point2, viewport);
-  renderPointContainment(segment2, point3, viewport);
-  renderPointContainment(circle1, point1, viewport);
-  renderPointContainment(circle1, point2, viewport);
+  for (var [point, props] of points) {
+    for (var tester of testers) {
+      renderPointContainment(tester, point, props, viewport);
+    }
+  }
 }
 
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
@@ -169,11 +222,11 @@ function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
   ctx.strokeCircle(point, 0.1);
 }
 
-function renderPointContainment(a: Geometry, point: Vector, viewport: Viewport) {
-  if (!a.containsPoint(point)) return;
+function renderPointContainment(a: Geometry, point: Vector, props: ContextProps, viewport: Viewport) {
+  if (!a.containsPoint(point, 0.05)) return;
 
-  beginPath(a.props, viewport);
-  viewport.ctx.fillStyle = a.props.fillStyle || a.props.strokeStyle || "gray";
+  beginPath(props, viewport);
+  viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
   ctx.fillCircle(point, 0.2);
 }
 
