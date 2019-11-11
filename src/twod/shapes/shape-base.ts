@@ -1,5 +1,5 @@
 import { IShape, Shape, shapeContainsPoint, SupportInfo } from '.';
-import { calcIntersectPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
+import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
@@ -98,6 +98,11 @@ export abstract class ShapeBase implements IShape {
   containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
     return shapeContainsPoint(this, point, epsilon);
+  }
+
+  closestPoint(point: Vector, hullOnly: boolean = false, result?: Vector) {
+    // @ts-ignore - assigment compatibility.
+    return closestPoint(this, point, hullOnly, result);
   }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {

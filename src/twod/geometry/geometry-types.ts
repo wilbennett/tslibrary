@@ -6,6 +6,7 @@ export interface IGeometry {
   props: ContextProps;
 
   containsPoint(point: Vector, epsilon?: number): boolean;
+  closestPoint(point: Vector, hullOnly?: boolean, result?: Vector): Vector;
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector>;
   render(view: Viewport): void;
 }

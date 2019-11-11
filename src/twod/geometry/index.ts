@@ -1,5 +1,6 @@
 export * from "./geometry-types";
 export * from "./geo-contain";
+export * from "./geo-closest";
 export * from "./geo-intersect";
 export * from "./polygon-utils";
 export * from "./triangle-utils";

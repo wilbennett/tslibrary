@@ -1,4 +1,4 @@
-import { containsPoint, Geometry, IGeometry } from '.';
+import { closestPoint, containsPoint, Geometry, IGeometry } from '.';
 import { ContextProps, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -12,6 +12,11 @@ export abstract class GeometryBase implements IGeometry {
   containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
     return containsPoint(this, point, epsilon);
+  }
+
+  closestPoint(point: Vector, hullOnly: boolean = false, result?: Vector) {
+    // @ts-ignore - assigment compatibility.
+    return closestPoint(this, point, hullOnly, result);
   }
 
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {

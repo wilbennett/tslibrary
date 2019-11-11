@@ -2,6 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { ConcurrentEaser, Ease, EaseRunner, NumberEaser, SequentialEaser, VectorEaser } from '../../../easing';
+import { Bounds } from '../../../misc';
 import {
   Brush,
   CanvasContext,
@@ -204,6 +205,7 @@ function render() {
   points.forEach(([point, props]) => point.render(viewport, origin, props));
   renderIntersections(viewport);
   renderPointContainments(viewport);
+  renderClosestPoints(viewport);
   viewport.restoreTransform();
 
   ctx.restore();
@@ -225,6 +227,14 @@ function renderPointContainments(viewport: Viewport) {
   }
 }
 
+function renderClosestPoints(viewport: Viewport) {
+  for (var [point, props] of points) {
+    for (var tester of testers) {
+      renderClosestPoint(tester, point, props, viewport);
+    }
+  }
+}
+
 function renderIntersection(a: Geometry, b: Geometry, viewport: Viewport) {
   const point = a.getIntersectPoint(b);
 
@@ -239,7 +249,21 @@ function renderPointContainment(a: Geometry, point: Vector, props: ContextProps,
 
   beginPath(props, viewport);
   viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
-  ctx.fillCircle(point, 0.2);
+  ctx.fillCircle(point, 0.1);
+}
+
+function renderClosestPoint(a: Geometry, point: Vector, props: ContextProps, viewport: Viewport) {
+  const closest = a.closestPoint(point, false);
+
+  beginPath(props, viewport);
+  viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
+  ctx.fillRect(Bounds.fromCenterHalf(closest.x, closest.y, 0.04, 0.04));
+
+  a.closestPoint(point, true, closest);
+
+  beginPath(props, viewport);
+  viewport.ctx.strokeStyle = props.fillStyle || props.strokeStyle || "gray";
+  ctx.strokeRect(Bounds.fromCenterHalf(closest.x, closest.y, 0.07, 0.07));
 }
 
 function beginPath(props: ContextProps, viewport: Viewport) {

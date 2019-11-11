@@ -19,3 +19,15 @@ export function isTriangleCCW(a: Vector, b: Vector, c: Vector) {
   return signedArea >= 0;
 }
 
+//
+// Segment.
+// Christer Ericson - Real Time Collision Detection.
+export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, result?: Vector) {
+  result = result || Vector.createPosition(0, 0);
+  const edge = end.subN(start);
+  const t = point.subN(start).dot(edge) / edge.dot(edge);
+
+  return t < 0 || t > 1
+    ? result.copyFrom(start)
+    : start.addScaledO(edge, t, result);
+}
