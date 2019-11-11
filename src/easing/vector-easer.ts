@@ -38,11 +38,15 @@ export class VectorEaser extends ValueEaser<Vector> {
     this._easeZ.reverse();
   }
 
-  // @ts-ignore - unused param.
-  protected calcValue(percent: number): Vector {
+  moveNext() {
     this._easeX.moveNext();
     this._easeY.moveNext();
     this._easeZ.moveNext();
+    return super.moveNext();
+  }
+
+  // @ts-ignore - unused param.
+  protected calcValue(percent: number): Vector {
     this._result.withXYZ(this._easeX.value, this._easeY.value, this._easeZ.value);
     return this._result;
   }
