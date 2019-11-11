@@ -1,41 +1,48 @@
-import { CollectionEaser, TypedEaser, EaserValueCallback, EaserCallback } from ".";
+import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
 
 export class RandomEaser<T> extends CollectionEaser<T> {
-    constructor(
-        easers: TypedEaser<T>[],
-        public randomOnReset: boolean = false,
-        onValueChanged: EaserValueCallback<T> = () => { },
-        onComplete: EaserCallback = () => { }
-    ) {
-        super(easers, onValueChanged, onComplete);
+  constructor(
+    easers: TypedEaser<T>[],
+    public randomOnReset: boolean = false,
+    onValueChanged: EaserValueCallback<T> = () => { },
+    onComplete: EaserCallback = () => { }
+  ) {
+    super(easers, onValueChanged, onComplete);
 
-        this.chooseRandom();
+    this.chooseRandom();
+  }
+
+  reset() {
+    super.reset();
+
+    if (this.randomOnReset)
+      this.chooseRandom();
+  }
+
+  moveNext() {
+    if (!this.easer.moveNext())
+      this.nextEaser();
+
+    return super.moveNext();
+  }
+
+  protected _choosing = false;
+
+  protected chooseRandom() {
+    if (this._choosing) return;
+
+    try {
+      this._choosing = true;
+      const index = Math.floor(Math.random() * this._easers.length);
+      this._easeIndex = index;
+      this._duration = this.easer.duration;
+      this.init();
+      this._easeIndex = index;
+    } finally {
+      this._choosing = false;
     }
+  }
 
-    reset() {
-        super.reset();
-
-        if (this.randomOnReset)
-            this.chooseRandom();
-    }
-
-    protected _choosing = false;
-
-    protected chooseRandom() {
-        if (this._choosing) return;
-
-        try {
-            this._choosing = true;
-            const index = Math.floor(Math.random() * this._easers.length);
-            this._easeIndex = index;
-            this._duration = this.easer.duration;
-            this.init();
-            this._easeIndex = index;
-        } finally {
-            this._choosing = false;
-        }
-    }
-
-    protected calcSteps() { return this.easer.steps; }
-    protected nextEaser() { }
+  protected calcSteps() { return this.easer.steps; }
+  protected nextEaser() { }
 }

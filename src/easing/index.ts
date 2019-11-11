@@ -12,5 +12,6 @@ export * from "./delay-easer";
 export * from "./ping-pong-easer";
 export * from "./repeat-easer";
 export * from "./sequential-easer";
+export * from "./concurrent-easer";
 export * from "./easer-extensions";
 export * from "./ease-runner";
