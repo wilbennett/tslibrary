@@ -37,20 +37,25 @@ export interface ICircle extends IGeometry {
   radius: number;
 }
 
-export interface IPolygon extends IGeometry {
-  kind: "polygon";
-  points: VectorCollection;
+export interface IAABB extends IGeometry {
+  kind: "aabb";
+  vertices: VectorCollection;
+  position: Vector;
+}
+
+export interface IPolygonBase extends IGeometry {
+  vertices: VectorCollection;
   position: Vector;
   radius: number;
   setPosition(position: Vector): void;
 }
 
-export interface ITriangle extends IGeometry {
+export interface IPolygon extends IPolygonBase {
+  kind: "polygon";
+}
+
+export interface ITriangle extends IPolygonBase {
   kind: "triangle";
-  a: Vector;
-  b: Vector;
-  c: Vector;
-  radius: number;
 }
 
 export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon;

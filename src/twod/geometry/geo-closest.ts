@@ -67,7 +67,7 @@ export function polygonClosestPoint(poly: IPolygon, point: Vector, hullOnly: boo
 
   if (!hullOnly && polygonContainsPoint(poly, point)) return result.copyFrom(point);
 
-  const vertices = poly.points.items;
+  const vertices = poly.vertices.items;
   const count = vertices.length;
   let minDist = Infinity;
   const closest = Vector.create(0, 0);

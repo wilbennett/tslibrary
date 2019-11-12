@@ -45,7 +45,6 @@ export class PolygonShape extends ShapeBase implements IPolygonShape {
     this._integrator.position = value;
     this.dirtyTransform();
   }
-  get points() { return this.vertices; }
   readonly radius: number;
 
   protected renderCore(view: Viewport, props: ContextProps) {

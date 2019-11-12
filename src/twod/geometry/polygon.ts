@@ -16,11 +16,11 @@ export class Polygon extends GeometryBase implements IPolygon {
     this.radius = radius;
     this._position = Vector.createPosition(0, 0);
 
-    this.points = new VectorCollection(vertexCount, Vector2D); // TODO: Make dimension agnostic.
-    Poly.generatePoly(this.points, radius, startAngle, regular);
+    this.vertices = new VectorCollection(vertexCount, Vector2D); // TODO: Make dimension agnostic.
+    Poly.generatePoly(this.vertices, radius, startAngle, regular);
   }
 
-  readonly points: VectorCollection;
+  readonly vertices: VectorCollection;
   private _position: Vector;
   get position() { return this._position; }
   set position(value) {
@@ -30,13 +30,13 @@ export class Polygon extends GeometryBase implements IPolygon {
   readonly radius: number;
 
   setPosition(position: Vector) {
-    Poly.movePoly(this.points, this._position, position);
+    Poly.movePoly(this.vertices, this._position, position);
     this._position.copyFrom(position);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
-    ctx.beginPath().poly(this.points, true);
+    ctx.beginPath().poly(this.vertices, true);
 
     if (props.fillStyle)
       ctx.fill();
