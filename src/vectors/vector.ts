@@ -582,7 +582,8 @@ export abstract class Vector {
   }
   toMeters(pixelsPerMeter: number = Vector.pixelsPerMeter) { return this.toMetersO(this, pixelsPerMeter); }
 
-  // TODO: Refactor WithElement methods to directly update elements.
+  // DONE: Refactor WithElement methods to directly update elements.
+  //       Don't directly update elements because cached values need to be cleared.
   withXYZWO(x: number, y: number, z: number, w: number, result: Vector) { return result.set(x, y, z, w); }
   withXYZWN(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this.newVector()); }
   withXYZW(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this); }
