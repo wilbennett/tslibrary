@@ -1,4 +1,4 @@
-import { Geometry, ICircle, ILine, IRay, ISegment } from '..';
+import { Geometry, IAABB, ICircle, ILine, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
@@ -11,6 +11,7 @@ export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector): T
     case "segment": return calcSegmentIntersectPoint(a, b, result);
     case "circle": return calcCircleIntersectPoint(a, b, result);
     case "polygon": return calcPolygonIntersectPoint(a, b, result);
+    case "aabb": return calcAabbIntersectPoint(a, b, result);
     default: return assertNever(a);
   }
 }
@@ -69,6 +70,7 @@ function calcLineIntersectPoint(line: ILine, b: Geometry, result?: Vector) {
     case "segment": return calcLineSegmentIntersectPoint(line, b, result);
     case "circle": return undefined;
     case "polygon": return undefined;
+    case "aabb": return undefined;
     default: return assertNever(b);
   }
 }
@@ -139,6 +141,7 @@ function calcRayIntersectPoint(ray: IRay, b: Geometry, result?: Vector) {
     case "segment": return calcRaySegmentIntersectPoint(ray, b, result);
     case "circle": return undefined;
     case "polygon": return undefined;
+    case "aabb": return undefined;
     default: return assertNever(b);
   }
 }
@@ -211,6 +214,7 @@ function calcSegmentIntersectPoint(segment: ISegment, b: Geometry, result?: Vect
     case "ray": return calcSegmentRayIntersectPoint(segment, b, result);
     case "circle": return undefined;
     case "polygon": return undefined;
+    case "aabb": return undefined;
     default: return assertNever(b);
   }
 }
@@ -228,5 +232,13 @@ function calcCircleIntersectPoint(circle: ICircle, b: Geometry, result?: Vector)
 // *************************************************************************************
 // @ts-ignore - unused param.
 function calcPolygonIntersectPoint(poly: IPolygon, b: Geometry, result?: Vector) {
+  return undefined;
+}
+
+// *************************************************************************************
+// AABB
+// *************************************************************************************
+// @ts-ignore - unused param.
+function calcAabbIntersectPoint(aabb: IAABB, b: Geometry, result?: Vector) {
   return undefined;
 }

@@ -16,6 +16,7 @@ import {
   Segment,
   Viewport,
 } from '../../../twod';
+import { AABB } from '../../../twod/geometry/aabb';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -54,13 +55,17 @@ const line1 = new Line(Vector.createPosition(0.7, 1.5), Vector.createDirection(1
 const line2 = new Line(Vector.createPosition(-1, 2), Vector.createDirection(1, -1));
 const ray1 = new Ray(Vector.createPosition(0.5, 1.2), Vector.createDirection(1, 0));
 const ray2 = new Ray(Vector.createPosition(-1, 1.2), Vector.createDirection(-1, 1));
-const segment1 = new Segment(Vector.createPosition(-1, 0.7), Vector.createPosition(1.7, 0.7));
-const segment2 = new Segment(Vector.createPosition(-1, 0.2), Vector.createPosition(-2.5, 1.7));
+const segment1 = new Segment(Vector.createPosition(-0.3, 0.7), Vector.createPosition(1.7, 0.7));
+const segment2 = new Segment(Vector.createPosition(-0.5, 0.2), Vector.createPosition(-2, 1.7));
 const circle1 = new Circle(Vector.createPosition(0.5, -1.5), 0.5);
 const poly1 = new Polygon(5, 0.5, 90 * ONE_DEGREE);
 poly1.setPosition(Vector.createPosition(-0.5, -1.5));
 const poly2 = new Polygon(5, 0.5, 0, false);
 poly2.setPosition(Vector.createPosition(-1.5, -0.5));
+const aabb1 = new AABB(Vector.createDirection(0.3, 0.3));
+// const aabb1 = new AABB(Vector.createDirection(0.8, 0.8));
+// aabb1.setPosition(Vector.createPosition(-1, 0));
+aabb1.setPosition(Vector.createPosition(-1.5, 0.5));
 const point1 = Vector.createPosition(1.7, 0);
 // const point2 = Vector.createPosition(2, 1);
 // const point3 = Vector.createPosition(2, -2);
@@ -74,6 +79,7 @@ segment2.props = { strokeStyle: refBrush, fillStyle: refBrush };
 circle1.props = { strokeStyle: refBrush };
 poly1.props = { strokeStyle: refBrush };
 poly2.props = { strokeStyle: refBrush };
+aabb1.props = { strokeStyle: refBrush };
 
 const iline1 = new Line(Vector.createPosition(0.7, 3), Vector.createDirection(1, 0));
 const iline2 = new Line(Vector.createPosition(3, 3), Vector.createDirection(1, -1));
@@ -103,6 +109,7 @@ const testers: Geometry[] = [
   circle1,
   poly1,
   poly2,
+  aabb1,
 ];
 
 const intersectors: Geometry[] = [
@@ -168,9 +175,10 @@ const isegment2Move = new VectorEaser(
     isegment2.start.copyFrom(v);
     isegment2.end.withXY(v.x + 2, v.y - 2);
   });
+// point1.withMag(2.3 - point1.mag);
 const point1Rotate = new NumberEaser(0, 360, duration * 1.2, Ease.linear, v => {
   point1.withDegreesMag(v, point1.mag);
-});
+}, () => point1.withMag(2.3 - point1.mag));
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();

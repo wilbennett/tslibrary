@@ -1,8 +1,10 @@
-import { Geometry, ICircle, ILine, IPolygon, IRay, ISegment } from '.';
+import { Geometry, IAABB, ICircle, ILine, IPolygon, IRay, ISegment } from '.';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
 import * as Utils2D from '../utils/utils2d';
 import { polygonContainsPoint } from './geo-contain';
+
+const { abs } = Math;
 
 export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolean = false, result?: Vector) {
   switch (geometry.kind) {
@@ -11,6 +13,7 @@ export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolea
     case "segment": return segmentClosestPoint(geometry, point, hullOnly, result);
     case "circle": return circleClosestPoint(geometry, point, hullOnly, result);
     case "polygon": return polygonClosestPoint(geometry, point, hullOnly, result);
+    case "aabb": return aabbClosestPoint(geometry, point, hullOnly, result);
     default: return assertNever(geometry);
   }
 }
@@ -56,7 +59,7 @@ export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boo
 
   if (!hullOnly && vector.magSquared <= circle.radius * circle.radius)
     return result.copyFrom(point)
-  
+
   return circle.position.displaceByO(vector.withMag(circle.radius), result);
 }
 
@@ -82,6 +85,28 @@ export function polygonClosestPoint(poly: IPolygon, point: Vector, hullOnly: boo
     if (dist < minDist) {
       result.copyFrom(closest);
       minDist = dist;
+    }
+  }
+
+  return result;
+}
+
+// AABB.
+export function aabbClosestPoint(aabb: IAABB, point: Vector, hullOnly: boolean = false, result?: Vector) {
+  result = result || Vector.createPosition(0, 0);
+  const position = aabb.position;
+  const min = aabb.min;
+  const max = aabb.max;
+  point.clampO(min, max, result);
+
+  if (hullOnly && result.equals(point)) {
+    const vector = point.subN(position);
+
+    // TODO: Make dimension agnostic.
+    if (abs(vector.x) > abs(vector.y)) {
+      result.withX(result.x >= position.x ? max.x : min.x);
+    } else {
+      result.withY(result.y >= position.y ? max.y : min.y);
     }
   }
 
