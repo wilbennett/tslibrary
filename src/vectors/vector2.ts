@@ -82,7 +82,7 @@ export class Vector2 extends Vector {
     return result.set(x, y, 0, w);
   }
 
-  asCartesianO(result: Vector) {
+  asCartesianPositionO(result: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -96,9 +96,7 @@ export class Vector2 extends Vector {
     return result.set(x, y, 0, 1);
   }
 
-  asPositionO(result: Vector) { return result.set(this.x, this.y, 0, 1); }
-
-  asDirectionO(result: Vector) {
+  asCartesianDirectionO(result: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;

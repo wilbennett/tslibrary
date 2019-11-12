@@ -200,7 +200,18 @@ export abstract class Vector {
   normalizeWN() { return this.normalizeWO(this.newVector()); }
   normalizeW() { return this.normalizeWO(this); }
 
-  asCartesianO(result: Vector) {
+  asCartesianO(result: Vector) { return this.normalizeWO(result); }
+  asCartesianN() { return this.asCartesianO(this.newVector()); }
+  asCartesian() { return this.asCartesianO(this); }
+
+  asPositionO(result: Vector) { return result.set(this.x, this.y, this.z, 1); }
+  asPositionN() { return this.asPositionO(this.newVector()); }
+  asPosition() { return this.asPositionO(this); }
+  asDirectionO(result: Vector) { return result.set(this.x, this.y, this.z, 0); }
+  asDirectionN() { return this.asDirectionO(this.newVector()); }
+  asDirection() { return this.asDirectionO(this); }
+
+  asCartesianPositionO(result: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -215,14 +226,10 @@ export abstract class Vector {
 
     return result.set(x, y, z, 1);
   }
-  asCartesianN() { return this.asCartesianO(this.newVector()); }
-  asCartesian() { return this.asCartesianO(this); }
+  asCartesianPositionN() { return this.asCartesianPositionO(this.newVector()); }
+  asCartesianPosition() { return this.asCartesianPositionO(this); }
 
-  asPositionO(result: Vector) { return result.set(this.x, this.y, this.z, 1); }
-  asPositionN() { return this.asPositionO(this.newVector()); }
-  asPosition() { return this.asPositionO(this); }
-
-  asDirectionO(result: Vector) {
+  asCartesianDirectionO(result: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -237,8 +244,8 @@ export abstract class Vector {
 
     return result.set(x, y, z, 0);
   }
-  asDirectionN() { return this.asDirectionO(this.newVector()); }
-  asDirection() { return this.asDirectionO(this); }
+  asCartesianDirectionN() { return this.asCartesianDirectionO(this.newVector()); }
+  asCartesianDirection() { return this.asCartesianDirectionO(this); }
 
   displaceByO(other: Vector, result: Vector) {
     let ox = other.x;
@@ -575,6 +582,7 @@ export abstract class Vector {
   }
   toMeters(pixelsPerMeter: number = Vector.pixelsPerMeter) { return this.toMetersO(this, pixelsPerMeter); }
 
+  // TODO: Refactor WithElement methods to directly update elements.
   withXYZWO(x: number, y: number, z: number, w: number, result: Vector) { return result.set(x, y, z, w); }
   withXYZWN(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this.newVector()); }
   withXYZW(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this); }
