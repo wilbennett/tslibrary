@@ -34,6 +34,8 @@ export abstract class Vector {
   set b(value) { this.z = value; }
   get a() { return this.w; }
   set a(value) { this.w = value; }
+  get minElement() { return Math.min(this.x, this.y, this.z); }
+  get maxElement() { return Math.max(this.x, this.y, this.z); }
   get isPosition() { return this.w !== 0; }
   get isDirection() { return this.w === 0; }
   get isEmpty() { return false; }
@@ -519,6 +521,42 @@ export abstract class Vector {
     const result = Math.atan2(this.x * target.y - this.y * target.x, this.x * target.x + this.y * target.y);
     return result > 0 ? result : result + MathEx.TWO_PI;
   }
+
+  clampO(min: Vector, max: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x < min.x ? min.x : this.x > max.x ? max.x : this.x,
+      this.y < min.y ? min.y : this.y > max.y ? max.y : this.y,
+      this.z < min.z ? min.z : this.z > max.z ? max.z : this.z,
+      this.w
+    );
+  }
+  clampN(min: Vector, max: Vector) { return this.clampO(min, max, this.newVector()); }
+  clamp(min: Vector, max: Vector) { return this.clampO(min, max, this); }
+
+  clampMinO(min: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x < min.x ? min.x : this.x,
+      this.y < min.y ? min.y : this.y,
+      this.z < min.z ? min.z : this.z,
+      this.w
+    );
+  }
+  clampMinN(min: Vector) { return this.clampMinO(min, this.newVector()); }
+  clampMin(min: Vector) { return this.clampMinO(min, this); }
+
+  clampMaxO(max: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x > max.x ? max.x : this.x,
+      this.y > max.y ? max.y : this.y,
+      this.z > max.z ? max.z : this.z,
+      this.w
+    );
+  }
+  clampMaxN(max: Vector) { return this.clampMaxO(max, this.newVector()); }
+  clampMax(max: Vector) { return this.clampMaxO(max, this); }
 
   toPixelsO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
     return result.set(this.x * pixelsPerMeter, this.y * pixelsPerMeter, this.z * pixelsPerMeter, this.w);

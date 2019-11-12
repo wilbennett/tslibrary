@@ -11,6 +11,9 @@ export class Vector2 extends Vector {
   static get instanceConstructor() { return this._instanceConstructor2; }
   static set instanceConstructor(value: Vector2Constructor) { this._instanceConstructor2 = value; }
 
+  get minElement() { return Math.min(this.x, this.y); }
+  get maxElement() { return Math.max(this.x, this.y); }
+
   get magSquared() {
     if (this._magSquared !== undefined) return this._magSquared;
 
@@ -234,6 +237,36 @@ export class Vector2 extends Vector {
 
   perpLeftO(result: Vector) { return result.set(-this.y, this.x, 0, this.w); }
   perpRightO(result: Vector) { return result.set(this.y, -this.x, 0, this.w); }
+
+  clampO(min: Vector, max: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x < min.x ? min.x : this.x > max.x ? max.x : this.x,
+      this.y < min.y ? min.y : this.y > max.y ? max.y : this.y,
+      0,
+      this.w
+    );
+  }
+
+  clampMinO(min: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x < min.x ? min.x : this.x,
+      this.y < min.y ? min.y : this.y,
+      0,
+      this.w
+    );
+  }
+
+  clampMaxO(max: Vector, result: Vector) {
+    // TODO: Account for w.
+    return result.set(
+      this.x > max.x ? max.x : this.x,
+      this.y > max.y ? max.y : this.y,
+      0,
+      this.w
+    );
+  }
 
   toPixelsO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
     return result.set(this.x * pixelsPerMeter, this.y * pixelsPerMeter, 0, this.w);
