@@ -153,7 +153,7 @@ export function populatePolyEdgeNormals(groups: VectorGroups) {
   }
 }
 
-export function populatePolyGroup(
+export function populatePolyData(
   groups: VectorGroups,
   radius: number,
   startAngle: number = 0,

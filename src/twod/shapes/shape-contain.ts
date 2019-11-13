@@ -1,4 +1,4 @@
-import { ICircleShape, IPolygonShape, Shape } from '.';
+import { ICircleShape, IPolygonShapeBase, Shape } from '.';
 import { containsPoint } from '..';
 import { MathEx } from '../../core';
 import { Vector } from '../../vectors';
@@ -18,7 +18,7 @@ export function circleShapeContainsPoint(circle: ICircleShape, point: Vector, ep
 
 // Polygon.
 // @ts-ignore - unused param.
-export function polygonShapeContainsPoint(poly: IPolygonShape, point: Vector, epsilon: number = MathEx.epsilon) {
+export function polygonShapeContainsPoint(poly: IPolygonShapeBase, point: Vector, epsilon: number = MathEx.epsilon) {
   const vertices = poly.vertices.items;
   const edges = poly.edgeVectors.items;
   const pvector = Vector.create(0, 0);

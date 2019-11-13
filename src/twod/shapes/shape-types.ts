@@ -1,7 +1,7 @@
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
-import { IPolygon } from '../geometry';
+import { IAABB, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
@@ -45,18 +45,16 @@ export interface IPlaneShape extends IShape {
 export interface ICircleShape extends IShape, ICircle {
 }
 
-export interface IPolygonShape extends IShape, IPolygon {
+export interface IPolygonShapeBase extends IShape, IPolygonBase {
 }
 
-export interface ITriangleShape extends IShape {
-  kind: "triangle";
+export interface IPolygonShape extends IPolygonShapeBase, IPolygon {
 }
 
-export interface IAABBShape extends IShape {
-  kind: "aabb";
-  halfSize: Vector;
-  min: Vector;
-  max: Vector;
+export interface IAABBShape extends IPolygonShapeBase, IAABB {
+}
+
+export interface ITriangleShape extends IPolygonShapeBase, ITriangle {
 }
 
 export type Shape =
@@ -66,6 +64,6 @@ export type Shape =
   // | IPlaneShape
   | ICircleShape
   | IPolygonShape
+  | IAABBShape
   // | ITriangleShape
-  // | IAABBShape
   ;
