@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph } from '../../../twod';
-import { CircleShape, PolygonShape, Shape } from '../../../twod/shapes';
+import { AABBShape, CircleShape, PolygonShape, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -50,6 +50,8 @@ const poly3 = new PolygonShape(10, 0.5, 0, false);
 poly3.setPosition(Vector.createPosition(-0.5, 2));
 const poly4 = new PolygonShape(15, 0.5, 0, false);
 poly4.setPosition(Vector.createPosition(-1.5, 1.5));
+const aabb1 = new AABBShape(Vector.createDirection(0.4, 0.4));
+aabb1.setPosition(Vector.createPosition(-2, 0.5));
 
 const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
@@ -59,6 +61,7 @@ poly1.props = { strokeStyle: refBrush };
 poly2.props = { strokeStyle: refBrush };
 poly3.props = { strokeStyle: refBrush };
 poly4.props = { strokeStyle: refBrush };
+aabb1.props = { strokeStyle: refBrush };
 
 const vectors: [Vector, ContextProps][] = [
   [vector1, vector1Props],
@@ -74,6 +77,7 @@ const testers: Shape[] = [
   poly2,
   poly3,
   poly4,
+  aabb1,
 ];
 
 const controls: Shape[] = [
