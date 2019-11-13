@@ -59,4 +59,4 @@ export interface ITriangle extends IPolygonBase {
   kind: "triangle";
 }
 
-export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon | IAABB;
+export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon | IAABB | ITriangle;

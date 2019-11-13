@@ -65,5 +65,5 @@ export type Shape =
   | ICircleShape
   | IPolygonShape
   | IAABBShape
-  // | ITriangleShape
+  | ITriangleShape
   ;

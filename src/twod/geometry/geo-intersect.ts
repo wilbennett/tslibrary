@@ -1,4 +1,4 @@
-import { Geometry, IAABB, ICircle, ILine, IRay, ISegment } from '..';
+import { Geometry, IAABB, ICircle, ILine, IRay, ISegment, ITriangle } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
@@ -12,6 +12,7 @@ export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector): T
     case "circle": return circleCalcIntersectPoint(a, b, result);
     case "polygon": return polygonCalcIntersectPoint(a, b, result);
     case "aabb": return aabbCalcIntersectPoint(a, b, result);
+    case "triangle": return triangleCalcIntersectPoint(a, b, result);
     default: return assertNever(a);
   }
 }
@@ -71,6 +72,7 @@ function lineCalcIntersectPoint(line: ILine, geometry: Geometry, result?: Vector
     case "circle": return undefined;
     case "polygon": return undefined;
     case "aabb": return undefined;
+    case "triangle": return undefined;
     default: return assertNever(geometry);
   }
 }
@@ -142,6 +144,7 @@ function rayCalcIntersectPoint(ray: IRay, geometry: Geometry, result?: Vector) {
     case "circle": return undefined;
     case "polygon": return undefined;
     case "aabb": return undefined;
+    case "triangle": return undefined;
     default: return assertNever(geometry);
   }
 }
@@ -215,6 +218,7 @@ function segmentCalcIntersectPoint(segment: ISegment, geometry: Geometry, result
     case "circle": return undefined;
     case "polygon": return undefined;
     case "aabb": return undefined;
+    case "triangle": return undefined;
     default: return assertNever(geometry);
   }
 }
@@ -240,5 +244,13 @@ function polygonCalcIntersectPoint(poly: IPolygon, geometry: Geometry, result?: 
 // *************************************************************************************
 // @ts-ignore - unused param.
 function aabbCalcIntersectPoint(aabb: IAABB, geometry: Geometry, result?: Vector) {
+  return undefined;
+}
+
+// *************************************************************************************
+// Triangle
+// *************************************************************************************
+// @ts-ignore - unused param.
+function triangleCalcIntersectPoint(triangle: ITriangle, geometry: Geometry, result?: Vector) {
   return undefined;
 }

@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph } from '../../../twod';
-import { AABBShape, CircleShape, PolygonShape, Shape } from '../../../twod/shapes';
+import { AABBShape, CircleShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -46,12 +46,16 @@ const poly1 = new PolygonShape(5, 0.5, 90 * ONE_DEGREE);
 poly1.setPosition(Vector.createPosition(1.5, 1.5));
 const poly2 = new PolygonShape(5, 0.5, 0, false);
 poly2.setPosition(Vector.createPosition(0.5, 2));
-const poly3 = new PolygonShape(10, 0.5, 0, false);
+const poly3 = new PolygonShape(15, 0.5, 0, false);
 poly3.setPosition(Vector.createPosition(-0.5, 2));
 const poly4 = new PolygonShape(15, 0.5, 0, false);
 poly4.setPosition(Vector.createPosition(-1.5, 1.5));
 const aabb1 = new AABBShape(Vector.createDirection(0.4, 0.4));
 aabb1.setPosition(Vector.createPosition(-2, 0.5));
+const triangle1 = new TriangleShape(0.5, 90 * ONE_DEGREE, true);
+triangle1.setPosition(Vector.createPosition(-1.5, -0.5));
+const triangle2 = new TriangleShape(0.5, 0, false);
+triangle2.setPosition(Vector.createPosition(-0.5, -1.5));
 
 const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
@@ -62,6 +66,8 @@ poly2.props = { strokeStyle: refBrush };
 poly3.props = { strokeStyle: refBrush };
 poly4.props = { strokeStyle: refBrush };
 aabb1.props = { strokeStyle: refBrush };
+triangle1.props = { strokeStyle: refBrush };
+triangle2.props = { strokeStyle: refBrush };
 
 const vectors: [Vector, ContextProps][] = [
   [vector1, vector1Props],
@@ -78,6 +84,8 @@ const testers: Shape[] = [
   poly3,
   poly4,
   aabb1,
+  triangle1,
+  triangle2,
 ];
 
 const controls: Shape[] = [

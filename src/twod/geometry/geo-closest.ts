@@ -1,4 +1,4 @@
-import { Geometry, IAABB, ICircle, ILine, IPolygon, IRay, ISegment } from '.';
+import { Geometry, IAABB, ICircle, ILine, IPolygonBase, IRay, ISegment, ITriangle } from '.';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
 import * as Utils2D from '../utils/utils2d';
@@ -14,6 +14,7 @@ export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolea
     case "circle": return circleClosestPoint(geometry, point, hullOnly, result);
     case "polygon": return polygonClosestPoint(geometry, point, hullOnly, result);
     case "aabb": return aabbClosestPoint(geometry, point, hullOnly, result);
+    case "triangle": return triangleClosestPoint(geometry, point, hullOnly, result);
     default: return assertNever(geometry);
   }
 }
@@ -64,7 +65,7 @@ export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boo
 }
 
 // Polygon.
-export function polygonClosestPoint(poly: IPolygon, point: Vector, hullOnly: boolean = false, result?: Vector) {
+export function polygonClosestPoint(poly: IPolygonBase, point: Vector, hullOnly: boolean = false, result?: Vector) {
   // TODO: Optimize.
   result = result || Vector.createPosition(0, 0);
 
@@ -111,4 +112,9 @@ export function aabbClosestPoint(aabb: IAABB, point: Vector, hullOnly: boolean =
   }
 
   return result;
+}
+
+// Triangle.
+export function triangleClosestPoint(triangle: ITriangle, point: Vector, hullOnly: boolean = false, result?: Vector) {
+  return polygonClosestPoint(triangle, point, hullOnly, result);
 }

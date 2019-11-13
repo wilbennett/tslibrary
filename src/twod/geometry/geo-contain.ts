@@ -1,4 +1,4 @@
-import { Geometry, IAABB, ICircle, ILine, IPolygon, IRay, ISegment } from '.';
+import { Geometry, IAABB, ICircle, ILine, IPolygonBase, IRay, ISegment, ITriangle } from '.';
 import { MathEx } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
@@ -13,6 +13,7 @@ export function containsPoint(geometry: Geometry, point: Vector, epsilon: number
     case "circle": return circleContainsPoint(geometry, point, epsilon);
     case "polygon": return polygonContainsPoint(geometry, point, epsilon);
     case "aabb": return aabbContainsPoint(geometry, point, epsilon);
+    case "triangle": return triangleContainsPoint(geometry, point, epsilon);
     default: return assertNever(geometry);
   }
 }
@@ -51,7 +52,7 @@ export function circleContainsPoint(circle: ICircle, point: Vector, epsilon: num
 
 // Polygon.
 // @ts-ignore - unused param.
-export function polygonContainsPoint(poly: IPolygon, point: Vector, epsilon: number = 0) {
+export function polygonContainsPoint(poly: IPolygonBase, point: Vector, epsilon: number = 0) {
   // TODO: Binary search when many vertices.
   const vertices = poly.vertices.items;
   const count = vertices.length;
@@ -93,4 +94,9 @@ export function aabbContainsPoint(aabb: IAABB, point: Vector, epsilon: number = 
     && isLessOrEqualTo(point.x, max.x, epsilon)
     && isLessOrEqualTo(point.y, max.y, epsilon)
     && isLessOrEqualTo(point.z, max.z, epsilon);
+}
+
+// Triangle.
+export function triangleContainsPoint(triangle: ITriangle, point: Vector, epsilon: number = 0) {
+  return polygonContainsPoint(triangle, point, epsilon);
 }

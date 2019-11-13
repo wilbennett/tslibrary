@@ -1,17 +1,23 @@
 import { IPolygonShapeBase, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { VectorGroups } from '../../vectors';
+import { normalizePolyCenter } from '../geometry';
 
 export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShapeBase {
   constructor(
     data: VectorGroups,
-    radius: number,
+    radius?: number,
     // @ts-ignore - unused param.
     area?: number,
     integratorType: IntegratorConstructor = EulerSemiImplicit) {
     super();
 
     this._data = data;
+
+    if (radius === undefined) {
+      [radius] = normalizePolyCenter(this.vertices);
+    }
+
     this.radius = radius;
 
     this._integratorType = integratorType;
