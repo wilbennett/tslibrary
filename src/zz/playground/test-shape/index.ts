@@ -2,7 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph } from '../../../twod';
 import { CircleShape, PolygonShape, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -29,50 +29,81 @@ const colors: Brush[] = [
   "violet",
 ];
 
+const refBrush = "teal";
+Vector.tipDrawHeight = 0.1;
 const screenBounds = ctx.bounds;
 const origin = Vector.createPosition(0, 0);
 const gridSize = 50;
 let angle = 0;
 const duration = 5;
-Vector.tipDrawHeight = 0.2;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const vector1 = Vector.createPosition(2, 0);
+const vector1 = Vector.createDirection(1, 0);
+// const point1 = Vector.createPosition(2, 0);
 const circle = new CircleShape(0.5);
 circle.setPosition(Vector.createPosition(2, 0.5));
 const poly1 = new PolygonShape(5, 0.5, 90 * ONE_DEGREE);
 poly1.setPosition(Vector.createPosition(1.5, 1.5));
 const poly2 = new PolygonShape(5, 0.5, 0, false);
 poly2.setPosition(Vector.createPosition(0.5, 2));
+const poly3 = new PolygonShape(10, 0.5, 0, false);
+poly3.setPosition(Vector.createPosition(-0.5, 2));
+const poly4 = new PolygonShape(15, 0.5, 0, false);
+poly4.setPosition(Vector.createPosition(-1.5, 1.5));
 
-const vector1Props = { strokeStyle: "black", fillStyle: "black" };
-circle.props = { strokeStyle: colors[0] };
-poly1.props = { strokeStyle: colors[1] };
-poly2.props = { strokeStyle: colors[2] };
+const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
+// const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
+
+circle.props = { strokeStyle: refBrush };
+poly1.props = { strokeStyle: refBrush };
+poly2.props = { strokeStyle: refBrush };
+poly3.props = { strokeStyle: refBrush };
+poly4.props = { strokeStyle: refBrush };
 
 const vectors: [Vector, ContextProps][] = [
   [vector1, vector1Props],
 ];
 
-const shapes: Shape[] = [
+const points: [Vector, ContextProps][] = [
+  // [point1, point1Props],
+];
+
+const testers: Shape[] = [
   circle,
   poly1,
   poly2,
+  poly3,
+  poly4,
 ];
 
-const rotateV1 = new NumberEaser(0, 90, duration * 1, Ease.smoothStep, v => {
+const controls: Shape[] = [
+];
+
+const shapes: Shape[] = [...testers, ...controls];
+
+const fps = 60;
+const secPerFrame = 1 / fps;
+const framesPerDegree = 2;
+const secPerDegree = framesPerDegree * secPerFrame;
+
+const vector1Rotate = new NumberEaser(0, 360, 360 * secPerDegree, Ease.linear, v => {
   vector1.withRadiansMag(v * ONE_DEGREE, vector1.mag);
 });
 
-const rotateShape = new NumberEaser(0, 360, duration * 1.5, Ease.inOutBack, v => {
-  shapes.forEach(shape => shape.angle = v * ONE_DEGREE);
-});
+// const point1Rotate = new NumberEaser(0, 90, duration * 1, Ease.smoothStep, v => {
+//   point1.withRadiansMag(v * ONE_DEGREE, point1.mag);
+// });
+
+// const rotateShapes = new NumberEaser(0, 360, duration * 1.5, Ease.inOutBack, v => {
+//   shapes.forEach(shape => shape.angle = v * ONE_DEGREE);
+// });
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
 runner.add(
-  rotateV1.pingPong().repeat(Infinity),
-  rotateShape.repeat(Infinity),
+  vector1Rotate.repeat(Infinity),
+  // point1Rotate.pingPong().repeat(Infinity),
+  // rotateShapes.repeat(Infinity),
 );
 
 loop.start();
@@ -95,31 +126,32 @@ function render() {
 
   shapes.forEach(shape => shape.render(viewport));
   vectors.forEach(([vector, props]) => vector.render(viewport, origin, props));
-  renderPointContainments(viewport);
+  points.forEach(([point, props]) => point.render(viewport, origin, props));
 
   viewport.restoreTransform();
   ctx.restore();
 }
 
-function renderPointContainments(viewport: Viewport) {
-  renderPointContainment(circle, vector1, viewport);
-  renderPointContainment(poly1, vector1, viewport);
-  renderPointContainment(poly2, vector1, viewport);
-}
+// function renderPointContainments(viewport: Viewport) {
+//   for (var [point, props] of points) {
+//     for (var tester of testers) {
+//       renderPointContainment(tester, point, props, viewport);
+//     }
+//   }
+// }
 
-function renderPointContainment(a: Shape, point: Vector, viewport: Viewport) {
-  const localPoint = a.toLocal(point);
-  if (!a.containsPoint(localPoint)) return;
+// function renderPointContainment(a: Shape, point: Vector, props: ContextProps, viewport: Viewport) {
+//   if (!a.containsPoint(a.toLocal(point), 0.05)) return;
 
-  beginPath(a.props, viewport);
-  viewport.ctx.fillStyle = a.props.fillStyle || a.props.strokeStyle || "gray";
-  ctx.fillCircle(point, 0.1);
-}
+//   beginPath(props, viewport);
+//   viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
+//   ctx.fillCircle(point, 0.1);
+// }
 
-function beginPath(props: ContextProps, viewport: Viewport) {
-  ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
-}
+// function beginPath(props: ContextProps, viewport: Viewport) {
+//   ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
+// }
 
-function getLineWidth(props: ContextProps, viewport: Viewport) {
-  return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
-}
+// function getLineWidth(props: ContextProps, viewport: Viewport) {
+//   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+// }
