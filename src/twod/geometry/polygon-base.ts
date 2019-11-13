@@ -3,7 +3,7 @@ import { ContextProps, Viewport } from '..';
 import { Vector, VectorCollection } from '../../vectors';
 import * as Poly from './polygon-utils';
 
-export class PolygonBase extends GeometryBase implements IPolygonBase {
+export abstract class PolygonBase extends GeometryBase implements IPolygonBase {
   constructor(vertices: VectorCollection, radius: number) {
     super();
 

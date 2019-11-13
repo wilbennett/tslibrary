@@ -2,7 +2,7 @@ import { IPolygonShapeBase, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { VectorGroups } from '../../vectors';
 
-export class PolygonShapeBase extends ShapeBase implements IPolygonShapeBase {
+export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShapeBase {
   constructor(
     data: VectorGroups,
     radius: number,
