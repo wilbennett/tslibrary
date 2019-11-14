@@ -7,8 +7,8 @@ describe.each([
 ])("Should allow %s construction", (_, pos, sz) => {
     const position = <Vector>pos;
     const size = <Vector>sz;
-    const halfSize = size.scaleN(0.5);
-    const center = position.displaceByN(halfSize);
+    const halfSize = size.scaleO(0.5);
+    const center = position.displaceByO(halfSize);
 
     it("Should construct with position and size vectors", () => {
         let bounds = new Bounds(position, size);

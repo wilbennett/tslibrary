@@ -99,16 +99,16 @@ export class Viewport {
       this.viewBounds.withSize(this.viewBounds.width, this.worldBounds.height);
 
     if (viewMin.x < worldMin.x)
-      this.viewBounds.withPosition(this.viewBounds.position.withXN(worldMin.x));
+      this.viewBounds.withPosition(this.viewBounds.position.withXO(worldMin.x));
 
     if (viewMin.y < worldMin.y)
-      this.viewBounds.withPosition(this.viewBounds.position.withYN(worldMin.y));
+      this.viewBounds.withPosition(this.viewBounds.position.withYO(worldMin.y));
 
     if (viewMax.x > worldMax.x)
-      this.viewBounds.withPosition(this.viewBounds.position.withXN(worldMax.x - this.viewBounds.size.x));
+      this.viewBounds.withPosition(this.viewBounds.position.withXO(worldMax.x - this.viewBounds.size.x));
 
     if (viewMax.y > worldMax.y)
-      this.viewBounds.withPosition(this.viewBounds.position.withYN(worldMax.y - this.viewBounds.size.y));
+      this.viewBounds.withPosition(this.viewBounds.position.withYO(worldMax.y - this.viewBounds.size.y));
   }
 
   protected calcTransform() {
@@ -117,7 +117,7 @@ export class Viewport {
 
     result.translate(this.screenBounds.center);
     result.scale(this.scale);
-    result.translate(this.viewBounds.center.multN(-1, 1));
+    result.translate(this.viewBounds.center.multO(-1, 1));
     result.scale(1, -1);
 
     return result;

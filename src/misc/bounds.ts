@@ -19,25 +19,25 @@ export class Bounds {
 
     if (param1 instanceof Vector && param2 instanceof Vector) {
       const position = param1;
-      this.halfSize = param2.scaleN(0.5);
-      this.center = position.displaceByN(this.halfSize);
+      this.halfSize = param2.scaleO(0.5);
+      this.center = position.displaceByO(this.halfSize);
       this._direction = param3 || "up";
     } else if (typeof param1 === "number") {
       if (arguments.length >= 6) {
         const position = Vector3D.createPosition(param1, param2, param3);
         this.halfSize = Vector3D.createDirection(param4 * 0.5, param5 * 0.5, param6 * 0.5);
-        this.center = position.displaceByN(this.halfSize);
+        this.center = position.displaceByO(this.halfSize);
         this._direction = param7 || "up";
       } else {
         const position = Vector2D.createPosition(param1, param2);
         this.halfSize = Vector2D.createDirection(param3 * 0.5, param4 * 0.5);
-        this.center = position.displaceByN(this.halfSize);
+        this.center = position.displaceByO(this.halfSize);
         this._direction = param5 || "up";
       }
     } else if (typeof param1 === "string") { // center or centerhalf.
       if (param1 === "center") {
         if (param2 instanceof Vector && param3 instanceof Vector) {
-          this.halfSize = param3.scaleN(0.5);
+          this.halfSize = param3.scaleO(0.5);
           this.center = param2;
           this._direction = param4 || "up";
         } else if (typeof param2 === "number") {
@@ -75,18 +75,18 @@ export class Bounds {
   public halfSize: Vector;
   protected _direction: BoundsDirection;
   get direction() { return this._direction; }
-  get size() { return this.halfSize.scaleN(2); }
-  get min() { return this.center.displaceByN(this.halfSize.negateN()); }
-  get max() { return this.center.addN(this.halfSize); }
+  get size() { return this.halfSize.scaleO(2); }
+  get min() { return this.center.displaceByO(this.halfSize.negateO()); }
+  get max() { return this.center.addO(this.halfSize); }
   get left() { return this.center.x - this.halfSize.x; }
   get right() { return this.center.x + this.halfSize.x; }
   get top() { return this.direction === "up" ? this.center.y + this.halfSize.y : this.center.y - this.halfSize.y; }
   get bottom() { return this.direction === "up" ? this.center.y - this.halfSize.y : this.center.y + this.halfSize.y; }
   get back() { return this.center.z - this.halfSize.z; }
-  get topLeft() { return this.center.withXYZWN(this.left, this.top, this.back, 1); }
-  get bottomLeft() { return this.center.withXYZWN(this.left, this.bottom, this.back, 1); }
-  get topRight() { return this.center.withXYZWN(this.right, this.top, this.back, 1); }
-  get bottomRight() { return this.center.withXYZWN(this.right, this.bottom, this.back, 1); }
+  get topLeft() { return this.center.withXYZWO(this.left, this.top, this.back, 1); }
+  get bottomLeft() { return this.center.withXYZWO(this.left, this.bottom, this.back, 1); }
+  get topRight() { return this.center.withXYZWO(this.right, this.top, this.back, 1); }
+  get bottomRight() { return this.center.withXYZWO(this.right, this.bottom, this.back, 1); }
   get position() { return this.min; }
   get x() { return this.min.x; }
   get y() { return this.min.y; }
@@ -118,7 +118,7 @@ export class Bounds {
   withCenter(param1: Vector | number, y?: number, z?: number): Bounds {
     let center = param1 instanceof Vector
       ? param1
-      : this.center.withXYZN(param1, y!, z === undefined ? 0 : z);
+      : this.center.withXYZO(param1, y!, z === undefined ? 0 : z);
 
     this.center.copyFrom(center);
     return this;
@@ -130,7 +130,7 @@ export class Bounds {
   withCenterN(param1: Vector | number, y?: number, z?: number): Bounds {
     let center = param1 instanceof Vector
       ? param1
-      : this.center.withXYZN(param1, y!, z === undefined ? 0 : z);
+      : this.center.withXYZO(param1, y!, z === undefined ? 0 : z);
 
     return new Bounds("centerhalf", center, this.halfSize.clone(), this.direction);
   }
@@ -141,9 +141,9 @@ export class Bounds {
   withPosition(param1: Vector | number, y?: number, z?: number): Bounds {
     let position = param1 instanceof Vector
       ? param1
-      : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
+      : this.position.withXYZO(param1, y!, z === undefined ? 0 : z);
 
-    this.center.copyFrom(position.displaceByN(this.halfSize));
+    this.center.copyFrom(position.displaceByO(this.halfSize));
     return this;
   }
 
@@ -153,7 +153,7 @@ export class Bounds {
   withPositionN(param1: Vector | number, y?: number, z?: number): Bounds {
     let position = param1 instanceof Vector
       ? param1
-      : this.position.withXYZN(param1, y!, z === undefined ? 0 : z);
+      : this.position.withXYZO(param1, y!, z === undefined ? 0 : z);
 
     return new Bounds(position, this.size.clone(), this.direction);
   }
@@ -172,7 +172,7 @@ export class Bounds {
     } else
       size = this.size.withXYZN(param1, param1, param1);
 
-    this.halfSize.copyFrom(size.scaleN(0.5));
+    this.halfSize.copyFrom(size.scaleO(0.5));
     return this;
   }
 

@@ -150,7 +150,7 @@ export class Graph {
 
   protected createViewport(ctx: CanvasContext) {
     const gridScale = 1 / this.gridSize;
-    this._viewBounds.withSize(this.bounds.size.scaleN(gridScale));
+    this._viewBounds.withSize(this.bounds.size.scaleO(gridScale));
     return new Viewport(ctx, this.bounds, this._viewBounds);
   }
 }

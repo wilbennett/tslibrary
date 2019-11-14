@@ -13,7 +13,7 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
 
     this.halfSize = halfSize;
     const vertices = this.vertices.items;
-    const hs = halfSize.asPositionN();
+    const hs = halfSize.asPositionO();
     hs.negateO(vertices[0]);
     hs.withNegYO(vertices[1]);
     hs.copyTo(vertices[2]);
@@ -32,7 +32,7 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
-    ctx.beginPath().rect(this.min, this.halfSize.scaleN(2));
+    ctx.beginPath().rect(this.min, this.halfSize.scaleO(2));
 
     if (props.fillStyle)
       ctx.fill();

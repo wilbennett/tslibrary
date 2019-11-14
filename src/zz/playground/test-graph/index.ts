@@ -65,7 +65,7 @@ function loop() {
     .save()
     .translate(screenBounds.center)
     .rotateDegrees(angle)
-    .translate(screenBounds.center.negateN());
+    .translate(screenBounds.center.negateO());
 
   seriesList.forEach(series => {
     series.startX = graph.range.left - MathEx.TWO_PI;

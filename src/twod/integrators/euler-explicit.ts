@@ -7,7 +7,7 @@ export class EulerExplicit extends IntegratorBase {
   get velocity() { return this._velocity; }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
-    this._velocity.add(impulse.scaleN(this.massInfo.massInverse));
+    this._velocity.add(impulse.scaleO(this.massInfo.massInverse));
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
@@ -15,8 +15,8 @@ export class EulerExplicit extends IntegratorBase {
     const dt = step.dt;
     this.updateForces(now, this.position, this.velocity);
 
-    this._acceleration = this._force.scaleN(this.massInfo.massInverse);
-    this._position.addScaled(this._velocity.toPixelsN(), dt);
+    this._acceleration = this._force.scaleO(this.massInfo.massInverse);
+    this._position.addScaled(this._velocity.toPixelsO(), dt);
     this._velocity.addScaled(this._acceleration, dt);
 
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;

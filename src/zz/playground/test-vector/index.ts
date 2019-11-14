@@ -28,7 +28,7 @@ Vector.tipDrawHeight = 0.2;
 const graph = new Graph(ctx.bounds, gridSize);
 const vector1 = Vector.createPosition(1, 0);
 const vector2 = Vector.createDirection(-2, 0);
-const vector3 = vector2.normalizeN();
+const vector3 = vector2.normalizeO();
 
 const vector1Props = { strokeStyle: "red", fillStyle: "red" };
 const vector2Props = { strokeStyle: "green", fillStyle: "green" };
@@ -65,7 +65,7 @@ function render() {
     .save()
     .translate(screenBounds.center)
     .rotateDegrees(angle)
-    .translate(screenBounds.center.negateN());
+    .translate(screenBounds.center.negateO());
 
   graph.render(ctx);
 

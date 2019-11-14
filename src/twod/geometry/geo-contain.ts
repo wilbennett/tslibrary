@@ -20,13 +20,13 @@ export function containsPoint(geometry: Geometry, point: Vector, epsilon: number
 
 // Line.
 export function lineContainsPoint(line: ILine, point: Vector, epsilon: number = 0) {
-  const vector = point.subN(line.point);
+  const vector = point.subO(line.point);
   return MathEx.isEqualTo(vector.cross2D(line.direction), 0, epsilon);
 }
 
 // Ray.
 export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = 0) {
-  const vector = point.subN(ray.start);
+  const vector = point.subO(ray.start);
 
   if (!MathEx.isEqualTo(vector.cross2D(ray.direction), 0, epsilon)) return false;
 
@@ -35,9 +35,9 @@ export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = 0) 
 
 // Segment.
 export function segmentContainsPoint(segment: ISegment, point: Vector, epsilon: number = 0) {
-  const vector = point.subN(segment.start);
+  const vector = point.subO(segment.start);
 
-  if (!MathEx.isEqualTo(vector.dot(segment.edgeVector.perpN()), 0, epsilon)) return false;
+  if (!MathEx.isEqualTo(vector.dot(segment.edgeVector.perpO()), 0, epsilon)) return false;
 
   const edge = segment.edgeVector;
   const dot = vector.dot(edge);
@@ -46,7 +46,7 @@ export function segmentContainsPoint(segment: ISegment, point: Vector, epsilon: 
 
 // Circle.
 export function circleContainsPoint(circle: ICircle, point: Vector, epsilon: number = 0) {
-  const vector = point.subN(circle.position);
+  const vector = point.subO(circle.position);
   return MathEx.isLessOrEqualTo(vector.dot(vector), circle.radius * circle.radius, epsilon);
 }
 

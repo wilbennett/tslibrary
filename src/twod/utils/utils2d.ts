@@ -5,7 +5,7 @@ export function calcIntersectTime(point: Vector, direction: Vector, otherPoint: 
 
   if (denom === 0) return null;
 
-  const c = otherPoint.subN(point);
+  const c = otherPoint.subO(point);
   return otherDirection.cross2D(c) / denom;
 }
 
@@ -24,8 +24,8 @@ export function isTriangleCCW(a: Vector, b: Vector, c: Vector) {
 // Christer Ericson - Real Time Collision Detection.
 export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, result?: Vector) {
   result = result || Vector.createPosition(0, 0);
-  const edge = end.subN(start);
-  const t = point.subN(start).dot(edge) / edge.dot(edge);
+  const edge = end.subO(start);
+  const t = point.subO(start).dot(edge) / edge.dot(edge);
 
   return t < 0 || t > 1
     ? result.copyFrom(start)

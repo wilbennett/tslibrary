@@ -7,15 +7,15 @@ describe.each([
 ])("Should execute methods properly in %s", (_, pos, sz) => {
     const position = <Vector>pos;
     const size = <Vector>sz;
-    const halfSize = size.scaleN(0.5);
+    const halfSize = size.scaleO(0.5);
     // const is2D = position instanceof Vector2;
     const is3D = position instanceof Vector3;
 
     it("Should provide a toString implementation", () => {
         let bounds1 = new Bounds(position, size, "up");
-        let bounds2 = Bounds.fromCenter(position.displaceByN(size.scaleN(0.5)), size, "up");
+        let bounds2 = Bounds.fromCenter(position.displaceByO(size.scaleO(0.5)), size, "up");
         let bounds3 = new Bounds(position, size, "down");
-        let bounds4 = Bounds.fromCenter(position.displaceByN(size.scaleN(0.5)), size, "down");
+        let bounds4 = Bounds.fromCenter(position.displaceByO(size.scaleO(0.5)), size, "down");
 
         expect(bounds1.toString()).toBe(bounds2.toString());
         expect(bounds3.toString()).toBe(bounds4.toString());
@@ -29,8 +29,8 @@ describe.each([
         });
 
         it("Should allow replacing position", () => {
-            const newPosition = position.displaceByN(size);
-            const expected_center = newPosition.addN(bounds.halfSize);
+            const newPosition = position.displaceByO(size);
+            const expected_center = newPosition.addO(bounds.halfSize);
             const expected_direction = bounds.direction;
 
             bounds.withPosition(newPosition);
@@ -46,7 +46,7 @@ describe.each([
             expect(bounds.direction).toBe(expected_direction);
 
             bounds.withPosition(newPosition.x, newPosition.y);
-            expect(bounds.center.equals(expected_center.withZN(halfSize.z))).toBeTruthy();
+            expect(bounds.center.equals(expected_center.withZO(halfSize.z))).toBeTruthy();
             expect(bounds.position.x).toBe(newPosition.x);
             expect(bounds.position.y).toBe(newPosition.y);
             expect(bounds.position.z).toBe(0);
@@ -55,8 +55,8 @@ describe.each([
         });
 
         it("Should allow cloning with new position", () => {
-            const newPosition = position.displaceByN(size);
-            const expected_center = newPosition.addN(bounds.halfSize);
+            const newPosition = position.displaceByO(size);
+            const expected_center = newPosition.addO(bounds.halfSize);
             const expected_direction = bounds.direction;
 
             let newBounds = bounds.withPositionN(newPosition);
@@ -72,7 +72,7 @@ describe.each([
             expect(newBounds.direction).toBe(expected_direction);
 
             newBounds = bounds.withPositionN(newPosition.x, newPosition.y);
-            expect(newBounds.center.equals(expected_center.withZN(halfSize.z))).toBeTruthy();
+            expect(newBounds.center.equals(expected_center.withZO(halfSize.z))).toBeTruthy();
             expect(newBounds.position.x).toBe(newPosition.x);
             expect(newBounds.position.y).toBe(newPosition.y);
             expect(newBounds.position.z).toBe(0);
@@ -81,9 +81,9 @@ describe.each([
         });
 
         it("Should allow replacing size", () => {
-            let newSize = size.scaleN(2);
-            let newHalfSize = newSize.scaleN(0.5);
-            let expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            let newSize = size.scaleO(2);
+            let newHalfSize = newSize.scaleO(0.5);
+            let expected_position = bounds.center.displaceByO(newHalfSize.negateN());
             const expected_direction = bounds.direction;
 
             bounds.withSize(newSize);
@@ -106,8 +106,8 @@ describe.each([
             expect(bounds.direction).toBe(expected_direction);
 
             newSize = newSize.withY(newSize.x).withZ(newSize.x);
-            newHalfSize = newSize.scaleN(0.5);
-            expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            newHalfSize = newSize.scaleO(0.5);
+            expected_position = bounds.center.displaceByO(newHalfSize.negateN());
 
             bounds.withSize(newSize.x);
             expect(bounds.size.equals(newSize)).toBeTruthy();
@@ -116,9 +116,9 @@ describe.each([
         });
 
         it("Should allow cloning with new size", () => {
-            let newSize = size.scaleN(2);
-            let newHalfSize = newSize.scaleN(0.5);
-            let expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            let newSize = size.scaleO(2);
+            let newHalfSize = newSize.scaleO(0.5);
+            let expected_position = bounds.center.displaceByO(newHalfSize.negateN());
             const expected_direction = bounds.direction;
 
             let newBounds = bounds.withSizeN(newSize);
@@ -141,8 +141,8 @@ describe.each([
             expect(newBounds.direction).toBe(expected_direction);
 
             newSize = newSize.withY(newSize.x).withZ(newSize.x);
-            newHalfSize = newSize.scaleN(0.5);
-            expected_position = bounds.center.displaceByN(newHalfSize.negateN());
+            newHalfSize = newSize.scaleO(0.5);
+            expected_position = bounds.center.displaceByO(newHalfSize.negateN());
 
             newBounds = bounds.withSizeN(newSize.x);
             expect(newBounds.size.equals(newSize)).toBeTruthy();
@@ -152,12 +152,12 @@ describe.each([
 
         it("Should inflate size", () => {
             const origCenter = bounds.center;
-            const inflateSize = size.withXYZN(2, 2, 2);
-            const expected_inflateSize = size.addN(inflateSize.scaleN(2));
-            const deflateSize = inflateSize.negateN();
-            const expected_deflateSize = size.addN(deflateSize.scaleN(2));
-            const overDeflateSize = inflateSize.withXN(size.x + 1).negate();
-            const expected_overDeflateSize = size.addN(overDeflateSize.scaleN(2)).withX(0);
+            const inflateSize = size.withXYZO(2, 2, 2);
+            const expected_inflateSize = size.addO(inflateSize.scaleO(2));
+            const deflateSize = inflateSize.negateO();
+            const expected_deflateSize = size.addO(deflateSize.scaleO(2));
+            const overDeflateSize = inflateSize.withXO(size.x + 1).negate();
+            const expected_overDeflateSize = size.addO(overDeflateSize.scaleO(2)).withX(0);
 
             bounds.inflate(inflateSize);
             expect(bounds.size.equals(expected_inflateSize)).toBeTruthy();
@@ -232,12 +232,12 @@ describe.each([
         });
 
         it("Should allow cloning with inflated size", () => {
-            const inflateSize = size.withXYZN(2, 2, 2);
-            const expected_inflateSize = size.addN(inflateSize.scaleN(2));
-            const deflateSize = inflateSize.negateN();
-            const expected_deflateSize = size.addN(deflateSize.scaleN(2));
-            const overDeflateSize = inflateSize.withXN(size.x + 1).negate();
-            const expected_overDeflateSize = size.addN(overDeflateSize.scaleN(2)).withX(0);
+            const inflateSize = size.withXYZO(2, 2, 2);
+            const expected_inflateSize = size.addO(inflateSize.scaleO(2));
+            const deflateSize = inflateSize.negateO();
+            const expected_deflateSize = size.addO(deflateSize.scaleO(2));
+            const overDeflateSize = inflateSize.withXO(size.x + 1).negate();
+            const expected_overDeflateSize = size.addO(overDeflateSize.scaleO(2)).withX(0);
 
             let newBounds = bounds.inflateN(inflateSize);
             expect(newBounds.size.equals(expected_inflateSize)).toBeTruthy();
@@ -314,13 +314,13 @@ describe.each([
 
         it("Should calculate containment", () => {
             expect(bounds.contains(bounds.center)).toBeTruthy();
-            expect(bounds.contains(bounds.center.displaceByN(bounds.size))).not.toBeTruthy();
+            expect(bounds.contains(bounds.center.displaceByO(bounds.size))).not.toBeTruthy();
         });
 
         it("Should calculate intersection", () => {
-            const intersecting = new Bounds(position.displaceByN(bounds.halfSize), size, bounds.direction);
-            const displacement = size.withXYZN(size.x + 1, size.y + 1, size.z + 1);
-            const nonIntersecting = new Bounds(position.displaceByN(displacement), size, bounds.direction);
+            const intersecting = new Bounds(position.displaceByO(bounds.halfSize), size, bounds.direction);
+            const displacement = size.withXYZO(size.x + 1, size.y + 1, size.z + 1);
+            const nonIntersecting = new Bounds(position.displaceByO(displacement), size, bounds.direction);
 
             expect(bounds.intersectsWith(intersecting)).toBeTruthy();
             expect(bounds.intersectsWith(nonIntersecting)).not.toBeTruthy();

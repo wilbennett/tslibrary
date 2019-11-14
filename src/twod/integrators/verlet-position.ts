@@ -10,11 +10,11 @@ export class VerletPosition extends IntegratorBase {
     this.dirty();
   }
 
-  get velocity() { return this._position.subN(this._oldPosition); }
+  get velocity() { return this._position.subO(this._oldPosition); }
   set velocity(value) { this._position.subO(value, this._oldPosition); }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
-    this.velocity = this.velocity.add(impulse.scaleN(this.massInfo.massInverse));
+    this.velocity = this.velocity.add(impulse.scaleO(this.massInfo.massInverse));
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
@@ -26,7 +26,7 @@ export class VerletPosition extends IntegratorBase {
 
     const temp = pos.clone();
     this.updateForces(now, pos, this.velocity);
-    const acc = this._force.scaleN(this.massInfo.massInverse);
+    const acc = this._force.scaleO(this.massInfo.massInverse);
     pos.add(pos).sub(oldPos).addScaled(acc, dtSqr);
     oldPos.copyFrom(temp);
 

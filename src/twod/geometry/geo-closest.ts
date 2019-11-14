@@ -24,8 +24,8 @@ export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolea
 // @ts-ignore - unused param.
 export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean = false, result?: Vector) {
   result = result || Vector.createPosition(0, 0);
-  const normal = line.direction.perpLeftN();
-  const t = normal.dot(point.subN(line.point));
+  const normal = line.direction.perpLeftO();
+  const t = normal.dot(point.subO(line.point));
   return point.subO(normal.scale(t), result);
 }
 
@@ -33,7 +33,7 @@ export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean =
 // @ts-ignore - unused param.
 export function rayClosestPoint(ray: IRay, point: Vector, hullOnly: boolean = false, result?: Vector) {
   result = result || Vector.createPosition(0, 0);
-  const t = point.subN(ray.start).dot(ray.direction);
+  const t = point.subO(ray.start).dot(ray.direction);
 
   return t < 0
     ? result.copyFrom(ray.start)
@@ -46,7 +46,7 @@ export function rayClosestPoint(ray: IRay, point: Vector, hullOnly: boolean = fa
 export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: boolean = false, result?: Vector) {
   result = result || Vector.createPosition(0, 0);
   const edge = segment.edgeVector;
-  const t = point.subN(segment.start).dot(edge) / edge.dot(edge);
+  const t = point.subO(segment.start).dot(edge) / edge.dot(edge);
 
   return t < 0 || t > 1
     ? result.copyFrom(segment.start)
@@ -56,7 +56,7 @@ export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: 
 // Circle.
 export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boolean = false, result?: Vector) {
   result = result || Vector.createPosition(0, 0);
-  const vector = point.subN(circle.position);
+  const vector = point.subO(circle.position);
 
   if (!hullOnly && vector.magSquared <= circle.radius * circle.radius)
     return result.copyFrom(point)
@@ -101,7 +101,7 @@ export function aabbClosestPoint(aabb: IAABB, point: Vector, hullOnly: boolean =
   point.clampO(min, max, result);
 
   if (hullOnly && result.equals(point)) {
-    const vector = point.subN(position);
+    const vector = point.subO(position);
 
     // TODO: Make dimension agnostic.
     if (abs(vector.x) > abs(vector.y)) {

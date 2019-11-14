@@ -21,7 +21,7 @@ export function calcPoint(t: Tristate<number>, start: Vector, direction: Vector,
   if (t === null || t === undefined) return t;
 
   result = result || Vector.createPosition(0, 0);
-  return start.addO(direction.scaleN(t), result);
+  return start.addO(direction.scaleO(t), result);
 }
 
 // *************************************************************************************

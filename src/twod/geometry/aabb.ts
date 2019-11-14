@@ -13,14 +13,14 @@ export class AABB extends PolygonBase implements IAABB {
 
   readonly halfSize: Vector;
   get min() {
-    const result = this.halfSize.negateN();
+    const result = this.halfSize.negateO();
     return this.position.displaceByO(result, result);
   }
-  get max() { return this.position.displaceByN(this.halfSize); }
+  get max() { return this.position.displaceByO(this.halfSize); }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
-    ctx.beginPath().rect(this.min, this.halfSize.scaleN(2));
+    ctx.beginPath().rect(this.min, this.halfSize.scaleO(2));
 
     if (props.fillStyle)
       ctx.fill();

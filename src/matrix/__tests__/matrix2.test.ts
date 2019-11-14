@@ -301,7 +301,7 @@ describe.each([["Matrix2D", new Matrix2D()]])(
             const ty = 20;
             const initialPosition = Vector2.create(1, 0, 2);
             const initialDirection = new DVector2(1, 0);
-            const expectedPosition = initialPosition.asCartesianN().add(Vector2.create(tx, ty)).toString();
+            const expectedPosition = initialPosition.asCartesianO().add(Vector2.create(tx, ty)).toString();
 
             matrix.translate(tx, ty);//?.
             expect(matrix.transform(initialPosition).asCartesian().toString()).toBe(expectedPosition);

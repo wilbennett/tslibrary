@@ -119,7 +119,7 @@ function render() {
     .save()
     .translate(screenBounds.center)
     .rotateDegrees(angle)
-    .translate(screenBounds.center.negateN());
+    .translate(screenBounds.center.negateO());
 
   graph.render(ctx);
 

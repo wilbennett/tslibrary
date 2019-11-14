@@ -32,10 +32,10 @@ export class Line extends GeometryBase implements ILine {
 
   // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
-    const mag = view.viewBounds.max.subN(view.viewBounds.min).magSquared;
-    const dir = this.direction.scaleN(mag);
-    const start = this.point.displaceByN(dir);
-    const end = this.point.displaceByN(dir.negate());
+    const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
+    const dir = this.direction.scaleO(mag);
+    const start = this.point.displaceByO(dir);
+    const end = this.point.displaceByO(dir.negate());
 
     view.ctx.beginPath().line(start, end).stroke();
   }

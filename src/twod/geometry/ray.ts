@@ -32,9 +32,9 @@ export class Ray extends GeometryBase implements IRay {
 
   // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
-    const mag = view.viewBounds.max.subN(view.viewBounds.min).mag;
-    const dir = this.direction.scaleN(mag);
-    const end = this.start.displaceByN(dir);
+    const mag = view.viewBounds.max.subO(view.viewBounds.min).mag;
+    const dir = this.direction.scaleO(mag);
+    const end = this.start.displaceByO(dir);
 
     view.ctx.beginPath().line(this.start, end).stroke();
   }

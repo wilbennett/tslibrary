@@ -36,7 +36,7 @@ const screenCenter = Vector.create(halfWidth, halfHeight);
 const screenBounds = Bounds.fromCenter(halfWidth, halfHeight, 50, 50, "down");
 const viewBounds = Bounds.fromCenter(0, 0, 50, 50);
 const worldBounds = new Bounds(-halfWidth, -halfHeight, width, height);
-const inset = ctx.bounds.inflateN(screenBounds.halfSize.negateN());
+const inset = ctx.bounds.inflateN(screenBounds.halfSize.negateO());
 const worldInset = worldBounds.inflateN(-radius, -radius);
 
 const corner1 = worldInset.bottomLeft;
@@ -56,7 +56,7 @@ const viewport = new Viewport(ctx, screenBounds, viewBounds, worldBounds);
 const duration = 1.5;
 
 const scale = new NumberEaser(0.5, 1.5, duration * 5, Ease.linear, v =>
-  viewport.viewBounds.withSize(screenBounds.size.scaleN(1 / v)));
+  viewport.viewBounds.withSize(screenBounds.size.scaleO(1 / v)));
 
 const centerTo1S = new VectorEaser(screenCenter, screenBounds.halfSize, duration, Ease.linear, v =>
   viewport.screenBounds.withCenter(v));

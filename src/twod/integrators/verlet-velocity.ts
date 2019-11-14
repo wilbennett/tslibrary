@@ -11,7 +11,7 @@ export class VerletVelocity extends IntegratorBase {
   }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
-    this.velocity.add(impulse.scaleN(this.massInfo.massInverse));
+    this.velocity.add(impulse.scaleO(this.massInfo.massInverse));
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
@@ -23,11 +23,11 @@ export class VerletVelocity extends IntegratorBase {
     const vel = this.velocity;
 
     this.updateForces(now, pos, vel);
-    let acc = this._force.scaleN(this.massInfo.massInverse);
+    let acc = this._force.scaleO(this.massInfo.massInverse);
     const prevAcc = acc;
     pos.addScaled(vel, dt).addScaled(acc, dtSqrDiv2);
     this.updateForces(now, pos, vel);
-    acc = this._force.scaleN(this.massInfo.massInverse); // NOTE: Assume force does not depend explicitly on velocity.
+    acc = this._force.scaleO(this.massInfo.massInverse); // NOTE: Assume force does not depend explicitly on velocity.
     vel.addScaled(acc.add(prevAcc), dtDiv2);
 
     // TODO: Update.

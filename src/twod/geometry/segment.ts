@@ -27,9 +27,9 @@ export class Segment extends GeometryBase implements ISegment {
   }
 
   protected _edgeVector?: Vector;
-  get edgeVector() { return this._edgeVector || (this._edgeVector = this.end.subN(this.start)); }
+  get edgeVector() { return this._edgeVector || (this._edgeVector = this.end.subO(this.start)); }
   protected _direction?: Vector;
-  get direction() { return this._direction || (this._direction = this.edgeVector.normalizeN()); }
+  get direction() { return this._direction || (this._direction = this.edgeVector.normalizeO()); }
 
   reset() {
     this._edgeVector = undefined;

@@ -49,7 +49,7 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
 export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
   const vertices = vertexList.items;
   const vertexCount = vertices.length;
-  const amt = offset.withWN(0);
+  const amt = offset.withWO(0);
 
   for (let i = 0; i < vertexCount; i++) {
     vertices[i].displaceBy(amt);
@@ -57,7 +57,7 @@ export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
 }
 
 export function movePoly(vertexList: VectorCollection, currentCenter: Vector, newCenter: Vector) {
-  offsetPoly(vertexList, newCenter.subN(currentCenter));
+  offsetPoly(vertexList, newCenter.subO(currentCenter));
 }
 
 export function normalizePolyCenter(vertexList: VectorCollection, areaMaxRadius?: [number, number]) {
