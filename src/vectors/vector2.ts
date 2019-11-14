@@ -65,9 +65,12 @@ export class Vector2 extends Vector {
   }
 
   cross2D(other: Vector) { return this.x * other.y - this.y * other.x; }
-  crossO(other: Vector, result: Vector) { return result.set(this.cross2D(other), 0, 0, 0); }
 
-  normalizeWO(result: Vector) {
+  crossO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+ return result.set(this.cross2D(other), 0, 0, 0); }
+
+  normalizeWO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -79,10 +82,11 @@ export class Vector2 extends Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, 0, w);
   }
 
-  asCartesianPositionO(result: Vector) {
+  asCartesianPositionO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -93,10 +97,11 @@ export class Vector2 extends Vector {
       y *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, 0, 1);
   }
 
-  asCartesianDirectionO(result: Vector) {
+  asCartesianDirectionO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -107,10 +112,11 @@ export class Vector2 extends Vector {
       y *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, 0, 0);
   }
 
-  displaceByO(other: Vector, result: Vector) {
+  displaceByO(other: Vector, result?: Vector) {
     let ox = other.x;
     let oy = other.y;
     let ow = other.w;
@@ -130,10 +136,11 @@ export class Vector2 extends Vector {
       oy *= w;
     }
 
-    return result.set(x + ox, y + oy, 0, w);
+    result || (result = this.newVector());
+return result.set(x + ox, y + oy, 0, w);
   }
 
-  displaceByScaledO(other: Vector, scale: number, result: Vector) {
+  displaceByScaledO(other: Vector, scale: number, result?: Vector) {
     let ox = other.x * scale;
     let oy = other.y * scale;
     let ow = other.w;
@@ -153,18 +160,26 @@ export class Vector2 extends Vector {
       oy *= w;
     }
 
-    return result.set(x + ox, y + oy, 0, w);
+    result || (result = this.newVector());
+return result.set(x + ox, y + oy, 0, w);
   }
 
-  addO(other: Vector, result: Vector) { return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w); }
-  subO(other: Vector, result: Vector) { return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
-  scaleO(scale: number, result: Vector) { return result.set(this.x * scale, this.y * scale, 0, this.w); }
+  addO(other: Vector, result?: Vector) { 
+        result || (result = this.newVector());
+return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w); }
+  subO(other: Vector, result?: Vector) { 
+    result || (result = this.newVector());
+return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
+  scaleO(scale: number, result?: Vector) {
+    result || (result = this.newVector());
+ return result.set(this.x * scale, this.y * scale, 0, this.w); }
 
-  addScaledO(other: Vector, scale: number, result: Vector) {
+  addScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
     return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
   }
 
-  normalizeScaleO(scale: number, result: Vector) {
+  normalizeScaleO(scale: number, result?: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -176,14 +191,15 @@ export class Vector2 extends Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     const magInv = 1 / this.mag;
     return result.set(x * magInv * scale, y * magInv * scale, 0, w);
   }
 
-  multO(other: Vector, result: Vector): Vector;
-  multO(scaleX: number, result: Vector): Vector;
-  multO(scaleX: number, scaleY: number, result: Vector): Vector;
-  multO(scaleX: number, scaleY: number, scaleZ: number, result: Vector): Vector;
+  multO(other: Vector, result?: Vector): Vector;
+  multO(scaleX: number, result?: Vector): Vector;
+  multO(scaleX: number, scaleY: number, result?: Vector): Vector;
+  multO(scaleX: number, scaleY: number, scaleZ: number, result?: Vector): Vector;
   multO(param1: Vector | number, param2?: any, param3?: any, param4?: Vector): Vector {
     let scaleX: number;
     let scaleY: number;
@@ -192,32 +208,35 @@ export class Vector2 extends Vector {
     if (param1 instanceof Vector) {
       scaleX = param1.x;
       scaleY = param1.y;
-      result = param2;
+      result = param2 || this.newVector();
     } else if (arguments.length === 2) {
       scaleX = param1;
       scaleY = 1;
-      result = param3!;
+      result = param3 || this.newVector();
     } else if (arguments.length === 3) {
       scaleX = param1;
       scaleY = param2;
-      result = param3!;
+      result = param3 || this.newVector();
     } else {
       scaleX = param1;
       scaleY = param2;
-      result = param4!;
+      result = param4 || this.newVector();
     }
 
     return result.set(this.x * scaleX, this.y * scaleY, 0, this.w);
   }
 
-  divO(scale: number, result: Vector) {
+  divO(scale: number, result?: Vector) {
+    result || (result = this.newVector());
     scale = 1 / scale;
     return result.set(this.x * scale, this.y * scale, 0, this.w);
   }
 
-  negateO(result: Vector) { return result.set(-this.x, -this.y, 0, this.w); }
+  negateO(result?: Vector) { 
+    result || (result = this.newVector());
+    return result.set(-this.x, -this.y, 0, this.w); }
 
-  normalizeO(result: Vector) {
+  normalizeO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let w = this.w;
@@ -229,14 +248,20 @@ export class Vector2 extends Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     const magInv = 1 / this.mag;
     return result.set(x * magInv, y * magInv, 0, w);
   }
 
-  perpLeftO(result: Vector) { return result.set(-this.y, this.x, 0, this.w); }
-  perpRightO(result: Vector) { return result.set(this.y, -this.x, 0, this.w); }
+  perpLeftO(result?: Vector) {
+    result || (result = this.newVector());
+ return result.set(-this.y, this.x, 0, this.w); }
+  perpRightO(result?: Vector) {
+    result || (result = this.newVector());
+ return result.set(this.y, -this.x, 0, this.w); }
 
-  clampO(min: Vector, max: Vector, result: Vector) {
+  clampO(min: Vector, max: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x < min.x ? min.x : this.x > max.x ? max.x : this.x,
@@ -246,7 +271,8 @@ export class Vector2 extends Vector {
     );
   }
 
-  clampMinO(min: Vector, result: Vector) {
+  clampMinO(min: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x < min.x ? min.x : this.x,
@@ -256,7 +282,8 @@ export class Vector2 extends Vector {
     );
   }
 
-  clampMaxO(max: Vector, result: Vector) {
+  clampMaxO(max: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x > max.x ? max.x : this.x,
@@ -266,11 +293,13 @@ export class Vector2 extends Vector {
     );
   }
 
-  toPixelsO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+  toPixelsO(result?: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+    result || (result = this.newVector());
     return result.set(this.x * pixelsPerMeter, this.y * pixelsPerMeter, 0, this.w);
   }
 
-  toMetersO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+  toMetersO(result?: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+    result || (result = this.newVector());
     const inverse = 1 / pixelsPerMeter;
     return result.set(this.x * inverse, this.y * inverse, 0, this.w);
   }

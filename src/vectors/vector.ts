@@ -131,12 +131,13 @@ export abstract class Vector {
   static get empty() { return Vector._empty || (Vector._empty = new NullVector()); }
   static get [Symbol.species]() { return this; }
 
-  protected newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
+  protected newVector(x: number = 0, y: number = 0, z: number = 0, w: number = 0): Vector {
     // @ts-ignore - species pattern.
     const Species = this.constructor[Symbol.species];
     return new Species(x, y, z, w);
   }
 
+  // TODO: Allow copying cached properties.
   set(x: number, y: number, z: number, w: number = 0) {
     this.x = x;
     this.y = y;
@@ -175,7 +176,9 @@ export abstract class Vector {
 
   cross2D(other: Vector) { return this.x * other.y - this.y * other.x; }
 
-  crossO(other: Vector, result: Vector) {
+  crossO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+
     return result.set(
       this.y * other.z - this.z * other.y,
       this.z * other.x - this.x * other.z,
@@ -185,7 +188,8 @@ export abstract class Vector {
   crossN(other: Vector) { return this.crossO(other, this.newVector()); }
   cross(other: Vector) { return this.crossO(other, this); }
 
-  normalizeWO(result: Vector) {
+  // TODO: Doesn't change angle. Should not change cached angle.
+  normalizeWO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -199,23 +203,30 @@ export abstract class Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, z, w);
   }
   normalizeWN() { return this.normalizeWO(this.newVector()); }
   normalizeW() { return this.normalizeWO(this); }
 
-  asCartesianO(result: Vector) { return this.normalizeWO(result); }
+  asCartesianO(result?: Vector) { return this.normalizeWO(result); }
   asCartesianN() { return this.asCartesianO(this.newVector()); }
   asCartesian() { return this.asCartesianO(this); }
 
-  asPositionO(result: Vector) { return result.set(this.x, this.y, this.z, 1); }
+  asPositionO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, this.y, this.z, 1);
+  }
   asPositionN() { return this.asPositionO(this.newVector()); }
   asPosition() { return this.asPositionO(this); }
-  asDirectionO(result: Vector) { return result.set(this.x, this.y, this.z, 0); }
+  asDirectionO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, this.y, this.z, 0);
+  }
   asDirectionN() { return this.asDirectionO(this.newVector()); }
   asDirection() { return this.asDirectionO(this); }
 
-  asCartesianPositionO(result: Vector) {
+  asCartesianPositionO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -228,12 +239,13 @@ export abstract class Vector {
       z *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, z, 1);
   }
   asCartesianPositionN() { return this.asCartesianPositionO(this.newVector()); }
   asCartesianPosition() { return this.asCartesianPositionO(this); }
 
-  asCartesianDirectionO(result: Vector) {
+  asCartesianDirectionO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -246,12 +258,13 @@ export abstract class Vector {
       z *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x, y, z, 0);
   }
   asCartesianDirectionN() { return this.asCartesianDirectionO(this.newVector()); }
   asCartesianDirection() { return this.asCartesianDirectionO(this); }
 
-  displaceByO(other: Vector, result: Vector) {
+  displaceByO(other: Vector, result?: Vector) {
     let ox = other.x;
     let oy = other.y;
     let oz = other.z;
@@ -275,12 +288,13 @@ export abstract class Vector {
       oz *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x + ox, y + oy, z + oz, w);
   }
   displaceByN(other: Vector) { return this.displaceByO(other, this.newVector()); }
   displaceBy(other: Vector) { return this.displaceByO(other, this); }
 
-  displaceByScaledO(other: Vector, scale: number, result: Vector) {
+  displaceByScaledO(other: Vector, scale: number, result?: Vector) {
     let ox = other.x * scale;
     let oy = other.y * scale;
     let oz = other.z * scale;
@@ -304,30 +318,42 @@ export abstract class Vector {
       oz *= w;
     }
 
+    result || (result = this.newVector());
     return result.set(x + ox, y + oy, z + oz, w);
   }
   displaceByScaledN(other: Vector, scale: number) { return this.displaceByScaledO(other, scale, this.newVector()); }
   displaceByScaled(other: Vector, scale: number) { return this.displaceByScaledO(other, scale, this); }
 
-  addO(other: Vector, result: Vector) { return result.set(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w); }
+  addO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w);
+  }
   addN(other: Vector) { return this.addO(other, this.newVector()); }
   add(other: Vector) { return this.addO(other, this); }
 
-  subO(other: Vector, result: Vector) { return result.set(this.x - other.x, this.y - other.y, this.z - other.z, this.w - other.w); }
+  subO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x - other.x, this.y - other.y, this.z - other.z, this.w - other.w);
+  }
   subN(other: Vector) { return this.subO(other, this.newVector()); }
   sub(other: Vector) { return this.subO(other, this); }
 
-  scaleO(scale: number, result: Vector) { return result.set(this.x * scale, this.y * scale, this.z * scale, this.w); }
+  // TODO: Doesn't change angle. Should not change cached angle.
+  scaleO(scale: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x * scale, this.y * scale, this.z * scale, this.w);
+  }
   scaleN(scale: number) { return this.scaleO(scale, this.newVector()); }
   scale(scale: number) { return this.scaleO(scale, this); }
 
-  addScaledO(other: Vector, scale: number, result: Vector) {
+  addScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
     return result.set(this.x + other.x * scale, this.y + other.y * scale, this.z + other.z * scale, this.w + other.w);
   }
   addScaledN(other: Vector, scale: number) { return this.addScaledO(other, scale, this.newVector()); }
   addScaled(other: Vector, scale: number) { return this.addScaledO(other, scale, this); }
 
-  normalizeScaleO(scale: number, result: Vector) {
+  normalizeScaleO(scale: number, result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -341,16 +367,17 @@ export abstract class Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     const magInv = 1 / this.mag;
     return result.set(x * magInv * scale, y * magInv * scale, z * magInv * scale, w);
   }
   normalizeScaleN(scale: number) { return this.normalizeScaleO(scale, this.newVector()); }
   normalizeScale(scale: number) { return this.normalizeScaleO(scale, this); }
 
-  multO(other: Vector, result: Vector): Vector;
-  multO(scaleX: number, result: Vector): Vector;
-  multO(scaleX: number, scaleY: number, result: Vector): Vector;
-  multO(scaleX: number, scaleY: number, scaleZ: number, result: Vector): Vector;
+  multO(other: Vector, result?: Vector): Vector;
+  multO(scaleX: number, result?: Vector): Vector;
+  multO(scaleX: number, scaleY: number, result?: Vector): Vector;
+  multO(scaleX: number, scaleY: number, scaleZ: number, result?: Vector): Vector;
   multO(param1: Vector | number, param2?: any, param3?: any, param4?: Vector): Vector {
     let scaleX: number;
     let scaleY: number;
@@ -361,22 +388,22 @@ export abstract class Vector {
       scaleX = param1.x;
       scaleY = param1.y;
       scaleZ = param1.z;
-      result = param2;
+      result = param2 || this.newVector();
     } else if (arguments.length === 2) {
       scaleX = param1;
       scaleY = 1;
       scaleZ = 1;
-      result = param3!;
+      result = param3 || this.newVector();
     } else if (arguments.length === 3) {
       scaleX = param1;
       scaleY = param2;
       scaleZ = 1;
-      result = param3!;
+      result = param3 || this.newVector();
     } else {
       scaleX = param1;
       scaleY = param2;
       scaleZ = param3;
-      result = param4!;
+      result = param4 || this.newVector();
     }
 
     return result.set(this.x * scaleX, this.y * scaleY, this.z * scaleZ, this.w);
@@ -406,18 +433,23 @@ export abstract class Vector {
     return this.multO(param1, scaleY!, scaleZ!, this);
   }
 
-  divO(scale: number, result: Vector) {
+  divO(scale: number, result?: Vector) {
+    result || (result = this.newVector());
     scale = 1 / scale;
     return result.set(this.x * scale, this.y * scale, this.z * scale, this.w);
   }
   divN(scale: number) { return this.divO(scale, this.newVector()); }
   div(scale: number) { return this.divO(scale, this); }
 
-  negateO(result: Vector) { return result.set(-this.x, -this.y, -this.z, this.w); }
+  // TODO: Doesn't change magnitude. Should not change cached values.
+  negateO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(-this.x, -this.y, -this.z, this.w);
+  }
   negateN() { return this.negateO(this.newVector()); }
   negate() { return this.negateO(this); }
 
-  normalizeO(result: Vector) {
+  normalizeO(result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -431,6 +463,7 @@ export abstract class Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     const magInv = 1 / this.mag;
     return result.set(x * magInv, y * magInv, z * magInv, w);
   }
@@ -438,19 +471,21 @@ export abstract class Vector {
   normalize() { return this.normalizeO(this); }
 
   // TODO: Proper 3D implementation.
-  rotateO(radians: number, result: Vector) {
+  // TODO: Doesn't change magnitude. Should not change cached values.
+  rotateO(radians: number, result?: Vector) {
     const sin = Math.sin(radians);
     const cos = Math.cos(radians);
     const x = this.x;
     const y = this.y;
 
+    result || (result = this.newVector());
     return result.set(x * cos - y * sin, x * sin + y * cos, this.z, this.w);
   }
   rotateN(radians: number) { return this.rotateO(radians, this.newVector()); }
   rotate(radians: number) { return this.rotateO(radians, this); }
 
   // TODO: Proper 3D implementation.
-  rotateAboutO(center: Vector, radians: number, result: Vector) {
+  rotateAboutO(center: Vector, radians: number, result?: Vector) {
     const sin = Math.sin(radians);
     const cos = Math.cos(radians);
     let x = this.x - center.x;
@@ -460,36 +495,46 @@ export abstract class Vector {
     rx += center.x;
     ry += center.y;
 
+    result || (result = this.newVector());
     return result.set(rx, ry, this.z, this.w);
   }
   rotateAboutN(center: Vector, radians: number) { return this.rotateAboutO(center, radians, this.newVector()); }
   rotateAbout(center: Vector, radians: number) { return this.rotateAboutO(center, radians, this); }
 
   // TODO: Proper 3D implementation.
-  rotateOneDegreeO(result: Vector) {
+  rotateOneDegreeO(result?: Vector) {
     const x = this.x;
     const y = this.y;
+    result || (result = this.newVector());
     return result.set(x * MathEx.COS1 - y * MathEx.SIN1, x * MathEx.SIN1 + y * MathEx.COS1, this.z, this.w);
   }
   rotateOneDegreeN() { return this.rotateOneDegreeO(this.newVector()); }
   rotateOneDegree() { return this.rotateOneDegreeO(this); }
 
   // TODO: Proper 3D implementation.
-  rotateNegativeOneDegreeO(result: Vector) {
+  rotateNegativeOneDegreeO(result?: Vector) {
     const x = this.x;
     const y = this.y;
+    result || (result = this.newVector());
     return result.set(x * MathEx.COSN1 - y * MathEx.SINN1, x * MathEx.SINN1 + y * MathEx.COSN1, this.z, this.w);
   }
   rotateNegativeOneDegreeN() { return this.rotateNegativeOneDegreeO(this.newVector()); }
   rotateNegativeOneDegree() { return this.rotateNegativeOneDegreeO(this); }
 
   // TODO: Proper 3D implementation.
-  perpLeftO(result: Vector) { return result.set(-this.y, this.x, this.z, this.w); }
+  // TODO: Doesn't change magnitude. Should not change cached values.
+  perpLeftO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(-this.y, this.x, this.z, this.w);
+  }
   perpLeftN() { return this.perpLeftO(this.newVector()); }
   perpLeft() { return this.perpLeftO(this); }
 
   // TODO: Proper 3D implementation.
-  perpRightO(result: Vector) { return result.set(this.y, -this.x, this.z, this.w); }
+  perpRightO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.y, -this.x, this.z, this.w);
+  }
   perpRightN() { return this.perpRightO(this.newVector()); }
   perpRight() { return this.perpRightO(this); }
 
@@ -499,18 +544,19 @@ export abstract class Vector {
 
   projectionLength(other: Vector) { return this.dot(other) / other.dot(other); }
 
-  projectOntoUnitO(unitVector: Vector, result: Vector) { return unitVector.scaleO(this.dot(unitVector), result); }
+  projectOntoUnitO(unitVector: Vector, result?: Vector) { return unitVector.scaleO(this.dot(unitVector), result); }
   projectOntoUnitN(unitVector: Vector) { return this.projectOntoUnitO(unitVector, this.newVector()); }
   projectOntoUnit(unitVector: Vector) { return this.projectOntoUnitO(unitVector, this); }
 
-  projectOntoO(other: Vector, result: Vector) { return other.scaleO(this.dot(other) / other.dot(other), result); }
+  projectOntoO(other: Vector, result?: Vector) { return other.scaleO(this.dot(other) / other.dot(other), result); }
   projectOntoN(other: Vector) { return this.projectOntoO(other, this.newVector()); }
   projectOnto(other: Vector) { return this.projectOntoO(other, this); }
 
-  reflectViaNormalO(normal: Vector, result: Vector) {
+  reflectViaNormalO(normal: Vector, result?: Vector) {
     // -(2 * (v . normal) * normal - v)
     let dot2 = 2 * this.dot(normal);
     let dot2TimesNormal = normal.scaleN(dot2);
+    result || (result = this.newVector());
     return result.copyFrom(dot2TimesNormal.sub(this).negate());
 
     // v - 2 * (v . normal) * normal
@@ -519,11 +565,11 @@ export abstract class Vector {
   reflectViaNormalN(normal: Vector) { return this.reflectViaNormalO(normal, this.newVector()); }
   reflectViaNormal(normal: Vector) { return this.reflectViaNormalO(normal, this); }
 
-  reflectOffO(reflector: Vector, result: Vector): Vector { return this.reflectViaNormalO(reflector.normal, result); }
+  reflectOffO(reflector: Vector, result?: Vector): Vector { return this.reflectViaNormalO(reflector.normal, result); }
   reflectOffN(reflector: Vector): Vector { return this.reflectOffO(reflector, this.newVector()); }
   reflectOff(reflector: Vector): Vector { return this.reflectOffO(reflector, this); }
 
-  reflectO(source: Vector, result: Vector): Vector { return source.reflectViaNormalO(this.normal, result); }
+  reflectO(source: Vector, result?: Vector): Vector { return source.reflectViaNormalO(this.normal, result); }
   reflectN(source: Vector): Vector { return this.reflectO(source, this.newVector()); }
   reflect(source: Vector): Vector { return this.reflectO(source, this); }
 
@@ -533,7 +579,8 @@ export abstract class Vector {
     return result > 0 ? result : result + MathEx.TWO_PI;
   }
 
-  clampO(min: Vector, max: Vector, result: Vector) {
+  clampO(min: Vector, max: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x < min.x ? min.x : this.x > max.x ? max.x : this.x,
@@ -545,7 +592,8 @@ export abstract class Vector {
   clampN(min: Vector, max: Vector) { return this.clampO(min, max, this.newVector()); }
   clamp(min: Vector, max: Vector) { return this.clampO(min, max, this); }
 
-  clampMinO(min: Vector, result: Vector) {
+  clampMinO(min: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x < min.x ? min.x : this.x,
@@ -557,7 +605,8 @@ export abstract class Vector {
   clampMinN(min: Vector) { return this.clampMinO(min, this.newVector()); }
   clampMin(min: Vector) { return this.clampMinO(min, this); }
 
-  clampMaxO(max: Vector, result: Vector) {
+  clampMaxO(max: Vector, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Account for w.
     return result.set(
       this.x > max.x ? max.x : this.x,
@@ -569,7 +618,8 @@ export abstract class Vector {
   clampMaxN(max: Vector) { return this.clampMaxO(max, this.newVector()); }
   clampMax(max: Vector) { return this.clampMaxO(max, this); }
 
-  toPixelsO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+  toPixelsO(result?: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+    result || (result = this.newVector());
     return result.set(this.x * pixelsPerMeter, this.y * pixelsPerMeter, this.z * pixelsPerMeter, this.w);
   }
   toPixelsN(pixelsPerMeter: number = Vector.pixelsPerMeter) {
@@ -577,7 +627,8 @@ export abstract class Vector {
   }
   toPixels(pixelsPerMeter: number = Vector.pixelsPerMeter) { return this.toPixelsO(this, pixelsPerMeter); }
 
-  toMetersO(result: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+  toMetersO(result?: Vector, pixelsPerMeter: number = Vector.pixelsPerMeter) {
+    result || (result = this.newVector());
     const inverse = 1 / pixelsPerMeter;
     return result.set(this.x * inverse, this.y * inverse, this.z * inverse, this.w);
   }
@@ -588,51 +639,85 @@ export abstract class Vector {
 
   // DONE: Refactor WithElement methods to directly update elements.
   //       Don't directly update elements because cached values need to be cleared.
-  withXYZWO(x: number, y: number, z: number, w: number, result: Vector) { return result.set(x, y, z, w); }
+  withXYZWO(x: number, y: number, z: number, w: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(x, y, z, w);
+  }
   withXYZWN(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this.newVector()); }
   withXYZW(x: number, y: number, z: number, w: number) { return this.withXYZWO(x, y, z, w, this); }
 
-  withXYZO(x: number, y: number, z: number, result: Vector) { return result.set(x, y, z, this.w); }
+  withXYZO(x: number, y: number, z: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(x, y, z, this.w);
+  }
   withXYZN(x: number, y: number, z: number) { return this.withXYZO(x, y, z, this.newVector()); }
   withXYZ(x: number, y: number, z: number) { return this.withXYZO(x, y, z, this); }
 
-  withXYWO(x: number, y: number, w: number, result: Vector) { return result.set(x, y, this.z, w); }
+  withXYWO(x: number, y: number, w: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(x, y, this.z, w);
+  }
   withXYWN(x: number, y: number, w: number) { return this.withXYWO(x, y, w, this.newVector()); }
   withXYW(x: number, y: number, w: number) { return this.withXYWO(x, y, w, this); }
 
-  withXYO(x: number, y: number, result: Vector) { return result.set(x, y, this.z, this.w); }
+  withXYO(x: number, y: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(x, y, this.z, this.w);
+  }
   withXYN(x: number, y: number) { return this.withXYO(x, y, this.newVector()); }
   withXY(x: number, y: number) { return this.withXYO(x, y, this); }
 
-  withXO(x: number, result: Vector) { return result.set(x, this.y, this.z, this.w); }
+  withXO(x: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(x, this.y, this.z, this.w);
+  }
   withXN(x: number) { return this.withXO(x, this.newVector()); }
   withX(x: number) { return this.withXO(x, this); }
 
-  withYO(y: number, result: Vector) { return result.set(this.x, y, this.z, this.w); }
+  withYO(y: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, y, this.z, this.w);
+  }
   withYN(y: number) { return this.withYO(y, this.newVector()); }
   withY(y: number) { return this.withYO(y, this); }
 
-  withZO(z: number, result: Vector) { return result.set(this.x, this.y, z, this.w); }
+  withZO(z: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, this.y, z, this.w);
+  }
   withZN(z: number) { return this.withZO(z, this.newVector()); }
   withZ(z: number) { return this.withZO(z, this); }
 
-  withWO(w: number, result: Vector) { return result.set(this.x, this.y, this.z, w); }
+  withWO(w: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, this.y, this.z, w);
+  }
   withWN(w: number) { return this.withWO(w, this.newVector()); }
   withW(w: number) { return this.withWO(w, this); }
 
-  withNegXO(result: Vector) { return result.set(-this.x, this.y, this.z, this.w); }
+  withNegXO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(-this.x, this.y, this.z, this.w);
+  }
   withNegXN() { return this.withNegXO(this.newVector()); }
   withNegX() { return this.withNegXO(this); }
 
-  withNegYO(result: Vector) { return result.set(this.x, -this.y, this.z, this.w); }
+  withNegYO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, -this.y, this.z, this.w);
+  }
   withNegYN() { return this.withNegYO(this.newVector()); }
   withNegY() { return this.withNegYO(this); }
 
-  withNegZO(result: Vector) { return result.set(this.x, this.y, -this.z, this.w); }
+  withNegZO(result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x, this.y, -this.z, this.w);
+  }
   withNegZN() { return this.withNegZO(this.newVector()); }
   withNegZ() { return this.withNegZO(this); }
 
-  withRadiansO(radians: number, result: Vector) {
+  withRadiansO(radians: number, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Not valid for 3D.
     if (result === this) {
       this.set(Math.cos(radians), Math.sin(radians), 0, this.w);
@@ -647,14 +732,15 @@ export abstract class Vector {
   withRadiansN(radians: number) { return this.withRadiansO(radians, this.newVector()); }
   withRadians(radians: number) { return this.withRadiansO(radians, this); }
 
-  withDegreesO(degrees: number, result: Vector) {
+  withDegreesO(degrees: number, result?: Vector) {
     // TODO: Not valid for 3D.
     return this.withRadiansO(degrees * MathEx.ONE_DEGREE, result);
   }
   withDegreesN(degrees: number) { return this.withDegreesO(degrees, this.newVector()); }
   withDegrees(degrees: number) { return this.withDegreesO(degrees, this); }
 
-  withRadiansMagO(radians: number, mag: number, result: Vector) {
+  withRadiansMagO(radians: number, mag: number, result?: Vector) {
+    result || (result = this.newVector());
     // TODO: Not valid for 3D.
     if (result === this) {
       this.set(Math.cos(radians) * mag, Math.sin(radians) * mag, 0, this.w);
@@ -672,14 +758,14 @@ export abstract class Vector {
   withRadiansMagN(radians: number, mag: number) { return this.withRadiansMagO(radians, mag, this.newVector()); }
   withRadiansMag(radians: number, mag: number) { return this.withRadiansMagO(radians, mag, this); }
 
-  withDegreesMagO(degrees: number, mag: number, result: Vector) {
+  withDegreesMagO(degrees: number, mag: number, result?: Vector) {
     // TODO: Not valid for 3D.
     return this.withRadiansMagO(degrees * MathEx.ONE_DEGREE, mag, result);
   }
   withDegreesMagN(degrees: number, mag: number) { return this.withDegreesMagO(degrees, mag, this.newVector()); }
   withDegreesMag(degrees: number, mag: number) { return this.withDegreesMagO(degrees, mag, this); }
 
-  withMagO(mag: number, result: Vector) {
+  withMagO(mag: number, result?: Vector) {
     let x = this.x;
     let y = this.y;
     let z = this.z;
@@ -693,6 +779,7 @@ export abstract class Vector {
       w = 1;
     }
 
+    result || (result = this.newVector());
     const magInv = 1 / this.mag;
     return result.set(x * magInv * mag, y * magInv * mag, z * magInv * mag, w);
   }
