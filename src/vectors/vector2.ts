@@ -45,9 +45,9 @@ export class Vector2 extends Vector {
     return result;
   }
 
-  static create(x: number, y: number, w: number = 0) { return new this.instanceConstructor(x, y, w); }
-  static createPosition(x: number, y: number) { return new this.instanceConstructor(x, y, 1); }
-  static createDirection(x: number, y: number) { return new this.instanceConstructor(x, y, 0); }
+  static create(x: number = 0, y: number = 0, w: number = 0) { return new this.instanceConstructor(x, y, w); }
+  static createPosition(x: number = 0, y: number = 0) { return new this.instanceConstructor(x, y, 1); }
+  static createDirection(x: number = 0, y: number = 0) { return new this.instanceConstructor(x, y, 0); }
 
   writeTo(data: NumberArray, index: number) {
     data[index] = this.x;

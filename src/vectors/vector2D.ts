@@ -1,5 +1,4 @@
 import { Vector, Vector2 } from '.';
-import { MathEx } from '../core';
 
 export class Vector2D extends Vector2 {
   constructor();
@@ -38,18 +37,12 @@ export class Vector2D extends Vector2 {
   protected get _radians(): number | undefined { return this.__radians; }
   protected set _radians(value) { this.__radians = value; }
 
+  // TODO: Need to revisit these.
+  // Should be immutable? Should allow being part of calculations?
   private static _zeroPosition: Vector;
   static get zeroPosition() { return Vector2D._zeroPosition || (Vector2D._zeroPosition = new Vector2ZeroPosition()); }
   private static _zeroDirection: Vector;
   static get zeroDirection() { return Vector2D._zeroDirection || (Vector2D._zeroDirection = new Vector2ZeroDirection()); }
-
-  static fromRadians(angle: number, radius: number = 1, w: number = 0) {
-    return new Vector2D().withRadiansMag(angle, radius).withW(w);
-  }
-
-  static fromDegrees(angle: number, mag: number = 1, w: number = 0) {
-    return this.fromRadians(angle * MathEx.ONE_DEGREE, mag, w);
-  }
 }
 
 export class PVector2 extends Vector2D {

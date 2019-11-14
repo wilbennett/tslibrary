@@ -49,16 +49,16 @@ export abstract class Vector {
   // @ts-ignore - unused params.
   protected set _radians(value) { }
 
-  static create(x: number, y: number, z: number = 0, w: number = 0) {
-    return new this.instanceConstructor(x, y, z || 0, w);
+  static create(x: number = 0, y: number = 0, z: number = 0, w: number = 0) {
+    return new this.instanceConstructor(x, y, z, w);
   }
 
-  static createPosition(x: number, y: number, z: number = 0) {
-    return new this.instanceConstructor(x, y, z || 0, 1);
+  static createPosition(x: number = 0, y: number = 0, z: number = 0) {
+    return new this.instanceConstructor(x, y, z, 1);
   }
 
-  static createDirection(x: number, y: number, z: number = 0) {
-    return new this.instanceConstructor(x, y, z || 0, 0);
+  static createDirection(x: number = 0, y: number = 0, z: number = 0) {
+    return new this.instanceConstructor(x, y, z, 0);
   }
 
   getCoord(index: number) {
@@ -816,6 +816,15 @@ export abstract class Vector {
 
     return Math.abs(x - ox) < epsilon && Math.abs(y - oy) < epsilon && Math.abs(z - oz) < epsilon;
   }
+
+  static fromRadians(angle: number, radius: number = 1, w: number = 0) {
+    return Vector.create(0, 0).withRadiansMag(angle, radius).withW(w);
+  }
+
+  static fromDegrees(angle: number, mag: number = 1, w: number = 0) {
+    return this.fromRadians(angle * MathEx.ONE_DEGREE, mag, w);
+  }
+
 
   // @ts-ignore - unused param.
   renderCore(viewport: Viewport, origin: Vector) { }
