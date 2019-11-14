@@ -156,7 +156,11 @@ export abstract class Vector {
     return index + 4;
   }
 
-  clone() { return this.newVector(this.x, this.y, this.z, this.w); }
+  clone(result?: Vector) {
+    return result
+      ? result.copyFrom(this)
+      : this.newVector(this.x, this.y, this.z, this.w);
+  }
 
   dot(other: Vector) { return this.x * other.x + this.y * other.y + this.z * other.z; }
 
