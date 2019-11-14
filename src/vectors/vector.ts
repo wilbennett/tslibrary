@@ -787,27 +787,34 @@ export abstract class Vector {
   withMag(scale: number) { return this.withMagO(scale, this); }
 
   equals(other: Vector, epsilon: number = MathEx.epsilon) {
-    if (this.isDirection && other.isDirection)
-      return Math.abs(this.x - other.x) < epsilon
-        && Math.abs(this.y - other.y) < epsilon
-        && Math.abs(this.z - other.z) < epsilon;
+    let w = this.w;
+    let ow = other.w;
 
-    if (this.w === 1 && other.w === 1)
-      return Math.abs(this.x - other.x) < epsilon
-        && Math.abs(this.y - other.y) < epsilon
-        && Math.abs(this.z - other.z) < epsilon;
+    if ((w === 0 && ow !== 0) || (w === 1 && ow !== 1)) return false;
 
-    if (this.isDirection || other.isDirection)
-      return false;
+    let x = this.x;
+    let y = this.y;
+    let z = this.z;
 
-    if (this.w !== 1)
-      return Math.abs(this.x / this.w - other.x) < epsilon
-        && Math.abs(this.y / this.w - other.y) < epsilon
-        && Math.abs(this.z / this.w - other.z) < epsilon;
+    let ox = other.x;
+    let oy = other.y;
+    let oz = other.z;
 
-    return Math.abs(this.x - other.x / other.w) < epsilon
-      && Math.abs(this.y - other.y / other.w) < epsilon
-      && Math.abs(this.z - other.z / other.w) < epsilon;
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      z *= w;
+    }
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+      oz *= ow;
+    }
+
+    return Math.abs(x - ox) < epsilon && Math.abs(y - oy) < epsilon && Math.abs(z - oz) < epsilon;
   }
 
   // @ts-ignore - unused param.

@@ -68,7 +68,8 @@ export class Vector2 extends Vector {
 
   crossO(other: Vector, result?: Vector) {
     result || (result = this.newVector());
- return result.set(this.cross2D(other), 0, 0, 0); }
+    return result.set(this.cross2D(other), 0, 0, 0);
+  }
 
   normalizeWO(result?: Vector) {
     let x = this.x;
@@ -137,7 +138,7 @@ export class Vector2 extends Vector {
     }
 
     result || (result = this.newVector());
-return result.set(x + ox, y + oy, 0, w);
+    return result.set(x + ox, y + oy, 0, w);
   }
 
   displaceByScaledO(other: Vector, scale: number, result?: Vector) {
@@ -161,18 +162,21 @@ return result.set(x + ox, y + oy, 0, w);
     }
 
     result || (result = this.newVector());
-return result.set(x + ox, y + oy, 0, w);
+    return result.set(x + ox, y + oy, 0, w);
   }
 
-  addO(other: Vector, result?: Vector) { 
-        result || (result = this.newVector());
-return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w); }
-  subO(other: Vector, result?: Vector) { 
+  addO(other: Vector, result?: Vector) {
     result || (result = this.newVector());
-return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
+    return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w);
+  }
+  subO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w);
+  }
   scaleO(scale: number, result?: Vector) {
     result || (result = this.newVector());
- return result.set(this.x * scale, this.y * scale, 0, this.w); }
+    return result.set(this.x * scale, this.y * scale, 0, this.w);
+  }
 
   addScaledO(other: Vector, scale: number, result?: Vector) {
     result || (result = this.newVector());
@@ -232,9 +236,10 @@ return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
     return result.set(this.x * scale, this.y * scale, 0, this.w);
   }
 
-  negateO(result?: Vector) { 
+  negateO(result?: Vector) {
     result || (result = this.newVector());
-    return result.set(-this.x, -this.y, 0, this.w); }
+    return result.set(-this.x, -this.y, 0, this.w);
+  }
 
   normalizeO(result?: Vector) {
     let x = this.x;
@@ -255,10 +260,12 @@ return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
 
   perpLeftO(result?: Vector) {
     result || (result = this.newVector());
- return result.set(-this.y, this.x, 0, this.w); }
+    return result.set(-this.y, this.x, 0, this.w);
+  }
   perpRightO(result?: Vector) {
     result || (result = this.newVector());
- return result.set(this.y, -this.x, 0, this.w); }
+    return result.set(this.y, -this.x, 0, this.w);
+  }
 
   clampO(min: Vector, max: Vector, result?: Vector) {
     result || (result = this.newVector());
@@ -305,19 +312,30 @@ return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w); }
   }
 
   equals(other: Vector, epsilon: number = Number.EPSILON) {
-    if (this.isDirection && other.isDirection)
-      return Math.abs(this.x - other.x) < epsilon && Math.abs(this.y - other.y) < epsilon;
+    let w = this.w;
+    let ow = other.w;
 
-    if (this.w === 1 && other.w === 1)
-      return Math.abs(this.x - other.x) < epsilon && Math.abs(this.y - other.y) < epsilon;
+    if ((w === 0 && ow !== 0) || (w === 1 && ow !== 1)) return false;
 
-    if (this.isDirection || other.isDirection)
-      return false;
+    let x = this.x;
+    let y = this.y;
 
-    if (this.w !== 1)
-      return Math.abs(this.x / this.w - other.x) < epsilon && Math.abs(this.y / this.w - other.y) < epsilon;
+    let ox = other.x;
+    let oy = other.y;
 
-    return Math.abs(this.x - other.x / other.w) < epsilon && Math.abs(this.y - other.y / other.w) < epsilon;
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+    }
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+    }
+
+    return Math.abs(x - ox) < epsilon && Math.abs(y - oy) < epsilon;
   }
 
   toString(precision: number = 2) {
