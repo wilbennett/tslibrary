@@ -87,7 +87,7 @@ export function generateRegularPoly(vertexList: VectorCollection, radius: number
   const vertices = vertexList.items;
   const vertexCount = vertices.length;
   const step = 360 * ONE_DEGREE / vertexCount;
-  const vector = Vector2D.fromRadians(startAngle, radius); // TODO: Make dimension agnostic.
+  const vector = Vector2D.fromRadians(startAngle, radius, 1); // TODO: Make dimension agnostic.
 
   for (let i = 0; i < vertexCount; i++) {
     vertices[i].copyFrom(vector);

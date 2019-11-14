@@ -18,8 +18,11 @@ export interface IShape extends IGeometry {
   props: ContextProps;
 
   setPosition(position: Vector): void;
-  getSupport(direction: Vector, result?: SupportInfo): Tristate<SupportInfo>; // Local space.
-  getSupport(radians: number, result?: SupportInfo): Tristate<SupportInfo>;
+  getSupport(direction: Vector, result?: Vector): Tristate<number | Vector>; // Local space.
+  // TODO: Check if binary searching angle is faster than searching by dot product.
+  // getSupport(radians: number, result?: Vector): Tristate<number | Vector>;
+  getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector>; // Local space.
+  // getSupportPoint(radians: number, result?: Vector): Tristate<Vector>;
   getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;

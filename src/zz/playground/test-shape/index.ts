@@ -2,7 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, Graph } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { AABBShape, CircleShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -35,7 +35,7 @@ const screenBounds = ctx.bounds;
 const origin = Vector.createPosition(0, 0);
 const gridSize = 50;
 let angle = 0;
-const duration = 5;
+// const duration = 5;
 
 const graph = new Graph(ctx.bounds, gridSize);
 const vector1 = Vector.createDirection(1, 0);
@@ -139,31 +139,34 @@ function render() {
   shapes.forEach(shape => shape.render(viewport));
   vectors.forEach(([vector, props]) => vector.render(viewport, origin, props));
   points.forEach(([point, props]) => point.render(viewport, origin, props));
+  renderSupports(viewport);
 
   viewport.restoreTransform();
   ctx.restore();
 }
 
-// function renderPointContainments(viewport: Viewport) {
-//   for (var [point, props] of points) {
-//     for (var tester of testers) {
-//       renderPointContainment(tester, point, props, viewport);
-//     }
-//   }
-// }
+function renderSupports(viewport: Viewport) {
+  for (var [vector, props] of vectors) {
+    for (var tester of testers) {
+      renderSupport(tester, vector, props, viewport);
+    }
+  }
+}
 
-// function renderPointContainment(a: Shape, point: Vector, props: ContextProps, viewport: Viewport) {
-//   if (!a.containsPoint(a.toLocal(point), 0.05)) return;
+function renderSupport(a: Shape, direction: Vector, props: ContextProps, viewport: Viewport) {
+  const point = Vector.create(0, 0);
 
-//   beginPath(props, viewport);
-//   viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
-//   ctx.fillCircle(point, 0.1);
-// }
+  if (!a.getSupportPoint(direction, point)) return;
 
-// function beginPath(props: ContextProps, viewport: Viewport) {
-//   ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
-// }
+  beginPath(props, viewport);
+  viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
+  ctx.fillCircle(a.toWorld(point, point), 0.06);
+}
 
-// function getLineWidth(props: ContextProps, viewport: Viewport) {
-//   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
-// }
+function beginPath(props: ContextProps, viewport: Viewport) {
+  ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
+}
+
+function getLineWidth(props: ContextProps, viewport: Viewport) {
+  return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+}

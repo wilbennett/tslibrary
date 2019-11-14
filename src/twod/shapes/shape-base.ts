@@ -1,4 +1,4 @@
-import { IShape, Shape, shapeContainsPoint, SupportInfo } from '.';
+import { IShape, Shape, shapeContainsPoint } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
@@ -63,10 +63,17 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupport(direction: Vector, result?: SupportInfo): Tristate<SupportInfo>;
-  getSupport(radians: number, result?: SupportInfo): Tristate<SupportInfo>;
-  // @ts-ignore - unused param.
-  getSupport(direction: Vector | number, result?: SupportInfo) { return undefined; }
+  getSupport(direction: Vector, result?: Vector): Tristate<number | Vector> {
+    return this.getSupportFromVector(direction, result);
+  }
+
+  getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector> {
+    const info = this.getSupportFromVector(direction, result);
+
+    if (info === null || info === undefined) return info;
+
+    return info instanceof Vector ? info : this.vertices.items[info].clone(result);
+  }
 
   // @ts-ignore - unused param.
   getAxes(other: Shape, result?: Vector[]): Vector[] { return []; }
@@ -140,5 +147,31 @@ export abstract class ShapeBase implements IShape {
 
     matrix.getValues(transform);
     matrix.getInverse(transformInverse);
+  }
+
+  // @ts-ignore - unused param.
+  protected getSupportFromVector(direction: Vector, result?: Vector): Tristate<number | Vector> {
+    const vertices = this.vertices.items;
+    const vertexCount = this.vertices.length;
+
+    if (vertexCount === 0) return undefined;
+
+    let best = -Infinity;
+    let bestIndex = -1;
+
+    for (let i = 0; i < vertexCount; i++) {
+      const dot = vertices[i].dot(direction);
+
+      if (dot > best) {
+        best = dot;
+        bestIndex = i;
+      }
+    }
+
+    return bestIndex;
+  }
+
+  protected getSupportFromAngle(radians: number, result?: Vector): Tristate<number | Vector> {
+    return this.getSupportFromVector(Vector2D.fromRadians(radians, 1, 0), result);
   }
 }

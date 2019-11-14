@@ -1,5 +1,7 @@
 import { ICircleShape, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
+import { Tristate } from '../../core';
+import { Vector } from '../../vectors';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";
@@ -30,6 +32,11 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     this.dirtyTransform();
   }
   radius: number;
+
+  protected getSupportFromVector(direction: Vector, result?: Vector): Tristate<number | Vector> {
+    result || (result = Vector.create(0, 0));
+    return direction.withMagO(this.radius, result).asPosition();
+  }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
