@@ -48,9 +48,10 @@ export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: 
   const edge = segment.edgeVector;
   const t = point.subO(segment.start).dot(edge) / edge.dot(edge);
 
-  return t < 0 || t > 1
-    ? result.copyFrom(segment.start)
-    : segment.start.addScaledO(edge, t, result);
+  if (t <= 0) return result.copyFrom(segment.start);
+  if (t >= 1) return result.copyFrom(segment.end);
+
+  return segment.start.addScaledO(edge, t, result);
 }
 
 // Circle.
