@@ -83,7 +83,7 @@ describe.each([
         it("Should allow replacing size", () => {
             let newSize = size.scaleO(2);
             let newHalfSize = newSize.scaleO(0.5);
-            let expected_position = bounds.center.displaceByO(newHalfSize.negateN());
+            let expected_position = bounds.center.displaceByO(newHalfSize.negateO());
             const expected_direction = bounds.direction;
 
             bounds.withSize(newSize);
@@ -107,7 +107,7 @@ describe.each([
 
             newSize = newSize.withY(newSize.x).withZ(newSize.x);
             newHalfSize = newSize.scaleO(0.5);
-            expected_position = bounds.center.displaceByO(newHalfSize.negateN());
+            expected_position = bounds.center.displaceByO(newHalfSize.negateO());
 
             bounds.withSize(newSize.x);
             expect(bounds.size.equals(newSize)).toBeTruthy();
@@ -118,7 +118,7 @@ describe.each([
         it("Should allow cloning with new size", () => {
             let newSize = size.scaleO(2);
             let newHalfSize = newSize.scaleO(0.5);
-            let expected_position = bounds.center.displaceByO(newHalfSize.negateN());
+            let expected_position = bounds.center.displaceByO(newHalfSize.negateO());
             const expected_direction = bounds.direction;
 
             let newBounds = bounds.withSizeN(newSize);
@@ -142,7 +142,7 @@ describe.each([
 
             newSize = newSize.withY(newSize.x).withZ(newSize.x);
             newHalfSize = newSize.scaleO(0.5);
-            expected_position = bounds.center.displaceByO(newHalfSize.negateN());
+            expected_position = bounds.center.displaceByO(newHalfSize.negateO());
 
             newBounds = bounds.withSizeN(newSize.x);
             expect(newBounds.size.equals(newSize)).toBeTruthy();

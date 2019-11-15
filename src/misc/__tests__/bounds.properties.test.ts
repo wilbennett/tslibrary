@@ -20,9 +20,9 @@ describe.each([
         const expected_halfSize = size.scaleO(0.5);
         const expected_center = position.displaceByO(expected_halfSize);
         const expected_max = expected_center.displaceByO(expected_halfSize);
-        const expected_topLeft = expected_center.displaceByO(expected_halfSize.withNegXN().withNegZN());
-        const expected_topRight = expected_center.displaceByO(expected_halfSize.withNegZN());
-        const expected_bottomRight = expected_center.displaceByO(expected_halfSize.withNegYN().withNegZN());
+        const expected_topLeft = expected_center.displaceByO(expected_halfSize.withNegXO().withNegZO());
+        const expected_topRight = expected_center.displaceByO(expected_halfSize.withNegZO());
+        const expected_bottomRight = expected_center.displaceByO(expected_halfSize.withNegYO().withNegZO());
         const expected_bottomLeft = position;
         const expected_left = expected_topLeft.x;
         const expected_right = expected_topRight.x;
@@ -57,13 +57,13 @@ describe.each([
         let bounds = new Bounds(position, size, "down");
 
         const expected_halfSize = size.scaleO(0.5);
-        const negHalfSize = expected_halfSize.negateN();
+        const negHalfSize = expected_halfSize.negateO();
         const expected_center = position.displaceByO(expected_halfSize);
         const expected_max = expected_center.displaceByO(expected_halfSize);
         const expected_topLeft = expected_center.displaceByO(negHalfSize);
-        const expected_topRight = expected_center.displaceByO(negHalfSize.withNegXN());
-        const expected_bottomRight = expected_center.displaceByO(expected_halfSize.withNegZN());
-        const expected_bottomLeft = expected_center.displaceByO(negHalfSize.withNegYN());
+        const expected_topRight = expected_center.displaceByO(negHalfSize.withNegXO());
+        const expected_bottomRight = expected_center.displaceByO(expected_halfSize.withNegZO());
+        const expected_bottomLeft = expected_center.displaceByO(negHalfSize.withNegYO());
         const expected_left = expected_topLeft.x;
         const expected_right = expected_topRight.x;
         const expected_top = expected_topLeft.y;

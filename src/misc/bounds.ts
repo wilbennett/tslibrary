@@ -168,9 +168,9 @@ export class Bounds {
     if (param1 instanceof Vector) {
       size = param1;
     } else if (arguments.length >= 2) {
-      size = this.size.withXYZN(param1, h!, d === undefined ? 0 : d);
+      size = this.size.withXYZO(param1, h!, d === undefined ? 0 : d);
     } else
-      size = this.size.withXYZN(param1, param1, param1);
+      size = this.size.withXYZO(param1, param1, param1);
 
     this.halfSize.copyFrom(size.scaleO(0.5));
     return this;
@@ -186,9 +186,9 @@ export class Bounds {
     if (param1 instanceof Vector) {
       size = param1.clone();
     } else if (arguments.length >= 2) {
-      size = this.size.withXYZN(param1, h!, d === undefined ? 0 : d);
+      size = this.size.withXYZO(param1, h!, d === undefined ? 0 : d);
     } else
-      size = this.size.withXYZN(param1, param1, param1);
+      size = this.size.withXYZO(param1, param1, param1);
 
     return new Bounds("center", this.center.clone(), size, this.direction);
   }
