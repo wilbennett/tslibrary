@@ -29,19 +29,16 @@ export function calcPoint(t: Tristate<number>, start: Vector, direction: Vector,
 // Plane
 // *************************************************************************************
 export function planeCalcPlaneIntersect(a: IPlane, b: IPlane) {
-  const aDir = a.normal.perpO();
-  const bDir = b.normal.perpO();
-  return calcIntersectTime(a.point, aDir, b.point, bDir);
+  return calcIntersectTime(a.position, a.direction, b.position, b.direction);
 }
 
 export function planeCalcLineIntersect(plane: IPlane, b: ILine) {
-  const planeDir = plane.normal.perpO();
-  return calcIntersectTime(plane.point, planeDir, b.point, b.direction);
+  return calcIntersectTime(plane.position, plane.direction, b.point, b.direction);
 }
 
 export function planeCalcRayIntersect(plane: IPlane, ray: IRay) {
-  const planeDir = plane.normal.perpO();
-  const planePoint = plane.point;
+  const planeDir = plane.direction;
+  const planePoint = plane.position;
   const t = calcIntersectTime(ray.start, ray.direction, planePoint, planeDir);
 
   if (t === null || t === undefined) return t;
@@ -51,8 +48,8 @@ export function planeCalcRayIntersect(plane: IPlane, ray: IRay) {
 }
 
 export function planeCalcSegmentIntersect(plane: IPlane, segment: ISegment) {
-  const planeDir = plane.normal.perpO();
-  const planePoint = plane.point;
+  const planeDir = plane.direction;
+  const planePoint = plane.position;
   const t = calcIntersectTime(segment.start, segment.direction, planePoint, planeDir);
 
   if (t === null || t === undefined) return t;
@@ -62,27 +59,23 @@ export function planeCalcSegmentIntersect(plane: IPlane, segment: ISegment) {
 }
 
 export function planeCalcPlaneIntersectPoint(a: IPlane, b: IPlane, result?: Vector) {
-  const aDir = a.normal.perpO();
   const t = planeCalcPlaneIntersect(a, b);
-  return calcPoint(t, a.point, aDir, result);
+  return calcPoint(t, a.position, a.direction, result);
 }
 
 export function planeCalcLineIntersectPoint(plane: IPlane, line: ILine, result?: Vector) {
-  const planeDir = plane.normal.perpO();
   const t = planeCalcLineIntersect(plane, line);
-  return calcPoint(t, plane.point, planeDir, result);
+  return calcPoint(t, plane.position, plane.direction, result);
 }
 
 export function planeCalcRayIntersectPoint(plane: IPlane, ray: IRay, result?: Vector) {
-  const planeDir = plane.normal.perpO();
   const t = planeCalcRayIntersect(plane, ray);
-  return calcPoint(t, plane.point, planeDir, result);
+  return calcPoint(t, plane.position, plane.direction, result);
 }
 
 export function planeCalcSegmentIntersectPoint(plane: IPlane, segment: ISegment, result?: Vector) {
-  const planeDir = plane.normal.perpO();
   const t = planeCalcSegmentIntersect(plane, segment);
-  return calcPoint(t, plane.point, planeDir, result);
+  return calcPoint(t, plane.position, plane.direction, result);
 }
 
 function planeCalcIntersectPoint(plane: IPlane, geometry: Geometry, result?: Vector) {
@@ -103,8 +96,7 @@ function planeCalcIntersectPoint(plane: IPlane, geometry: Geometry, result?: Vec
 // Line
 // *************************************************************************************
 export function lineCalcPlaneIntersect(line: ILine, plane: IPlane) {
-  const planeDir = plane.normal.perpO();
-  return calcIntersectTime(line.point, line.direction, plane.point, planeDir);
+  return calcIntersectTime(line.point, line.direction, plane.position, plane.direction);
 }
 
 export function lineCalcLineIntersect(a: ILine, b: ILine) {
@@ -167,8 +159,7 @@ function lineCalcIntersectPoint(line: ILine, geometry: Geometry, result?: Vector
 // Ray
 // *************************************************************************************
 export function rayCalcPlaneIntersect(ray: IRay, plane: IPlane) {
-  const planeDir = plane.normal.perpO();
-  const t = calcIntersectTime(ray.start, ray.direction, plane.point, planeDir);
+  const t = calcIntersectTime(ray.start, ray.direction, plane.position, plane.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
@@ -254,8 +245,7 @@ function rayCalcIntersectPoint(ray: IRay, geometry: Geometry, result?: Vector) {
 // Segment
 // *************************************************************************************
 export function segmentCalcPlaneIntersect(segment: ISegment, plane: IPlane) {
-  const planeDir = plane.normal.perpO();
-  const t = calcIntersectTime(segment.start, segment.direction, plane.point, planeDir);
+  const t = calcIntersectTime(segment.start, segment.direction, plane.position, plane.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0 || t * t > segment.edgeVector.dot(segment.edgeVector)) return null;

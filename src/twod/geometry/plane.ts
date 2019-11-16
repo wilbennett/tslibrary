@@ -11,7 +11,7 @@ export class Plane extends GeometryBase implements IPlane {
     const ab = point2.subO(point1);
     const axb = point1.cross2D(point2);
     this.normal = axb >= 0 ? ab.perpLeft().normalize() : ab.perpRight().normalize();
-    this.distance = this.normal.dot(point1);
+    this._distance = this.normal.dot(point1);
   }
 
   protected _normal!: Vector;
@@ -23,15 +23,19 @@ export class Plane extends GeometryBase implements IPlane {
     this._normal = value;
   }
 
-  distance: number;
+  protected _distance: number;
+  get distance() { return this._distance; }
+  set distance(value) { this._distance = value; }
 
-  get point() { return this.normal.scaleO(this.distance); }
+  get position() { return this.normal.scaleO(this.distance); }
+  set position(value) { this._distance = value.dot(this.normal); }
+  get direction() { return this.normal.perpO(); }
 
   // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
-    const point = this.point;
+    const point = this.position;
     const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
-    const dir = this.normal.perpRightO().scale(mag);
+    const dir = this.direction.scale(mag);
     const start = point.displaceByO(dir);
     const end = point.displaceByO(dir.negate());
 
