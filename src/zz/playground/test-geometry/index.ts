@@ -11,6 +11,7 @@ import {
   Geometry,
   Graph,
   Line,
+  Plane,
   Polygon,
   Ray,
   Segment,
@@ -51,6 +52,8 @@ let angle = 0;
 const duration = 10;
 
 const graph = new Graph(ctx.bounds, gridSize);
+// const plane1 = new Plane(Vector.createPosition(1, 2), Vector.createPosition(2, 1));
+const plane1 = new Plane(Vector.createPosition(-1, -2), Vector.createPosition(-2, -1));
 const line1 = new Line(Vector.createPosition(0.7, 1.5), Vector.createDirection(1, 0));
 const line2 = new Line(Vector.createPosition(-1, 2), Vector.createDirection(1, -1));
 const ray1 = new Ray(Vector.createPosition(0.5, 1.2), Vector.createDirection(1, 0));
@@ -70,6 +73,7 @@ const point1 = Vector.createPosition(1.7, 0);
 // const point2 = Vector.createPosition(2, 1);
 // const point3 = Vector.createPosition(2, -2);
 
+plane1.props = { strokeStyle: refBrush, fillStyle: refBrush };
 line1.props = { strokeStyle: refBrush, fillStyle: refBrush };
 line2.props = { strokeStyle: refBrush, fillStyle: refBrush };
 ray1.props = { strokeStyle: refBrush, fillStyle: refBrush };
@@ -96,10 +100,11 @@ isegment1.props = { strokeStyle: colors[0], fillStyle: colors[0] };
 isegment2.props = { strokeStyle: colors[1], fillStyle: colors[1] };
 
 const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
-// const point2Props = { strokeStyle: "black", fillStyle: "black" };
+// const point2Props = { strokeStyle: colors[1], fillStyle: colors[1] };
 // const point3Props = { strokeStyle: "black", fillStyle: "black" };
 
 const testers: Geometry[] = [
+  plane1,
   line1,
   line2,
   ray1,

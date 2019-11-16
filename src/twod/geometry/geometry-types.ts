@@ -11,6 +11,13 @@ export interface IGeometry {
   render(view: Viewport): void;
 }
 
+export interface IPlane extends IGeometry {
+  kind: "plane";
+  normal: Vector;
+  distance: number;
+  point: Vector;
+}
+
 export interface ILine extends IGeometry {
   kind: "line";
   point: Vector;
@@ -59,4 +66,12 @@ export interface ITriangle extends IPolygonBase {
   kind: "triangle";
 }
 
-export type Geometry = ILine | IRay | ISegment | ICircle | IPolygon | IAABB | ITriangle;
+export type Geometry =
+  | IPlane
+  | ILine
+  | IRay
+  | ISegment
+  | ICircle
+  | IPolygon
+  | IAABB
+  | ITriangle;

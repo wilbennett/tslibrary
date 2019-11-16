@@ -1,4 +1,4 @@
-import { Geometry, IAABB, ICircle, ILine, IPolygonBase, IRay, ISegment, ITriangle } from '.';
+import { Geometry, IAABB, ICircle, ILine, IPlane, IPolygonBase, IRay, ISegment, ITriangle } from '.';
 import { MathEx } from '../../core';
 import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
@@ -7,6 +7,7 @@ const { isLessOrEqualTo, isGreaterOrEqualTo } = MathEx;
 
 export function containsPoint(geometry: Geometry, point: Vector, epsilon: number = 0) {
   switch (geometry.kind) {
+    case "plane": return planeContainsPoint(geometry, point, epsilon);
     case "line": return lineContainsPoint(geometry, point, epsilon);
     case "ray": return rayContainsPoint(geometry, point, epsilon);
     case "segment": return segmentContainsPoint(geometry, point, epsilon);
@@ -16,6 +17,11 @@ export function containsPoint(geometry: Geometry, point: Vector, epsilon: number
     case "triangle": return triangleContainsPoint(geometry, point, epsilon);
     default: return assertNever(geometry);
   }
+}
+
+// Plane.
+export function planeContainsPoint(plane: IPlane, point: Vector, epsilon: number = 0) {
+  return MathEx.isEqualTo(point.dot(plane.normal), 0, epsilon);
 }
 
 // Line.

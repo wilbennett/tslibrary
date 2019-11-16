@@ -5,6 +5,7 @@ export * from "./geo-intersect";
 export * from "./polygon-utils";
 export * from "./triangle-utils";
 export * from "./geometry-base";
+export * from "./plane";
 export * from "./line";
 export * from "./ray";
 export * from "./segment";

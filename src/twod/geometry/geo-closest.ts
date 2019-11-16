@@ -8,6 +8,7 @@ const { abs } = Math;
 
 export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolean = false, result?: Vector) {
   switch (geometry.kind) {
+    case "plane": return planeClosestPoint(geometry, point, hullOnly, result);
     case "line": return lineClosestPoint(geometry, point, hullOnly, result);
     case "ray": return rayClosestPoint(geometry, point, hullOnly, result);
     case "segment": return segmentClosestPoint(geometry, point, hullOnly, result);
@@ -19,11 +20,18 @@ export function closestPoint(geometry: Geometry, point: Vector, hullOnly: boolea
   }
 }
 
+// Plane.
+// Christer Ericson - Real Time Collision Detection.
+// @ts-ignore - unused param.
+export function planeClosestPoint(plane: IPlane, point: Vector, hullOnly: boolean = false, result?: Vector) {
+  const t = plane.normal.dot(point) - plane.distance;
+  return point.subO(plane.normal.scaleO(t), result).asPosition();
+}
+
 // Line.
 // Christer Ericson - Real Time Collision Detection.
 // @ts-ignore - unused param.
 export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  result = result || Vector.createPosition(0, 0);
   const normal = line.direction.perpLeftO();
   const t = normal.dot(point.subO(line.point));
   return point.subO(normal.scale(t), result);
@@ -32,11 +40,10 @@ export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean =
 // Ray.
 // @ts-ignore - unused param.
 export function rayClosestPoint(ray: IRay, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  result = result || Vector.createPosition(0, 0);
   const t = point.subO(ray.start).dot(ray.direction);
 
   return t < 0
-    ? result.copyFrom(ray.start)
+    ? ray.start.clone(result)
     : ray.start.addScaledO(ray.direction, t, result);
 }
 
@@ -44,23 +51,21 @@ export function rayClosestPoint(ray: IRay, point: Vector, hullOnly: boolean = fa
 // Christer Ericson - Real Time Collision Detection.
 // @ts-ignore - unused param.
 export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  result = result || Vector.createPosition(0, 0);
   const edge = segment.edgeVector;
   const t = point.subO(segment.start).dot(edge) / edge.dot(edge);
 
-  if (t <= 0) return result.copyFrom(segment.start);
-  if (t >= 1) return result.copyFrom(segment.end);
+  if (t <= 0) return segment.start.clone(result);
+  if (t >= 1) return segment.end.clone(result);
 
   return segment.start.addScaledO(edge, t, result);
 }
 
 // Circle.
 export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  result = result || Vector.createPosition(0, 0);
   const vector = point.subO(circle.position);
 
   if (!hullOnly && vector.magSquared <= circle.radius * circle.radius)
-    return result.copyFrom(point)
+    return point.clone(result);
 
   return circle.position.displaceByO(vector.withMag(circle.radius), result);
 }
