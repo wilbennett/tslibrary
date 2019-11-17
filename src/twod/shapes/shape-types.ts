@@ -1,14 +1,13 @@
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
-import { IAABB, IPolygon, IPolygonBase, ITriangle } from '../geometry';
+import { IAABB, IPolygon, IPolygonBase, IPositioned, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
-export interface IShape extends IGeometry {
+export interface IShape extends IGeometry, IPositioned {
   isWorld: boolean;
   readonly integrators: Integrator[];
-  position: Vector; // World space.
   angle: number;
   readonly data: VectorGroups;
   vertexList: VectorCollection;
@@ -17,7 +16,6 @@ export interface IShape extends IGeometry {
   boundingShape?: Shape;
   props: ContextProps;
 
-  setPosition(position: Vector): void;
   getSupport(direction: Vector, result?: Vector): Tristate<number | Vector>; // Local space.
   // TODO: Check if binary searching angle is faster than searching by dot product.
   // getSupport(radians: number, result?: Vector): Tristate<number | Vector>;
