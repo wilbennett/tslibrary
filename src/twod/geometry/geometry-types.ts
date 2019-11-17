@@ -18,38 +18,38 @@ export interface IGeometry extends IPositioned {
 
 export interface IPlane extends IGeometry {
   kind: "plane";
-  readonly normal: Vector;
-  distance: number;
+  readonly normal: Vector; // Should not modify externally.
+  distance: number; // Should not modify externally.
   readonly direction: Vector; // Calculated.
 }
 
 export interface ILine extends IGeometry {
   kind: "line";
-  readonly normal: Vector;
+  readonly normal: Vector; // Should not modify externally.
   readonly direction: Vector; // Calculated.
 }
 
 export interface IRay extends IGeometry {
   kind: "ray";
-  readonly direction: Vector;
+  readonly direction: Vector; // Should not modify externally.
 }
 
 export interface ISegment extends IGeometry {
   kind: "segment";
-  readonly start: Vector;
-  readonly end: Vector;
+  readonly start: Vector; // Should not modify externally.
+  readonly end: Vector; // Should not modify externally.
   readonly edgeVector: Vector; // Calculated.
   readonly direction: Vector; // Calculated.
 }
 
 export interface ICircle extends IGeometry {
   kind: "circle";
-  radius: number;
+  readonly radius: number;
 }
 
 export interface IPolygonBase extends IGeometry {
   vertexList: VectorCollection;
-  radius: number;
+  radius: number; // Should not modify externally.
 }
 
 export interface IPolygon extends IPolygonBase {
@@ -58,7 +58,7 @@ export interface IPolygon extends IPolygonBase {
 
 export interface IAABB extends IPolygonBase {
   kind: "aabb";
-  halfSize: Vector;
+  halfSize: Vector; // Should not modify externally.
   readonly min: Vector; // Calculated.
   readonly max: Vector; // Calculated.
 }
