@@ -8,17 +8,26 @@ export class Line extends GeometryBase implements ILine {
   constructor(point: Vector, direction: Vector) {
     super();
 
-    this.point = point;
+    this.position = point;
     this.direction = direction;
   }
 
-  protected _point!: Vector;
-  get point() { return this._point; }
-  set point(value) {
+  protected _normal!: Vector;
+  get normal() { return this._normal; }
+  set normal(value) {
+    if (!value.isDirection)
+      value = value.asDirection();
+
+    this._normal = value;
+  }
+
+  protected _position!: Vector;
+  get position() { return this._position; }
+  set position(value) {
     if (!value.isPosition)
       value = value.asPosition();
 
-    this._point = value;
+    this._position = value;
   }
 
   protected _direction!: Vector;
@@ -34,8 +43,8 @@ export class Line extends GeometryBase implements ILine {
   protected renderCore(view: Viewport, props: ContextProps) {
     const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
     const dir = this.direction.scaleO(mag);
-    const start = this.point.displaceByO(dir);
-    const end = this.point.displaceByO(dir.negate());
+    const start = this.position.displaceByO(dir);
+    const end = this.position.displaceByO(dir.negate());
 
     view.ctx.beginPath().line(start, end).stroke();
   }

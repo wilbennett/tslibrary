@@ -33,7 +33,7 @@ export function planeClosestPoint(plane: IPlane, point: Vector, hullOnly: boolea
 // @ts-ignore - unused param.
 export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean = false, result?: Vector) {
   const normal = line.direction.perpLeftO();
-  const t = normal.dot(point.subO(line.point));
+  const t = normal.dot(point.subO(line.position));
   return point.subO(normal.scale(t), result);
 }
 

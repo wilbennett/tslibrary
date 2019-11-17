@@ -21,8 +21,9 @@ export interface IPlane extends IGeometry {
 
 export interface ILine extends IGeometry {
   kind: "line";
-  point: Vector;
-  direction: Vector;
+  normal: Vector;
+  position: Vector;
+  direction: Vector; // Calculated.
 }
 
 export interface IRay extends IGeometry {

@@ -142,13 +142,13 @@ const iline1Move = new VectorEaser(
   Vector.createPosition(0.7, -3),
   duration,
   Ease.smoothStep,
-  v => iline1.point.copyFrom(v));
+  v => iline1.position.copyFrom(v));
 const iline2Move = new VectorEaser(
   Vector.createPosition(3, 3),
   Vector.createPosition(-3, -3),
   duration,
   Ease.smoothStep,
-  v => iline2.point.copyFrom(v));
+  v => iline2.position.copyFrom(v));
 const iray1Move = new VectorEaser(
   Vector.createPosition(2, 3),
   Vector.createPosition(2, -3),
