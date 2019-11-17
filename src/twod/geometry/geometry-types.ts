@@ -50,11 +50,9 @@ export interface ICircle extends IGeometry {
   radius: number;
 }
 
-export interface IPolygonBase extends IGeometry {
+export interface IPolygonBase extends IGeometry, IPositioned {
   vertices: VectorCollection;
-  position: Vector;
   radius: number;
-  setPosition(position: Vector): void;
 }
 
 export interface IPolygon extends IPolygonBase {
