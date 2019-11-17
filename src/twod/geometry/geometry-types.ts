@@ -20,26 +20,26 @@ export interface IPlane extends IGeometry {
   kind: "plane";
   readonly normal: Vector;
   distance: number;
-  direction: Vector; // Calculated.
+  readonly direction: Vector; // Calculated.
 }
 
 export interface ILine extends IGeometry {
   kind: "line";
   readonly normal: Vector;
-  direction: Vector; // Calculated.
+  readonly direction: Vector; // Calculated.
 }
 
 export interface IRay extends IGeometry {
   kind: "ray";
-  direction: Vector;
+  readonly direction: Vector;
 }
 
 export interface ISegment extends IGeometry {
   kind: "segment";
-  start: Vector;
-  end: Vector;
-  edgeVector: Vector; // Calculated.
-  direction: Vector; // Calculated.
+  readonly start: Vector;
+  readonly end: Vector;
+  readonly edgeVector: Vector; // Calculated.
+  readonly direction: Vector; // Calculated.
 }
 
 export interface ICircle extends IGeometry {
@@ -59,8 +59,8 @@ export interface IPolygon extends IPolygonBase {
 export interface IAABB extends IPolygonBase {
   kind: "aabb";
   halfSize: Vector;
-  min: Vector; // Calculated.
-  max: Vector; // Calculated.
+  readonly min: Vector; // Calculated.
+  readonly max: Vector; // Calculated.
 }
 
 export interface ITriangle extends IPolygonBase {
