@@ -141,6 +141,30 @@ export class Vector2 extends Vector {
     return result.set(x + ox, y + oy, 0, w);
   }
 
+  displaceByNegO(other: Vector, result?: Vector) {
+    let ox = other.x;
+    let oy = other.y;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+    }
+
+    result || (result = this.newVector());
+    return result.set(x - ox, y - oy, 0, w);
+  }
+
   displaceByScaledO(other: Vector, scale: number, result?: Vector) {
     let ox = other.x * scale;
     let oy = other.y * scale;
@@ -163,6 +187,30 @@ export class Vector2 extends Vector {
 
     result || (result = this.newVector());
     return result.set(x + ox, y + oy, 0, w);
+  }
+
+  displaceByNegScaledO(other: Vector, scale: number, result?: Vector) {
+    let ox = other.x * scale;
+    let oy = other.y * scale;
+    let ow = other.w;
+
+    if (ow !== 0 && ow !== 1) {
+      ow = 1 / ow;
+      ox *= ow;
+      oy *= ow;
+    }
+
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      ox *= w;
+      oy *= w;
+    }
+
+    result || (result = this.newVector());
+    return result.set(x - ox, y - oy, 0, w);
   }
 
   addO(other: Vector, result?: Vector) {

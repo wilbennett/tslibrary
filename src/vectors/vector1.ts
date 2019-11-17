@@ -40,6 +40,18 @@ export class Vector1 extends Vector {
     result || (result = this.newVector());
     return result.set(this.x + other.x, 0, 0, 0);
   }
+  displaceByNegO(other: Vector, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x - other.x, 0, 0, 0);
+  }
+  displaceByScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x + other.x * scale, 0, 0, 0);
+  }
+  displaceByNegScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x - other.x * scale, 0, 0, 0);
+  }
   addO(other: Vector, result?: Vector) {
     result || (result = this.newVector());
     return result.set(this.x + other.x, 0, 0, 0);
