@@ -22,8 +22,13 @@ export abstract class PolygonBase extends GeometryBase implements IPolygonBase {
   readonly radius: number;
 
   setPosition(position: Vector) {
-    Poly.movePoly(this.vertexList, this._position, position);
-    this._position.copyFrom(position);
+    const thisPosition = this.position;
+
+    if (!position.isPosition)
+      position = position.asPositionO();
+
+    Poly.movePoly(this.vertexList, thisPosition, position);
+    thisPosition.copyFrom(position);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {

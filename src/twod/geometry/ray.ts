@@ -12,23 +12,14 @@ export class Ray extends GeometryBase implements IRay {
     this.direction = direction;
   }
 
-  protected _start!: Vector;
-  get position() { return this._start; }
+  protected _position!: Vector;
+  get position() { return this._position; }
   set position(value) {
-    if (!value.isPosition)
-      value = value.asPosition();
-
-    this._start = value;
+    this._position = value;
+    this.setPosition(value);
   }
 
-  protected _direction!: Vector;
-  get direction() { return this._direction; }
-  set direction(value) {
-    if (!value.isDirection)
-      value = value.asDirection();
-
-    this._direction = value.normalize();
-  }
+  direction: Vector;
 
   // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {

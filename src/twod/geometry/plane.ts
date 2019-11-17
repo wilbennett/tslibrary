@@ -21,8 +21,12 @@ export class Plane extends GeometryBase implements IPlane {
   set distance(value) { this._distance = value; }
 
   get position() { return this.normal.scaleO(this.distance).asPosition(); }
-  set position(value) { this._distance = value.dot(this.normal); }
+  set position(value) { this.setPosition(value); }
   get direction() { return this.normal.perpO(); }
+
+  setPosition(position: Vector) {
+    this._distance = position.dot(this.normal);
+  }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const point = this.position;

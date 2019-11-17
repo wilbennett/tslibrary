@@ -7,7 +7,7 @@ export interface IPositioned {
   setPosition(position: Vector): void;
 }
 
-export interface IGeometry {
+export interface IGeometry extends IPositioned {
   props: ContextProps;
 
   containsPoint(point: Vector, epsilon?: number): boolean;
@@ -20,11 +20,10 @@ export interface IPlane extends IGeometry {
   kind: "plane";
   readonly normal: Vector;
   distance: number;
-  position: Vector; // Calculated.
   direction: Vector; // Calculated.
 }
 
-export interface ILine extends IGeometry, IPositioned {
+export interface ILine extends IGeometry {
   kind: "line";
   readonly normal: Vector;
   direction: Vector; // Calculated.
@@ -32,11 +31,10 @@ export interface ILine extends IGeometry, IPositioned {
 
 export interface IRay extends IGeometry {
   kind: "ray";
-  position: Vector;
   direction: Vector;
 }
 
-export interface ISegment extends IGeometry, IPositioned {
+export interface ISegment extends IGeometry {
   kind: "segment";
   start: Vector;
   end: Vector;
@@ -46,11 +44,10 @@ export interface ISegment extends IGeometry, IPositioned {
 
 export interface ICircle extends IGeometry {
   kind: "circle";
-  position: Vector;
   radius: number;
 }
 
-export interface IPolygonBase extends IGeometry, IPositioned {
+export interface IPolygonBase extends IGeometry {
   vertexList: VectorCollection;
   radius: number;
 }

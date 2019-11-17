@@ -43,7 +43,7 @@ export class Segment extends GeometryBase implements ISegment {
     this._start.copyFrom(value);
 
     if (!this._start.isPosition)
-      this._start = this._start.asPosition();
+      this._start.asPosition();
 
     this.reset();
   }
@@ -52,7 +52,7 @@ export class Segment extends GeometryBase implements ISegment {
     this._end.copyFrom(value);
 
     if (!this._end.isPosition)
-      this._end = this._end.asPosition();
+      this._end.asPosition();
 
     this.reset();
   }

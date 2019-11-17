@@ -5,9 +5,21 @@ import { Vector } from '../../vectors';
 import { calcIntersectPoint } from './geo-intersect';
 
 export abstract class GeometryBase implements IGeometry {
+  get position() { return Vector.empty; }
+  // @ts-ignore - unused param.
+  set position(value) { }
+
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
+
+  setPosition(position: Vector) {
+    const thisPosition = this.position;
+    thisPosition.copyFrom(position);
+
+    if (!thisPosition.isPosition)
+      thisPosition.asPosition();
+  }
 
   containsPoint(point: Vector, epsilon: number = MathEx.epsilon) {
     // @ts-ignore - assigment compatibility.
