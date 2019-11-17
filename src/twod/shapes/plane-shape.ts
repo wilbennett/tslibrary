@@ -45,7 +45,6 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     return result;
   }
 
-  first = true;
   protected renderCore(view: Viewport, props: ContextProps) {
     const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
     const dir = this.direction.scale(mag);
