@@ -89,8 +89,9 @@ const iline1 = new Line(Vector.createPosition(0, 3), Vector.createPosition(1, 3)
 const iline2 = new Line(Vector.createPosition(2, 4), Vector.createDirection(3, 3));
 const iray1 = new Ray(Vector.createPosition(2, 3), Vector.createDirection(-1, 0));
 const iray2 = new Ray(Vector.createPosition(4, 3), Vector.createDirection(-1, 1));
-const isegment1 = new Segment(Vector.createPosition(-2, 2.5), Vector.createPosition(1.5, 2.5));
+const isegment1 = new Segment(Vector.createPosition(-2, 3), Vector.createPosition(1, 3));
 const isegment2 = new Segment(Vector.createPosition(1, 3), Vector.createPosition(3, 1));
+isegment2.setPosition(Vector.createPosition(3, 3));
 
 iline1.props = { strokeStyle: colors[0], fillStyle: colors[0] };
 iline2.props = { strokeStyle: colors[1], fillStyle: colors[1] };
@@ -163,23 +164,17 @@ const iray2Move = new VectorEaser(
   v => iray2.position.copyFrom(v)
 );
 const isegment1Move = new VectorEaser(
-  Vector.createPosition(-2, 3),
-  Vector.createPosition(-2, -3.5),
+  Vector.createPosition(-0.5, 3),
+  Vector.createPosition(-0.5, -3.5),
   duration,
   Ease.smoothStep,
-  v => {
-    isegment1.start.copyFrom(v);
-    isegment1.end.withY(v.y);
-  });
+  v => isegment1.setPosition(v));
 const isegment2Move = new VectorEaser(
-  Vector.createPosition(3, 5),
-  Vector.createPosition(-5, -3.5),
+  Vector.createPosition(3, 3),
+  Vector.createPosition(-3, -3),
   duration,
   Ease.smoothStep,
-  v => {
-    isegment2.start.copyFrom(v);
-    isegment2.end.withXY(v.x + 2, v.y - 2);
-  });
+  v => isegment2.setPosition(v));
 // point1.withMag(2.3 - point1.mag);
 const point1Rotate = new NumberEaser(0, 360, duration * 1.2, Ease.linear, v => {
   point1.withDegreesMag(v, point1.mag);

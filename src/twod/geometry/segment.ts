@@ -31,6 +31,9 @@ export class Segment extends GeometryBase implements ISegment {
   protected _direction?: Vector;
   get direction() { return this._direction || (this._direction = this.edgeVector.normalizeO()); }
 
+  get position() { return this._start.addO(this._end).normalizeW(); }
+  set position(value) { this.setPosition(value); }
+
   reset() {
     this._edgeVector = undefined;
     this._direction = undefined;
@@ -51,6 +54,13 @@ export class Segment extends GeometryBase implements ISegment {
     if (!this._end.isPosition)
       this._end = this._end.asPosition();
 
+    this.reset();
+  }
+
+  setPosition(position: Vector) {
+    const offset = this.position.subO(position);
+    this.start.displaceByNeg(offset);
+    this.end.displaceByNeg(offset);
     this.reset();
   }
 

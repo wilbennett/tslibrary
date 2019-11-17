@@ -36,7 +36,7 @@ export interface IRay extends IGeometry {
   direction: Vector;
 }
 
-export interface ISegment extends IGeometry {
+export interface ISegment extends IGeometry, IPositioned {
   kind: "segment";
   start: Vector;
   end: Vector;
