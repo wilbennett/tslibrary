@@ -15,7 +15,7 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
     this._data = data;
 
     if (radius === undefined) {
-      [radius] = normalizePolyCenter(this.vertices);
+      [radius] = normalizePolyCenter(this.vertexList);
     }
 
     this.radius = radius;
@@ -38,7 +38,7 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
-    ctx.beginPath().poly(this.vertices, true);
+    ctx.beginPath().poly(this.vertexList, true);
 
     if (props.fillStyle)
       ctx.fill();

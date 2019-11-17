@@ -26,9 +26,9 @@ export abstract class ShapeBase implements IShape {
   set angle(value) { this.setAngle(value); }
   protected _data?: VectorGroups;
   get data(): VectorGroups { return this._data || (this._data = new VectorGroups()); }
-  get vertices() { return this.data.get("vertex"); }
-  get edgeVectors() { return this.data.get("edge"); }
-  get normals() { return this.data.get("normal"); }
+  get vertexList() { return this.data.get("vertex"); }
+  get edgeVectorList() { return this.data.get("edge"); }
+  get normalList() { return this.data.get("normal"); }
   boundingShape?: Shape;
   protected _isTransformDirty = true;
   protected _transform: MatrixValues;
@@ -72,7 +72,7 @@ export abstract class ShapeBase implements IShape {
 
     if (info === null || info === undefined) return info;
 
-    return info instanceof Vector ? info : this.vertices.items[info].clone(result);
+    return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
 
   // @ts-ignore - unused param.
@@ -151,8 +151,8 @@ export abstract class ShapeBase implements IShape {
 
   // @ts-ignore - unused param.
   protected getSupportFromVector(direction: Vector, result?: Vector): Tristate<number | Vector> {
-    const vertices = this.vertices.items;
-    const vertexCount = this.vertices.length;
+    const vertices = this.vertexList.items;
+    const vertexCount = this.vertexList.length;
 
     if (vertexCount === 0) return undefined;
 

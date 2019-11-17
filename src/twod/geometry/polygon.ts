@@ -12,6 +12,6 @@ export class Polygon extends PolygonBase implements IPolygon {
     regular?: boolean) {
     super(new VectorCollection(vertexCount, Vector2D), radius); // TODO: Make dimension agnostic.
 
-    Poly.generatePoly(this.vertices, radius, startAngle, regular);
+    Poly.generatePoly(this.vertexList, radius, startAngle, regular);
   }
 }

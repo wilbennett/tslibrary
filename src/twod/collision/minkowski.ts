@@ -26,7 +26,7 @@ export class Minkowski {
     let indexB: number;
 
     if (typeof infoA === "number") {
-      pointA = first.vertices.items[infoA];
+      pointA = first.vertexList.items[infoA];
       indexA = infoA;
     } else if (!infoA) {
       return infoA;
@@ -36,7 +36,7 @@ export class Minkowski {
     }
 
     if (typeof infoB === "number") {
-      pointB = second.vertices.items[infoB];
+      pointB = second.vertexList.items[infoB];
       indexB = infoB;
     } else if (!infoB) {
       return infoB;

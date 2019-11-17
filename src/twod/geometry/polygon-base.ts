@@ -7,12 +7,12 @@ export abstract class PolygonBase extends GeometryBase implements IPolygonBase {
   constructor(vertices: VectorCollection, radius: number) {
     super();
 
-    this.vertices = vertices;
+    this.vertexList = vertices;
     this.radius = radius;
     this._position = Vector.createPosition(0, 0);
   }
 
-  readonly vertices: VectorCollection;
+  readonly vertexList: VectorCollection;
   private _position: Vector;
   get position() { return this._position; }
   set position(value) {
@@ -22,13 +22,13 @@ export abstract class PolygonBase extends GeometryBase implements IPolygonBase {
   readonly radius: number;
 
   setPosition(position: Vector) {
-    Poly.movePoly(this.vertices, this._position, position);
+    Poly.movePoly(this.vertexList, this._position, position);
     this._position.copyFrom(position);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
-    ctx.beginPath().poly(this.vertices, true);
+    ctx.beginPath().poly(this.vertexList, true);
 
     if (props.fillStyle)
       ctx.fill();

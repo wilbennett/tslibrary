@@ -12,7 +12,7 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
     super(createPolyData(4, vectorClass), halfSize.maxElement, undefined, integratorType);
 
     this.halfSize = halfSize;
-    const vertices = this.vertices.items;
+    const vertices = this.vertexList.items;
     const hs = halfSize.asPositionO();
     hs.negateO(vertices[0]);
     hs.withNegYO(vertices[1]);
@@ -21,8 +21,8 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
   }
 
   readonly halfSize: Vector;
-  get min() { return this.vertices.items[0]; }
-  get max() { return this.vertices.items[2]; }
+  get min() { return this.vertexList.items[0]; }
+  get max() { return this.vertexList.items[2]; }
   // get min() { return this.halfSize.negateN().asPosition(); }
   // get max() { return this.halfSize.asPositionN(); }
 

@@ -6,7 +6,7 @@ export function signedTriangleArea(a: Vector, b: Vector, c: Vector) {
 }
 
 export function signedGeoTriangleArea(triangle: ITriangle) {
-  const vertices = triangle.vertices.items;
+  const vertices = triangle.vertexList.items;
   const a = vertices[0];
   const b = vertices[1];
   const c = vertices[2];
@@ -22,7 +22,7 @@ export function isTriangleCCW(a: Vector, b: Vector, c: Vector) {
 }
 
 export function isGeoTriangleCCW(triangle: ITriangle) {
-  const vertices = triangle.vertices.items;
+  const vertices = triangle.vertexList.items;
   const a = vertices[0];
   const b = vertices[1];
   const c = vertices[2];

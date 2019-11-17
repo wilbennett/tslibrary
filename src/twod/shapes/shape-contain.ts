@@ -19,8 +19,8 @@ export function circleShapeContainsPoint(circle: ICircleShape, point: Vector, ep
 // Polygon.
 // @ts-ignore - unused param.
 export function polygonShapeContainsPoint(poly: IPolygonShapeBase, point: Vector, epsilon: number = MathEx.epsilon) {
-  const vertices = poly.vertices.items;
-  const edges = poly.edgeVectors.items;
+  const vertices = poly.vertexList.items;
+  const edges = poly.edgeVectorList.items;
   const pvector = Vector.create(0, 0);
   const side = edges[0].cross2D(point.subO(vertices[0], pvector));
 

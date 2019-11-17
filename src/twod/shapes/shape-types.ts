@@ -11,9 +11,9 @@ export interface IShape extends IGeometry {
   position: Vector; // World space.
   angle: number;
   readonly data: VectorGroups;
-  vertices: VectorCollection;
-  edgeVectors: VectorCollection;
-  normals: VectorCollection;
+  vertexList: VectorCollection;
+  edgeVectorList: VectorCollection;
+  normalList: VectorCollection;
   boundingShape?: Shape;
   props: ContextProps;
 

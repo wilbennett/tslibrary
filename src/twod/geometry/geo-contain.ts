@@ -59,7 +59,7 @@ export function circleContainsPoint(circle: ICircle, point: Vector, epsilon: num
 // @ts-ignore - unused param.
 export function polygonContainsPoint(poly: IPolygonBase, point: Vector, epsilon: number = 0) {
   // TODO: Binary search when many vertices.
-  const vertices = poly.vertices.items;
+  const vertices = poly.vertexList.items;
   const count = vertices.length;
   const edge = Vector.create(0, 0);
   const pvector = Vector.create(0, 0);
