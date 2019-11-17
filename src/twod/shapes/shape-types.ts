@@ -56,7 +56,7 @@ export interface ITriangleShape extends IPolygonShapeBase, ITriangle {
 }
 
 export type Shape =
-  // | IPlaneShape
+  | IPlaneShape
   // | ILineShape
   // | IRayShape
   // | ISegmentShape

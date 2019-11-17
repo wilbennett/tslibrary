@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
-import { AABBShape, CircleShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
+import { AABBShape, CircleShape, PlaneShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -52,6 +52,8 @@ aabb1.setPosition(Vector.createPosition(-2, 0.5));
 const triangle1 = new TriangleShape(0.5, 90 * ONE_DEGREE, true);
 triangle1.setPosition(Vector.createPosition(-1.5, -0.5));
 let triangle2: Shape;
+const plane1 = new PlaneShape(Vector.createPosition(0, -1), Vector.createPosition(1, 0));
+plane1.setPosition(Vector.createPosition(1.5, -1.5));
 
 const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
@@ -60,6 +62,7 @@ circle.props = { strokeStyle: refBrush };
 poly1.props = { strokeStyle: refBrush };
 aabb1.props = { strokeStyle: refBrush };
 triangle1.props = { strokeStyle: refBrush };
+plane1.props = { strokeStyle: refBrush };
 
 const vectors: [Vector, ContextProps][] = [
   [vector1, vector1Props],
@@ -74,6 +77,7 @@ const testers: Shape[] = [
   poly1,
   aabb1,
   triangle1,
+  plane1,
 ];
 
 const controls: Shape[] = [
