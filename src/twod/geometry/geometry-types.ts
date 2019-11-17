@@ -18,7 +18,7 @@ export interface IGeometry {
 
 export interface IPlane extends IGeometry {
   kind: "plane";
-  normal: Vector;
+  readonly normal: Vector;
   distance: number;
   position: Vector; // Calculated.
   direction: Vector; // Calculated.

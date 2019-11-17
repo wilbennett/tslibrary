@@ -14,14 +14,7 @@ export class Plane extends GeometryBase implements IPlane {
     this._distance = this.normal.dot(point1);
   }
 
-  protected _normal!: Vector;
-  get normal() { return this._normal; }
-  set normal(value) {
-    if (!value.isDirection)
-      value = value.asDirection();
-
-    this._normal = value;
-  }
+  readonly normal: Vector;
 
   protected _distance: number;
   get distance() { return this._distance; }
@@ -31,13 +24,12 @@ export class Plane extends GeometryBase implements IPlane {
   set position(value) { this._distance = value.dot(this.normal); }
   get direction() { return this.normal.perpO(); }
 
-  // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
     const point = this.position;
     const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
     const dir = this.direction.scale(mag);
     const start = point.displaceByO(dir);
-    const end = point.displaceByO(dir.negate());
+    const end = point.displaceByNegO(dir);
 
     view.ctx.beginPath().line(start, end).stroke();
     this.normal.render(view, point, props);
