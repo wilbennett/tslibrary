@@ -5,46 +5,38 @@ import { Vector } from '../../vectors';
 export class Line extends GeometryBase implements ILine {
   kind: "line" = "line";
 
-  constructor(point: Vector, direction: Vector) {
+  constructor(point1: Vector, point2: Vector) {
     super();
 
-    this.position = point;
-    this.direction = direction;
+    const ab = point2.subO(point1);
+    this.normal = ab.perpLeft().normalize();
+    const distance = this.normal.dot(point1);
+    this.position = this.normal.scaleO(distance);
   }
 
-  protected _normal!: Vector;
-  get normal() { return this._normal; }
-  set normal(value) {
-    if (!value.isDirection)
-      value = value.asDirection();
-
-    this._normal = value;
-  }
+  readonly normal: Vector;
 
   protected _position!: Vector;
   get position() { return this._position; }
   set position(value) {
-    if (!value.isPosition)
-      value = value.asPosition();
-
     this._position = value;
+    this.setPosition(value);
   }
 
-  protected _direction!: Vector;
-  get direction() { return this._direction; }
-  set direction(value) {
-    if (!value.isDirection)
-      value = value.asDirection();
+  get direction() { return this.normal.perpO(); }
 
-    this._direction = value.normalize();
+  setPosition(position: Vector) {
+    const distance = this.normal.dot(position);
+    this.normal.scaleO(distance).asPositionO(this._position);
   }
 
   // @ts-ignore - unused param.
   protected renderCore(view: Viewport, props: ContextProps) {
     const mag = view.viewBounds.max.subO(view.viewBounds.min).magSquared;
-    const dir = this.direction.scaleO(mag);
-    const start = this.position.displaceByO(dir);
-    const end = this.position.displaceByO(dir.negate());
+    const position = this._position;
+    const dir = this.direction.scale(mag);
+    const start = position.displaceByO(dir);
+    const end = position.displaceByNegO(dir);
 
     view.ctx.beginPath().line(start, end).stroke();
   }

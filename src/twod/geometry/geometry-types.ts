@@ -2,6 +2,11 @@ import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection } from '../../vectors';
 
+export interface IPositioned {
+  position: Vector;
+  setPosition(position: Vector): void;
+}
+
 export interface IGeometry {
   props: ContextProps;
 
@@ -19,10 +24,9 @@ export interface IPlane extends IGeometry {
   direction: Vector; // Calculated.
 }
 
-export interface ILine extends IGeometry {
+export interface ILine extends IGeometry, IPositioned {
   kind: "line";
-  normal: Vector;
-  position: Vector;
+  readonly normal: Vector;
   direction: Vector; // Calculated.
 }
 

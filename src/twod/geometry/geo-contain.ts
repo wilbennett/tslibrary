@@ -26,8 +26,7 @@ export function planeContainsPoint(plane: IPlane, point: Vector, epsilon: number
 
 // Line.
 export function lineContainsPoint(line: ILine, point: Vector, epsilon: number = 0) {
-  const vector = point.subO(line.position);
-  return MathEx.isEqualTo(vector.cross2D(line.direction), 0, epsilon);
+  return MathEx.isEqualTo(point.dot(line.normal), 0, epsilon);
 }
 
 // Ray.

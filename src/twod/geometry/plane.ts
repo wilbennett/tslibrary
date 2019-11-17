@@ -27,7 +27,7 @@ export class Plane extends GeometryBase implements IPlane {
   get distance() { return this._distance; }
   set distance(value) { this._distance = value; }
 
-  get position() { return this.normal.scaleO(this.distance); }
+  get position() { return this.normal.scaleO(this.distance).asPosition(); }
   set position(value) { this._distance = value.dot(this.normal); }
   get direction() { return this.normal.perpO(); }
 
