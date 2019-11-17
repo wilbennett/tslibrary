@@ -154,13 +154,13 @@ const iray1Move = new VectorEaser(
   Vector.createPosition(2, -3),
   duration,
   Ease.smoothStep,
-  v => iray1.start.copyFrom(v));
+  v => iray1.position.copyFrom(v));
 const iray2Move = new VectorEaser(
   Vector.createPosition(4, 3),
   Vector.createPosition(-3, -4),
   duration,
   Ease.smoothStep,
-  v => iray2.start.copyFrom(v)
+  v => iray2.position.copyFrom(v)
 );
 const isegment1Move = new VectorEaser(
   Vector.createPosition(-2, 3),

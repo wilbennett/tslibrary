@@ -8,13 +8,13 @@ export class Ray extends GeometryBase implements IRay {
   constructor(start: Vector, direction: Vector) {
     super();
 
-    this.start = start;
+    this.position = start;
     this.direction = direction;
   }
 
   protected _start!: Vector;
-  get start() { return this._start; }
-  set start(value) {
+  get position() { return this._start; }
+  set position(value) {
     if (!value.isPosition)
       value = value.asPosition();
 
@@ -34,8 +34,8 @@ export class Ray extends GeometryBase implements IRay {
   protected renderCore(view: Viewport, props: ContextProps) {
     const mag = view.viewBounds.max.subO(view.viewBounds.min).mag;
     const dir = this.direction.scaleO(mag);
-    const end = this.start.displaceByO(dir);
+    const end = this.position.displaceByO(dir);
 
-    view.ctx.beginPath().line(this.start, end).stroke();
+    view.ctx.beginPath().line(this.position, end).stroke();
   }
 }

@@ -39,12 +39,12 @@ export function planeCalcLineIntersect(plane: IPlane, b: ILine) {
 export function planeCalcRayIntersect(plane: IPlane, ray: IRay) {
   const planeDir = plane.direction;
   const planePoint = plane.position;
-  const t = calcIntersectTime(ray.start, ray.direction, planePoint, planeDir);
+  const t = calcIntersectTime(ray.position, ray.direction, planePoint, planeDir);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
 
-  return calcIntersectTime(planePoint, planeDir, ray.start, ray.direction);
+  return calcIntersectTime(planePoint, planeDir, ray.position, ray.direction);
 }
 
 export function planeCalcSegmentIntersect(plane: IPlane, segment: ISegment) {
@@ -104,12 +104,12 @@ export function lineCalcLineIntersect(a: ILine, b: ILine) {
 }
 
 export function lineCalcRayIntersect(line: ILine, ray: IRay) {
-  const t = calcIntersectTime(ray.start, ray.direction, line.point, line.direction);
+  const t = calcIntersectTime(ray.position, ray.direction, line.point, line.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
 
-  return calcIntersectTime(line.point, line.direction, ray.start, ray.direction);
+  return calcIntersectTime(line.point, line.direction, ray.position, ray.direction);
 }
 
 export function lineCalcSegmentIntersect(line: ILine, segment: ISegment) {
@@ -159,7 +159,7 @@ function lineCalcIntersectPoint(line: ILine, geometry: Geometry, result?: Vector
 // Ray
 // *************************************************************************************
 export function rayCalcPlaneIntersect(ray: IRay, plane: IPlane) {
-  const t = calcIntersectTime(ray.start, ray.direction, plane.position, plane.direction);
+  const t = calcIntersectTime(ray.position, ray.direction, plane.position, plane.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
@@ -169,12 +169,12 @@ export function rayCalcPlaneIntersect(ray: IRay, plane: IPlane) {
 
 export function rayCalcRayIntersect(a: IRay, b: IRay) {
   // TODO: Optimize.
-  let t = calcIntersectTime(b.start, b.direction, a.start, a.direction);
+  let t = calcIntersectTime(b.position, b.direction, a.position, a.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
 
-  t = calcIntersectTime(a.start, a.direction, b.start, b.direction);
+  t = calcIntersectTime(a.position, a.direction, b.position, b.direction);
 
   if (t === null || t === undefined) return t;
 
@@ -183,11 +183,11 @@ export function rayCalcRayIntersect(a: IRay, b: IRay) {
 
 export function rayCalcLineIntersect(ray: IRay, line: ILine) {
   // TODO: Optimize.
-  let t = calcIntersectTime(line.point, line.direction, ray.start, ray.direction);
+  let t = calcIntersectTime(line.point, line.direction, ray.position, ray.direction);
 
   if (t === null || t === undefined) return t;
 
-  t = calcIntersectTime(ray.start, ray.direction, line.point, line.direction);
+  t = calcIntersectTime(ray.position, ray.direction, line.point, line.direction);
 
   if (t === null || t === undefined) return t;
 
@@ -196,12 +196,12 @@ export function rayCalcLineIntersect(ray: IRay, line: ILine) {
 
 export function rayCalcSegmentIntersect(ray: IRay, segment: ISegment) {
   // TODO: Optimize.
-  let t = calcIntersectTime(segment.start, segment.direction, ray.start, ray.direction);
+  let t = calcIntersectTime(segment.start, segment.direction, ray.position, ray.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0 || t * t > segment.edgeVector.dot(segment.edgeVector)) return null;
 
-  t = calcIntersectTime(ray.start, ray.direction, segment.start, segment.direction);
+  t = calcIntersectTime(ray.position, ray.direction, segment.start, segment.direction);
 
   if (t === null || t === undefined) return t;
 
@@ -210,22 +210,22 @@ export function rayCalcSegmentIntersect(ray: IRay, segment: ISegment) {
 
 export function rayCalcPlaneIntersectPoint(ray: IRay, plane: IPlane, result?: Vector) {
   const t = rayCalcPlaneIntersect(ray, plane);
-  return calcPoint(t, ray.start, ray.direction, result);
+  return calcPoint(t, ray.position, ray.direction, result);
 }
 
 export function rayCalcRayIntersectPoint(a: IRay, b: IRay, result?: Vector) {
   let t = rayCalcRayIntersect(a, b);
-  return calcPoint(t, a.start, a.direction, result);
+  return calcPoint(t, a.position, a.direction, result);
 }
 
 export function rayCalcLineIntersectPoint(ray: IRay, line: ILine, result?: Vector) {
   let t = rayCalcLineIntersect(ray, line);
-  return calcPoint(t, ray.start, ray.direction, result);
+  return calcPoint(t, ray.position, ray.direction, result);
 }
 
 export function rayCalcSegmentIntersectPoint(ray: IRay, segment: ISegment, result?: Vector) {
   let t = rayCalcSegmentIntersect(ray, segment);
-  return calcPoint(t, ray.start, ray.direction, result);
+  return calcPoint(t, ray.position, ray.direction, result);
 }
 
 function rayCalcIntersectPoint(ray: IRay, geometry: Geometry, result?: Vector) {
@@ -284,12 +284,12 @@ export function segmentCalcLineIntersect(segment: ISegment, line: ILine) {
 
 export function segmentCalcRayIntersect(segment: ISegment, ray: IRay) {
   // TODO: Optimize.
-  let t = calcIntersectTime(ray.start, ray.direction, segment.start, segment.direction);
+  let t = calcIntersectTime(ray.position, ray.direction, segment.start, segment.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0) return null;
 
-  t = calcIntersectTime(segment.start, segment.direction, ray.start, ray.direction);
+  t = calcIntersectTime(segment.start, segment.direction, ray.position, ray.direction);
 
   if (t === null || t === undefined) return t;
   if (t < 0 || t * t > segment.edgeVector.dot(segment.edgeVector)) return null;

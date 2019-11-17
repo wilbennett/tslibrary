@@ -32,7 +32,7 @@ export function lineContainsPoint(line: ILine, point: Vector, epsilon: number = 
 
 // Ray.
 export function rayContainsPoint(ray: IRay, point: Vector, epsilon: number = 0) {
-  const vector = point.subO(ray.start);
+  const vector = point.subO(ray.position);
 
   if (!MathEx.isEqualTo(vector.cross2D(ray.direction), 0, epsilon)) return false;
 

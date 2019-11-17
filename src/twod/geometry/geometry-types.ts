@@ -27,7 +27,7 @@ export interface ILine extends IGeometry {
 
 export interface IRay extends IGeometry {
   kind: "ray";
-  start: Vector;
+  position: Vector;
   direction: Vector;
 }
 

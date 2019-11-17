@@ -40,11 +40,11 @@ export function lineClosestPoint(line: ILine, point: Vector, hullOnly: boolean =
 // Ray.
 // @ts-ignore - unused param.
 export function rayClosestPoint(ray: IRay, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  const t = point.subO(ray.start).dot(ray.direction);
+  const t = point.subO(ray.position).dot(ray.direction);
 
   return t < 0
-    ? ray.start.clone(result)
-    : ray.start.addScaledO(ray.direction, t, result);
+    ? ray.position.clone(result)
+    : ray.position.addScaledO(ray.direction, t, result);
 }
 
 // Segment.
