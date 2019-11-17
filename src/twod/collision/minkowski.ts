@@ -16,7 +16,7 @@ export class MinkowskiPoint {
 };
 
 export class Minkowski {
-  static getSupport(shapes: ShapePair, direction: Vector): Tristate<MinkowskiPoint> {
+  static getPoint(shapes: ShapePair, direction: Vector): Tristate<MinkowskiPoint> {
     const { first, second } = shapes;
     const infoA = first.getSupportPoint(first.toLocal(direction));
     const infoB = second.getSupportPoint(second.toLocal(direction.negateO()));
