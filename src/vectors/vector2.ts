@@ -359,7 +359,7 @@ export class Vector2 extends Vector {
     return result.set(this.x * inverse, this.y * inverse, 0, this.w);
   }
 
-  equals(other: Vector, epsilon: number = Number.EPSILON) {
+  equals(other: Vector, epsilon: number = MathEx.epsilon) {
     let w = this.w;
     let ow = other.w;
 
