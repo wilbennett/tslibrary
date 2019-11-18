@@ -14,6 +14,7 @@ export interface IShape extends IGeometry {
   edgeVectorList: VectorCollection;
   normalList: VectorCollection;
   boundingShape?: Shape;
+  hasDynamicAxes: boolean;
   props: ContextProps;
 
   getSupport(direction: Vector, result?: Vector): Tristate<number | Vector>; // Local space.
@@ -21,7 +22,8 @@ export interface IShape extends IGeometry {
   // getSupport(radians: number, result?: Vector): Tristate<number | Vector>;
   getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector>; // Local space.
   // getSupportPoint(radians: number, result?: Vector): Tristate<Vector>;
-  getAxes(other: Shape, result?: Vector[]): Vector[]; // Local space.
+  getAxes(result?: Vector[]): Vector[]; // Local space.
+  getDynamicAxes(other: Shape, result?: Vector[]): Vector[]; // World space.
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;

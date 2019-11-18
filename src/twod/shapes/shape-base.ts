@@ -4,6 +4,9 @@ import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 
+const EMPTY_AXES: Vector[] = [];
+export const ORIGIN = Vector.createPosition(0, 0);
+
 export abstract class ShapeBase implements IShape {
   constructor() {
     const matrix = this.matrix;
@@ -19,6 +22,7 @@ export abstract class ShapeBase implements IShape {
   get position() { return Vector.empty; }
   // @ts-ignore - unused param.
   set position(value) { }
+  get center() { return ORIGIN; }
   get angle() {
     const integrators = this.integrators;
     return integrators.length > 0 ? integrators[0].angle : 0;
@@ -29,6 +33,7 @@ export abstract class ShapeBase implements IShape {
   get vertexList() { return this.data.get("vertex"); }
   get edgeVectorList() { return this.data.get("edge"); }
   get normalList() { return this.data.get("normal"); }
+  get hasDynamicAxes() { return false; }
   boundingShape?: Shape;
   protected _isTransformDirty = true;
   protected _transform: MatrixValues;
@@ -75,8 +80,9 @@ export abstract class ShapeBase implements IShape {
     return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
 
+  getAxes(result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
   // @ts-ignore - unused param.
-  getAxes(other: Shape, result?: Vector[]): Vector[] { return []; }
+  getDynamicAxes(other: Shape, result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
 
   toWorld(localPoint: Vector, result?: Vector) {
     if (this.isWorld) {

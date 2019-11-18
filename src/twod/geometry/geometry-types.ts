@@ -4,6 +4,7 @@ import { Vector, VectorCollection } from '../../vectors';
 
 export interface IPositioned {
   position: Vector;
+  readonly center: Vector;
   setPosition(position: Vector): void;
 }
 

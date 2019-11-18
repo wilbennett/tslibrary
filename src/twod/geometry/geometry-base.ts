@@ -8,6 +8,7 @@ export abstract class GeometryBase implements IGeometry {
   get position() { return Vector.empty; }
   // @ts-ignore - unused param.
   set position(value) { }
+  get center() { return this.position; }
 
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }

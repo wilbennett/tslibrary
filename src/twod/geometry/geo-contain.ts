@@ -51,7 +51,7 @@ export function segmentContainsPoint(segment: ISegment, point: Vector, epsilon: 
 
 // Circle.
 export function circleContainsPoint(circle: ICircle, point: Vector, epsilon: number = 0) {
-  const vector = point.subO(circle.position);
+  const vector = point.subO(circle.center);
   return MathEx.isLessOrEqualTo(vector.dot(vector), circle.radius * circle.radius, epsilon);
 }
 

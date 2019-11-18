@@ -2,11 +2,11 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
 import { ShapePair, SimpleCollider } from '../../../twod/collision';
 import { AABBShape, CircleShape, PlaneShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
-import { Vector } from '../../../vectors';
+import { UniqueVectorList, Vector } from '../../../vectors';
 
 const { ONE_DEGREE } = MathEx;
 
@@ -39,7 +39,7 @@ const refBrush = "teal";
 Vector.tipDrawHeight = 0.5;
 const screenBounds = ctx.bounds;
 const origin = Vector.createPosition(0, 0);
-const gridSize = 10;
+const gridSize = 15;
 const radius = 2.5;
 const smallRadius = 1.5;
 let angle = 0;
@@ -51,8 +51,8 @@ const vector1 = Vector.createDirection(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle1 = new CircleShape(smallRadius);
 // circle1.setPosition(Vector.createPosition(2.5, 2.5));
-// circle1.setPosition(Vector.createPosition(2.5, 5.5));
-circle1.setPosition(Vector.createPosition(2.5, 3.5));
+circle1.setPosition(Vector.createPosition(2.5, 5.5));
+// circle1.setPosition(Vector.createPosition(2.5, 3.5));
 const circle2 = new CircleShape(radius);
 circle2.setPosition(Vector.createPosition(2.5, 2.5));
 const poly1 = new PolygonShape(5, radius, 90 * ONE_DEGREE);
@@ -60,6 +60,7 @@ let poly2: Shape;
 let poly3: Shape;
 let poly4: Shape;
 const aabb1 = new AABBShape(Vector.createDirection(radius * 0.9, radius * 0.9));
+const aabb2 = new AABBShape(Vector.createDirection(radius * 0.9, radius * 0.9));
 const triangle1 = new TriangleShape(radius, 90 * ONE_DEGREE, true);
 let triangle2: Shape;
 const plane1 = new PlaneShape(Vector.createPosition(0, 2.5), Vector.createPosition(1, 2.5));
@@ -72,10 +73,12 @@ const vectors: [Vector, ContextProps][] = [
 ];
 
 const pairs: ShapePair[] = [
-  // new ShapePair(circle1, circle2),
+  new ShapePair(circle1, circle2),
   // new ShapePair(circle2, circle1),
   // new ShapePair(circle1, plane1),
-  new ShapePair(plane1, circle1),
+  // new ShapePair(plane1, circle1),
+  // new ShapePair(aabb1, plane1),
+  // new ShapePair(plane1, aabb1),
 ]
 
 const points: [Vector, ContextProps][] = [
@@ -153,6 +156,7 @@ function render() {
     contact.render(viewport);
   }
 
+  drawSat(pairs[0], viewport);
   viewport.restoreTransform();
   ctx.restore();
 }
@@ -197,4 +201,73 @@ function beginPath(props: ContextProps, viewport: Viewport) {
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+}
+
+function drawProjection(shape: Shape, axis: Vector, axisLine: Line, view: Viewport, offset: number = 0) {
+  let support1 = shape.getSupportPoint(axis);
+  let support2 = shape.getSupportPoint(axis.negateO());
+
+  if (!support1 || !support2) return;
+
+  shape.toWorld(support1, support1);
+  shape.toWorld(support2, support2);
+  const ofs = axis.perpLeftO().scale(offset);
+  const closest1 = axisLine.closestPoint(support1).displaceBy(ofs);
+  const closest2 = axisLine.closestPoint(support2).displaceBy(ofs);
+
+  const props: ContextProps = {};
+  Object.assign(props, shape.props);
+  props.lineDash = [0.2, 0.2];
+
+  const ctx = view.ctx;
+  beginPath(props, view);
+  ctx.line(support1, closest1).stroke();
+  ctx.line(support2, closest2).stroke();
+
+  props.lineDash = [];
+  props.lineWidth = 3;
+
+  beginPath(props, view);
+  ctx.line(closest1, closest2).stroke();
+}
+
+function createAxisLine(axis: Vector, radius: number) {
+  const props: ContextProps = { strokeStyle: "black", lineDash: [0.3, 0.3], lineWidth: 2 };
+  const origin = Vector.createPosition(0, 0);
+  const dir = axis.perpRightO().scale(radius);
+  const line = new Line(origin, origin.displaceByO(axis));
+  line.setPosition(dir.asPosition());
+  line.props = props;
+  return line;
+}
+
+function drawSat(shapes: ShapePair, view: Viewport) {
+  const { first, second } = shapes;
+  const axesA = first.getAxes();
+  const axesB = second.getAxes();
+  const axesList = new UniqueVectorList(true);
+  axesList.addVectors(axesA.map(a => first.toWorld(a)));
+  axesList.addVectors(axesB.map(a => second.toWorld(a)));
+
+  if (first.hasDynamicAxes)
+    axesList.addVectors(first.getDynamicAxes(second));
+
+  if (second.hasDynamicAxes)
+    axesList.addVectors(second.getDynamicAxes(first));
+
+  const axes = axesList.items;
+  // console.log(`axes count: ${axes.length}`);
+  const radius = view.viewBounds.halfSize.x * 0.9;
+  const axesLines = axes.map(a => createAxisLine(a, radius));
+
+  // const ctx = view.ctx;
+  // const props: ContextProps = { strokeStyle: "black", lineDash: [0.2, 0.2] };
+  // beginPath(props, view);
+  // ctx.strokeCircle(0, 0, radius);
+  axesLines.forEach(a => a.render(view));
+
+  axes.forEach((a, i) => {
+    drawProjection(first, a, axesLines[i], view);
+    drawProjection(second, a, axesLines[i], view, 0.5);
+  });
 }

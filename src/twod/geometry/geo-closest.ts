@@ -62,12 +62,12 @@ export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: 
 
 // Circle.
 export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  const vector = point.subO(circle.position);
+  const vector = point.subO(circle.center);
 
   if (!hullOnly && vector.magSquared <= circle.radius * circle.radius)
     return point.clone(result);
 
-  return circle.position.displaceByO(vector.withMag(circle.radius), result);
+  return circle.center.displaceByO(vector.withMag(circle.radius), result);
 }
 
 // Polygon.
