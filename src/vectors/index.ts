@@ -14,6 +14,7 @@ export * from "./vector3";
 export * from "./vector3d";
 export * from "./vector3b";
 export * from "./vector-common";
+export * from "./unique-vector-list";
 export * from "./vector-collection";
 export * from "./vector-indexer";
 export * from "./vector-groups";
