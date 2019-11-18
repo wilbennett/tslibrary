@@ -23,5 +23,5 @@ export class UniqueVectorList {
     this.items.push(vector);
   }
 
-  addVectors(vectors: Vector[]) { vectors.forEach(this.add); }
+  addVectors(vectors: Vector[]) { vectors.forEach(v => this.add(v)); }
 }
