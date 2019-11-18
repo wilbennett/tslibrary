@@ -28,6 +28,12 @@ export class Contact {
     this.points.splice(0);
   }
 
+  flipNormal() {
+    const normal = this.normal;
+    this.points.forEach(cp => cp.point.displaceBy(normal.scaleO(cp.depth)));
+    normal.negate();
+  }
+
   render(view: Viewport) {
     const props = this.props;
     const temp = Vector.create(0, 0);

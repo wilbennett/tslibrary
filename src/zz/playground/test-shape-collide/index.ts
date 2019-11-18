@@ -51,7 +51,8 @@ const vector1 = Vector.createDirection(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle1 = new CircleShape(smallRadius);
 // circle1.setPosition(Vector.createPosition(2.5, 2.5));
-circle1.setPosition(Vector.createPosition(2.5, 5.5));
+// circle1.setPosition(Vector.createPosition(2.5, 5.5));
+circle1.setPosition(Vector.createPosition(2.5, 3.5));
 const circle2 = new CircleShape(radius);
 circle2.setPosition(Vector.createPosition(2.5, 2.5));
 const poly1 = new PolygonShape(5, radius, 90 * ONE_DEGREE);
@@ -71,9 +72,10 @@ const vectors: [Vector, ContextProps][] = [
 ];
 
 const pairs: ShapePair[] = [
-  new ShapePair(circle1, circle2),
-  new ShapePair(circle2, circle1),
+  // new ShapePair(circle1, circle2),
+  // new ShapePair(circle2, circle1),
   // new ShapePair(circle1, plane1),
+  new ShapePair(plane1, circle1),
 ]
 
 const points: [Vector, ContextProps][] = [
@@ -139,7 +141,7 @@ function render() {
 
   const { first, second } = pairs[0];
   first.props = { strokeStyle: colors[0] };
-  second.props = { strokeStyle: refBrush };
+  second.props = { strokeStyle: refBrush, lineWidth: 2 };
   second.render(viewport);
   first.render(viewport);
   vectors.forEach(([vector, props]) => vector.render(viewport, origin, props));

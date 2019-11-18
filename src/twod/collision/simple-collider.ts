@@ -1,8 +1,7 @@
 import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
-import { ICircle } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
-import { ICircleShape } from '../shapes';
+import { ICircleShape, IPlaneShape } from '../shapes';
 
 export class SimpleCollider extends ColliderBase {
   constructor(fallback?: Collider) {
@@ -15,7 +14,13 @@ export class SimpleCollider extends ColliderBase {
     switch (first.kind) {
       case "circle":
         switch (second.kind) {
-          case "circle": return circleIsCollidingCircle(shapes);
+          case "circle": return circleIsCollidingCircle(first, second);
+          case "plane": return circleIsCollidingPlane(first, second);
+          default: return undefined;
+        }
+      case "plane":
+        switch (second.kind) {
+          case "circle": return circleIsCollidingPlane(second, first);
           default: return undefined;
         }
       default: return undefined;
@@ -28,7 +33,13 @@ export class SimpleCollider extends ColliderBase {
     switch (first.kind) {
       case "circle":
         switch (second.kind) {
-          case "circle": return circleCalcContactCircle(shapes);
+          case "circle": return circleCalcContactCircle(first, second, shapes.contact);
+          case "plane": return circleCalcContactPlane(first, second, shapes.contact);
+          default: return undefined;
+        }
+      case "plane":
+        switch (second.kind) {
+          case "circle": return circleCalcContactPlane(second, first, shapes.contact, true);
           default: return undefined;
         }
       default: return undefined;
@@ -36,21 +47,16 @@ export class SimpleCollider extends ColliderBase {
   }
 }
 
-function circleIsCollidingCircle(shapes: ShapePair) {
-  const a = <ICircle>shapes.first;
-  const b = <ICircle>shapes.second;
+function circleIsCollidingCircle(a: ICircleShape, b: ICircleShape) {
   const ab = b.position.subO(a.position);
   const totalRadius = a.radius + b.radius
   return ab.magSquared <= totalRadius * totalRadius;
 }
 
-function circleCalcContactCircle(shapes: ShapePair) {
-  const a = <ICircleShape>shapes.first;
-  const b = <ICircleShape>shapes.second;
+function circleCalcContactCircle(a: ICircleShape, b: ICircleShape, contact: Contact) {
   const ba = a.position.subO(b.position);
   const totalRadius = a.radius + b.radius;
   const distanceSquared = ba.magSquared;
-  const contact = shapes.contact;
   contact.reset();
 
   if (distanceSquared > totalRadius * totalRadius) {
@@ -71,5 +77,27 @@ function circleCalcContactCircle(shapes: ShapePair) {
 
   const point = a.position.displaceByNegScaledO(contact.normal, a.radius);
   contact.points.push(new ContactPoint(point, depth));
+  return contact;
+}
+
+function circleIsCollidingPlane(circle: ICircleShape, plane: IPlaneShape) {
+  const distance = circle.position.dot(plane.normal) - plane.distance;
+  return distance <= circle.radius;
+}
+
+function circleCalcContactPlane(circle: ICircleShape, plane: IPlaneShape, contact: Contact, flip: boolean = false) {
+  const distance = circle.position.dot(plane.normal) - plane.distance;
+  contact.reset();
+  contact.normal = plane.normal;
+
+  if (distance > circle.radius) return null;
+
+  const depth = circle.radius - distance;
+  const point = circle.position.displaceByNegScaledO(contact.normal, circle.radius);
+  contact.points.push(new ContactPoint(point, depth));
+
+  if (flip)
+    contact.flipNormal();
+
   return contact;
 }
