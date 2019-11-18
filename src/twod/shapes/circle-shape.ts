@@ -1,4 +1,4 @@
-import { ICircleShape, ORIGIN, Shape, ShapeBase } from '.';
+import { ICircleShape, Shape, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -41,7 +41,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     // console.log(`position: ${this.position} => ${posInOtherSpace}, closest: ${closest}`);
 
     // If centers are at the same position, return an arbitrary axis.
-    if (closest.equals(ORIGIN)) {
+    if (closest.equals(other.position)) {
       result.push(Vector.createDirection(0, 1));
       return result;
     }
