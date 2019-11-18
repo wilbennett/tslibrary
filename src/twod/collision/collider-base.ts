@@ -6,23 +6,23 @@ export abstract class ColliderBase implements Collider {
   }
 
   // @ts-ignore - unused param.
-  protected isCollidingCore(pair: ShapePair): boolean | undefined { return undefined; }
+  protected isCollidingCore(shapes: ShapePair): boolean | undefined { return undefined; }
   // @ts-ignore - unused param.
-  protected calcContactCore(pair: ShapePair): Tristate<Contact> { return undefined; }
+  protected calcContactCore(shapes: ShapePair): Tristate<Contact> { return undefined; }
 
-  isColliding(pair: ShapePair): boolean | undefined {
-    const result = this.isCollidingCore(pair);
+  isColliding(shapes: ShapePair): boolean | undefined {
+    const result = this.isCollidingCore(shapes);
 
     return result !== undefined
       ? result
-      : this.fallback && this.fallback.isColliding(pair);
+      : this.fallback && this.fallback.isColliding(shapes);
   }
 
-  calcContact(pair: ShapePair): Tristate<Contact> {
-    const result = this.calcContactCore(pair);
+  calcContact(shapes: ShapePair): Tristate<Contact> {
+    const result = this.calcContactCore(shapes);
 
     if (result === null) return result;
 
-    return result || (this.fallback && this.fallback.calcContact(pair));
+    return result || (this.fallback && this.fallback.calcContact(shapes));
   }
 }

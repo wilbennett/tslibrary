@@ -1,4 +1,5 @@
 import { ShapePair } from '.';
+import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
 
 export class ContactPoint {
@@ -7,7 +8,7 @@ export class ContactPoint {
     public depth: number) {
   }
 
-  get isPenetrating() { return this.depth < 0; }
+  get isPenetrating() { return this.depth > 0; }
 };
 
 // TODO: Add Contact ID.
@@ -20,8 +21,20 @@ export class Contact {
   normal: Vector;
   points: ContactPoint[];
   get isContacting() { return this.points.length > 0; }
+  protected _props?: ContextProps;
+  get props() { return this._props || { strokeStyle: "blue", fillStyle: "blue" }; }
 
   reset() {
     this.points.splice(0);
+  }
+
+  render(view: Viewport) {
+    const props = this.props;
+    const temp = Vector.create(0, 0);
+
+    this.points.forEach(cp => {
+      cp.point.render(view, undefined, props);
+      this.normal.scaleO(cp.depth, temp).render(view, cp.point, props);
+    });
   }
 }
