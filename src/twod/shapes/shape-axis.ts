@@ -2,73 +2,64 @@ import { Shape } from '.';
 import { Vector } from '../../vectors';
 
 export class ShapeAxis {
-  constructor(shape: Shape, normal?: Vector, point?: Vector, isWorld?: boolean) {
+  constructor(shape: Shape, normal?: Vector, point?: Vector) {
     this.shape = shape;
     this.normal = normal || Vector.empty;
     this.point = point || Vector.empty;
-
-    if (isWorld)
-      this.isWorld = isWorld;
   }
 
   shape: Shape;
   normal: Vector;
+  _worldNormal?: Vector;
+  get worldNormal() {
+    if (!this._worldNormal) {
+      if (this.point.isEmpty) return Vector.empty;
+
+      this._worldNormal = this.shape.toWorld(this.normal);
+    }
+
+    return this._worldNormal;
+  }
+  set worldNormal(value) { this._worldNormal = value; }
   point: Vector;
-  isWorld?: boolean;
+  _worldPoint?: Vector;
+  get worldPoint() {
+    if (!this._worldPoint) {
+      if (this.point.isEmpty) return Vector.empty;
 
-  toWorld(result?: ShapeAxis) {
-    const shape = this.shape;
-
-    if (this.isWorld) {
-      if (!result) return this;
-
-      result.shape = shape;
-      result.normal = this.normal;
-      result.point = this.point;
-      result.isWorld = true;
+      this._worldPoint = this.shape.toWorld(this.point);
     }
 
-    if (!result)
-      return new ShapeAxis(shape, shape.toWorld(this.normal), shape.toWorld(this.point), true);
+    return this._worldPoint;
+  }
+  set worldPoint(value) { this._worldPoint = value; }
 
-    result.shape = shape;
-    result.normal = shape.toWorld(this.normal);
-    result.point = shape.toWorld(this.point);
-    result.isWorld = true;
-    return result;
+  clear() {
+    this.normal = Vector.empty;
+    this._worldNormal = undefined;
+    this.point = Vector.empty;
+    this._worldPoint = undefined;
   }
 
-  toLocal(result?: ShapeAxis) {
+  toLocalOf(otherShape: Shape, result?: ShapeAxis) {
     const shape = this.shape;
 
-    if (!this.isWorld) {
+    if (otherShape === shape) {
       if (!result) return this;
 
-      result.shape = shape;
+      result.clear();
       result.normal = this.normal;
       result.point = this.point;
-      result.isWorld = false;
+      result.shape = shape;
+      return result;
     }
 
-    if (!result)
-      return new ShapeAxis(shape, shape.toLocal(this.normal), shape.toLocal(this.point));
+    result || (result = new ShapeAxis(otherShape));
 
-    result.shape = shape;
-    result.normal = shape.toLocal(this.normal);
-    result.point = shape.toLocal(this.point);
-    result.isWorld = false;
-    return result;
-  }
-
-  toLocalSpaceOf(otherShape: Shape, result?: ShapeAxis) {
-    const shape = this.shape;
-
-    if (otherShape === shape) return this.toLocal(result);
-
-    result || (result = new ShapeAxis(shape));
-
-    this.toWorld(result);
+    result.clear();
+    result.normal = shape.toLocalOf(otherShape, this.normal);
+    result.point = shape.toLocalOf(otherShape, this.point);
     result.shape = otherShape;
-    return result.toLocal(result);
+    return result;
   }
 }
