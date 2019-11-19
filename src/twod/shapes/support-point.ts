@@ -1,7 +1,7 @@
 import { Shape } from '.';
 import { Vector } from '../../vectors';
 
-export class SupportPointInfo {
+export class SupportPoint {
   constructor(public shape: Shape, point?: Vector, worldPoint?: Vector, index?: number, distance?: number) {
     this.point = point || Vector.empty;
 

@@ -1,7 +1,7 @@
 import { Shape } from '.';
 import { Vector } from '../../vectors';
 
-export class SupportAxis {
+export class ShapeAxis {
   constructor(shape: Shape, normal?: Vector, point?: Vector, isWorld?: boolean) {
     this.shape = shape;
     this.normal = normal || Vector.empty;
@@ -16,7 +16,7 @@ export class SupportAxis {
   point: Vector;
   isWorld?: boolean;
 
-  toWorld(result?: SupportAxis) {
+  toWorld(result?: ShapeAxis) {
     const shape = this.shape;
 
     if (this.isWorld) {
@@ -29,7 +29,7 @@ export class SupportAxis {
     }
 
     if (!result)
-      return new SupportAxis(shape, shape.toWorld(this.normal), shape.toWorld(this.point), true);
+      return new ShapeAxis(shape, shape.toWorld(this.normal), shape.toWorld(this.point), true);
 
     result.shape = shape;
     result.normal = shape.toWorld(this.normal);
@@ -38,7 +38,7 @@ export class SupportAxis {
     return result;
   }
 
-  toLocal(result?: SupportAxis) {
+  toLocal(result?: ShapeAxis) {
     const shape = this.shape;
 
     if (!this.isWorld) {
@@ -51,7 +51,7 @@ export class SupportAxis {
     }
 
     if (!result)
-      return new SupportAxis(shape, shape.toLocal(this.normal), shape.toLocal(this.point));
+      return new ShapeAxis(shape, shape.toLocal(this.normal), shape.toLocal(this.point));
 
     result.shape = shape;
     result.normal = shape.toLocal(this.normal);
@@ -60,12 +60,12 @@ export class SupportAxis {
     return result;
   }
 
-  toLocalSpaceOf(otherShape: Shape, result?: SupportAxis) {
+  toLocalSpaceOf(otherShape: Shape, result?: ShapeAxis) {
     const shape = this.shape;
 
     if (otherShape === shape) return this.toLocal(result);
 
-    result || (result = new SupportAxis(shape));
+    result || (result = new ShapeAxis(shape));
 
     this.toWorld(result);
     result.shape = otherShape;

@@ -1,4 +1,4 @@
-import { ICircleShape, ORIGIN, Shape, ShapeBase, SupportAxis } from '.';
+import { ICircleShape, ORIGIN, Shape, ShapeAxis, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -34,7 +34,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
-  getDynamicSupportAxes(other: Shape, result?: SupportAxis[]) {
+  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]) {
     result || (result = []);
     const posInOtherSpace = other.toLocal(this.position);
     const closestInOtherSpace = other.closestPoint(posInOtherSpace);
@@ -50,7 +50,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     }
 
     const point = normal.scale(this.radius).asPosition();
-    result.push(new SupportAxis(this, normal, point));
+    result.push(new ShapeAxis(this, normal, point));
     return result;
   }
 

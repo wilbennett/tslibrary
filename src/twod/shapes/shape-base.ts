@@ -1,11 +1,11 @@
-import { IShape, Projection, Shape, shapeContainsPoint, SupportAxis, SupportPointInfo } from '.';
+import { IShape, Projection, Shape, ShapeAxis, shapeContainsPoint, SupportPoint } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 
 export const EMPTY_AXES: Vector[] = [];
-export const EMPTY_SUPPORT_AXES: SupportAxis[] = [];
+export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
 export const ORIGIN = Vector.createPosition(0, 0);
 
 export abstract class ShapeBase implements IShape {
@@ -69,7 +69,7 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupportInfo(axis: SupportAxis, result?: SupportPointInfo) {
+  getSupportInfo(axis: ShapeAxis, result?: SupportPoint) {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
 
@@ -95,7 +95,7 @@ export abstract class ShapeBase implements IShape {
     }
 
     // @ts-ignore - "this" not assignable to Shape.
-    result || (result = new SupportPointInfo(this));
+    result || (result = new SupportPoint(this));
 
     // Force typescript to realize result is assigned.
     if (!result) return undefined;
@@ -121,7 +121,7 @@ export abstract class ShapeBase implements IShape {
     return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
 
-  getSupportAxes(result?: SupportAxis[]) {
+  getSupportAxes(result?: ShapeAxis[]) {
     result || (result = []);
     const vertices = this.vertexList.items;
     const normals = this.normalList.items;
@@ -131,14 +131,14 @@ export abstract class ShapeBase implements IShape {
       const vertex = vertices[i];
       const normal = normals[i];
       // @ts-ignore - "this" not assignable to ITriangleShape.
-      result.push(new SupportAxis(this, normal, vertex));
+      result.push(new ShapeAxis(this, normal, vertex));
     }
 
     return result;
   }
 
   // @ts-ignore - unused param.
-  getDynamicSupportAxes(other: Shape, result?: SupportAxis[]) { return result || EMPTY_SUPPORT_AXES; }
+  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]) { return result || EMPTY_SUPPORT_AXES; }
 
   getAxes(result?: Vector[]): Vector[] {
     result || (result = []);
