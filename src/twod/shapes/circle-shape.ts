@@ -1,4 +1,4 @@
-import { ICircleShape, Shape, ShapeBase } from '.';
+import { ICircleShape, ORIGIN, Shape, ShapeBase, SupportAxis } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -34,6 +34,26 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
+  getDynamicSupportAxes(other: Shape, result?: SupportAxis[]) {
+    result || (result = []);
+    const posInOtherSpace = other.toLocal(this.position);
+    const closestInOtherSpace = other.closestPoint(posInOtherSpace);
+    let normal: Vector;
+    // console.log(`position: ${this.position} => ${posInOtherSpace}, closest: ${closestInOtherSpace}`);
+
+    if (closestInOtherSpace.equals(ORIGIN)) {
+      // If centers are at the same position, return an arbitrary normal.
+      normal = Vector.createDirection(0, 1);
+    } else {
+      const closest = other.toLocalOf(this, closestInOtherSpace);
+      normal = closest.asDirection().normalize();
+    }
+
+    const point = normal.scale(this.radius).asPosition();
+    result.push(new SupportAxis(this, normal, point));
+    return result;
+  }
+
   getDynamicAxes(other: Shape, result?: Vector[]): Vector[] {
     result || (result = []);
     const posInOtherSpace = other.toLocal(this.position);
@@ -48,12 +68,12 @@ export class CircleShape extends ShapeBase implements ICircleShape {
 
     // Center is inside other shape.
     if (closest.equals(this.position)) {
-      const axis = this.position.subO(other.position).normalize();
+      const axis = other.position.subO(this.position).normalize();
       result.push(axis);
       return result;
     }
 
-    const axis = this.position.subO(closest).normalize();
+    const axis = closest.subO(this.position).normalize();
     result.push(axis);
     return result;
   }

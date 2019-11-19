@@ -1,3 +1,4 @@
+import { SupportAxis, SupportPointInfo } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
@@ -18,14 +19,17 @@ export interface IShape extends IGeometry {
   hasDynamicAxes: boolean;
   props: ContextProps;
 
+  getSupportInfo(axis: SupportAxis, result?: SupportPointInfo): Tristate<SupportPointInfo>;
   getSupport(direction: Vector, result?: Vector): Tristate<number | Vector>; // Local space.
   // TODO: Check if binary searching angle is faster than searching by dot product.
   // getSupport(radians: number, result?: Vector): Tristate<number | Vector>;
   getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector>; // Local space.
   // getSupportPoint(radians: number, result?: Vector): Tristate<Vector>;
+  getSupportAxes(result?: SupportAxis[]): SupportAxis[]; // Local space.
+  getDynamicSupportAxes(other: Shape, result?: SupportAxis[]): SupportAxis[]; // Local space.
   getAxes(result?: Vector[]): Vector[]; // Local space.
-  projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection>;
   getDynamicAxes(other: Shape, result?: Vector[]): Vector[]; // World space.
+  projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection>;
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;

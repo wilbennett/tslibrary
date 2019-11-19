@@ -1,11 +1,12 @@
-import { IShape, Shape, shapeContainsPoint } from '.';
+import { IShape, Shape, shapeContainsPoint, SupportAxis, SupportPointInfo } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { Projection } from '../collision';
 
-const EMPTY_AXES: Vector[] = [];
+export const EMPTY_AXES: Vector[] = [];
+export const EMPTY_SUPPORT_AXES: SupportAxis[] = [];
 export const ORIGIN = Vector.createPosition(0, 0);
 
 export abstract class ShapeBase implements IShape {
@@ -69,6 +70,46 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
+  getSupportInfo(axis: SupportAxis, result?: SupportPointInfo) {
+    const vertices = this.vertexList.items;
+    const vertexCount = this.vertexList.length;
+
+    if (vertexCount === 0) return undefined;
+
+    const axisPoint = axis.point;
+    const axisDirection = axis.normal;
+    const vertexToPoint = Vector.create();
+    let bestVertex = vertices[0];
+    let bestDistance = -Infinity;
+    let bestIndex = -1;
+
+    for (let i = 0; i < vertexCount; i++) {
+      const vertex = vertices[i];
+      axisPoint.subO(vertex, vertexToPoint);
+      const distance = vertexToPoint.dot(axisDirection);
+
+      if (distance > bestDistance) {
+        bestVertex = vertex;
+        bestIndex = i;
+        bestDistance = distance;
+      }
+    }
+
+    // @ts-ignore - "this" not assignable to Shape.
+    result || (result = new SupportPointInfo(this));
+
+    // Force typescript to realize result is assigned.
+    if (!result) return undefined;
+
+    result.clear();
+    // @ts-ignore - "this" not assignable to Shape.
+    result.shape = this;
+    result.point = bestVertex;
+    result.index = bestIndex;
+    result.distance = bestDistance;
+    return result;
+  }
+
   getSupport(direction: Vector, result?: Vector): Tristate<number | Vector> {
     return this.getSupportFromVector(direction, result);
   }
@@ -80,6 +121,25 @@ export abstract class ShapeBase implements IShape {
 
     return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
+
+  getSupportAxes(result?: SupportAxis[]) {
+    result || (result = []);
+    const vertices = this.vertexList.items;
+    const normals = this.normalList.items;
+    const count = normals.length;
+
+    for (let i = 0; i < count; i++) {
+      const vertex = vertices[i];
+      const normal = normals[i];
+      // @ts-ignore - "this" not assignable to ITriangleShape.
+      result.push(new SupportAxis(this, normal, vertex));
+    }
+
+    return result;
+  }
+
+  // @ts-ignore - unused param.
+  getDynamicSupportAxes(other: Shape, result?: SupportAxis[]) { return result || EMPTY_SUPPORT_AXES; }
 
   getAxes(result?: Vector[]): Vector[] {
     result || (result = []);

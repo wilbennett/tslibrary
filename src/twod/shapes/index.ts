@@ -1,3 +1,5 @@
+export * from "./support-axis";
+export * from "./support-point-info";
 export * from "./shape-types";
 export * from "./shape-contain";
 export * from "./shape-base";
