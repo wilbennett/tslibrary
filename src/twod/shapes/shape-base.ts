@@ -1,9 +1,8 @@
-import { IShape, Shape, shapeContainsPoint, SupportAxis, SupportPointInfo } from '.';
+import { IShape, Projection, Shape, shapeContainsPoint, SupportAxis, SupportPointInfo } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
-import { Projection } from '../collision';
 
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: SupportAxis[] = [];

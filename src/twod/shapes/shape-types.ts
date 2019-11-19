@@ -1,8 +1,7 @@
-import { SupportAxis, SupportPointInfo } from '.';
+import { Projection, SupportAxis, SupportPointInfo } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
-import { Projection } from '../collision';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.

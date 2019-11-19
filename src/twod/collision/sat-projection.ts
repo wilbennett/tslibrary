@@ -1,8 +1,7 @@
 import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { UniqueVectorList, Vector } from '../../vectors';
-import { Shape } from '../shapes';
-import { Projection } from './projection';
+import { Projection, Shape } from '../shapes';
 
 export class SATProjectionState {
   protected _axesA?: Vector[];
