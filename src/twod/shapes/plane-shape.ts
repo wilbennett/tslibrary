@@ -40,6 +40,25 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     this.dirtyTransform();
   }
 
+  getAxes(result?: Vector[]): Vector[] {
+    result || (result = []);
+    result.push(this.normal);
+    return result;
+  }
+
+  // projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
+  //   const value = this.position.dot(worldAxis);
+
+  //   result || (result = new Projection());
+
+  //   result.min = value;
+  //   result.max = value;
+  //   result.minPoint = this.position;
+  //   result.maxPoint = this.position;
+
+  //   return result;
+  // }
+
   // @ts-ignore - unused param.
   protected getSupportFromVector(direction: Vector, result?: Vector): Tristate<number | Vector> {
     return result;

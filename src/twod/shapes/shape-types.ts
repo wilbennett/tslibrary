@@ -1,6 +1,7 @@
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
+import { Projection } from '../collision';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
@@ -23,6 +24,7 @@ export interface IShape extends IGeometry {
   getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector>; // Local space.
   // getSupportPoint(radians: number, result?: Vector): Tristate<Vector>;
   getAxes(result?: Vector[]): Vector[]; // Local space.
+  projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection>;
   getDynamicAxes(other: Shape, result?: Vector[]): Vector[]; // World space.
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;

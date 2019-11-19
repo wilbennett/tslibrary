@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
-import { ShapePair, SimpleCollider } from '../../../twod/collision';
+import { Collider, SATProjection, ShapePair, SimpleCollider } from '../../../twod/collision';
 import { AABBShape, CircleShape, PlaneShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { UniqueVectorList, Vector } from '../../../vectors';
@@ -12,14 +12,15 @@ const { ONE_DEGREE } = MathEx;
 
 // console.clear();
 
+const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
-canvasb.width = 300;
-canvasb.height = 300;
+canvasb.width = gridExtent;
+canvasb.height = gridExtent;
 const ctxb = new CanvasContext(canvasb);
 
 const canvas = UiUtils.getCanvasElement("canvas");
-canvas.width = 300;
-canvas.height = 300;
+canvas.width = gridExtent;
+canvas.height = gridExtent;
 const ctx = new CanvasContext(canvas);
 
 ctx.fillStyle = WebColors.whitesmoke;
@@ -36,36 +37,35 @@ const colors: Brush[] = [
 ];
 
 const refBrush = "teal";
+MathEx.epsilon = 0.0001;
 Vector.tipDrawHeight = 0.5;
 const screenBounds = ctx.bounds;
 const origin = Vector.createPosition(0, 0);
-const gridSize = 15;
+const gridSize = 30;
 const radius = 2.5;
 const smallRadius = 1.5;
 let angle = 0;
-const duration = 5;
+// const duration = 5;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const collider = new SimpleCollider();
+let collider: Collider;
+collider = new SimpleCollider();
+collider = new SATProjection();
 const vector1 = Vector.createDirection(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle1 = new CircleShape(smallRadius);
-// circle1.setPosition(Vector.createPosition(2.5, 2.5));
-circle1.setPosition(Vector.createPosition(2.5, 5.5));
-// circle1.setPosition(Vector.createPosition(2.5, 3.5));
 const circle2 = new CircleShape(radius);
-circle2.setPosition(Vector.createPosition(2.5, 2.5));
-const poly1 = new PolygonShape(5, radius, 90 * ONE_DEGREE);
-let poly2: Shape;
-let poly3: Shape;
-let poly4: Shape;
-const aabb1 = new AABBShape(Vector.createDirection(radius * 0.9, radius * 0.9));
+const poly1 = new PolygonShape(5, smallRadius, 90 * ONE_DEGREE);
+const poly2 = new PolygonShape(5, radius, 90 * ONE_DEGREE);
+let poly3 = new PolygonShape(10, radius, 0, false);
+let poly4 = new PolygonShape(10, radius, 0, false);
+const aabb1 = new AABBShape(Vector.createDirection(smallRadius, smallRadius));
 const aabb2 = new AABBShape(Vector.createDirection(radius * 0.9, radius * 0.9));
-const triangle1 = new TriangleShape(radius, 90 * ONE_DEGREE, true);
-let triangle2: Shape;
-const plane1 = new PlaneShape(Vector.createPosition(0, 2.5), Vector.createPosition(1, 2.5));
+const triangle1 = new TriangleShape(smallRadius, 90 * ONE_DEGREE, true);
+const triangle2 = new TriangleShape(radius, 90 * ONE_DEGREE, true);
+const plane1 = new PlaneShape(Vector.createPosition(0, 2.5), Vector.createPosition(1, 3.5));
 
-const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
+// const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 
 const vectors: [Vector, ContextProps][] = [
@@ -73,13 +73,34 @@ const vectors: [Vector, ContextProps][] = [
 ];
 
 const pairs: ShapePair[] = [
+  new ShapePair(circle1, aabb2),
+  new ShapePair(aabb2, circle1),
   new ShapePair(circle1, circle2),
-  // new ShapePair(circle2, circle1),
-  // new ShapePair(circle1, plane1),
-  // new ShapePair(plane1, circle1),
-  // new ShapePair(aabb1, plane1),
-  // new ShapePair(plane1, aabb1),
+  new ShapePair(circle2, circle1),
+  new ShapePair(poly3, poly4),
+  new ShapePair(poly4, poly3),
+  new ShapePair(poly1, poly2),
+  new ShapePair(poly2, poly1),
+  new ShapePair(triangle1, triangle2),
+  new ShapePair(triangle2, triangle1),
+  new ShapePair(circle1, plane1),
+  new ShapePair(plane1, circle1),
+  new ShapePair(aabb1, aabb2),
+  new ShapePair(aabb2, aabb1),
+  new ShapePair(aabb1, plane1),
+  new ShapePair(plane1, aabb1),
 ]
+
+pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
+
+pairs[0].first.setPosition(Vector.createPosition(2.5, 2.5));
+pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
+pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
+pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
+pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
+pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
+// pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
+// pairs[0].first.setPosition(Vector.createPosition(-0.5, 0.5));
 
 const points: [Vector, ContextProps][] = [
   // [point1, point1Props],
@@ -143,8 +164,9 @@ function render() {
   viewport.applyTransform();
 
   const { first, second } = pairs[0];
-  first.props = { strokeStyle: colors[0] };
-  second.props = { strokeStyle: refBrush, lineWidth: 2 };
+  const lineW = collider.isColliding(pairs[0]) ? 3 : 1;
+  first.props = { strokeStyle: colors[0], lineWidth: lineW };
+  second.props = { strokeStyle: refBrush, lineWidth: lineW };
   second.render(viewport);
   first.render(viewport);
   vectors.forEach(([vector, props]) => vector.render(viewport, origin, props));
@@ -196,7 +218,7 @@ function addDynamicTesters() {
 }
 
 function beginPath(props: ContextProps, viewport: Viewport) {
-  ctx.beginPath().withProps(props).withLineWidth(getLineWidth(props, viewport));
+  ctx.beginPath().withGlobalAlpha(1).withProps(props).withLineWidth(getLineWidth(props, viewport));
 }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
@@ -204,35 +226,35 @@ function getLineWidth(props: ContextProps, viewport: Viewport) {
 }
 
 function drawProjection(shape: Shape, axis: Vector, axisLine: Line, view: Viewport, offset: number = 0) {
-  let support1 = shape.getSupportPoint(axis);
-  let support2 = shape.getSupportPoint(axis.negateO());
+  const projection = shape.projectOn(axis);
 
-  if (!support1 || !support2) return;
+  if (!projection) return;
 
-  shape.toWorld(support1, support1);
-  shape.toWorld(support2, support2);
+  const support1 = projection.minPoint;
+  const support2 = projection.maxPoint;
+
   const ofs = axis.perpLeftO().scale(offset);
   const closest1 = axisLine.closestPoint(support1).displaceBy(ofs);
   const closest2 = axisLine.closestPoint(support2).displaceBy(ofs);
 
+  const ctx = view.ctx;
   const props: ContextProps = {};
   Object.assign(props, shape.props);
-  props.lineDash = [0.2, 0.2];
-
-  const ctx = view.ctx;
-  beginPath(props, view);
-  ctx.line(support1, closest1).stroke();
-  ctx.line(support2, closest2).stroke();
 
   props.lineDash = [];
   props.lineWidth = 3;
-
   beginPath(props, view);
   ctx.line(closest1, closest2).stroke();
+
+  props.lineDash = [0.2, 0.2];
+  props.globalAlpha = 0.2;
+  beginPath(props, view);
+  ctx.line(support1, closest1).stroke();
+  ctx.line(support2, closest2).stroke();
 }
 
 function createAxisLine(axis: Vector, radius: number) {
-  const props: ContextProps = { strokeStyle: "black", lineDash: [0.3, 0.3], lineWidth: 2 };
+  const props: ContextProps = { strokeStyle: "black", lineDash: [0.5, 0.5], lineWidth: 2, globalAlpha: 0.5 };
   const origin = Vector.createPosition(0, 0);
   const dir = axis.perpRightO().scale(radius);
   const line = new Line(origin, origin.displaceByO(axis));
@@ -257,7 +279,8 @@ function drawSat(shapes: ShapePair, view: Viewport) {
 
   const axes = axesList.items;
   // console.log(`axes count: ${axes.length}`);
-  const radius = view.viewBounds.halfSize.x * 0.9;
+  // console.log(`axes: ${axes.map(a => a.toString())}`);
+  const radius = view.viewBounds.halfSize.x * 0.8;
   const axesLines = axes.map(a => createAxisLine(a, radius));
 
   // const ctx = view.ctx;
@@ -267,7 +290,7 @@ function drawSat(shapes: ShapePair, view: Viewport) {
   axesLines.forEach(a => a.render(view));
 
   axes.forEach((a, i) => {
-    drawProjection(first, a, axesLines[i], view);
-    drawProjection(second, a, axesLines[i], view, 0.5);
+    drawProjection(first, a, axesLines[i], view, 0.5);
+    drawProjection(second, a, axesLines[i], view);
   });
 }

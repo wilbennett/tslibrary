@@ -3,6 +3,7 @@ import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, V
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
+import { Projection } from '../collision';
 
 const EMPTY_AXES: Vector[] = [];
 export const ORIGIN = Vector.createPosition(0, 0);
@@ -80,9 +81,45 @@ export abstract class ShapeBase implements IShape {
     return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
 
-  getAxes(result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
+  getAxes(result?: Vector[]): Vector[] {
+    result || (result = []);
+    const normals = this.normalList.items;
+    normals.forEach(n => result!.push(n));
+    return result;
+  }
+
   // @ts-ignore - unused param.
   getDynamicAxes(other: Shape, result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
+
+  projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
+    const axis = this.toLocal(worldAxis);
+    const support1 = this.getSupportPoint(axis);
+    const support2 = this.getSupportPoint(axis.negateO());
+
+    if (!support1 || !support2) return undefined;
+
+    this.toWorld(support1, support1);
+    this.toWorld(support2, support2);
+
+    const value1 = support1.dot(worldAxis);
+    const value2 = support2.dot(worldAxis);
+
+    result || (result = new Projection());
+
+    if (value1 < value2) {
+      result.min = value1;
+      result.max = value2;
+      result.minPoint = support1;
+      result.maxPoint = support2;
+    } else {
+      result.min = value2;
+      result.max = value1;
+      result.minPoint = support2;
+      result.maxPoint = support1;
+    }
+
+    return result;
+  }
 
   toWorld(localPoint: Vector, result?: Vector) {
     if (this.isWorld) {
