@@ -151,32 +151,37 @@ export abstract class ShapeBase implements IShape {
   getDynamicAxes(other: Shape, result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
 
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
-    const axis = this.toLocal(worldAxis);
-    const support1 = this.getSupportPoint(axis);
-    const support2 = this.getSupportPoint(axis.negateO());
+    const vertices = this.vertexList.items;
+    const vertexCount = this.vertexList.length;
 
-    if (!support1 || !support2) return undefined;
+    if (vertexCount === 0) return undefined;
 
-    this.toWorld(support1, support1);
-    this.toWorld(support2, support2);
+    const worldVertex = Vector.create();
+    let min = Infinity;
+    let max = -Infinity;
+    let minPoint = Vector.create();
+    let maxPoint = Vector.create();
 
-    const value1 = support1.dot(worldAxis);
-    const value2 = support2.dot(worldAxis);
+    for (let i = 0; i < vertexCount; i++) {
+      const vertex = vertices[i];
+      const dot = worldAxis.dot(this.toWorld(vertex, worldVertex));
 
-    result || (result = new Projection());
+      if (dot < min) {
+        min = dot;
+        minPoint.copyFrom(worldVertex);
+      }
 
-    if (value1 < value2) {
-      result.min = value1;
-      result.max = value2;
-      result.minPoint = support1;
-      result.maxPoint = support2;
-    } else {
-      result.min = value2;
-      result.max = value1;
-      result.minPoint = support2;
-      result.maxPoint = support1;
+      if (dot > max) {
+        max = dot;
+        maxPoint.copyFrom(worldVertex);
+      }
     }
 
+    result || (result = new Projection());
+    result.min = min;
+    result.max = max;
+    result.minPoint = minPoint;
+    result.maxPoint = maxPoint;
     return result;
   }
 
