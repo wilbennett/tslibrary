@@ -1,13 +1,11 @@
 import { Collider, ColliderBase, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
-import { UniqueVectorList, Vector } from '../../vectors';
-import { Shape } from '../shapes';
+import { Shape, ShapeAxis, UniqueShapeAxesList } from '../shapes';
 
 export class SATSupportState {
-  protected _axesA?: Vector[];
-  get axesA() { return this._axesA || (this._axesA = []); }
-  protected _axesB?: Vector[];
-  get axesB() { return this._axesB || (this._axesB = []); }
+  protected _axes?: ShapeAxis[];
+  get axes() { return this._axes || (this._axes = []); }
+  set axes(value) { this._axes = value; }
   startIndex = 0;
   unsupported?: boolean;
 }
@@ -34,36 +32,32 @@ export class SATSupport extends ColliderBase {
       const { first, second } = shapes;
       state = new SATSupportState();
       shapes.customData["satSupportState"] = state;
-      const axesB = second.getAxes();
-      const axesA = first.getAxes();
+      const axesA = first.getSupportAxes();
+      const axesB = second.getSupportAxes();
 
       if (axesA.length === 0 && !first.hasDynamicAxes || axesB.length === 0 && !second.hasDynamicAxes) {
         state.unsupported = true;
         return state;
       }
 
-      const axesList = new UniqueVectorList(true);
-      axesList.addVectors(axesA);
-      state.axesA.push(...axesList.items);
-
-      axesList.clear();
-      axesList.addVectors(axesB);
-      state.axesB.push(...axesList.items);
+      const axesList = new UniqueShapeAxesList(false);
+      axesList.addAxes(axesA);
+      axesList.addAxes(axesB);
+      state.axes = axesList.items;
     }
 
     return state;
   }
 
-  protected getAxes(first: Shape, second: Shape, state: SATSupportState): Vector[] {
-    const axesList = new UniqueVectorList(true);
-    state.axesA.forEach(a => axesList.add(first.toWorld(a)));
-    state.axesB.forEach(a => axesList.add(second.toWorld(a)));
+  protected getAxes(first: Shape, second: Shape, state: SATSupportState) {
+    const axesList = new UniqueShapeAxesList(false);
+    axesList.addAxes(state.axes);
 
     if (first.hasDynamicAxes)
-      axesList.addVectors(first.getDynamicAxes(second));
+      axesList.addAxes(first.getDynamicSupportAxes(second));
 
     if (second.hasDynamicAxes)
-      axesList.addVectors(second.getDynamicAxes(first));
+      axesList.addAxes(second.getDynamicSupportAxes(first));
 
     return axesList.items;
   }
