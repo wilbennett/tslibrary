@@ -210,8 +210,9 @@ export class NullVector extends Vector {
   // @ts-ignore - unused param.
   withDegrees(degrees: number) { return this; }
   // @ts-ignore - unused param.
-  withRadiansMagO(radians: number, mag: number, result?: Vector) { return this; }
-  withRadiansMag(radians: number, mag: number) { return this.withRadiansMagO(radians, mag, this); }
+  withRadiansMagO(radians: number, mag: number, result?: Vector) { return this.zeroResult(result); }
+  // @ts-ignore - unused param.
+  withRadiansMag(radians: number, mag: number) { return this; }
   // @ts-ignore - unused param.
   withDegreesMagO(degrees: number, mag: number, result?: Vector) { return this.zeroResult(result); }
   // @ts-ignore - unused param.
