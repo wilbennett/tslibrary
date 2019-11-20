@@ -1,4 +1,4 @@
-import { ICircleShape, ORIGIN, Shape, ShapeAxis, ShapeBase } from '.';
+import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -75,6 +75,22 @@ export class CircleShape extends ShapeBase implements ICircleShape {
 
     const axis = closest.subO(this.position).normalize();
     result.push(axis);
+    return result;
+  }
+
+  projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
+    const maxPoint = this.position.displaceByScaledO(worldAxis, this.radius);
+    const minPoint = this.position.displaceByNegScaledO(worldAxis, this.radius);
+    const maxValue = maxPoint.dot(worldAxis);
+    const minValue = minPoint.dot(worldAxis);
+
+    result || (result = new Projection());
+
+    result.min = minValue;
+    result.max = maxValue;
+    result.minPoint = minPoint;
+    result.maxPoint = maxPoint;
+
     return result;
   }
 
