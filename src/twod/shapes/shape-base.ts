@@ -77,7 +77,7 @@ export abstract class ShapeBase implements IShape {
 
     const axisPoint = axis.point;
     const axisDirection = axis.normal;
-    const vertexToPoint = Vector.create();
+    const pointToVertex = Vector.create();
     const hasAxisPoint = !axisPoint.isEmpty;
     let bestVertex = vertices[0];
     let bestDistance = -Infinity;
@@ -86,8 +86,8 @@ export abstract class ShapeBase implements IShape {
     if (hasAxisPoint) {
       for (let i = 0; i < vertexCount; i++) {
         const vertex = vertices[i];
-        axisPoint.subO(vertex, vertexToPoint);
-        const distance = vertexToPoint.dot(axisDirection);
+        vertex.subO(axisPoint, pointToVertex);
+        const distance = pointToVertex.dot(axisDirection);
 
         if (distance > bestDistance) {
           bestVertex = vertex;

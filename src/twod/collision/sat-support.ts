@@ -1,6 +1,6 @@
-import { Collider, ColliderBase, Contact, ShapePair } from '.';
+import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { Tristate } from '../../core';
-import { Shape, ShapeAxis, UniqueShapeAxesList } from '../shapes';
+import { Shape, ShapeAxis, SupportPoint } from '../shapes';
 
 export class SATSupportState {
   protected _axes?: ShapeAxis[];
@@ -15,14 +15,92 @@ export class SATSupport extends ColliderBase {
     super(fallback);
   }
 
-  // @ts-ignore - unused param.
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    return undefined;
+    const { first, second } = shapes;
+    const state = this.getState(shapes);
+
+    if (state.unsupported) return undefined;
+
+    const axes = this.getAxes(first, second, state);
+    const count = axes.length;
+
+    if (count === 0) return undefined;
+
+    let support = new SupportPoint(first);
+    let index = state.startIndex;
+
+    for (let i = 0; i < count; i++) {
+      const axis = axes[index];
+
+      const success = axis.shape === first
+        ? second.getSupport(axis.toWorldWithShape(second, true), support)
+        : first.getSupport(axis.toWorldWithShape(first, true), support);
+
+      if (!success) return undefined;
+
+      if (support.distance < 0) { // Separating axis.
+        state.startIndex = index;
+        return false;
+      }
+
+      index = (index + 1) % count;
+    }
+
+    return true;
   }
 
-  // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
-    return undefined;
+    const { first, second } = shapes;
+    const state = this.getState(shapes);
+
+    if (state.unsupported) return undefined;
+
+    const axes = this.getAxes(first, second, state);
+    const count = axes.length;
+
+    if (count === 0) return undefined;
+
+    let support = new SupportPoint(first);
+    const bestSupport = new SupportPoint(first);
+    let bestAxis = axes[0];
+    let bestDistance = Infinity;
+    let index = state.startIndex;
+
+    for (let i = 0; i < count; i++) {
+      const axis = axes[index];
+
+      const success = axis.shape === first
+        ? second.getSupport(axis.toWorldWithShape(second, true), support)
+        : first.getSupport(axis.toWorldWithShape(first, true), support);
+
+      if (!success) return undefined;
+
+      if (support.distance < 0) { // Separating axis.
+        state.startIndex = index;
+        return null;
+      }
+
+      if (support.distance < bestDistance) {
+        bestDistance = support.distance;
+        support.copyTo(bestSupport);
+        bestAxis = axis;
+      }
+
+      index = (index + 1) % count;
+    }
+
+    const contact = shapes.contact;
+    contact.reset();
+
+    if (bestAxis.shape === second) {
+      contact.normal = bestAxis.worldNormal;
+      contact.points.push(new ContactPoint(bestSupport.worldPoint, bestDistance));
+    } else {
+      contact.normal = bestAxis.worldNormal.negateO();
+      contact.points.push(new ContactPoint(bestAxis.worldPoint, bestDistance));
+    }
+
+    return contact;
   }
 
   protected getState(shapes: ShapePair) {
@@ -40,25 +118,21 @@ export class SATSupport extends ColliderBase {
         return state;
       }
 
-      const axesList = new UniqueShapeAxesList(false);
-      axesList.addAxes(axesA);
-      axesList.addAxes(axesB);
-      state.axes = axesList.items;
+      state.axes = [...axesA, ...axesB];
     }
 
     return state;
   }
 
   protected getAxes(first: Shape, second: Shape, state: SATSupportState) {
-    const axesList = new UniqueShapeAxesList(false);
-    axesList.addAxes(state.axes);
+    const result = [...state.axes];
 
     if (first.hasDynamicAxes)
-      axesList.addAxes(first.getDynamicAxes(second));
+      result.push(...first.getDynamicAxes(second));
 
     if (second.hasDynamicAxes)
-      axesList.addAxes(second.getDynamicAxes(first));
+      result.push(...second.getDynamicAxes(first));
 
-    return axesList.items;
+    return result;
   }
 }

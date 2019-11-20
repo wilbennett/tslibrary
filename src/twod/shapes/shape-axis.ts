@@ -61,6 +61,29 @@ export class ShapeAxis {
     this._worldPoint = undefined;
   }
 
+  toWorldWithShape(otherShape: Shape, negateNormal: boolean = false, result?: ShapeAxis) {
+    const shape = this.shape;
+
+    if (otherShape === shape) {
+      if (!result && !negateNormal) return this;
+
+      result || (result = new ShapeAxis(shape));
+      result.clear();
+      result.worldNormal = negateNormal ? this.worldNormal.negateO() : this.worldNormal;
+      result.worldPoint = this.worldPoint;
+      result.shape = shape;
+      return result;
+    }
+
+    result || (result = new ShapeAxis(otherShape));
+
+    result.clear();
+    result.worldNormal = negateNormal ? this.worldNormal.negateO() : this.worldNormal;
+    result.worldPoint = this.worldPoint;
+    result.shape = otherShape;
+    return result;
+  }
+
   toLocalOf(otherShape: Shape, negateNormal: boolean = false, result?: ShapeAxis) {
     const shape = this.shape;
 
@@ -71,6 +94,8 @@ export class ShapeAxis {
       result.clear();
       result.normal = negateNormal ? this.normal.negateO() : this.normal;
       result.point = this.point;
+      result.worldNormal = negateNormal ? this.worldNormal.negateO() : this.worldNormal;
+      result.worldPoint = this.worldPoint;
       result.shape = shape;
       return result;
     }
@@ -80,7 +105,13 @@ export class ShapeAxis {
     result.clear();
     result.normal = shape.toLocalOf(otherShape, negateNormal ? this.normal.negateO() : this.normal);
     result.point = shape.toLocalOf(otherShape, this.point);
+    result.worldNormal = negateNormal ? this.worldNormal.negateO() : this.worldNormal;
+    result.worldPoint = this.worldPoint;
     result.shape = otherShape;
     return result;
+  }
+
+  toString() {
+    return `Axis: ${this.shape.constructor.name}, ${this.worldNormal}, ${this.worldPoint}`;
   }
 }

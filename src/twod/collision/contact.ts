@@ -23,6 +23,7 @@ export class Contact {
   get isContacting() { return this.points.length > 0; }
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "blue", fillStyle: "blue" }; }
+  set props(value) { this._props = value; }
 
   reset() {
     this.points.splice(0);

@@ -9,7 +9,7 @@ export class SupportPoint {
       this._worldPoint = worldPoint;
 
     this.index = index !== undefined ? index : -1;
-    this.distance = distance || 0;
+    this.distance = distance !== undefined ? distance : -Infinity;
   }
 
   point: Vector;
@@ -32,6 +32,13 @@ export class SupportPoint {
     this.point = Vector.empty;
     this._worldPoint = undefined;
     this.index = -1;
-    this.distance = 0;
+    this.distance = -Infinity;
+  }
+
+  copyTo(other: SupportPoint) {
+    other.point = this.point;
+    other.worldPoint = this.worldPoint;
+    other.index = this.index;
+    other.distance = this.distance;
   }
 }

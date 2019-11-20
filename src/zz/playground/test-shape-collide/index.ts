@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
-import { Collider, SATProjection, ShapePair, SimpleCollider } from '../../../twod/collision';
+import { Collider, SATProjection, SATSupport, ShapePair, SimpleCollider } from '../../../twod/collision';
 import {
   AABBShape,
   CircleShape,
@@ -60,6 +60,8 @@ const graph = new Graph(ctx.bounds, gridSize);
 let collider: Collider;
 collider = new SimpleCollider();
 collider = new SATProjection();
+collider = new SATSupport();
+const collider2 = new SATProjection();
 const vector1 = Vector.createDirection(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle1 = new CircleShape(smallRadius);
@@ -109,7 +111,7 @@ pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
 pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
-// pairs[0].first.setPosition(Vector.createPosition(-0.5, 0.5));
+// pairs[0].first.setPosition(Vector.createPosition(-0.6, 0.5));
 
 const points: [Vector, ContextProps][] = [
   // [point1, point1Props],
@@ -181,9 +183,17 @@ function render() {
   vectors.forEach(([vector, props]) => vector.render(viewport, origin, props));
   points.forEach(([point, props]) => point.render(viewport, origin, props));
 
-  const contact = collider.calcContact(pairs[0]);
+  let contact = collider2.calcContact(pairs[0]);
 
   if (contact) {
+    contact.props = { strokeStyle: "green", fillStyle: "green" };
+    contact.render(viewport);
+  }
+
+  contact = collider.calcContact(pairs[0]);
+
+  if (contact) {
+    contact.props = { strokeStyle: "blue", fillStyle: "blue" };
     contact.render(viewport);
   }
 

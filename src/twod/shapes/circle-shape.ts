@@ -43,7 +43,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     result.shape = this;
     result.point = point;
     result.index = -1;
-    result.distance = !axis.point.isEmpty ? axis.point.subO(point).dot(axis.normal) : point.dot(axis.normal);
+    result.distance = !axis.point.isEmpty ? point.subO(axis.point).dot(axis.normal) : point.dot(axis.normal);
     return result;
   }
 
