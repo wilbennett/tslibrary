@@ -13,7 +13,7 @@ export class SupportPoint {
   }
 
   point: Vector;
-  _worldPoint?: Vector;
+  protected _worldPoint?: Vector;
   get worldPoint() {
     if (!this._worldPoint) {
       if (this.point.isEmpty) return Vector.empty;

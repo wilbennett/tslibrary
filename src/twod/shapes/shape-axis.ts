@@ -10,7 +10,7 @@ export class ShapeAxis {
 
   shape: Shape;
   normal: Vector;
-  _worldNormal?: Vector;
+  protected _worldNormal?: Vector;
   get worldNormal() {
     if (!this._worldNormal) {
       if (this.point.isEmpty) return Vector.empty;
@@ -22,7 +22,7 @@ export class ShapeAxis {
   }
   set worldNormal(value) { this._worldNormal = value; }
   point: Vector;
-  _worldPoint?: Vector;
+  protected _worldPoint?: Vector;
   get worldPoint() {
     if (!this._worldPoint) {
       if (this.point.isEmpty) return Vector.empty;
