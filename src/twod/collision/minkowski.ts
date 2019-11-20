@@ -1,7 +1,6 @@
 import { ShapePair } from '.';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
-import { ShapeAxis } from '../shapes';
 
 export class MinkowskiPoint {
   constructor(
@@ -17,15 +16,12 @@ export class MinkowskiPoint {
 };
 
 export class Minkowski {
-  static getPoint(shapes: ShapePair, direction: Vector): Tristate<MinkowskiPoint> {
+  static getPoint(shapes: ShapePair, worldDirection: Vector): Tristate<MinkowskiPoint> {
     const { first, second } = shapes;
-    const directionN = direction.negateO();
-    const axisA = new ShapeAxis(first, first.toLocal(direction));
-    const axisB = new ShapeAxis(second, second.toLocal(directionN));
-    axisA.worldNormal = direction;
-    axisB.worldNormal = directionN;
-    const spA = first.getSupport(axisA);
-    const spB = second.getSupport(axisB);
+    const direction = worldDirection.normalizeO();
+    const axis = first.createWorldAxis(direction);
+    const spA = first.getSupport(axis);
+    const spB = second.getSupport(axis.toLocalOf(second, true));
 
     if (!spA) return spA;
     if (!spB) return spB;

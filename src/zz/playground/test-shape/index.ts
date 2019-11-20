@@ -9,7 +9,6 @@ import {
   PlaneShape,
   PolygonShape,
   Shape,
-  ShapeAxis,
   SupportPoint,
   TriangleShape,
 } from '../../../twod/shapes';
@@ -192,8 +191,7 @@ function renderSupports(viewport: Viewport) {
 
 function renderSupport(a: Shape, direction: Vector, props: ContextProps, viewport: Viewport) {
   const dir = direction.normalizeO();
-  const axis = new ShapeAxis(a, a.toLocal(dir));
-  axis.worldNormal = dir;
+  const axis = a.createWorldAxis(dir);
   const support = new SupportPoint(a);
 
   if (!a.getSupport(axis, support)) return;

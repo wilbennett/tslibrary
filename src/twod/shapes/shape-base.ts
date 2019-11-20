@@ -142,6 +142,28 @@ export abstract class ShapeBase implements IShape {
   // @ts-ignore - unused param.
   getDynamicAxes(other: Shape, result?: ShapeAxis[]) { return result || EMPTY_SUPPORT_AXES; }
 
+  createAxis(normal: Vector, result?: ShapeAxis): ShapeAxis {
+    // @ts-ignore - "this" not assignable to ITriangleShape.
+    result || (result = new ShapeAxis(this));
+    // Appease typescript.
+    if (!result) throw new Error("impossible");
+
+    result.clear();
+    result.normal = normal;
+    return result!;
+  }
+
+  createWorldAxis(worldNormal: Vector, result?: ShapeAxis): ShapeAxis {
+    // @ts-ignore - "this" not assignable to ITriangleShape.
+    result || (result = new ShapeAxis(this));
+    // Appease typescript.
+    if (!result) throw new Error("impossible");
+
+    result.clear();
+    result.worldNormal = worldNormal;
+    return result!;
+  }
+
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
