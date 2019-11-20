@@ -4,9 +4,18 @@ import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
 import { Collider, SATProjection, ShapePair, SimpleCollider } from '../../../twod/collision';
-import { AABBShape, CircleShape, PlaneShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
+import {
+  AABBShape,
+  CircleShape,
+  PlaneShape,
+  PolygonShape,
+  Shape,
+  ShapeAxis,
+  TriangleShape,
+  UniqueShapeAxesList,
+} from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
-import { UniqueVectorList, Vector } from '../../../vectors';
+import { Vector } from '../../../vectors';
 
 const { ONE_DEGREE } = MathEx;
 
@@ -225,17 +234,18 @@ function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 }
 
-function drawProjection(shape: Shape, axis: Vector, axisLine: Line, view: Viewport, offset: number = 0) {
-  const projection = shape.projectOn(axis);
+//*
+function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {
+  const projection = shape.projectOn(axis.worldNormal);
 
   if (!projection) return;
 
-  const support1 = projection.minPoint;
-  const support2 = projection.maxPoint;
+  const minPoint = projection.minPoint;
+  const maxPoint = projection.maxPoint;
 
-  const ofs = axis.perpLeftO().scale(offset);
-  const closest1 = axisLine.closestPoint(support1).displaceBy(ofs);
-  const closest2 = axisLine.closestPoint(support2).displaceBy(ofs);
+  const ofs = axis.worldNormal.perpLeftO().scale(offset);
+  const minClosest = axisLine.closestPoint(minPoint).displaceBy(ofs);
+  const maxClosest = axisLine.closestPoint(maxPoint).displaceBy(ofs);
 
   const ctx = view.ctx;
   const props: ContextProps = {};
@@ -244,20 +254,26 @@ function drawProjection(shape: Shape, axis: Vector, axisLine: Line, view: Viewpo
   props.lineDash = [];
   props.lineWidth = 3;
   beginPath(props, view);
-  ctx.line(closest1, closest2).stroke();
+  ctx.line(minClosest, maxClosest).stroke();
 
   props.lineDash = [0.2, 0.2];
   props.globalAlpha = 0.2;
   beginPath(props, view);
-  ctx.line(support1, closest1).stroke();
-  ctx.line(support2, closest2).stroke();
+  ctx.line(minPoint, minClosest).stroke();
+  ctx.line(maxPoint, maxClosest).stroke();
 }
 
-function createAxisLine(axis: Vector, radius: number) {
+function drawProjection(pair: ShapePair, axis: ShapeAxis, axisLine: Line, view: Viewport) {
+  const { first, second } = pair;
+  drawShapeProjection(first, axis, axisLine, view, 0.5);
+  drawShapeProjection(second, axis, axisLine, view);
+}
+
+function createAxisLine(axis: ShapeAxis, radius: number) {
   const props: ContextProps = { strokeStyle: "black", lineDash: [0.5, 0.5], lineWidth: 2, globalAlpha: 0.5 };
   const origin = Vector.createPosition(0, 0);
-  const dir = axis.perpRightO().scale(radius);
-  const line = new Line(origin, origin.displaceByO(axis));
+  const dir = axis.worldNormal.perpRightO().scale(radius);
+  const line = new Line(origin, origin.displaceByO(axis.worldNormal));
   line.setPosition(dir.asPosition());
   line.props = props;
   return line;
@@ -265,21 +281,18 @@ function createAxisLine(axis: Vector, radius: number) {
 
 function drawSat(shapes: ShapePair, view: Viewport) {
   const { first, second } = shapes;
-  const axesA = first.getAxes();
-  const axesB = second.getAxes();
-  const axesList = new UniqueVectorList(true);
-  axesList.addVectors(axesA.map(a => first.toWorld(a)));
-  axesList.addVectors(axesB.map(a => second.toWorld(a)));
+  const axesList = new UniqueShapeAxesList(true);
 
-  if (first.hasDynamicAxes)
-    axesList.addVectors(first.getDynamicAxes(second));
-
-  if (second.hasDynamicAxes)
-    axesList.addVectors(second.getDynamicAxes(first));
+  axesList.addAxes([
+    ...first.getSupportAxes(),
+    ...second.getSupportAxes(),
+    ...first.getDynamicSupportAxes(second),
+    ...second.getDynamicSupportAxes(first),
+  ]);
 
   const axes = axesList.items;
   // console.log(`axes count: ${axes.length}`);
-  // console.log(`axes: ${axes.map(a => a.toString())}`);
+  // console.log(`axes: ${axes.map(a => a.worldNormal.toString())}`);
   const radius = view.viewBounds.halfSize.x * 0.8;
   const axesLines = axes.map(a => createAxisLine(a, radius));
 
@@ -288,9 +301,5 @@ function drawSat(shapes: ShapePair, view: Viewport) {
   // beginPath(props, view);
   // ctx.strokeCircle(0, 0, radius);
   axesLines.forEach(a => a.render(view));
-
-  axes.forEach((a, i) => {
-    drawProjection(first, a, axesLines[i], view, 0.5);
-    drawProjection(second, a, axesLines[i], view);
-  });
+  axes.forEach((a, i) => drawProjection(shapes, a, axesLines[i], view));
 }
