@@ -1,13 +1,11 @@
 import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { Tristate } from '../../core';
-import { UniqueVectorList, Vector } from '../../vectors';
-import { Projection, Shape } from '../shapes';
+import { Projection, Shape, ShapeAxis, UniqueShapeAxesList } from '../shapes';
 
 export class SATProjectionState {
-  protected _axesA?: Vector[];
-  get axesA() { return this._axesA || (this._axesA = []); }
-  protected _axesB?: Vector[];
-  get axesB() { return this._axesB || (this._axesB = []); }
+  protected _axes?: ShapeAxis[];
+  get axes() { return this._axes || (this._axes = []); }
+  set axes(value) { this._axes = value; }
   startIndex = 0;
   unsupported?: boolean;
 }
@@ -33,7 +31,7 @@ export class SATProjection extends ColliderBase {
     const projectionB = new Projection();
 
     for (let i = 0; i < count; i++) {
-      const axis = axes[index];
+      const axis = axes[index].worldNormal;
 
       if (!first.projectOn(axis, projectionA) || !second.projectOn(axis, projectionB)) return undefined;
 
@@ -64,7 +62,7 @@ export class SATProjection extends ColliderBase {
 
     let index = state.startIndex;
     let minOverlap = Infinity;
-    let minAxis = axes[index];
+    let minAxis = axes[index].worldNormal;
     const projectionA = new Projection();
     const projectionB = new Projection();
     let point = projectionA.minPoint;
@@ -72,7 +70,7 @@ export class SATProjection extends ColliderBase {
     const ba = first.position.subO(second.position);
 
     for (let i = 0; i < count; i++) {
-      const axis = axes[index];
+      const axis = axes[index].worldNormal;
 
       if (!first.projectOn(axis, projectionA) || !second.projectOn(axis, projectionB)) return undefined;
 
@@ -116,36 +114,32 @@ export class SATProjection extends ColliderBase {
       const { first, second } = shapes;
       state = new SATProjectionState();
       shapes.customData["satProjectionState"] = state;
-      const axesB = second.getAxes();
-      const axesA = first.getAxes();
+      const axesA = first.getSupportAxes();
+      const axesB = second.getSupportAxes();
 
       if (axesA.length === 0 && !first.hasDynamicAxes || axesB.length === 0 && !second.hasDynamicAxes) {
         state.unsupported = true;
         return state;
       }
 
-      const axesList = new UniqueVectorList(true);
-      axesList.addVectors(axesA);
-      state.axesA.push(...axesList.items);
-
-      axesList.clear();
-      axesList.addVectors(axesB);
-      state.axesB.push(...axesList.items);
+      const axesList = new UniqueShapeAxesList(true);
+      axesList.addAxes(axesA);
+      axesList.addAxes(axesB);
+      state.axes = axesList.items;
     }
 
     return state;
   }
 
-  protected getAxes(first: Shape, second: Shape, state: SATProjectionState): Vector[] {
-    const axesList = new UniqueVectorList(true);
-    state.axesA.forEach(a => axesList.add(first.toWorld(a)));
-    state.axesB.forEach(a => axesList.add(second.toWorld(a)));
+  protected getAxes(first: Shape, second: Shape, state: SATProjectionState) {
+    const axesList = new UniqueShapeAxesList(true);
+    axesList.addAxes(state.axes);
 
     if (first.hasDynamicAxes)
-      axesList.addVectors(first.getDynamicAxes(second));
+      axesList.addAxes(first.getDynamicSupportAxes(second));
 
     if (second.hasDynamicAxes)
-      axesList.addVectors(second.getDynamicAxes(first));
+      axesList.addAxes(second.getDynamicSupportAxes(first));
 
     return axesList.items;
   }
