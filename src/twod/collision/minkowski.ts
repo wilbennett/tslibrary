@@ -1,6 +1,7 @@
 import { ShapePair } from '.';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
+import { ShapeAxis } from '../shapes';
 
 export class MinkowskiPoint {
   constructor(
@@ -18,33 +19,18 @@ export class MinkowskiPoint {
 export class Minkowski {
   static getPoint(shapes: ShapePair, direction: Vector): Tristate<MinkowskiPoint> {
     const { first, second } = shapes;
-    const infoA = first.getSupportPoint(first.toLocal(direction));
-    const infoB = second.getSupportPoint(second.toLocal(direction.negateO()));
-    let pointA: Vector;
-    let pointB: Vector;
-    let indexA: number;
-    let indexB: number;
+    const directionN = direction.negateO();
+    const axisA = new ShapeAxis(first, first.toLocal(direction));
+    const axisB = new ShapeAxis(second, second.toLocal(directionN));
+    axisA.worldNormal = direction;
+    axisB.worldNormal = directionN;
+    const spA = first.getSupportInfo(axisA);
+    const spB = second.getSupportInfo(axisB);
 
-    if (typeof infoA === "number") {
-      pointA = first.vertexList.items[infoA];
-      indexA = infoA;
-    } else if (!infoA) {
-      return infoA;
-    } else {
-      pointA = infoA;
-      indexA = -1;
-    }
+    if (!spA) return spA;
+    if (!spB) return spB;
+    if (!spA.isValid || !spB.isValid) return null;
 
-    if (typeof infoB === "number") {
-      pointB = second.vertexList.items[infoB];
-      indexB = infoB;
-    } else if (!infoB) {
-      return infoB;
-    } else {
-      pointB = infoB;
-      indexB = -1;
-    }
-
-    return new MinkowskiPoint(pointA, pointB, indexA, indexB, direction);
+    return new MinkowskiPoint(spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
   }
 }
