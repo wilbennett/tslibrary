@@ -2,6 +2,7 @@ export * from "./shape-axis";
 export * from "./support-point";
 export * from "./projection";
 export * from "./shape-types";
+export * from "./unique-shape-axes-list";
 export * from "./shape-contain";
 export * from "./shape-base";
 export * from "./plane-shape";
