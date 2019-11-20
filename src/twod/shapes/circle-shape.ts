@@ -49,7 +49,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
       normal = closest.asDirection().normalize();
     }
 
-    const point = normal.scale(this.radius).asPosition();
+    const point = normal.scaleO(this.radius).asPosition();
     result.push(new ShapeAxis(this, normal, point));
     return result;
   }
