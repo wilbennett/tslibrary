@@ -69,7 +69,7 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupportInfo(axis: ShapeAxis, result?: SupportPoint) {
+  getSupportInfo(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
 
@@ -78,19 +78,33 @@ export abstract class ShapeBase implements IShape {
     const axisPoint = axis.point;
     const axisDirection = axis.normal;
     const vertexToPoint = Vector.create();
+    const hasAxisPoint = !axisPoint.isEmpty;
     let bestVertex = vertices[0];
     let bestDistance = -Infinity;
     let bestIndex = -1;
 
-    for (let i = 0; i < vertexCount; i++) {
-      const vertex = vertices[i];
-      axisPoint.subO(vertex, vertexToPoint);
-      const distance = vertexToPoint.dot(axisDirection);
+    if (hasAxisPoint) {
+      for (let i = 0; i < vertexCount; i++) {
+        const vertex = vertices[i];
+        axisPoint.subO(vertex, vertexToPoint);
+        const distance = vertexToPoint.dot(axisDirection);
 
-      if (distance > bestDistance) {
-        bestVertex = vertex;
-        bestIndex = i;
-        bestDistance = distance;
+        if (distance > bestDistance) {
+          bestVertex = vertex;
+          bestIndex = i;
+          bestDistance = distance;
+        }
+      }
+    } else {
+      for (let i = 0; i < vertexCount; i++) {
+        const vertex = vertices[i];
+        const distance = vertex.dot(axisDirection);
+
+        if (distance > bestDistance) {
+          bestVertex = vertex;
+          bestIndex = i;
+          bestDistance = distance;
+        }
       }
     }
 
@@ -107,18 +121,6 @@ export abstract class ShapeBase implements IShape {
     result.index = bestIndex;
     result.distance = bestDistance;
     return result;
-  }
-
-  getSupport(direction: Vector, result?: Vector): Tristate<number | Vector> {
-    return this.getSupportFromVector(direction, result);
-  }
-
-  getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector> {
-    const info = this.getSupportFromVector(direction, result);
-
-    if (info === null || info === undefined) return info;
-
-    return info instanceof Vector ? info : this.vertexList.items[info].clone(result);
   }
 
   getSupportAxes(result?: ShapeAxis[]) {
@@ -139,16 +141,6 @@ export abstract class ShapeBase implements IShape {
 
   // @ts-ignore - unused param.
   getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]) { return result || EMPTY_SUPPORT_AXES; }
-
-  getAxes(result?: Vector[]): Vector[] {
-    result || (result = []);
-    const normals = this.normalList.items;
-    normals.forEach(n => result!.push(n));
-    return result;
-  }
-
-  // @ts-ignore - unused param.
-  getDynamicAxes(other: Shape, result?: Vector[]): Vector[] { return result || EMPTY_AXES; }
 
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
     const vertices = this.vertexList.items;
@@ -254,31 +246,5 @@ export abstract class ShapeBase implements IShape {
 
     matrix.getValues(transform);
     matrix.getInverse(transformInverse);
-  }
-
-  // @ts-ignore - unused param.
-  protected getSupportFromVector(direction: Vector, result?: Vector): Tristate<number | Vector> {
-    const vertices = this.vertexList.items;
-    const vertexCount = this.vertexList.length;
-
-    if (vertexCount === 0) return undefined;
-
-    let best = -Infinity;
-    let bestIndex = -1;
-
-    for (let i = 0; i < vertexCount; i++) {
-      const dot = vertices[i].dot(direction);
-
-      if (dot > best) {
-        best = dot;
-        bestIndex = i;
-      }
-    }
-
-    return bestIndex;
-  }
-
-  protected getSupportFromAngle(radians: number, result?: Vector): Tristate<number | Vector> {
-    return this.getSupportFromVector(Vector2D.fromRadians(radians, 1, 0), result);
   }
 }

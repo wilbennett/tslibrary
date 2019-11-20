@@ -3,7 +3,16 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Ease, EaseRunner, NumberEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
-import { AABBShape, CircleShape, PlaneShape, PolygonShape, Shape, TriangleShape } from '../../../twod/shapes';
+import {
+  AABBShape,
+  CircleShape,
+  PlaneShape,
+  PolygonShape,
+  Shape,
+  ShapeAxis,
+  SupportPoint,
+  TriangleShape,
+} from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
 
@@ -182,14 +191,17 @@ function renderSupports(viewport: Viewport) {
 }
 
 function renderSupport(a: Shape, direction: Vector, props: ContextProps, viewport: Viewport) {
-  const localDir = a.toLocal(direction);
-  const point = Vector.create(0, 0);
+  const dir = direction.normalizeO();
+  const axis = new ShapeAxis(a, a.toLocal(dir));
+  axis.worldNormal = dir;
+  const support = new SupportPoint(a);
 
-  if (!a.getSupportPoint(localDir, point)) return;
+  if (!a.getSupportInfo(axis, support)) return;
 
+  const point = support.worldPoint;
   beginPath(props, viewport);
   viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
-  ctx.fillCircle(a.toWorld(point, point), 0.06);
+  ctx.fillCircle(point, 0.06);
 }
 
 function beginPath(props: ContextProps, viewport: Viewport) {

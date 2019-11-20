@@ -19,15 +19,8 @@ export interface IShape extends IGeometry {
   props: ContextProps;
 
   getSupportInfo(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(direction: Vector, result?: Vector): Tristate<number | Vector>; // Local space.
-  // TODO: Check if binary searching angle is faster than searching by dot product.
-  // getSupport(radians: number, result?: Vector): Tristate<number | Vector>;
-  getSupportPoint(direction: Vector, result?: Vector): Tristate<Vector>; // Local space.
-  // getSupportPoint(radians: number, result?: Vector): Tristate<Vector>;
-  getSupportAxes(result?: ShapeAxis[]): ShapeAxis[]; // Local space.
-  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[]; // Local space.
-  getAxes(result?: Vector[]): Vector[]; // Local space.
-  getDynamicAxes(other: Shape, result?: Vector[]): Vector[]; // World space.
+  getSupportAxes(result?: ShapeAxis[]): ShapeAxis[];
+  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[];
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection>;
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;

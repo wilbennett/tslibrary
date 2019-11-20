@@ -103,11 +103,11 @@ const pairs: ShapePair[] = [
 pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
 
 pairs[0].first.setPosition(Vector.createPosition(2.5, 2.5));
-pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
-pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
-pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
-pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
-pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
+// pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
+// pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
+// pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
+// pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
+// pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(-0.5, 0.5));
 
@@ -173,7 +173,7 @@ function render() {
   viewport.applyTransform();
 
   const { first, second } = pairs[0];
-  const lineW = collider.isColliding(pairs[0]) ? 3 : 1;
+  const lineW = collider.isColliding(pairs[0]) ? 4 : 2;
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };
   second.render(viewport);
@@ -234,7 +234,6 @@ function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 }
 
-//*
 function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {
   const projection = shape.projectOn(axis.worldNormal);
 
