@@ -69,7 +69,7 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupportInfo(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
 
@@ -123,7 +123,7 @@ export abstract class ShapeBase implements IShape {
     return result;
   }
 
-  getSupportAxes(result?: ShapeAxis[]) {
+  getAxes(result?: ShapeAxis[]) {
     result || (result = []);
     const vertices = this.vertexList.items;
     const normals = this.normalList.items;
@@ -140,7 +140,7 @@ export abstract class ShapeBase implements IShape {
   }
 
   // @ts-ignore - unused param.
-  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]) { return result || EMPTY_SUPPORT_AXES; }
+  getDynamicAxes(other: Shape, result?: ShapeAxis[]) { return result || EMPTY_SUPPORT_AXES; }
 
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection> {
     const vertices = this.vertexList.items;

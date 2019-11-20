@@ -103,10 +103,10 @@ const pairs: ShapePair[] = [
 pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
 
 pairs[0].first.setPosition(Vector.createPosition(2.5, 2.5));
-// pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
-// pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
-// pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
-// pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
+pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
+pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
+pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
+pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(-0.5, 0.5));
@@ -283,10 +283,10 @@ function drawSat(shapes: ShapePair, view: Viewport) {
   const axesList = new UniqueShapeAxesList(true);
 
   axesList.addAxes([
-    ...first.getSupportAxes(),
-    ...second.getSupportAxes(),
-    ...first.getDynamicSupportAxes(second),
-    ...second.getDynamicSupportAxes(first),
+    ...first.getAxes(),
+    ...second.getAxes(),
+    ...first.getDynamicAxes(second),
+    ...second.getDynamicAxes(first),
   ]);
 
   const axes = axesList.items;

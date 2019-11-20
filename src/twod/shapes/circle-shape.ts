@@ -34,7 +34,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
-  getSupportInfo(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     result || (result = new SupportPoint(this));
 
     const point = axis.normal.scaleO(this.radius).asPosition();
@@ -47,7 +47,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     return result;
   }
 
-  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]) {
+  getDynamicAxes(other: Shape, result?: ShapeAxis[]) {
     result || (result = []);
     const posInOtherSpace = other.toLocal(this.position);
     const closestInOtherSpace = other.closestPoint(posInOtherSpace);

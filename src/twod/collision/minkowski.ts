@@ -24,8 +24,8 @@ export class Minkowski {
     const axisB = new ShapeAxis(second, second.toLocal(directionN));
     axisA.worldNormal = direction;
     axisB.worldNormal = directionN;
-    const spA = first.getSupportInfo(axisA);
-    const spB = second.getSupportInfo(axisB);
+    const spA = first.getSupport(axisA);
+    const spB = second.getSupport(axisB);
 
     if (!spA) return spA;
     if (!spB) return spB;

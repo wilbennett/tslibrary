@@ -32,8 +32,8 @@ export class SATSupport extends ColliderBase {
       const { first, second } = shapes;
       state = new SATSupportState();
       shapes.customData["satSupportState"] = state;
-      const axesA = first.getSupportAxes();
-      const axesB = second.getSupportAxes();
+      const axesA = first.getAxes();
+      const axesB = second.getAxes();
 
       if (axesA.length === 0 && !first.hasDynamicAxes || axesB.length === 0 && !second.hasDynamicAxes) {
         state.unsupported = true;
@@ -54,10 +54,10 @@ export class SATSupport extends ColliderBase {
     axesList.addAxes(state.axes);
 
     if (first.hasDynamicAxes)
-      axesList.addAxes(first.getDynamicSupportAxes(second));
+      axesList.addAxes(first.getDynamicAxes(second));
 
     if (second.hasDynamicAxes)
-      axesList.addAxes(second.getDynamicSupportAxes(first));
+      axesList.addAxes(second.getDynamicAxes(first));
 
     return axesList.items;
   }

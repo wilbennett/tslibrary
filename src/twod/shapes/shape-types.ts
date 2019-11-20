@@ -18,9 +18,9 @@ export interface IShape extends IGeometry {
   hasDynamicAxes: boolean;
   props: ContextProps;
 
-  getSupportInfo(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupportAxes(result?: ShapeAxis[]): ShapeAxis[];
-  getDynamicSupportAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[];
+  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
+  getAxes(result?: ShapeAxis[]): ShapeAxis[];
+  getDynamicAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[];
   projectOn(worldAxis: Vector, result?: Projection): Tristate<Projection>;
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;
