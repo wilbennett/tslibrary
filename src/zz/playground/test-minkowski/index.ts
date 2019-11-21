@@ -5,8 +5,8 @@ import { EaseRunner } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
 import {
-  MinkowskiDiffPolyShape,
   MinkowskiPoint,
+  MinkowskiPolyShape,
   PolygonShape,
   Shape,
   ShapeAxis,
@@ -119,13 +119,16 @@ function render() {
   const pair = pairs[0];
   const { first, second } = pair;
   const lineW = 1;
-  const poly = new MinkowskiDiffPolyShape(first, second);
+  const polys = new MinkowskiPolyShape(first, second, true);
+  const polyd = new MinkowskiPolyShape(first, second);
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };
-  poly.props = { strokeStyle: "brown", lineWidth: 3 };
+  polys.props = { strokeStyle: "green", lineWidth: 3 };
+  polyd.props = { strokeStyle: "brown", lineWidth: 3 };
   second.render(viewport);
   first.render(viewport);
-  poly.render(viewport);
+  polys.render(viewport);
+  polyd.render(viewport);
   drawShape1Vertices(first, viewport);
   drawShape2Vertices(second, viewport);
   drawMinkowskiDiff(pair, viewport);

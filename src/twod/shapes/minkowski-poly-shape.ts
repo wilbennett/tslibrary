@@ -3,19 +3,20 @@ import { IntegratorConstructor, normalizePolyCenter, populatePolyEdgeNormals } f
 import { VectorClass } from '../../vectors';
 import * as Minkowski from './minkowski';
 
-export class MinkowskiDiffPolyShape extends PolygonShapeBase implements IPolygonShape {
+export class MinkowskiPolyShape extends PolygonShapeBase implements IPolygonShape {
   kind: "polygon";
 
   constructor(
     first: Shape,
     second: Shape,
+    sum: boolean = false,
     integratorType?: IntegratorConstructor,
     vectorClass?: VectorClass) {
 
-    const msPoints = Minkowski.createDiff(first, second);
+    const msPoints = sum ? Minkowski.createSum(first, second) : Minkowski.createDiff(first, second);
 
     if (!msPoints)
-      throw new Error(`Minkoski diff not supported for ${first.constructor.name} ad ${second.constructor.name}`);
+      throw new Error(`Minkoski sum not supported for ${first.constructor.name} and ${second.constructor.name}`);
 
     const vertexCount = msPoints.length;
     const data = createPolyData(vertexCount, vectorClass);
