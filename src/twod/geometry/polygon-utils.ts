@@ -1,7 +1,44 @@
+import { isTriangleCW } from '.';
 import { MathEx } from '../../core';
 import { Vector, Vector2D, VectorCollection, VectorGroups } from '../../vectors';
 
 const { ONE_DEGREE } = MathEx;
+
+// Andrew's Algorithm: https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
+export function convexHull(vertices: Vector[]) {
+  const count = vertices.length;
+  vertices.sort((a, b) => a.x == b.x ? a.y - b.y : a.x - b.x);
+
+  const lower = [];
+
+  for (let i = 0; i < count; i++) {
+    let len = lower.length;
+
+    while (len >= 2 && isTriangleCW(lower[len - 2], lower[len - 1], vertices[i])) {
+      lower.pop();
+      len--;
+    }
+
+    lower.push(vertices[i]);
+  }
+
+  const upper = [];
+
+  for (let i = count - 1; i >= 0; i--) {
+    let len = upper.length;
+
+    while (len >= 2 && isTriangleCW(upper[len - 2], upper[len - 1], vertices[i])) {
+      upper.pop();
+      len--;
+    }
+
+    upper.push(vertices[i]);
+  }
+
+  upper.pop();
+  lower.pop();
+  return lower.concat(upper);
+}
 
 export function calcPolyArea(vertexList: VectorCollection) {
   const vertices = vertexList.items;
