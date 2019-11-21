@@ -3,6 +3,7 @@ export * from "./ease";
 export * from "./ease-manager";
 export * from "./easer";
 export * from "./typed-easer";
+export * from "./easer-adapter";
 export * from "./value-easer";
 export * from "./easer-decorator";
 export * from "./collection-easer";
