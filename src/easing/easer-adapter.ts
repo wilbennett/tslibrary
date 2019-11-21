@@ -4,6 +4,8 @@ import { Easer } from './easer';
 export class EaserAdapter extends TypedEaser<any> {
   constructor(public readonly easer: Easer) {
     super(easer.duration);
+
+    this.init();
   }
 
   get value() { return 0; }
