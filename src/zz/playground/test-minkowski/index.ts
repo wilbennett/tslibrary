@@ -178,12 +178,10 @@ function drawMinkowskiVertices(shapes: ShapePair, view: Viewport) {
 
     beginPath(props, view)
       .withFillStyle(colors[mp.indexA])
-      .withGlobalAlpha(mp.isInteriorPoint ? 0.25 : 1)
       .fillCircle(mp.point, 0.3);
 
     beginPath(props, view)
       .withStrokeStyle(colors[mp.indexB])
-      .withGlobalAlpha(mp.isInteriorPoint ? 0.25 : 1)
       .strokeCircle(mp.point, 0.5);
   }
 

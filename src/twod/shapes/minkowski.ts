@@ -12,8 +12,6 @@ export class MinkowskiPoint {
     public indexB: number,
     public direction: Vector) {
   }
-
-  isInteriorPoint = false;
 };
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
