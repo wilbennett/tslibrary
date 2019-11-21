@@ -34,18 +34,6 @@ export abstract class TypedEaser<T> extends Easer {
     return true;
   }
 
-  protected init() {
-    this._change = this.calcChange();
-    this._stepAmt = this.calcStepAmt();
-    this._steps = this.calcSteps();
-
-    // HACK: Allow elapsed time calculation when easer never ends.
-    if (isNaN(this._steps) || !isFinite(this._steps))
-      this._steps = Math.floor(Number.MAX_SAFE_INTEGER);
-
-    this.reset();
-  }
-
   protected abstract calcValue(percent: number): T;
   // @ts-ignore - unused param.
   protected setValue(value: T) { }
