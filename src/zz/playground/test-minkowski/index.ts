@@ -4,7 +4,14 @@ import { MathEx } from '../../../core';
 import { EaseRunner } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import { PolygonShape, Shape, ShapeAxis, UniqueShapeAxesList } from '../../../twod/shapes';
+import {
+  MinkowskiDiffPolyShape,
+  MinkowskiPoint,
+  PolygonShape,
+  Shape,
+  ShapeAxis,
+  UniqueShapeAxesList,
+} from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -112,13 +119,17 @@ function render() {
   const pair = pairs[0];
   const { first, second } = pair;
   const lineW = 1;
+  const poly = new MinkowskiDiffPolyShape(first, second);
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };
+  poly.props = { strokeStyle: "brown", lineWidth: 3 };
   second.render(viewport);
   first.render(viewport);
+  poly.render(viewport);
   drawShape1Vertices(first, viewport);
   drawShape2Vertices(second, viewport);
-  drawMinkowskiVertices(pair, viewport);
+  drawMinkowskiDiff(pair, viewport);
+  drawMinkowskiSum(pair, viewport);
 
   // drawSat(pair, viewport);
   viewport.restoreTransform();
@@ -154,27 +165,27 @@ function drawVertices(shape: Shape, props: ContextProps, view: Viewport) {
 }
 
 function drawShape1Vertices(shape: Shape, view: Viewport) {
-  const props: ContextProps = { fillStyle: "black", lineWidth: 2 };
+  const props: ContextProps = { fillStyle: "black", lineWidth: 2, lineDash: [] };
   drawVertices(shape, props, view);
 }
 
 function drawShape2Vertices(shape: Shape, view: Viewport) {
-  const props: ContextProps = { strokeStyle: "black", lineWidth: 2 };
+  const props: ContextProps = { strokeStyle: "black", lineWidth: 2, lineDash: [] };
   drawVertices(shape, props, view);
 }
 
-function drawMinkowskiVertices(shapes: ShapePair, view: Viewport) {
-  const { first, second } = shapes;
+function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, brush: Brush, view: Viewport) {
+  beginPath(props, view)
+    .withStrokeStyle(brush)
+    .withGlobalAlpha(1)
+    .poly(points.map(mp => mp.point), true)
+    .stroke();
 
-  let msPoints = Minkowski.createDiff(first, second);
-
-  if (!msPoints) return;
-
-  const props: ContextProps = { lineWidth: 2 };
-  const count = msPoints.length;
+  props.lineDash = [];
+  const count = points.length;
 
   for (let i = 0; i < count; i++) {
-    const mp = msPoints[i];
+    const mp = points[i];
 
     beginPath(props, view)
       .withFillStyle(colors[mp.indexA])
@@ -184,12 +195,24 @@ function drawMinkowskiVertices(shapes: ShapePair, view: Viewport) {
       .withStrokeStyle(colors[mp.indexB])
       .strokeCircle(mp.point, 0.5);
   }
+}
 
-  beginPath(props, view)
-    .withStrokeStyle("rebeccapurple")
-    .withGlobalAlpha(1)
-    .poly(msPoints.map(mp => mp.point), true)
-    .stroke();
+function drawMinkowskiSum(shapes: ShapePair, view: Viewport) {
+  const msPoints = Minkowski.createSum(shapes.first, shapes.second);
+
+  if (!msPoints) return;
+
+  const props: ContextProps = { lineWidth: 2, lineDash: [0.2, 0.5] };
+  drawMinkowskiVertices(msPoints, props, "orange", view);
+}
+
+function drawMinkowskiDiff(shapes: ShapePair, view: Viewport) {
+  let msPoints = Minkowski.createDiff(shapes.first, shapes.second);
+
+  if (!msPoints) return;
+
+  const props: ContextProps = { lineWidth: 2, lineDash: [0.2, 0.5] };
+  drawMinkowskiVertices(msPoints, props, "yellow", view);
 }
 
 function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {

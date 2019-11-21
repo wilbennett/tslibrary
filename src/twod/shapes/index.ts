@@ -12,3 +12,4 @@ export * from "./polygon-shape-base";
 export * from "./polygon-shape";
 export * from "./aabb-shape";
 export * from "./triangle-shape";
+export * from "./minkowski-diff-poly-shape";
