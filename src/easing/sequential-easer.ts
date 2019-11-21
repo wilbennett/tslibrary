@@ -1,12 +1,11 @@
-import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
+import { CollectionEaser, Easer, EaserCallback } from '.';
 
-export class SequentialEaser extends CollectionEaser<any> {
+export class SequentialEaser extends CollectionEaser {
   constructor(
-    easers: TypedEaser<any>[],
-    onValueChanged?: EaserValueCallback<any>,
+    easers: Easer[],
     onComplete?: EaserCallback
   ) {
-    super(easers, onValueChanged, onComplete);
+    super(easers, onComplete);
 
     this.init();
   }

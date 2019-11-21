@@ -1,19 +1,18 @@
-import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
+import { CollectionEaser, Easer, EaserCallback } from '.';
 
-export class ConcurrentEaser extends CollectionEaser<any> {
+export class ConcurrentEaser extends CollectionEaser {
   constructor(
-    easers: TypedEaser<any>[],
-    onValueChanged?: EaserValueCallback<any>,
+    easers: Easer[],
     onComplete?: EaserCallback
   ) {
-    super(easers, onValueChanged, onComplete);
+    super(easers, onComplete);
 
     let duration = this._easers.reduce((max, easer) => Math.max(max, easer.duration), 0);
     this._duration = duration;
     this.init();
   }
 
-  protected _pendingEasers: TypedEaser<any>[] = [];
+  protected _pendingEasers: Easer[] = [];
 
   reset() {
     super.reset();

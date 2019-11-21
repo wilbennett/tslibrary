@@ -1,13 +1,12 @@
-import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
+import { CollectionEaser, Easer, EaserCallback } from '.';
 
-export class RandomEaser extends CollectionEaser<any> {
+export class RandomEaser extends CollectionEaser {
   constructor(
-    easers: TypedEaser<any>[],
+    easers: Easer[],
     public randomOnReset: boolean = false,
-    onValueChanged: EaserValueCallback<any> = () => { },
     onComplete: EaserCallback = () => { }
   ) {
-    super(easers, onValueChanged, onComplete);
+    super(easers, onComplete);
 
     this.chooseRandom();
   }

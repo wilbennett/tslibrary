@@ -1,14 +1,11 @@
-import { EaserCallback, EaserValueCallback, TypedEaser } from '.';
+import { Easer, EaserCallback } from '.';
 
-export abstract class CollectionEaser<T> extends TypedEaser<T> {
+export abstract class CollectionEaser extends Easer {
   constructor(
-    protected _easers: TypedEaser<T>[],
-    onValueChanged: EaserValueCallback<T> = () => { },
+    protected _easers: Easer[],
     onComplete: EaserCallback = () => { }
   ) {
     super(1, onComplete);
-
-    this.onValueChanged = onValueChanged;
 
     let duration = _easers.reduce((sum, easer) => sum + easer.duration, 0);
     duration += (_easers.length - 1) * this._secondsPerFrame;
@@ -18,9 +15,9 @@ export abstract class CollectionEaser<T> extends TypedEaser<T> {
   protected _easeIndex: number = 0;
   get easer() { return this._easers[this._easeIndex]; }
   get ease() { return this.easer.ease; }
-  get value() { return this.easer.value; }
-  get start() { return this.easer.start; }
-  get end() { return this.easer.end; }
+  // get value() { return this.easer.value; }
+  // get start() { return this.easer.start; }
+  // get end() { return this.easer.end; }
 
   reset() {
     super.reset();
@@ -36,7 +33,19 @@ export abstract class CollectionEaser<T> extends TypedEaser<T> {
 
   protected _iterationsRun = 0;
 
-  moveNext() { return super.moveNext(); }
+  moveNext() {
+    if (this._isComplete) {
+      this.notifyComplete();
+      return false;
+    }
+
+    this._stepsRemain--;
+    this._percent = this._stepsRemain > 0 ? this._percent + this._stepAmt : 1;
+    this._percent = Math.min(this._percent, 1);
+    this._isComplete = this.calcComplete();
+
+    return true;
+  }
 
   protected nextEaser() {
     if (this._easeIndex >= this._easers.length - 1) return;
