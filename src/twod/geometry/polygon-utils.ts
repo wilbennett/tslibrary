@@ -60,27 +60,27 @@ export function movePoly(vertexList: VectorCollection, currentCenter: Vector, ne
   offsetPoly(vertexList, newCenter.subO(currentCenter));
 }
 
-export function normalizePolyCenter(vertexList: VectorCollection, areaMaxRadius?: [number, number]) {
+export function normalizePolyCenter(vertexList: VectorCollection, radiusCenterArea?: [number, Vector, number]) {
   const vertices = vertexList.items;
   const vertexCount = vertices.length;
 
   const [center, area] = calcPolyCenterArea(vertexList);
-  center.withW(0);
-  let max = 0;
+  let maxRadius = 0;
 
   for (let i = 0; i < vertexCount; i++) {
-    const vertex = vertices[i].sub(center);
+    const vertex = vertices[i].displaceByNeg(center);
     const magSquared = vertex.magSquared;
 
-    if (magSquared > max) {
-      max = magSquared;
+    if (magSquared > maxRadius) {
+      maxRadius = magSquared;
     }
   }
 
-  areaMaxRadius = areaMaxRadius || [0, 0];
-  areaMaxRadius[0] = area;
-  areaMaxRadius[1] = Math.sqrt(max);
-  return areaMaxRadius;
+  radiusCenterArea || (radiusCenterArea = [0, Vector.create(), 0]);
+  radiusCenterArea[0] = Math.sqrt(maxRadius);
+  radiusCenterArea[1] = center;
+  radiusCenterArea[2] = area;
+  return radiusCenterArea;
 }
 
 export function generateRegularPoly(vertexList: VectorCollection, radius: number, startAngle: number = 0) {
@@ -122,7 +122,7 @@ export function generateIrregularPoly(vertexList: VectorCollection, radius: numb
     index++;
   }
 
-  const [area, maxRadius] = normalizePolyCenter(vertexList);
+  const [maxRadius, , area] = normalizePolyCenter(vertexList);
   const scale = radius / maxRadius;
 
   for (i = 0; i < vertexCount; i++) {
