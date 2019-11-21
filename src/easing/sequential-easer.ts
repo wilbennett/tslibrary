@@ -1,9 +1,9 @@
 import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
 
-export class SequentialEaser<T> extends CollectionEaser<T> {
+export class SequentialEaser extends CollectionEaser<any> {
   constructor(
-    easers: TypedEaser<T>[],
-    onValueChanged?: EaserValueCallback<T>,
+    easers: TypedEaser<any>[],
+    onValueChanged?: EaserValueCallback<any>,
     onComplete?: EaserCallback
   ) {
     super(easers, onValueChanged, onComplete);

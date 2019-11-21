@@ -1,10 +1,10 @@
 import { CollectionEaser, EaserCallback, EaserValueCallback, TypedEaser } from '.';
 
-export class RandomEaser<T> extends CollectionEaser<T> {
+export class RandomEaser extends CollectionEaser<any> {
   constructor(
-    easers: TypedEaser<T>[],
+    easers: TypedEaser<any>[],
     public randomOnReset: boolean = false,
-    onValueChanged: EaserValueCallback<T> = () => { },
+    onValueChanged: EaserValueCallback<any> = () => { },
     onComplete: EaserCallback = () => { }
   ) {
     super(easers, onValueChanged, onComplete);
