@@ -108,7 +108,12 @@ export function createVertices(
   }
 
   convexHull(result, stateCallback, result);
-  stateCallback && stateCallback(state!);
+
+  if (state) {
+    state[1] = result;
+    stateCallback!(state);
+  }
+
   return result;
 }
 
