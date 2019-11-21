@@ -3,15 +3,24 @@ import { isTriangleCW } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
 
+const ZERO_DIRECTION = Vector.createDirection(0, 0);
+
 export class MinkowskiPoint {
   constructor(
+    public shapeA: Shape,
+    public shapeB: Shape,
     public point: Vector,
-    public pointA: Vector,
-    public pointB: Vector,
+    public worldPointA: Vector,
+    public worldPointB: Vector,
     public indexA: number,
     public indexB: number,
-    public direction: Vector) {
+    public worldDirection: Vector = ZERO_DIRECTION) {
   }
+
+  get pointA() { return this.shapeA.vertexList.items[this.indexA]; }
+  get pointB() { return this.shapeB.vertexList.items[this.indexB]; }
+  get directionA() { return this.shapeA.toLocal(this.worldDirection); }
+  get directionB() { return this.shapeB.toLocal(this.worldDirection.negateO()); }
 };
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
@@ -63,7 +72,7 @@ export function getPoint(first: Shape, second: Shape, worldDirection: Vector): T
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
-  return new MinkowskiPoint(point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
+  return new MinkowskiPoint(first, second, point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
 }
 
 export function createVertices(
@@ -78,7 +87,6 @@ export function createVertices(
 
   if (vertexCountA === 0 || vertexCountB === 0) return undefined;
 
-  const zeroDirection = Vector.createDirection(0, 0);
   result || (result = []);
 
   for (let a = 0; a < vertexCountA; a++) {
@@ -86,7 +94,7 @@ export function createVertices(
       const pointA = first.toWorld(verticesA[a]);
       const pointB = second.toWorld(verticesB[b]);
       const point = op(pointA, pointB);
-      const mp = new MinkowskiPoint(point, pointA, pointB, a, b, zeroDirection);
+      const mp = new MinkowskiPoint(first, second, point, pointA, pointB, a, b);
       result.push(mp);
     }
   }
