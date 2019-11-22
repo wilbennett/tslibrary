@@ -1,4 +1,4 @@
-import { ICircleShape, MinkowskiPoint, Shape } from '.';
+import { CircleShape, ICircleShape, MinkowskiPoint, PolygonShape, Shape } from '.';
 import { isTriangleCW } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -308,4 +308,39 @@ export function createDiff(
   circleSegments: number = circleSegmentCount,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
   return createVertices((a, b) => a.displaceByNegO(b), first, second, stateCallback, circleSegments, result);
+}
+
+export function createPoly(
+  first: Shape,
+  second: Shape,
+  op: MinkowskiOperation,
+  stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+  if (first.kind === "circle" && second.kind === "circle") {
+    const radius = first.radius + second.radius;
+    const position = op(first.position, second.position);
+    const circle = new CircleShape(radius, true);
+    circle.setPosition(position);
+    return circle;
+  }
+
+  const vertices = createVertices(op, first, second, stateCallback, circleSegments);
+  const poly = vertices && new PolygonShape(vertices.map(v => v.point), true);
+  return poly;
+}
+
+export function createSumPoly(
+  first: Shape,
+  second: Shape,
+  stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+  return createPoly(first, second, (a, b) => a.displaceByO(b), stateCallback, circleSegments);
+}
+
+export function createDiffPoly(
+  first: Shape,
+  second: Shape,
+  stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+  return createPoly(first, second, (a, b) => a.displaceByNegO(b), stateCallback, circleSegments);
 }

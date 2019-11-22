@@ -1,10 +1,10 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
-import { MathEx } from '../../../core';
+import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import { CircleShape, MinkowskiPoint, MinkowskiPolyShape, PolygonShape, Shape } from '../../../twod/shapes';
+import { CircleShape, MinkowskiPoint, PolygonShape, Shape } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -46,8 +46,8 @@ const gridSize = 20;
 let angle = 0;
 // const duration = 5;
 let isDirty = true;
-let showStates = true;
-// let showStates = false;
+// let showStates = true;
+let showStates = false;
 Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
 
 const graph = new Graph(ctx.bounds, gridSize);
@@ -77,8 +77,8 @@ const pairs: ShapePair[] = [
 
 let pairIndex = -1;
 let pair: ShapePair | null = null;
-let polys: MinkowskiPolyShape | null = null;
-let polyd: MinkowskiPolyShape | null = null;
+let polys: Tristate<Shape> = null;
+let polyd: Tristate<Shape> = null;
 let sumStates: Minkowski.MinkowskiPointsState[] = [];
 let diffStates: Minkowski.MinkowskiPointsState[] = [];
 let sumState: Minkowski.MinkowskiPointsState | null = null;
@@ -178,15 +178,6 @@ function beginPath(props: ContextProps, view: Viewport) {
 }
 
 function createMinkowskiStates() {
-  if (stateAnim)
-    runner.remove(stateAnim);
-
-  stateAnim = null;
-  sumStates = [];
-  diffStates = [];
-  sumState = null;
-  diffState = null;
-
   if (!pair) return;
 
   Minkowski.createSum(pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
@@ -224,6 +215,14 @@ function createMinkowskiStates() {
 }
 
 function createPolyShapes() {
+  if (stateAnim)
+    runner.remove(stateAnim);
+
+  stateAnim = null;
+  sumStates = [];
+  diffStates = [];
+  sumState = null;
+  diffState = null;
   pair = null;
   polys = null;
   polyd = null;
@@ -242,12 +241,12 @@ function createPolyShapes() {
     const { first, second } = pair;
 
     try {
-      polys = new MinkowskiPolyShape(first, second, true);
-      polyd = new MinkowskiPolyShape(first, second);
+      polys = Minkowski.createSumPoly(first, second);
+      polyd = Minkowski.createDiffPoly(first, second);
       first.props = { strokeStyle: colors[0], lineWidth: lineW };
       second.props = { strokeStyle: refBrush, lineWidth: lineW };
-      polys.props = { strokeStyle: "brown", lineWidth: 3 };
-      polyd.props = { strokeStyle: "green", lineWidth: 3 };
+      polys && (polys.props = { strokeStyle: "brown", lineWidth: 3 });
+      polyd && (polyd.props = { strokeStyle: "green", lineWidth: 3 });
 
       createMinkowskiStates();
       isDirty = true;
