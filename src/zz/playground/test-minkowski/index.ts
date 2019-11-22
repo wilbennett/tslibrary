@@ -1,17 +1,10 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
-import { EaseRunner } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
+import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
+import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import {
-  MinkowskiPoint,
-  MinkowskiPolyShape,
-  PolygonShape,
-  Shape,
-  ShapeAxis,
-  UniqueShapeAxesList,
-} from '../../../twod/shapes';
+import { CircleShape, MinkowskiPoint, MinkowskiPolyShape, PolygonShape, Shape } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -52,15 +45,35 @@ const screenBounds = ctx.bounds;
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
+let isDirty = true;
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
 const poly2 = new PolygonShape([pos(7, 3), pos(10, 2), pos(12, 7), pos(5, 7)]);
+const poly3 = new PolygonShape(5, 3);
+poly3.setPosition(Vector.createPosition(3.0, 3.0));
+const circle1 = new CircleShape(3);
+circle1.setPosition(Vector.createPosition(3.0, 3.0));
 
 const pairs: ShapePair[] = [
+  new ShapePair(circle1, poly2),
+  new ShapePair(poly3, poly2),
+  new ShapePair(poly2, poly3),
   new ShapePair(poly1, poly2),
   new ShapePair(poly2, poly1),
 ]
+
+let pairIndex = -1;
+let pair: ShapePair | null = null;
+let polys: MinkowskiPolyShape | null = null;
+let polyd: MinkowskiPolyShape | null = null;
+let sumStates: Minkowski.MinkowskiPointsState[] = [];
+let diffStates: Minkowski.MinkowskiPointsState[] = [];
+let sumState: Minkowski.MinkowskiPointsState | null = null;
+let diffState: Minkowski.MinkowskiPointsState | null = null;
+let stateAnim: Easer | null = null;
+
+const delay = new DelayEaser(2);
 
 // pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
 
@@ -80,13 +93,9 @@ const pairs: ShapePair[] = [
 
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
-runner.add(
-  // vector1Rotate.repeat(Infinity),
-  // point1Rotate.pingPong().repeat(Infinity),
-  // rotateShapes.repeat(Infinity),
-);
 
 drawGraph();
+createPolyShapes();
 loop.start();
 runner.start();
 
@@ -103,40 +112,46 @@ function drawGraph() {
   ctxb.restore();
 }
 
-function render() {
-  loop.stop();
-  ctx.beginPath().clearRect(ctx.bounds);
-
+function applyTransform() {
   ctx
     .save()
     .translate(screenBounds.center)
     .rotateDegrees(angle)
     .translate(screenBounds.center.negateO());
+}
 
-  const viewport = graph.getViewport(ctx);
-  viewport.applyTransform();
-
-  const pair = pairs[0];
-  const { first, second } = pair;
-  const lineW = 1;
-  const polys = new MinkowskiPolyShape(first, second, true);
-  const polyd = new MinkowskiPolyShape(first, second);
-  first.props = { strokeStyle: colors[0], lineWidth: lineW };
-  second.props = { strokeStyle: refBrush, lineWidth: lineW };
-  polys.props = { strokeStyle: "green", lineWidth: 3 };
-  polyd.props = { strokeStyle: "brown", lineWidth: 3 };
-  second.render(viewport);
-  first.render(viewport);
-  polys.render(viewport);
-  polyd.render(viewport);
-  drawShape1Vertices(first, viewport);
-  drawShape2Vertices(second, viewport);
-  drawMinkowskiDiff(pair, viewport);
-  drawMinkowskiSum(pair, viewport);
-
-  // drawSat(pair, viewport);
-  viewport.restoreTransform();
+function restoreTransform() {
   ctx.restore();
+}
+
+function render() {
+  // loop.stop();
+
+  if (!isDirty) return;
+
+  isDirty = false;
+  ctx.beginPath().clearRect(ctx.bounds);
+  applyTransform();
+
+  const view = graph.getViewport(ctx);
+  view.applyTransform();
+
+  if (pair) {
+    const { first, second } = pair;
+    second.render(view);
+    first.render(view);
+    polys && polys.render(view);
+    polyd && polyd.render(view);
+    drawShape1Vertices(first, view);
+    drawShape2Vertices(second, view);
+  }
+
+  sumState && drawState(sumState, view, sumState === sumStates[sumStates.length - 1]);
+  diffState && drawState(diffState, view, diffState === diffStates[diffStates.length - 1]);
+
+  // pair && drawSat(pair, view);
+  view.restoreTransform();
+  restoreTransform();
 }
 
 function pos(x: number, y: number) { return Vector.createPosition(x, y); }
@@ -148,6 +163,89 @@ function getLineWidth(props: ContextProps, viewport: Viewport) {
 function beginPath(props: ContextProps, view: Viewport) {
   view.ctx.beginPath().withGlobalAlpha(1).withProps(props).withLineWidth(getLineWidth(props, view));
   return view.ctx;
+}
+
+function createMinkowskiStates() {
+  if (stateAnim)
+    runner.remove(stateAnim);
+
+  stateAnim = null;
+  sumStates = [];
+  diffStates = [];
+  sumState = null;
+  diffState = null;
+
+  if (!pair) return;
+
+  Minkowski.createSum(pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
+  Minkowski.createDiff(pair.first, pair.second, s => diffStates.push([[...s[0]], [...s[1]]]));
+  const anims: Easer[] = [];
+
+  if (diffStates.length > 0) {
+    const anim = new ArrayEaser(diffStates, diffStates.length * 0.2, Ease.linear, v => {
+      diffState = v;
+      isDirty = true;
+    });
+
+    anims.push(anim);
+  }
+
+  if (sumStates.length > 0) {
+    const anim = new ArrayEaser(sumStates, sumStates.length * 0.2, Ease.linear, v => {
+      sumState = v;
+      isDirty = true;
+    });
+
+    anims.push(anim);
+  }
+
+  if (anims.length === 0) return;
+
+  stateAnim = new SequentialEaser([new ConcurrentEaser(anims), delay]).onCompleted(() => createPolyShapes());
+  runner.add(stateAnim);
+}
+
+function createPolyShapes() {
+  pair = null;
+  polys = null;
+  polyd = null;
+  const lineW = 1;
+
+  if (pairs.length === 0) return;
+
+  let i = pairs.length;
+
+  while (i-- > 0) {
+    pair = null;
+    polys = null;
+    polyd = null;
+    pairIndex = (pairIndex + 1) % pairs.length;
+    pair = pairs[pairIndex];
+    const { first, second } = pair;
+
+    try {
+      polys = new MinkowskiPolyShape(first, second, true);
+      polyd = new MinkowskiPolyShape(first, second);
+      first.props = { strokeStyle: colors[0], lineWidth: lineW };
+      second.props = { strokeStyle: refBrush, lineWidth: lineW };
+      polys.props = { strokeStyle: "green", lineWidth: 3 };
+      polyd.props = { strokeStyle: "brown", lineWidth: 3 };
+
+      createMinkowskiStates();
+      break;
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+}
+
+function drawState(state: Minkowski.MinkowskiPointsState, view: Viewport, closePoly: boolean = false) {
+  const [points, vertices] = state;
+  const props: ContextProps = { strokeStyle: "black", lineWidth: 5 };
+
+  vertices.length > 0 && drawMinkowskiPoly(vertices, props, view, closePoly);
+  props.lineDash = [];
+  drawMinkowskiVertices(points, props, view);
 }
 
 function drawVertices(shape: Shape, props: ContextProps, view: Viewport) {
@@ -177,14 +275,7 @@ function drawShape2Vertices(shape: Shape, view: Viewport) {
   drawVertices(shape, props, view);
 }
 
-function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, brush: Brush, view: Viewport) {
-  beginPath(props, view)
-    .withStrokeStyle(brush)
-    .withGlobalAlpha(1)
-    .poly(points.map(mp => mp.point), true)
-    .stroke();
-
-  props.lineDash = [];
+function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, view: Viewport) {
   const count = points.length;
 
   for (let i = 0; i < count; i++) {
@@ -200,24 +291,14 @@ function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, br
   }
 }
 
-function drawMinkowskiSum(shapes: ShapePair, view: Viewport) {
-  const msPoints = Minkowski.createSum(shapes.first, shapes.second);
-
-  if (!msPoints) return;
-
-  const props: ContextProps = { lineWidth: 2, lineDash: [0.2, 0.5] };
-  drawMinkowskiVertices(msPoints, props, "orange", view);
+function drawMinkowskiPoly(points: MinkowskiPoint[], props: ContextProps, view: Viewport, close: boolean = true) {
+  beginPath(props, view)
+    .withGlobalAlpha(1)
+    .poly(points.map(mp => mp.point), close)
+    .stroke();
 }
 
-function drawMinkowskiDiff(shapes: ShapePair, view: Viewport) {
-  let msPoints = Minkowski.createDiff(shapes.first, shapes.second);
-
-  if (!msPoints) return;
-
-  const props: ContextProps = { lineWidth: 2, lineDash: [0.2, 0.5] };
-  drawMinkowskiVertices(msPoints, props, "yellow", view);
-}
-
+/*
 function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {
   const projection = shape.projectOn(axis.worldNormal);
 
@@ -286,3 +367,4 @@ function drawSat(shapes: ShapePair, view: Viewport) {
   axesLines.forEach(a => a.render(view));
   axes.forEach((a, i) => drawProjection(shapes, a, axesLines[i], view));
 }
+//*/
