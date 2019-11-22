@@ -852,9 +852,11 @@ export abstract class Vector {
   }
 }
 
-export const position = Vector.position;
-export const direction = Vector.direction;
-export const pos = Vector.position;
-export const dir = Vector.direction;
+// TODO: Need to figure out issue with creating these as aliases.
+// Probably just module loading order causing the constants to be seen unpopulated.
+export function position(x?: number, y?: number, z?: number) { return Vector.position(x, y, z); }
+export function direction(x?: number, y?: number, z?: number) { return Vector.direction(x, y, z); }
+export function pos(x?: number, y?: number, z?: number) { return Vector.position(x, y, z); }
+export function dir(x?: number, y?: number, z?: number) { return Vector.direction(x, y, z); }
 
 export function normal(x: number, y: number, z: number = 0) { return Vector.direction(x, y, z).normalize(); }
