@@ -7,7 +7,7 @@ import { ShapePair } from '../../../twod/collision';
 import { CircleShape, MinkowskiPoint, PolygonShape, Shape, SupportPoint } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
-import { Vector } from '../../../vectors';
+import { normal, pos, Vector } from '../../../vectors';
 
 // const { ONE_DEGREE } = MathEx;
 
@@ -166,10 +166,6 @@ function render() {
   view.restoreTransform();
   restoreTransform();
 }
-
-function pos(x: number, y: number) { return Vector.position(x, y); }
-// function dir(x: number, y: number) { return Vector.createDirection(x, y); }
-function normal(x: number, y: number) { return Vector.direction(x, y).normalize(); }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
