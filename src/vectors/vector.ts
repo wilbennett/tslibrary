@@ -53,11 +53,11 @@ export abstract class Vector {
     return new this.instanceConstructor(x, y, z, w);
   }
 
-  static createPosition(x: number = 0, y: number = 0, z: number = 0) {
+  static position(x: number = 0, y: number = 0, z: number = 0) {
     return new this.instanceConstructor(x, y, z, 1);
   }
 
-  static createDirection(x: number = 0, y: number = 0, z: number = 0) {
+  static direction(x: number = 0, y: number = 0, z: number = 0) {
     return new this.instanceConstructor(x, y, z, 0);
   }
 
@@ -821,9 +821,10 @@ export abstract class Vector {
   // @ts-ignore - unused param.
   renderCore(viewport: Viewport, origin: Vector) { }
 
+  // TODO: Move to separate renderer class.
   // @ts-ignore - unused param.
   render(viewport: Viewport, origin?: Vector, props?: ContextProps) {
-    origin = origin || Vector.createPosition(0, 0);
+    origin = origin || Vector.position(0, 0);
     props = props || { strokeStyle: "black", fillStyle: "black" };
     let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
     viewport.ctx.withProps(props).withLineWidth(lineWidth);
@@ -850,3 +851,10 @@ export abstract class Vector {
     return instance;
   }
 }
+
+export const position = Vector.position;
+export const direction = Vector.direction;
+export const pos = Vector.position;
+export const dir = Vector.direction;
+
+export function normal(x: number, y: number, z: number = 0) { return Vector.direction(x, y, z).normalize(); }

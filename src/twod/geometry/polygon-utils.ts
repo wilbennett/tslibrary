@@ -63,7 +63,7 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
   const vertexCount = vertices.length;
 
   let area = 0;
-  let sum = Vector.createDirection(0, 0);
+  let sum = Vector.direction(0, 0);
   let temp = Vector.create(0, 0);
 
   for (let i = 0; i < vertexCount; i++) {
@@ -77,7 +77,7 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
 
   area *= 0.5;
 
-  result = result || [Vector.createPosition(0, 0), 0];
+  result = result || [Vector.position(0, 0), 0];
   sum.scale(1 / (6 * area)).withWO(1, result[0]);
   result[1] = area;
   return result;
@@ -143,7 +143,7 @@ export function generateIrregularPoly(vertexList: VectorCollection, radius: numb
   let remain = 360;
   let i = vertexCount;
   let index = 0;
-  let center = Vector.createPosition(0, 0);
+  let center = Vector.position(0, 0);
   let point = Vector2D.fromRadians(startAngle, radius, 1);
 
   while (remain > 0 && i > 0) {

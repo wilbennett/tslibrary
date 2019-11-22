@@ -96,7 +96,7 @@ export function calcCircleVertices(
   result.length = segmentCount;
 
   const center = circle.position;
-  let point = Vector.createPosition(center.x + circle.radius, center.y);
+  let point = Vector.position(center.x + circle.radius, center.y);
   let step = 360 / segmentCount * ONE_DEGREE;
 
   for (let i = 0; i < segmentCount; i++) {
@@ -159,7 +159,7 @@ export function circleCircle(
 
   const center1 = circle1.position;
   const radius1 = circle1.radius;
-  let circle1Point = Vector.createPosition(center1.x + radius1, center1.y);
+  let circle1Point = Vector.position(center1.x + radius1, center1.y);
   let step = 360 / segmentCount * ONE_DEGREE;
   let circle2Vertices = calcCircleVertices(circle2, segmentCount, new Array<Vector>(segmentCount));
 
@@ -204,7 +204,7 @@ export function circlePoly(
 
   polyVertices = polyVertices.map(v => poly.toWorld(v));
   const center = circle.position;
-  let circlePoint = Vector.createPosition(center.x + circle.radius, center.y);
+  let circlePoint = Vector.position(center.x + circle.radius, center.y);
   let step = 360 / segmentCount * ONE_DEGREE;
 
   result || (result = []);

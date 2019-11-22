@@ -167,9 +167,9 @@ function render() {
   restoreTransform();
 }
 
-function pos(x: number, y: number) { return Vector.createPosition(x, y); }
+function pos(x: number, y: number) { return Vector.position(x, y); }
 // function dir(x: number, y: number) { return Vector.createDirection(x, y); }
-function normal(x: number, y: number) { return Vector.createDirection(x, y).normalize(); }
+function normal(x: number, y: number) { return Vector.direction(x, y).normalize(); }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);

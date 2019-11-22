@@ -46,6 +46,6 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     const end = dir.negateO().asPosition();
 
     view.ctx.beginPath().line(start, end).stroke();
-    this.normal.render(view, Vector.createPosition(0, 0), props);
+    this.normal.render(view, Vector.position(0, 0), props);
   }
 }

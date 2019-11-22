@@ -21,7 +21,7 @@ export function calcIntersectPoint(a: Geometry, b: Geometry, result?: Vector): T
 export function calcPoint(t: Tristate<number>, start: Vector, direction: Vector, result?: Vector) {
   if (t === null || t === undefined) return t;
 
-  result = result || Vector.createPosition(0, 0);
+  result = result || Vector.position(0, 0);
   return start.addO(direction.scaleO(t), result);
 }
 

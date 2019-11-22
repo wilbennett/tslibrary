@@ -6,7 +6,7 @@ import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
-export const ORIGIN = Vector.createPosition(0, 0);
+export const ORIGIN = Vector.position(0, 0);
 
 export abstract class ShapeBase implements IShape {
   constructor() {

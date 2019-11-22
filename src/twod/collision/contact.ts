@@ -14,7 +14,7 @@ export class ContactPoint {
 // TODO: Add Contact ID.
 export class Contact {
   constructor(public shapes: ShapePair) {
-    this.normal = Vector.createDirection(0, 0);
+    this.normal = Vector.direction(0, 0);
     this.points = [];
   }
 

@@ -13,14 +13,14 @@ export class IntegratorBase extends Integrator {
     get material() { return this._material; }
     set material(value) { this._material = value; }
 
-    protected _position = Vector.createPosition(0, 0);
+    protected _position = Vector.position(0, 0);
     get position() { return this._position; }
     set position(value) {
         this._position = value;
         this.dirty();
     }
 
-    protected _acceleration = Vector.createDirection(0, 0);
+    protected _acceleration = Vector.direction(0, 0);
     get acceleration() { return this._acceleration; }
 
     protected _angle = 0;
@@ -41,7 +41,7 @@ export class IntegratorBase extends Integrator {
     dirty() { this._isDirty = true; }
     clean() { this._isDirty = false; }
 
-    protected _force = Vector.createDirection(0, 0);
+    protected _force = Vector.direction(0, 0);
     protected _torque = 0;
 
     applyForce(force: Vector) { this._force.add(force); }

@@ -3,7 +3,7 @@ import { TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 
 export class EulerSemiImplicit2 extends IntegratorBase {
-  private _velocity = Vector.createDirection(0, 0);
+  private _velocity = Vector.direction(0, 0);
   get velocity() { return this._velocity; }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {

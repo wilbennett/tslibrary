@@ -3,7 +3,7 @@ import { TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 
 export class VerletVelocity extends IntegratorBase {
-  protected _velocity = Vector.createDirection(0, 0);
+  protected _velocity = Vector.direction(0, 0);
   get velocity() { return this._velocity; }
   set velocity(value) {
     this._velocity = value;

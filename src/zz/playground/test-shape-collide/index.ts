@@ -49,7 +49,7 @@ const refBrush = "teal";
 MathEx.epsilon = 0.0001;
 Vector.tipDrawHeight = 0.5;
 const screenBounds = ctx.bounds;
-const origin = Vector.createPosition(0, 0);
+const origin = Vector.position(0, 0);
 const gridSize = 30;
 const radius = 2.5;
 const smallRadius = 1.5;
@@ -62,7 +62,7 @@ collider = new SimpleCollider();
 collider = new SATProjection();
 collider = new SATSupport();
 const collider2 = new SATProjection();
-const vector1 = Vector.createDirection(1, 0);
+const vector1 = Vector.direction(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle1 = new CircleShape(smallRadius);
 const circle2 = new CircleShape(radius);
@@ -70,11 +70,11 @@ const poly1 = new PolygonShape(5, smallRadius, 90 * ONE_DEGREE);
 const poly2 = new PolygonShape(5, radius, 90 * ONE_DEGREE);
 let poly3 = new PolygonShape(10, radius, 0, false);
 let poly4 = new PolygonShape(10, radius, 0, false);
-const aabb1 = new AABBShape(Vector.createDirection(smallRadius, smallRadius));
-const aabb2 = new AABBShape(Vector.createDirection(radius * 0.9, radius * 0.9));
+const aabb1 = new AABBShape(Vector.direction(smallRadius, smallRadius));
+const aabb2 = new AABBShape(Vector.direction(radius * 0.9, radius * 0.9));
 const triangle1 = new TriangleShape(smallRadius, 90 * ONE_DEGREE, true);
 const triangle2 = new TriangleShape(radius, 90 * ONE_DEGREE, true);
-const plane1 = new PlaneShape(Vector.createPosition(0, 2.5), Vector.createPosition(1, 3.5));
+const plane1 = new PlaneShape(Vector.position(0, 2.5), Vector.position(1, 3.5));
 
 // const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
@@ -102,13 +102,13 @@ const pairs: ShapePair[] = [
   new ShapePair(plane1, aabb1),
 ]
 
-pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
+pairs[0].second.setPosition(Vector.position(2.5, 2.5));
 
-pairs[0].first.setPosition(Vector.createPosition(2.5, 2.5));
-pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
-pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
-pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
-pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
+pairs[0].first.setPosition(Vector.position(2.5, 2.5));
+pairs[0].first.setPosition(Vector.position(2.5, 5.5));
+pairs[0].first.setPosition(Vector.position(2.5, 3.5));
+pairs[0].first.setPosition(Vector.position(1.5, 4.5));
+pairs[0].first.setPosition(Vector.position(1.5, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(-0.6, 0.5));
@@ -280,7 +280,7 @@ function drawProjection(pair: ShapePair, axis: ShapeAxis, axisLine: Line, view: 
 
 function createAxisLine(axis: ShapeAxis, radius: number) {
   const props: ContextProps = { strokeStyle: "black", lineDash: [0.5, 0.5], lineWidth: 2, globalAlpha: 0.5 };
-  const origin = Vector.createPosition(0, 0);
+  const origin = Vector.position(0, 0);
   const dir = axis.worldNormal.perpRightO().scale(radius);
   const line = new Line(origin, origin.displaceByO(axis.worldNormal));
   line.setPosition(dir.asPosition());

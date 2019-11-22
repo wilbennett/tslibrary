@@ -72,7 +72,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     // TODO: Need to account for world shapes?
     if (closestInOtherSpace.equals(ORIGIN)) {
       // If centers are at the same position, return an arbitrary normal.
-      normal = Vector.createDirection(0, 1);
+      normal = Vector.direction(0, 1);
     } else {
       const closest = other.toLocalOf(this, closestInOtherSpace);
       normal = closest.asDirection().normalize();

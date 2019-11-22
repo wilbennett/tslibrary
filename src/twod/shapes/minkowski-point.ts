@@ -1,7 +1,7 @@
 import { Shape } from '.';
 import { Vector } from '../../vectors';
 
-const ZERO_DIRECTION = Vector.createDirection(0, 0);
+const ZERO_DIRECTION = Vector.direction(0, 0);
 
 export class MinkowskiPoint {
   constructor(

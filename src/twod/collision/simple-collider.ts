@@ -69,7 +69,7 @@ function circleCalcContactCircle(a: ICircleShape, b: ICircleShape, contact: Cont
 
   if (distance === 0) {
     depth = a.radius + b.radius;
-    contact.normal = Vector.createDirection(0, 1);
+    contact.normal = Vector.direction(0, 1);
   } else {
     depth = totalRadius - distance;
     contact.normal = ba.div(distance);

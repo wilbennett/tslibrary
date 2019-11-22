@@ -73,7 +73,7 @@ export function circleClosestPoint(circle: ICircle, point: Vector, hullOnly: boo
 // Polygon.
 export function polygonClosestPoint(poly: IPolygonBase, point: Vector, hullOnly: boolean = false, result?: Vector) {
   // TODO: Optimize.
-  result = result || Vector.createPosition(0, 0);
+  result = result || Vector.position(0, 0);
 
   if (!hullOnly && polygonContainsPoint(poly, point)) return result.copyFrom(point);
 
@@ -100,7 +100,7 @@ export function polygonClosestPoint(poly: IPolygonBase, point: Vector, hullOnly:
 
 // AABB.
 export function aabbClosestPoint(aabb: IAABB, point: Vector, hullOnly: boolean = false, result?: Vector) {
-  result = result || Vector.createPosition(0, 0);
+  result = result || Vector.position(0, 0);
   const position = aabb.position;
   const min = aabb.min;
   const max = aabb.max;

@@ -19,15 +19,15 @@ ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
 
 const screenBounds = ctx.bounds;
-const origin = Vector.createPosition(0, 0);
+const origin = Vector.position(0, 0);
 const gridSize = 50;
 let angle = 0;
 const duration = 5;
 Vector.tipDrawHeight = 0.2;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const vector1 = Vector.createPosition(1, 0);
-const vector2 = Vector.createDirection(-2, 0);
+const vector1 = Vector.position(1, 0);
+const vector2 = Vector.direction(-2, 0);
 const vector3 = vector2.normalizeO();
 
 const vector1Props = { strokeStyle: "red", fillStyle: "red" };

@@ -9,7 +9,7 @@ export abstract class PolygonBase extends GeometryBase implements IPolygonBase {
 
     this.vertexList = vertices;
     this.radius = radius;
-    this._position = Vector.createPosition(0, 0);
+    this._position = Vector.position(0, 0);
   }
 
   readonly vertexList: VectorCollection;

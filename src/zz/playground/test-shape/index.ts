@@ -40,28 +40,28 @@ const colors: Brush[] = [
 const refBrush = "teal";
 Vector.tipDrawHeight = 0.1;
 const screenBounds = ctx.bounds;
-const origin = Vector.createPosition(0, 0);
+const origin = Vector.position(0, 0);
 const gridSize = 50;
 let angle = 0;
 const duration = 5;
 
 const graph = new Graph(ctx.bounds, gridSize);
-const vector1 = Vector.createDirection(1, 0);
+const vector1 = Vector.direction(1, 0);
 // const point1 = Vector.createPosition(2, 0);
 const circle = new CircleShape(0.5);
-circle.setPosition(Vector.createPosition(2, 0.5));
+circle.setPosition(Vector.position(2, 0.5));
 const poly1 = new PolygonShape(5, 0.5, 90 * ONE_DEGREE);
-poly1.setPosition(Vector.createPosition(1.5, 1.5));
+poly1.setPosition(Vector.position(1.5, 1.5));
 let poly2: Shape;
 let poly3: Shape;
 let poly4: Shape;
-const aabb1 = new AABBShape(Vector.createDirection(0.4, 0.4));
-aabb1.setPosition(Vector.createPosition(-2, 0.5));
+const aabb1 = new AABBShape(Vector.direction(0.4, 0.4));
+aabb1.setPosition(Vector.position(-2, 0.5));
 const triangle1 = new TriangleShape(0.5, 90 * ONE_DEGREE, true);
-triangle1.setPosition(Vector.createPosition(-1.5, -0.5));
+triangle1.setPosition(Vector.position(-1.5, -0.5));
 let triangle2: Shape;
-const plane1 = new PlaneShape(Vector.createPosition(0, -1), Vector.createPosition(1, 0));
-plane1.setPosition(Vector.createPosition(1.5, -1.5));
+const plane1 = new PlaneShape(Vector.position(0, -1), Vector.position(1, 0));
+plane1.setPosition(Vector.position(1.5, -1.5));
 
 const vector1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
 // const point1Props = { strokeStyle: colors[0], fillStyle: colors[0] };
@@ -158,13 +158,13 @@ function addDynamicTesters() {
   shapes.remove(triangle2);
 
   poly2 = new PolygonShape(5, 0.5, 0, false);
-  poly2.setPosition(Vector.createPosition(0.5, 2));
+  poly2.setPosition(Vector.position(0.5, 2));
   poly3 = new PolygonShape(15, 0.5, 0, false);
-  poly3.setPosition(Vector.createPosition(-0.5, 2));
+  poly3.setPosition(Vector.position(-0.5, 2));
   poly4 = new PolygonShape(15, 0.5, 0, false);
-  poly4.setPosition(Vector.createPosition(-1.5, 1.5));
+  poly4.setPosition(Vector.position(-1.5, 1.5));
   triangle2 = new TriangleShape(0.5, 0, false);
-  triangle2.setPosition(Vector.createPosition(-0.5, -1.5));
+  triangle2.setPosition(Vector.position(-0.5, -1.5));
 
   poly2.props = { strokeStyle: refBrush };
   poly3.props = { strokeStyle: refBrush };

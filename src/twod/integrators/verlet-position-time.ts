@@ -3,14 +3,14 @@ import { TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 
 export class VerletPositionTime extends IntegratorBase {
-  protected _oldPosition = Vector.createPosition(0, 0);
+  protected _oldPosition = Vector.position(0, 0);
   get oldPosition() { return this._oldPosition; }
   set oldPosition(value) {
     this._oldPosition = value;
     this.dirty();
   }
 
-  protected _velocity = Vector.createDirection(0, 0);
+  protected _velocity = Vector.direction(0, 0);
   get velocity() { return this._velocity; }
   set velocity(value) {
     this._velocity = value;
