@@ -41,7 +41,7 @@ const refBrush = "teal";
 MathEx.epsilon = 0.0001;
 Vector.tipDrawHeight = 0.5;
 const screenBounds = ctx.bounds;
-// const origin = Vector.createPosition(0, 0);
+// const origin = pos(0, 0);
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
@@ -54,13 +54,13 @@ const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
 const poly2 = new PolygonShape([pos(7, 3), pos(10, 2), pos(12, 7), pos(5, 7)]);
 const poly3 = new PolygonShape(5, 2, 0 * Math.PI / 180);
-poly3.setPosition(Vector.createPosition(3.0, 3.0));
+poly3.setPosition(pos(3.0, 3.0));
 const poly4 = new PolygonShape(5, 2, 90 * Math.PI / 180);
-poly4.setPosition(Vector.createPosition(7.0, 6.0));
+poly4.setPosition(pos(7.0, 6.0));
 const circle1 = new CircleShape(2);
-circle1.setPosition(Vector.createPosition(3.0, 3.0));
+circle1.setPosition(pos(3.0, 3.0));
 const circle2 = new CircleShape(3);
-circle2.setPosition(Vector.createPosition(9.0, 6.0));
+circle2.setPosition(pos(9.0, 6.0));
 
 const pairs: ShapePair[] = [
   new ShapePair(circle1, circle2),
@@ -87,16 +87,16 @@ let stateAnim: Easer | null = null;
 
 const delay = new DelayEaser(2);
 
-// pairs[0].second.setPosition(Vector.createPosition(2.5, 2.5));
+// pairs[0].second.setPosition(pos(2.5, 2.5));
 
-// pairs[0].first.setPosition(Vector.createPosition(2.5, 2.5));
-// pairs[0].first.setPosition(Vector.createPosition(2.5, 5.5));
-// pairs[0].first.setPosition(Vector.createPosition(2.5, 3.5));
-// pairs[0].first.setPosition(Vector.createPosition(1.5, 4.5));
-// pairs[0].first.setPosition(Vector.createPosition(1.5, 0.5));
-// pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
-// pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
-// pairs[0].first.setPosition(Vector.createPosition(-0.6, 0.5));
+// pairs[0].first.setPosition(pos(2.5, 2.5));
+// pairs[0].first.setPosition(pos(2.5, 5.5));
+// pairs[0].first.setPosition(pos(2.5, 3.5));
+// pairs[0].first.setPosition(pos(1.5, 4.5));
+// pairs[0].first.setPosition(pos(1.5, 0.5));
+// pairs[0].first.setPosition(pos(4.0, 0.5));
+// pairs[0].first.setPosition(pos(5.0, 0.5));
+// pairs[0].first.setPosition(pos(-0.6, 0.5));
 
 // const fps = 60;
 // const secPerFrame = 1 / fps;
@@ -156,31 +156,7 @@ function render() {
     polyd && polyd.render(view);
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
-
-    const ms = [
-      Minkowski.createShape(first, second, true),
-      Minkowski.createShape(first, second, false)
-    ];
-
-    ms.forEach(s => {
-      if (s) {
-        const props: ContextProps = { fillStyle: "black" };
-        const support = new SupportPoint(s);
-        let radius = 1;
-
-        if (s.getSupport(normal(1, 0), support))
-          beginPath(props, view).withFillStyle(colors[0]).fillCircle(support.worldPoint, radius);
-
-        if (s.getSupport(normal(0, 1), support))
-          beginPath(props, view).withFillStyle(colors[1]).fillCircle(support.worldPoint, radius *= 0.8);
-
-        if (s.getSupport(normal(-1, 0), support))
-          beginPath(props, view).withFillStyle(colors[2]).fillCircle(support.worldPoint, radius *= 0.8);
-
-        if (s.getSupport(normal(0, -1), support))
-          beginPath(props, view).withFillStyle(colors[3]).fillCircle(support.worldPoint, radius *= 0.8);
-      }
-    });
+    drawMinkowskiSupports(pair, view);
   }
 
   sumState && drawState(sumState, view, sumState === sumStates[sumStates.length - 1]);
@@ -192,7 +168,7 @@ function render() {
 }
 
 function pos(x: number, y: number) { return Vector.createPosition(x, y); }
-function dir(x: number, y: number) { return Vector.createDirection(x, y); }
+// function dir(x: number, y: number) { return Vector.createDirection(x, y); }
 function normal(x: number, y: number) { return Vector.createDirection(x, y).normalize(); }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
@@ -282,6 +258,35 @@ function createPolyShapes() {
       console.log(e.message);
     }
   }
+}
+
+function drawMinkowskiSupports(shapes: ShapePair, view: Viewport) {
+  const { first, second } = shapes;
+
+  const ms = [
+    Minkowski.createShape(first, second, true),
+    Minkowski.createShape(first, second, false)
+  ];
+
+  ms.forEach(s => {
+    if (s) {
+      const props: ContextProps = { fillStyle: "black" };
+      const support = new SupportPoint(s);
+      let radius = 1;
+
+      if (s.getSupport(normal(1, 0), support))
+        beginPath(props, view).withFillStyle(colors[0]).fillCircle(support.worldPoint, radius);
+
+      if (s.getSupport(normal(0, 1), support))
+        beginPath(props, view).withFillStyle(colors[1]).fillCircle(support.worldPoint, radius *= 0.8);
+
+      if (s.getSupport(normal(-1, 0), support))
+        beginPath(props, view).withFillStyle(colors[2]).fillCircle(support.worldPoint, radius *= 0.8);
+
+      if (s.getSupport(normal(0, -1), support))
+        beginPath(props, view).withFillStyle(colors[3]).fillCircle(support.worldPoint, radius *= 0.8);
+    }
+  });
 }
 
 function drawState(state: Minkowski.MinkowskiPointsState, view: Viewport, closePoly: boolean = false) {
