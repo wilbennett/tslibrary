@@ -1,6 +1,7 @@
-import { CircleShape, ICircleShape, MinkowskiPoint, PolygonShape, Shape } from '.';
+import { CircleShape, ICircleShape, MinkowskiPoint, MinkowskiShape, PolygonShape, Shape } from '.';
 import { isTriangleCW } from '..';
 import { MathEx, Tristate } from '../../core';
+import { assertNever } from '../../utils';
 import { Vector } from '../../vectors';
 
 const { ONE_DEGREE } = MathEx;
@@ -343,4 +344,33 @@ export function createDiffPoly(
   stateCallback?: MinkowskiPointsCallback,
   circleSegments: number = circleSegmentCount): Tristate<Shape> {
   return createPoly(first, second, (a, b) => a.displaceByNegO(b), stateCallback, circleSegments);
+}
+
+export function createShape(first: Shape, second: Shape, isSum: boolean): Tristate<Shape> {
+  switch (first.kind) {
+    case "circle":
+    case "aabb":
+    case "polygon":
+    case "triangle": break;
+    case "plane": return undefined;
+    case "minkowski": return undefined;
+    default: return assertNever(first);
+  }
+  switch (second.kind) {
+    case "circle":
+    case "aabb":
+    case "polygon":
+    case "triangle": return new MinkowskiShape(first, second, isSum);
+    case "plane": return undefined;
+    case "minkowski": return undefined;
+    default: return assertNever(second);
+  }
+}
+
+export function createSumShape(first: Shape, second: Shape): Tristate<Shape> {
+  return createShape(first, second, true);
+}
+
+export function createDiffShape(first: Shape, second: Shape): Tristate<Shape> {
+  return createShape(first, second, false);
 }

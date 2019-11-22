@@ -7,6 +7,7 @@ export function shapeContainsPoint(shape: Shape, point: Vector, epsilon: number 
   switch (shape.kind) {
     case "circle": return circleShapeContainsPoint(shape, point, epsilon);
     case "polygon": return polygonShapeContainsPoint(shape, point, epsilon);
+    case "minkowski": return undefined;
     default: return containsPoint(shape, point, epsilon);
   }
 }

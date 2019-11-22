@@ -18,6 +18,7 @@ export interface IShape extends IGeometry {
   hasDynamicAxes: boolean;
   props: ContextProps;
 
+  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
   getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
   getAxes(result?: ShapeAxis[]): ShapeAxis[];
   getDynamicAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[];
@@ -28,6 +29,10 @@ export interface IShape extends IGeometry {
   toLocal(worldPoint: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
   // createWorldShape(): this;
+}
+
+export interface IMinkowskiShape extends IShape {
+  kind: "minkowski";
 }
 
 export interface ILineShape extends IShape, ILine {
@@ -58,6 +63,7 @@ export interface ITriangleShape extends IPolygonShapeBase, ITriangle {
 }
 
 export type Shape =
+  | IMinkowskiShape
   | IPlaneShape
   // | ILineShape
   // | IRayShape

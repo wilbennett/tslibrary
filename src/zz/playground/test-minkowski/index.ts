@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import { CircleShape, MinkowskiPoint, PolygonShape, Shape } from '../../../twod/shapes';
+import { CircleShape, MinkowskiPoint, PolygonShape, Shape, SupportPoint } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { Vector } from '../../../vectors';
@@ -53,11 +53,11 @@ Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
 const poly2 = new PolygonShape([pos(7, 3), pos(10, 2), pos(12, 7), pos(5, 7)]);
-const poly3 = new PolygonShape(5, 3, 0 * Math.PI / 180);
+const poly3 = new PolygonShape(5, 2, 0 * Math.PI / 180);
 poly3.setPosition(Vector.createPosition(3.0, 3.0));
-const poly4 = new PolygonShape(5, 3, 0 * Math.PI / 180);
-poly4.setPosition(Vector.createPosition(9.0, 6.0));
-const circle1 = new CircleShape(3);
+const poly4 = new PolygonShape(5, 2, 90 * Math.PI / 180);
+poly4.setPosition(Vector.createPosition(7.0, 6.0));
+const circle1 = new CircleShape(2);
 circle1.setPosition(Vector.createPosition(3.0, 3.0));
 const circle2 = new CircleShape(3);
 circle2.setPosition(Vector.createPosition(9.0, 6.0));
@@ -156,6 +156,31 @@ function render() {
     polyd && polyd.render(view);
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
+
+    const ms = [
+      Minkowski.createShape(first, second, true),
+      Minkowski.createShape(first, second, false)
+    ];
+
+    ms.forEach(s => {
+      if (s) {
+        const props: ContextProps = { fillStyle: "black" };
+        const support = new SupportPoint(s);
+        let radius = 1;
+
+        if (s.getSupport(normal(1, 0), support))
+          beginPath(props, view).withFillStyle(colors[0]).fillCircle(support.worldPoint, radius);
+
+        if (s.getSupport(normal(0, 1), support))
+          beginPath(props, view).withFillStyle(colors[1]).fillCircle(support.worldPoint, radius *= 0.8);
+
+        if (s.getSupport(normal(-1, 0), support))
+          beginPath(props, view).withFillStyle(colors[2]).fillCircle(support.worldPoint, radius *= 0.8);
+
+        if (s.getSupport(normal(0, -1), support))
+          beginPath(props, view).withFillStyle(colors[3]).fillCircle(support.worldPoint, radius *= 0.8);
+      }
+    });
   }
 
   sumState && drawState(sumState, view, sumState === sumStates[sumStates.length - 1]);
@@ -167,6 +192,8 @@ function render() {
 }
 
 function pos(x: number, y: number) { return Vector.createPosition(x, y); }
+function dir(x: number, y: number) { return Vector.createDirection(x, y); }
+function normal(x: number, y: number) { return Vector.createDirection(x, y).normalize(); }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);

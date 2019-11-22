@@ -34,16 +34,29 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
-  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
+  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
+  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     result || (result = new SupportPoint(this));
 
-    const point = axis.normal.scaleO(this.radius).asPosition();
+    let axisDirection: Vector;
+    let axisPoint: Vector;
+
+    if (param1 instanceof Vector) {
+      axisDirection = param1;
+      axisPoint = Vector.empty;
+    } else {
+      axisDirection = param1.normal;
+      axisPoint = param1.point;
+    }
+
+    const point = axisDirection.scaleO(this.radius).asPosition();
 
     result.clear();
     result.shape = this;
     result.point = point;
     result.index = -1;
-    result.distance = !axis.point.isEmpty ? point.subO(axis.point).dot(axis.normal) : point.dot(axis.normal);
+    result.distance = !axisPoint.isEmpty ? point.subO(axisPoint).dot(axisDirection) : point.dot(axisDirection);
     return result;
   }
 

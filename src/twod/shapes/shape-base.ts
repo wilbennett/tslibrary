@@ -69,14 +69,25 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
+  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
+  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
 
     if (vertexCount === 0) return undefined;
 
-    const axisPoint = axis.point;
-    const axisDirection = axis.normal;
+    let axisDirection: Vector;
+    let axisPoint: Vector;
+
+    if (param1 instanceof Vector) {
+      axisDirection = param1;
+      axisPoint = Vector.empty;
+    } else {
+      axisDirection = param1.normal;
+      axisPoint = param1.point;
+    }
+
     const pointToVertex = Vector.create();
     const hasAxisPoint = !axisPoint.isEmpty;
     let bestVertex = vertices[0];
