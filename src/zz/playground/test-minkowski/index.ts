@@ -46,17 +46,29 @@ const gridSize = 20;
 let angle = 0;
 // const duration = 5;
 let isDirty = true;
+let showStates = true;
+// let showStates = false;
+Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
 const poly2 = new PolygonShape([pos(7, 3), pos(10, 2), pos(12, 7), pos(5, 7)]);
-const poly3 = new PolygonShape(5, 3);
+const poly3 = new PolygonShape(5, 3, 0 * Math.PI / 180);
 poly3.setPosition(Vector.createPosition(3.0, 3.0));
+const poly4 = new PolygonShape(5, 3, 0 * Math.PI / 180);
+poly4.setPosition(Vector.createPosition(9.0, 6.0));
 const circle1 = new CircleShape(3);
 circle1.setPosition(Vector.createPosition(3.0, 3.0));
+const circle2 = new CircleShape(3);
+circle2.setPosition(Vector.createPosition(9.0, 6.0));
 
 const pairs: ShapePair[] = [
+  new ShapePair(circle1, circle2),
+  new ShapePair(poly1, circle2),
+  new ShapePair(circle2, circle1),
   new ShapePair(circle1, poly2),
+  new ShapePair(circle1, poly4),
+  new ShapePair(poly3, poly4),
   new ShapePair(poly3, poly2),
   new ShapePair(poly2, poly3),
   new ShapePair(poly1, poly2),
@@ -179,29 +191,35 @@ function createMinkowskiStates() {
 
   Minkowski.createSum(pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
   Minkowski.createDiff(pair.first, pair.second, s => diffStates.push([[...s[0]], [...s[1]]]));
-  const anims: Easer[] = [];
 
-  if (diffStates.length > 0) {
-    const anim = new ArrayEaser(diffStates, diffStates.length * 0.2, Ease.linear, v => {
-      diffState = v;
-      isDirty = true;
-    });
+  if (showStates) {
+    const anims: Easer[] = [];
 
-    anims.push(anim);
+    if (diffStates.length > 0) {
+      const anim = new ArrayEaser(diffStates, Math.min(diffStates.length * 0.2, 10), Ease.linear, v => {
+        diffState = v;
+        isDirty = true;
+      });
+
+      anims.push(anim);
+    }
+
+    if (sumStates.length > 0) {
+      const anim = new ArrayEaser(sumStates, Math.min(sumStates.length * 0.2, 10), Ease.linear, v => {
+        sumState = v;
+        isDirty = true;
+      });
+
+      anims.push(anim);
+    }
+
+    if (anims.length === 0) return;
+
+    stateAnim = new SequentialEaser([new ConcurrentEaser(anims), delay]).onCompleted(() => createPolyShapes());
+  } else {
+    stateAnim = new SequentialEaser([delay]).onCompleted(() => createPolyShapes());
   }
 
-  if (sumStates.length > 0) {
-    const anim = new ArrayEaser(sumStates, sumStates.length * 0.2, Ease.linear, v => {
-      sumState = v;
-      isDirty = true;
-    });
-
-    anims.push(anim);
-  }
-
-  if (anims.length === 0) return;
-
-  stateAnim = new SequentialEaser([new ConcurrentEaser(anims), delay]).onCompleted(() => createPolyShapes());
   runner.add(stateAnim);
 }
 
@@ -228,10 +246,11 @@ function createPolyShapes() {
       polyd = new MinkowskiPolyShape(first, second);
       first.props = { strokeStyle: colors[0], lineWidth: lineW };
       second.props = { strokeStyle: refBrush, lineWidth: lineW };
-      polys.props = { strokeStyle: "green", lineWidth: 3 };
-      polyd.props = { strokeStyle: "brown", lineWidth: 3 };
+      polys.props = { strokeStyle: "brown", lineWidth: 3 };
+      polyd.props = { strokeStyle: "green", lineWidth: 3 };
 
       createMinkowskiStates();
+      isDirty = true;
       break;
     } catch (e) {
       console.log(e.message);

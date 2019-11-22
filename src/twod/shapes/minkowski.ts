@@ -1,11 +1,18 @@
-import { MinkowskiPoint, Shape } from '.';
+import { ICircleShape, MinkowskiPoint, Shape } from '.';
 import { isTriangleCW } from '..';
-import { Tristate } from '../../core';
+import { MathEx, Tristate } from '../../core';
 import { Vector } from '../../vectors';
+
+const { ONE_DEGREE } = MathEx;
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
 export type MinkowskiPointsState = [MinkowskiPoint[], MinkowskiPoint[]]; // Points, Vertices.
 export type MinkowskiPointsCallback = (state: MinkowskiPointsState) => void;
+
+let circleSegmentCount = 30;
+
+export function getCircleSegmentCount() { return circleSegmentCount; }
+export function setCircleSegmentCount(value: number) { circleSegmentCount = Math.max(value, 5); }
 
 // Andrew's Algorithm: https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 export function convexHull(points: MinkowskiPoint[], stateCallback?: MinkowskiPointsCallback, result?: MinkowskiPoint[]) {
@@ -79,26 +86,49 @@ export function getPoint(first: Shape, second: Shape, worldDirection: Vector): T
   return new MinkowskiPoint(first, second, point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
 }
 
-export function createVertices(
+export function calcCircleVertices(
+  circle: ICircleShape,
+  circleSegments: number = circleSegmentCount,
+  result?: Vector[]): Vector[] {
+  const segmentCount = Math.max(circleSegments, 5);
+  result || (result = []);
+  result.length = segmentCount;
+
+  const center = circle.position;
+  let point = Vector.createPosition(center.x + circle.radius, center.y);
+  let step = 360 / segmentCount * ONE_DEGREE;
+
+  for (let i = 0; i < segmentCount; i++) {
+    result[i] = point;
+    point = point.rotateAboutO(center, step);
+  }
+
+  return result;
+}
+
+export function verticesVertices(
   first: Shape,
   second: Shape,
+  verticesA: Vector[],
+  verticesB: Vector[],
   op: MinkowskiOperation,
+  isWorldB: boolean = false,
   stateCallback?: MinkowskiPointsCallback,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  const verticesA = first.vertexList.items;
-  const verticesB = second.vertexList.items;
   const vertexCountA = verticesA.length;
   const vertexCountB = verticesB.length;
 
   if (vertexCountA === 0 || vertexCountB === 0) return undefined;
 
+  isWorldB || (verticesB = verticesB.map(v => second.toWorld(v)));
   result || (result = []);
   const state: MinkowskiPointsState | undefined = stateCallback ? [result, []] : undefined;
 
   for (let a = 0; a < vertexCountA; a++) {
+    const pointA = first.toWorld(verticesA[a]);
+
     for (let b = 0; b < vertexCountB; b++) {
-      const pointA = first.toWorld(verticesA[a]);
-      const pointB = second.toWorld(verticesB[b]);
+      const pointB = verticesB[b];
       const point = op(pointA, pointB);
       const mp = new MinkowskiPoint(first, second, point, pointA, pointB, a, b);
       result.push(mp);
@@ -117,18 +147,165 @@ export function createVertices(
   return result;
 }
 
+export function circleCircle(
+  circle1: ICircleShape,
+  circle2: ICircleShape,
+  op: MinkowskiOperation,
+  circleSegments: number = circleSegmentCount,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  const segmentCount = Math.max(circleSegments, 5);
+
+  const center1 = circle1.position;
+  const radius1 = circle1.radius;
+  let circle1Point = Vector.createPosition(center1.x + radius1, center1.y);
+  let step = 360 / segmentCount * ONE_DEGREE;
+  let circle2Vertices = calcCircleVertices(circle2, segmentCount, new Array<Vector>(segmentCount));
+
+  result || (result = []);
+  const state: MinkowskiPointsState | undefined = stateCallback ? [result, []] : undefined;
+
+  for (let c1 = 0; c1 < segmentCount; c1++) {
+    for (let c2 = 0; c2 < segmentCount; c2++) {
+      const circle2Point = circle2Vertices[c2];
+      const point = op(circle1Point, circle2Point);
+      const mp = new MinkowskiPoint(circle1, circle2, point, circle1Point, circle2Point, c1, c2);
+      result.push(mp);
+
+      stateCallback && stateCallback(state!);
+    }
+
+    circle1Point = circle1Point.rotateAboutO(center1, step);
+  }
+
+  convexHull(result, stateCallback, result);
+
+  if (state) {
+    state[1] = result;
+    stateCallback!(state);
+  }
+
+  return result;
+}
+
+export function circlePoly(
+  circle: ICircleShape,
+  poly: Shape,
+  op: MinkowskiOperation,
+  circleSegments: number = circleSegmentCount,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  const segmentCount = Math.max(circleSegments, 5);
+  let polyVertices = poly.vertexList.items;
+  const vertexCount = polyVertices.length;
+
+  if (vertexCount === 0) return undefined;
+
+  polyVertices = polyVertices.map(v => poly.toWorld(v));
+  const center = circle.position;
+  let circlePoint = Vector.createPosition(center.x + circle.radius, center.y);
+  let step = 360 / segmentCount * ONE_DEGREE;
+
+  result || (result = []);
+  const state: MinkowskiPointsState | undefined = stateCallback ? [result, []] : undefined;
+
+  for (let c = 0; c < segmentCount; c++) {
+    for (let p = 0; p < vertexCount; p++) {
+      const polyPoint = polyVertices[p];
+      const point = op(circlePoint, polyPoint);
+      const mp = new MinkowskiPoint(circle, poly, point, circlePoint, polyPoint, c, p);
+      result.push(mp);
+
+      stateCallback && stateCallback(state!);
+    }
+
+    circlePoint = circlePoint.rotateAboutO(center, step);
+  }
+
+  convexHull(result, stateCallback, result);
+
+  if (state) {
+    state[1] = result;
+    stateCallback!(state);
+  }
+
+  return result;
+}
+
+export function polyCircle(
+  poly: Shape,
+  circle: ICircleShape,
+  op: MinkowskiOperation,
+  circleSegments: number = circleSegmentCount,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  return verticesVertices(
+    poly,
+    circle,
+    poly.vertexList.items,
+    calcCircleVertices(circle, circleSegments),
+    op,
+    true,
+    stateCallback,
+    result);
+}
+
+export function polyPoly(
+  first: Shape,
+  second: Shape,
+  op: MinkowskiOperation,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  return verticesVertices(
+    first,
+    second,
+    first.vertexList.items,
+    second.vertexList.items,
+    op,
+    false,
+    stateCallback,
+    result);
+}
+
+function createVertices(
+  op: MinkowskiOperation,
+  first: Shape,
+  second: Shape,
+  stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  switch (first.kind) {
+    case "circle":
+      switch (second.kind) {
+        case "circle":
+          return circleCircle(first, second, op, circleSegments, stateCallback, result);
+        default:
+          return circlePoly(first, second, op, circleSegments, stateCallback, result);
+      }
+    default:
+      switch (second.kind) {
+        case "circle":
+          return polyCircle(first, second, op, circleSegments, stateCallback, result);
+        default:
+          return polyPoly(first, second, op, stateCallback, result);
+      }
+  }
+}
+
 export function createSum(
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  return createVertices(first, second, (a, b) => a.displaceByO(b), stateCallback, result);
+  return createVertices((a, b) => a.displaceByO(b), first, second, stateCallback, circleSegments, result);
 }
 
 export function createDiff(
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
+  circleSegments: number = circleSegmentCount,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  return createVertices(first, second, (a, b) => a.displaceByNegO(b), stateCallback, result);
+  return createVertices((a, b) => a.displaceByNegO(b), first, second, stateCallback, circleSegments, result);
 }
