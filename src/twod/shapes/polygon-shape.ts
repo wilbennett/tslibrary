@@ -24,6 +24,7 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
     vectorClass?: VectorClass);
   constructor(
     vertices: Vector[],
+    isWorld?: boolean,
     integratorType?: IntegratorConstructor,
     vectorClass?: VectorClass);
   constructor(
@@ -45,8 +46,9 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
       populatePolyData(this.data, radius, startAngle, regular);
     } else {
       const inputVertices: Vector[] = param1;
-      const integratorType: IntegratorConstructor | undefined = param2;
-      const vectorClass: VectorClass = param3 || ShapeBase.vectorClass;
+      const isWorld: boolean = param2;
+      const integratorType: IntegratorConstructor | undefined = param3;
+      const vectorClass: VectorClass = param4 || ShapeBase.vectorClass;
 
       const vertexCount = inputVertices.length;
       const data = createPolyData(vertexCount, vectorClass);
@@ -60,6 +62,9 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
       const [radius, center, area] = normalizePolyCenter(vertexList);
 
       super(data, radius, area, integratorType);
+
+      if (isWorld)
+        this._isWorld = isWorld;
 
       populatePolyEdgeNormals(data);
       this.position.copyFrom(center);
