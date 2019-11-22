@@ -263,6 +263,8 @@ function renderPointContainment(a: Geometry, point: Vector, props: ContextProps,
 function renderClosestPoint(a: Geometry, point: Vector, props: ContextProps, viewport: Viewport) {
   const closest = a.closestPoint(point, false);
 
+  if (closest === null || closest === undefined) return;
+
   beginPath(props, viewport);
   viewport.ctx.fillStyle = props.fillStyle || props.strokeStyle || "gray";
   ctx.fillRect(Bounds.fromCenterHalf(closest.x, closest.y, 0.04, 0.04));

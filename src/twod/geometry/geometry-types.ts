@@ -11,8 +11,8 @@ export interface IPositioned {
 export interface IGeometry extends IPositioned {
   props: ContextProps;
 
-  containsPoint(point: Vector, epsilon?: number): boolean;
-  closestPoint(point: Vector, hullOnly?: boolean, result?: Vector): Vector;
+  containsPoint(point: Vector, epsilon?: number): boolean | undefined;
+  closestPoint(point: Vector, hullOnly?: boolean, result?: Vector): Tristate<Vector>;
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector>;
   render(view: Viewport): void;
 }

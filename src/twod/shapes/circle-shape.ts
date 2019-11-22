@@ -54,6 +54,9 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     let normal: Vector;
     // console.log(`position: ${this.position} => ${posInOtherSpace}, closest: ${closestInOtherSpace}`);
 
+    if (closestInOtherSpace === null || closestInOtherSpace === undefined) return result;
+
+    // TODO: Need to account for world shapes?
     if (closestInOtherSpace.equals(ORIGIN)) {
       // If centers are at the same position, return an arbitrary normal.
       normal = Vector.createDirection(0, 1);
