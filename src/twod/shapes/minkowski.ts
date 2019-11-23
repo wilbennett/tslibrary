@@ -120,6 +120,7 @@ export function calcCircleVertices(
   return result;
 }
 
+// Based on: http://www.arestlessmind.org/2014/12/21/
 function verticesVerticesV(
   verticesA: Vector[],
   verticesB: Vector[],
@@ -172,7 +173,7 @@ function verticesVerticesM(
   const count = vertexCountA + vertexCountB;
   result || (result = []);
   result.length = count;
-  const state: MinkowskiPointsState | undefined = stateCallback ? [result, []] : undefined;
+  const state: MinkowskiPointsState | undefined = stateCallback ? [result, result] : undefined;
   let a = start.indexA;
   let b = start.indexB;
   let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
@@ -197,11 +198,7 @@ function verticesVerticesM(
     mp = new MinkowskiPoint(first, second, point, verticesA[a], verticesA[b], a, b);
   }
 
-  if (state) {
-    state[1] = result;
-    stateCallback!(state);
-  }
-
+  stateCallback && stateCallback(state!);
   return result;
 }
 
