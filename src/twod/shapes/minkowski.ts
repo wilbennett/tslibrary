@@ -2,7 +2,7 @@ import { CircleShape, ICircleShape, MinkowskiPoint, MinkowskiShape, PolygonShape
 import { isTriangleCW } from '..';
 import { MathEx, Tristate } from '../../core';
 import { assertNever } from '../../utils';
-import { Vector } from '../../vectors';
+import { normal, Vector } from '../../vectors';
 
 const { ONE_DEGREE } = MathEx;
 
@@ -11,6 +11,7 @@ export type MinkowskiPointsState = [MinkowskiPoint[], MinkowskiPoint[]]; // Poin
 export type MinkowskiPointsCallback = (state: MinkowskiPointsState) => void;
 
 let circleSegmentCount = 30;
+const START_DIRECTION = normal(1, 0);
 
 export function getCircleSegmentCount() { return circleSegmentCount; }
 export function setCircleSegmentCount(value: number) { circleSegmentCount = Math.max(value, 5); }
@@ -73,11 +74,23 @@ export function convexHull(points: MinkowskiPoint[], stateCallback?: MinkowskiPo
   return result;
 }
 
-export function getPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
+export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
   const direction = worldDirection.normalizeO();
-  const axis = first.createWorldAxis(direction);
-  const spA = first.getSupport(axis);
-  const spB = second.getSupport(axis.toLocalOf(second, true));
+  const spA = first.getSupport(first.toLocal(direction));
+  const spB = second.getSupport(second.toLocal(direction));
+
+  if (!spA) return spA;
+  if (!spB) return spB;
+  if (!spA.isValid || !spB.isValid) return null;
+
+  const point = spA.worldPoint.displaceByO(spB.worldPoint);
+  return new MinkowskiPoint(first, second, point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
+}
+
+export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
+  const direction = worldDirection.normalizeO();
+  const spA = first.getSupport(first.toLocal(direction));
+  const spB = second.getSupport(second.toLocal(direction.negateO()));
 
   if (!spA) return spA;
   if (!spB) return spB;
@@ -107,13 +120,48 @@ export function calcCircleVertices(
   return result;
 }
 
-export function verticesVertices(
+function verticesVerticesV(
+  verticesA: Vector[],
+  verticesB: Vector[],
+  start: MinkowskiPoint,
+  result?: Vector[]): Tristate<Vector[]> {
+  const vertexCountA = verticesA.length;
+  const vertexCountB = verticesB.length;
+
+  if (vertexCountA === 0 || vertexCountB === 0) return undefined;
+
+  const count = vertexCountA + vertexCountB;
+  result || (result = []);
+  result.length = count;
+  let a = start.indexA;
+  let b = start.indexB;
+  let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
+  let edgeB = verticesB[(b + 1) % vertexCountB].subO(verticesB[b]);
+  let point = start.point;
+
+  for (let i = 0; i < count; i++) {
+    result[i] = point;
+
+    if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
+      point = point.displaceByO(edgeA);
+      a = (a + 1) % vertexCountA;
+      verticesA[(a + 1) % vertexCountA].subO(verticesA[a], edgeA);
+    } else {
+      point = point.displaceByO(edgeB);
+      b = (b + 1) % vertexCountB;
+      verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
+    }
+  }
+
+  return result;
+}
+
+function verticesVerticesM(
   first: Shape,
   second: Shape,
   verticesA: Vector[],
   verticesB: Vector[],
-  op: MinkowskiOperation,
-  isWorldB: boolean = false,
+  start: MinkowskiPoint,
   stateCallback?: MinkowskiPointsCallback,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
   const vertexCountA = verticesA.length;
@@ -121,24 +169,33 @@ export function verticesVertices(
 
   if (vertexCountA === 0 || vertexCountB === 0) return undefined;
 
-  isWorldB || (verticesB = verticesB.map(v => second.toWorld(v)));
+  const count = vertexCountA + vertexCountB;
   result || (result = []);
+  result.length = count;
   const state: MinkowskiPointsState | undefined = stateCallback ? [result, []] : undefined;
+  let a = start.indexA;
+  let b = start.indexB;
+  let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
+  let edgeB = verticesB[(b + 1) % vertexCountB].subO(verticesB[b]);
+  let mp = start;
+  let point = mp.point;
 
-  for (let a = 0; a < vertexCountA; a++) {
-    const pointA = first.toWorld(verticesA[a]);
+  for (let i = 0; i < count; i++) {
+    result[i] = mp;
+    stateCallback && stateCallback(state!);
 
-    for (let b = 0; b < vertexCountB; b++) {
-      const pointB = verticesB[b];
-      const point = op(pointA, pointB);
-      const mp = new MinkowskiPoint(first, second, point, pointA, pointB, a, b);
-      result.push(mp);
-
-      stateCallback && stateCallback(state!);
+    if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
+      point = point.displaceByO(edgeA);
+      a = (a + 1) % vertexCountA;
+      verticesA[(a + 1) % vertexCountA].subO(verticesA[a], edgeA);
+    } else {
+      point = point.displaceByO(edgeB);
+      b = (b + 1) % vertexCountB;
+      verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
     }
-  }
 
-  convexHull(result, stateCallback, result);
+    mp = new MinkowskiPoint(first, second, point, verticesA[a], verticesA[b], a, b);
+  }
 
   if (state) {
     state[1] = result;
@@ -148,7 +205,27 @@ export function verticesVertices(
   return result;
 }
 
-export function circleCircle(
+export function verticesVertices(
+  verticesA: Vector[],
+  verticesB: Vector[],
+  start: MinkowskiPoint,
+  result?: Vector[]): Tristate<Vector[]>;
+export function verticesVertices(
+  first: Shape,
+  second: Shape,
+  verticesA: Vector[],
+  verticesB: Vector[],
+  start: MinkowskiPoint,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
+export function verticesVertices(...args: any[]): Tristate<Vector[]> | Tristate<MinkowskiPoint[]> {
+  // @ts-ignore - arguments length.
+  return args.length <= 4 ? verticesVerticesV(...args) : verticesVerticesM(...args);
+}
+
+// TODO: Can create optimized circle versions by walking rotated circle vectors.
+/*/
+function circleCircle(
   circle1: ICircleShape,
   circle2: ICircleShape,
   op: MinkowskiOperation,
@@ -189,7 +266,7 @@ export function circleCircle(
   return result;
 }
 
-export function circlePoly(
+function circlePoly(
   circle: ICircleShape,
   poly: Shape,
   op: MinkowskiOperation,
@@ -233,7 +310,7 @@ export function circlePoly(
   return result;
 }
 
-export function polyCircle(
+function polyCircle(
   poly: Shape,
   circle: ICircleShape,
   op: MinkowskiOperation,
@@ -251,7 +328,7 @@ export function polyCircle(
     result);
 }
 
-export function polyPoly(
+function polyPoly(
   first: Shape,
   second: Shape,
   op: MinkowskiOperation,
@@ -267,83 +344,159 @@ export function polyPoly(
     stateCallback,
     result);
 }
+//*/
 
-function createVertices(
-  op: MinkowskiOperation,
-  first: Shape,
-  second: Shape,
-  stateCallback?: MinkowskiPointsCallback,
+export function getWorldVertices(
+  shape: Shape,
+  negate: boolean = false,
   circleSegments: number = circleSegmentCount,
-  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  switch (first.kind) {
-    case "circle":
-      switch (second.kind) {
-        case "circle":
-          return circleCircle(first, second, op, circleSegments, stateCallback, result);
-        default:
-          return circlePoly(first, second, op, circleSegments, stateCallback, result);
-      }
-    default:
-      switch (second.kind) {
-        case "circle":
-          return polyCircle(first, second, op, circleSegments, stateCallback, result);
-        default:
-          return polyPoly(first, second, op, stateCallback, result);
-      }
-  }
+  // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
+  referenceShape?: Shape): Vector[] {
+  if (shape.kind === "circle")
+    return calcCircleVertices(shape, circleSegments);
+
+  const result = shape.vertexList.items;
+
+  return negate
+    ? result.map(v => shape.toWorld(v).negate())
+    : result.map(v => shape.toWorld(v));
 }
 
 export function createSum(
+  kind: "vector",
+  first: Shape,
+  second: Shape,
+  circleSegments?: number,
+  result?: Vector[]): Tristate<Vector[]>;
+export function createSum(
+  kind: "minkowski",
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
-  circleSegments: number = circleSegmentCount,
-  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  return createVertices((a, b) => a.displaceByO(b), first, second, stateCallback, circleSegments, result);
+  circleSegments?: number,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
+export function createSum(
+  kind: "vector" | "minkowski",
+  first: Shape,
+  second: Shape,
+  param4?: any,
+  param5?: any,
+  param6?: any): Tristate<Vector[]> | Tristate<MinkowskiPoint[]> {
+  const start = getSumPoint(first, second, START_DIRECTION);
+
+  if (!start) return undefined;
+
+  if (kind === "minkowski") {
+    const stateCallback = param4;
+    const circleSegments = param5 || circleSegmentCount;
+    const result = param6;
+
+    return verticesVerticesM(
+      first,
+      second,
+      getWorldVertices(first, false, circleSegments, second),
+      getWorldVertices(second, false, circleSegments, first),
+      start,
+      stateCallback,
+      result);
+  }
+
+  const circleSegments = param4 || circleSegmentCount;
+  const result = param5;
+
+  return verticesVerticesV(
+    getWorldVertices(first, false, circleSegments, second),
+    getWorldVertices(second, false, circleSegments, first),
+    start,
+    result);
 }
 
 export function createDiff(
+  kind: "vector",
+  first: Shape,
+  second: Shape,
+  circleSegments?: number,
+  result?: Vector[]): Tristate<Vector[]>;
+export function createDiff(
+  kind: "minkowski",
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
-  circleSegments: number = circleSegmentCount,
-  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
-  return createVertices((a, b) => a.displaceByNegO(b), first, second, stateCallback, circleSegments, result);
+  circleSegments?: number,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
+export function createDiff(
+  kind: "vector" | "minkowski",
+  first: Shape,
+  second: Shape,
+  param4?: any,
+  param5?: any,
+  param6?: any): Tristate<Vector[]> | Tristate<MinkowskiPoint[]> {
+  const start = getDiffPoint(first, second, START_DIRECTION);
+
+  if (!start) return undefined;
+
+  if (kind === "minkowski") {
+    const stateCallback = param4;
+    const circleSegments = param5 || circleSegmentCount;
+    const result = param6;
+
+    return verticesVerticesM(
+      first,
+      second,
+      getWorldVertices(first, false, circleSegments, second),
+      getWorldVertices(second, true, circleSegments, first),
+      start,
+      stateCallback,
+      result);
+  }
+
+  const circleSegments = param4 || circleSegmentCount;
+  const result = param5;
+
+  return verticesVerticesV(
+    getWorldVertices(first, false, circleSegments, second),
+    getWorldVertices(second, true, circleSegments, first),
+    start,
+    result);
 }
 
 export function createPoly(
   first: Shape,
   second: Shape,
-  op: MinkowskiOperation,
-  stateCallback?: MinkowskiPointsCallback,
+  isSum: boolean,
   circleSegments: number = circleSegmentCount): Tristate<Shape> {
   if (first.kind === "circle" && second.kind === "circle") {
     const radius = first.radius + second.radius;
-    const position = op(first.position, second.position);
+
+    const position = isSum
+      ? first.position.displaceByO(second.position)
+      : first.position.displaceByNegO(second.position);
+
     const circle = new CircleShape(radius, true);
     circle.setPosition(position);
     return circle;
   }
 
-  const vertices = createVertices(op, first, second, stateCallback, circleSegments);
-  const poly = vertices && new PolygonShape(vertices.map(v => v.point), true);
+  const vertices = isSum
+    ? createSum("vector", first, second, circleSegments)
+    : createDiff("vector", first, second, circleSegments);
+
+  const poly = vertices && new PolygonShape(vertices, true);
   return poly;
 }
 
 export function createSumPoly(
   first: Shape,
   second: Shape,
-  stateCallback?: MinkowskiPointsCallback,
   circleSegments: number = circleSegmentCount): Tristate<Shape> {
-  return createPoly(first, second, (a, b) => a.displaceByO(b), stateCallback, circleSegments);
+  return createPoly(first, second, true, circleSegments);
 }
 
 export function createDiffPoly(
   first: Shape,
   second: Shape,
-  stateCallback?: MinkowskiPointsCallback,
   circleSegments: number = circleSegmentCount): Tristate<Shape> {
-  return createPoly(first, second, (a, b) => a.displaceByNegO(b), stateCallback, circleSegments);
+  return createPoly(first, second, false, circleSegments);
 }
 
 export function createShape(first: Shape, second: Shape, isSum: boolean): Tristate<Shape> {
