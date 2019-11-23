@@ -39,24 +39,24 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
     result || (result = new SupportPoint(this));
 
-    let axisDirection: Vector;
+    let direction: Vector;
     let axisPoint: Vector;
 
     if (param1 instanceof Vector) {
-      axisDirection = param1;
+      direction = param1;
       axisPoint = Vector.empty;
     } else {
-      axisDirection = param1.normal;
+      direction = param1.normal;
       axisPoint = param1.point;
     }
 
-    const point = axisDirection.scaleO(this.radius).asPosition();
+    const point = direction.scaleO(this.radius).asPosition();
 
     result.clear();
     result.shape = this;
     result.point = point;
-    result.index = -1;
-    result.distance = !axisPoint.isEmpty ? point.subO(axisPoint).dot(axisDirection) : point.dot(axisDirection);
+    result.index = 0;
+    result.distance = !axisPoint.isEmpty ? point.subO(axisPoint).dot(direction) : point.dot(direction);
     return result;
   }
 
