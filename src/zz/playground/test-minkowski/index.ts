@@ -46,8 +46,8 @@ const gridSize = 20;
 let angle = 0;
 // const duration = 5;
 let isDirty = true;
-// let showStates = true;
-let showStates = false;
+let showStates = true;
+// let showStates = false;
 Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
 
 const graph = new Graph(ctx.bounds, gridSize);
@@ -157,8 +157,6 @@ function render() {
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
     drawMinkowskiSupports(pair, view);
-    // calcMinkowskiDiff(pair, true, view);
-    // calcMinkowskiDiff(pair, false, view);
   }
 
   sumState && drawState(sumState, view, sumState === sumStates[sumStates.length - 1]);
@@ -168,104 +166,6 @@ function render() {
   view.restoreTransform();
   restoreTransform();
 }
-
-//*
-// Based on: http://www.arestlessmind.org/2014/12/21/
-function calcMinkowskiDiff(shapes: ShapePair, isSum: boolean, view: Viewport) {
-  const { first, second } = shapes;
-  const direction = normal(1, 0);
-
-  const mp = isSum
-    ? Minkowski.getSumPoint(first, second, direction)
-    : Minkowski.getDiffPoint(first, second, direction);
-
-  if (!mp) return;
-
-  let a = mp.indexA;
-  let b = mp.indexB;
-  let verticesA: Vector[];
-  let verticesB: Vector[];
-
-  if (first.kind === "circle") {
-    verticesA = Minkowski.calcCircleVertices(first);
-  } else {
-    verticesA = first.vertexList.items;
-    verticesA = verticesA.map(v => first.toWorld(v));
-  }
-
-  if (second.kind === "circle") {
-    verticesB = Minkowski.calcCircleVertices(second);
-  } else {
-    verticesB = second.vertexList.items;
-
-    verticesB = isSum
-      ? verticesB = verticesB.map(v => second.toWorld(v))
-      : verticesB.map(v => second.toWorld(v).negate());
-  }
-
-  const vertexCountA = verticesA.length;
-  const vertexCountB = verticesB.length;
-  const count = vertexCountA + vertexCountB;
-  let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
-  let edgeB = verticesB[(b + 1) % vertexCountB].subO(verticesB[b]);
-  let point = mp.point;
-  const vertices: Vector[] = new Array<Vector>(count);
-
-  const props: ContextProps = { strokeStyle: "blue", fillStyle: "blue", lineWidth: 2 };
-  beginPath(props, view).fillCircle(point, 0.5);
-
-  for (let i = 0; i < count; i++) {
-    vertices[i] = point;
-
-    if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
-      point = point.displaceByO(edgeA);
-      a = (a + 1) % vertexCountA;
-      verticesA[(a + 1) % vertexCountA].subO(verticesA[a], edgeA);
-    } else {
-      point = point.displaceByO(edgeB);
-      b = (b + 1) % vertexCountB;
-      verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
-    }
-  }
-
-  view.ctx.beginPath().strokePoly(vertices, true);
-}
-/*/
-function calcMinkowskiDiff(shapes: ShapePair, view: Viewport) {
-  const { first, second } = shapes;
-  // const direction = normal(1, 0);
-  // const direction = normal(0, 1);
-  // const direction = normal(-1, 0);
-  const direction = normal(0, -1);
-  // const temp = pos();
-  const mp = Minkowski.getDiffPoint(first, second, direction);
-
-  if (!mp) return;
-
-  let verticesA = first.kind === "circle" ? Minkowski.calcCircleVertices(first) : first.vertexList.items;
-  let verticesB = second.kind === "circle" ? Minkowski.calcCircleVertices(second) : second.vertexList.items;
-  const vertexCountA = verticesA.length;
-  const vertexCountB = verticesB.length;
-
-  verticesA = verticesA.map(v => first.toWorld(v));
-  verticesB = verticesB.map(v => second.toWorld(v).negate());
-
-  verticesA = verticesA.map((v, i) => verticesA[(i + 1) % vertexCountA].subO(v));
-  verticesB = verticesB.map((v, i) => verticesB[(i + 1) % vertexCountB].subO(v));
-  let edges = verticesA.concat(verticesB);
-  edges = edges.sort((a, b) => a.degrees - b.degrees);
-  // console.log(`edges: ${edges.map(e => e.toString())}`);
-
-  const props: ContextProps = { strokeStyle: "blue", fillStyle: "blue", lineWidth: 2 };
-  const point = mp.point;
-  const vertices: Vector[] = [point];
-  edges.forEach(e => vertices.push(point.displaceBy(e).clone()));
-
-  const ctx = view.ctx;
-  beginPath(props, view).fillCircle(point, 0.5);
-  ctx.beginPath().strokePoly(vertices, true);
-}
-//*/
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
@@ -279,10 +179,10 @@ function beginPath(props: ContextProps, view: Viewport) {
 function createMinkowskiStates() {
   if (!pair) return;
 
-  Minkowski.createSum("minkowski", pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
-  Minkowski.createDiff("minkowski", pair.first, pair.second, s => diffStates.push([[...s[0]], [...s[1]]]));
-
   if (showStates) {
+    Minkowski.createSum("minkowski", pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
+    Minkowski.createDiff("minkowski", pair.first, pair.second, s => diffStates.push([[...s[0]], [...s[1]]]));
+
     const anims: Easer[] = [];
 
     if (diffStates.length > 0) {
@@ -427,6 +327,8 @@ function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, vi
   for (let i = 0; i < count; i++) {
     const mp = points[i];
 
+    if (!mp) continue;
+
     beginPath(props, view)
       .withFillStyle(colors[mp.indexA])
       .fillCircle(mp.point, 0.3);
@@ -440,7 +342,7 @@ function drawMinkowskiVertices(points: MinkowskiPoint[], props: ContextProps, vi
 function drawMinkowskiPoly(points: MinkowskiPoint[], props: ContextProps, view: Viewport, close: boolean = true) {
   beginPath(props, view)
     .withGlobalAlpha(1)
-    .poly(points.map(mp => mp.point), close)
+    .poly(points.filter(mp => mp).map(mp => mp.point), close)
     .stroke();
 }
 
