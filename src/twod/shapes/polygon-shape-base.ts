@@ -53,8 +53,5 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
 
     if (props.strokeStyle)
       ctx.stroke();
-
-    ctx.beginPath().withFillStyle("black").fillCircle(this.position, 1);
-    ctx.beginPath().withFillStyle("yellow").fillCircle(this.center, 0.5);
   }
 }
