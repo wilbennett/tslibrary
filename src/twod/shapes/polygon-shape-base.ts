@@ -1,7 +1,7 @@
 import { IPolygonShapeBase, ShapeBase } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
-import { VectorGroups } from '../../vectors';
-import { normalizePolyCenter } from '../geometry';
+import { Vector, VectorGroups } from '../../vectors';
+import { movePoly, normalizePolyCenter } from '../geometry';
 
 export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShapeBase {
   constructor(
@@ -31,10 +31,18 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
   get integrators() { return this._integrators; }
   get position() { return this._integrator.position; }
   set position(value) {
+    this.setPosition(value);
     this._integrator.position = value;
     this.dirtyTransform();
   }
   readonly radius: number;
+
+  setPosition(position: Vector) {
+    if (this._isWorld)
+      movePoly(this.vertexList, this.position, position);
+
+    super.setPosition(position);
+  }
 
   protected renderCore(view: Viewport, props: ContextProps) {
     const ctx = view.ctx;
@@ -45,5 +53,8 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
 
     if (props.strokeStyle)
       ctx.stroke();
+
+    ctx.beginPath().withFillStyle("black").fillCircle(this.position, 1);
+    ctx.beginPath().withFillStyle("yellow").fillCircle(this.center, 0.5);
   }
 }

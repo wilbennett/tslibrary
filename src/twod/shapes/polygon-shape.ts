@@ -1,5 +1,12 @@
 import { IPolygonShape, PolygonShapeBase, ShapeBase } from '.';
-import { IntegratorConstructor, normalizePolyCenter, populatePolyData, populatePolyEdgeNormals } from '..';
+import {
+  calcPolyCenterArea,
+  calcPolyRadius,
+  IntegratorConstructor,
+  normalizePolyCenter,
+  populatePolyData,
+  populatePolyEdgeNormals,
+} from '..';
 import { Vector, VectorClass, VectorGroupsBuilder } from '../../vectors';
 
 export function createPolyData(
@@ -59,7 +66,16 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
         inputVertices[i].copyTo(vertices[i]);
       }
 
-      const [radius, center, area] = normalizePolyCenter(vertexList);
+      let radius: number;
+      let center: Vector;
+      let area: number;
+
+      if (!isWorld)
+        [radius, center, area] = normalizePolyCenter(vertexList);
+      else {
+        [center, area] = calcPolyCenterArea(vertexList);
+        radius = calcPolyRadius(vertexList, center);
+      }
 
       super(data, radius, area, integratorType);
 

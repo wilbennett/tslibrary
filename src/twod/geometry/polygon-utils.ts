@@ -83,6 +83,25 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
   return result;
 }
 
+export function calcPolyRadius(vertexList: VectorCollection, center: Vector) {
+  const vertices = vertexList.items;
+  const vertexCount = vertices.length;
+
+  const vertex = Vector.create();
+  let radiusSquared = 0;
+
+  for (let i = 0; i < vertexCount; i++) {
+    vertices[i].displaceByNegO(center, vertex);
+    const magSquared = vertex.magSquared;
+
+    if (magSquared > radiusSquared) {
+      radiusSquared = magSquared;
+    }
+  }
+
+  return Math.sqrt(radiusSquared);
+}
+
 export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
   const vertices = vertexList.items;
   const vertexCount = vertices.length;

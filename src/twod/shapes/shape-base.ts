@@ -23,7 +23,7 @@ export abstract class ShapeBase implements IShape {
   get position() { return Vector.empty; }
   // @ts-ignore - unused param.
   set position(value) { }
-  get center() { return ORIGIN; }
+  get center() { return this._isWorld ? this.position : ORIGIN; }
   get angle() {
     const integrators = this.integrators;
     return integrators.length > 0 ? integrators[0].angle : 0;
@@ -272,10 +272,18 @@ export abstract class ShapeBase implements IShape {
   protected calcTransform(transform: MatrixValues, transformInverse: MatrixValues) {
     const matrix = this.matrix;
 
-    matrix
-      .setToIdentity()
-      .setRotation2D(this.angle)
-      .setTranslation(this.position);
+    if (this._isWorld) {
+      matrix
+        .setToIdentity()
+        .translate(this.position)
+        .rotate2D(this.angle)
+        .translate(this.position.negateO());
+    } else {
+      matrix
+        .setToIdentity()
+        .setRotation2D(this.angle)
+        .setTranslation(this.position);
+    }
 
     matrix.getValues(transform);
     matrix.getInverse(transformInverse);
