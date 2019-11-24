@@ -82,7 +82,7 @@ export class SATSupport extends ColliderBase {
 
       if (support.distance < bestDistance) {
         bestDistance = support.distance;
-        support.copyTo(bestSupport);
+        support.clone(bestSupport);
         bestAxis = axis;
       }
 

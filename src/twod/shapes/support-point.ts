@@ -35,10 +35,12 @@ export class SupportPoint {
     this.distance = -Infinity;
   }
 
-  copyTo(other: SupportPoint) {
-    other.point = this.point;
-    other.worldPoint = this.worldPoint;
-    other.index = this.index;
-    other.distance = this.distance;
+  clone(result?: SupportPoint) {
+    result || (result = new SupportPoint(this.shape));
+    result.point = this.point;
+    result.worldPoint = this.worldPoint;
+    result.index = this.index;
+    result.distance = this.distance;
+    return result;
   }
 }
