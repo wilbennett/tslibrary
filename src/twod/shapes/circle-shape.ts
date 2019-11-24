@@ -1,7 +1,7 @@
 import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase, SupportPoint } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
-import { Vector } from '../../vectors';
+import { dir, Vector } from '../../vectors';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";
@@ -49,6 +49,9 @@ export class CircleShape extends ShapeBase implements ICircleShape {
       direction = param1.normal;
       axisPoint = param1.point;
     }
+
+    if (direction.magSquared !== 1)
+      direction = direction.normalizeO();
 
     const point = direction.scaleO(this.radius).asPosition();
 
@@ -104,9 +107,9 @@ export class CircleShape extends ShapeBase implements ICircleShape {
 
     ctx
       .beginPath()
-      .circle(0, 0, this.radius)
-      .moveTo(0, 0)
-      .lineTo(this.radius, 0);
+      .circle(this.center, this.radius)
+      .moveTo(this.center)
+      .lineTo(this.center.addO(dir(this.radius, 0)));
 
     props.fillStyle && ctx.fill();
     props.strokeStyle && ctx.stroke();
