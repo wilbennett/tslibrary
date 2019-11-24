@@ -4,10 +4,10 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import { CircleShape, MinkowskiPoint, PolygonShape, Shape, SupportPoint } from '../../../twod/shapes';
+import { CircleShape, MinkowskiPoint, PolygonShape, Shape } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
-import { normal, pos, Vector } from '../../../vectors';
+import { dir, pos, Vector } from '../../../vectors';
 
 // const { ONE_DEGREE } = MathEx;
 
@@ -23,6 +23,9 @@ const canvas = UiUtils.getCanvasElement("canvas");
 canvas.width = gridExtent;
 canvas.height = gridExtent;
 const ctx = new CanvasContext(canvas);
+
+const elPause = UiUtils.getInputElement("pause");
+// const elText = UiUtils.getInputElement("text");
 
 ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
@@ -46,8 +49,8 @@ const gridSize = 20;
 let angle = 0;
 // const duration = 5;
 let isDirty = true;
-let showStates = true;
-// let showStates = false;
+// let showStates = true;
+let showStates = false;
 Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
 
 const graph = new Graph(ctx.bounds, gridSize);
@@ -79,13 +82,14 @@ let pairIndex = -1;
 let pair: ShapePair | null = null;
 let polys: Tristate<Shape> = null;
 let polyd: Tristate<Shape> = null;
+let polydBrush = "green";
 let sumStates: Minkowski.MinkowskiPointsState[] = [];
 let diffStates: Minkowski.MinkowskiPointsState[] = [];
 let sumState: Minkowski.MinkowskiPointsState | null = null;
 let diffState: Minkowski.MinkowskiPointsState | null = null;
 let stateAnim: Easer | null = null;
 
-const delay = new DelayEaser(2);
+const delay = new DelayEaser(5);
 
 // pairs[0].second.setPosition(pos(2.5, 2.5));
 
@@ -103,13 +107,31 @@ const delay = new DelayEaser(2);
 // const framesPerDegree = 4;
 // const secPerDegree = framesPerDegree * secPerFrame;
 
+let frame = -1;
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner();
+
+elPause.addEventListener("change", () => {
+  if (elPause.checked)
+    loop.stop();
+  else
+    loop.start();
+});
 
 drawGraph();
 createPolyShapes();
 loop.start();
 runner.start();
+
+let dragging = false;
+const dragOffset = dir(0, 0);
+const dragPos = pos(0, 0);
+const mouse = pos(0, 0);
+const polyPoint = pos(0, 0);
+
+canvas.addEventListener("mousemove", handleMouseMove);
+canvas.addEventListener("mousedown", handleMouseDown);
+canvas.addEventListener("mouseup", handleMouseUp);
 
 function drawGraph() {
   ctxb.beginPath().withFillStyle("grey").fillRect(ctxb.bounds);
@@ -137,11 +159,13 @@ function restoreTransform() {
 }
 
 function render() {
-  // loop.stop();
+  if (++frame === (60 * 5)) {
+    loop.stop();
+    elPause.checked = true;
+  }
 
   if (!isDirty) return;
 
-  isDirty = false;
   ctx.beginPath().clearRect(ctx.bounds);
   applyTransform();
 
@@ -153,10 +177,10 @@ function render() {
     second.render(view);
     first.render(view);
     polys && polys.render(view);
-    polyd && polyd.render(view);
+    polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
-    drawMinkowskiSupports(pair, view);
+    // drawMinkowskiSupports(pair, view);
   }
 
   sumState && drawState(sumState, view, sumState === sumStates[sumStates.length - 1]);
@@ -165,6 +189,57 @@ function render() {
   // pair && drawSat(pair, view);
   view.restoreTransform();
   restoreTransform();
+  isDirty = false;
+}
+
+function updateMouse(ev: MouseEvent) {
+  const view = graph.getViewport(ctx);
+  const rect = canvas.getBoundingClientRect();
+  mouse.withXY(ev.clientX - rect.left, ev.clientY - rect.top);
+  // mouse.withXY(ev.offsetX, ev.offsetY);
+  view.toWorld(mouse, true, mouse);
+  // elText.value = `${mouse}`;
+}
+
+function handleMouseMove(ev: MouseEvent) {
+  if (!polyd) return;
+
+  if (!dragging) {
+    // polyd.toLocal(mouse, polyPoint);
+    // if (polyd.containsPoint(polyPoint))
+    //   polydBrush !== "blue" && (polydBrush = "blue") && (isDirty = true);
+    // else
+    //   polydBrush !== "green" && (polydBrush = "green") && (isDirty = true);
+
+    return;
+  }
+
+  updateMouse(ev);
+  mouse.displaceByO(dragOffset, dragPos);
+  polyd.setPosition(dragPos);
+  isDirty = true;
+}
+
+function handleMouseDown(ev: MouseEvent) {
+  if (dragging) return;
+  if (!polyd) return;
+  if (ev.button !== 0) return;
+
+  updateMouse(ev);
+  polyd.toLocal(mouse, polyPoint);
+
+  if (!polyd.containsPoint(polyPoint)) return;
+
+  polyd.position.subO(mouse, dragOffset);
+  dragging = true;
+}
+
+function handleMouseUp(ev: MouseEvent) {
+  if (!dragging) return;
+  if (ev.button !== 0) return;
+
+  // updateMouse(ev);
+  dragging = false;
 }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
@@ -245,7 +320,7 @@ function createPolyShapes() {
       first.props = { strokeStyle: colors[0], lineWidth: lineW };
       second.props = { strokeStyle: refBrush, lineWidth: lineW };
       polys && (polys.props = { strokeStyle: "brown", lineWidth: 3 });
-      polyd && (polyd.props = { strokeStyle: "green", lineWidth: 3 });
+      polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
 
       createMinkowskiStates();
       isDirty = true;
@@ -256,6 +331,7 @@ function createPolyShapes() {
   }
 }
 
+/*/
 function drawMinkowskiSupports(shapes: ShapePair, view: Viewport) {
   const { first, second } = shapes;
 
@@ -284,6 +360,7 @@ function drawMinkowskiSupports(shapes: ShapePair, view: Viewport) {
     }
   });
 }
+//*/
 
 function drawState(state: Minkowski.MinkowskiPointsState, view: Viewport, closePoly: boolean = false) {
   const [points, vertices] = state;
@@ -346,7 +423,7 @@ function drawMinkowskiPoly(points: MinkowskiPoint[], props: ContextProps, view: 
     .stroke();
 }
 
-/*
+/*/
 function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {
   const projection = shape.projectOn(axis.worldNormal);
 
