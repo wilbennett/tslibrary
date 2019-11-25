@@ -72,6 +72,10 @@ export class Vector1 extends Vector {
     result || (result = this.newVector());
     return result.set(this.x - other.x * scale, 0, 0, 0);
   }
+  scaleSubScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x * scale - other.x * scale, 0, 0, 0);
+  }
   normalizeScaleO(scale: number, result?: Vector) {
     result || (result = this.newVector());
     return result.set(this.x / this.mag * scale, 0, 0, 0);

@@ -67,6 +67,10 @@ export class NullVector extends Vector {
   // @ts-ignore - unused param.
   subScaled(other: Vector, scale: number) { return this; }
   // @ts-ignore - unused param.
+  scaleSubScaledO(other: Vector, scale: number, result?: Vector) { return this.zeroResult(result); }
+  // @ts-ignore - unused param.
+  scaleSubScaled(other: Vector, scale: number) { return this; }
+  // @ts-ignore - unused param.
   normalizeScaleO(scale: number, result?: Vector) { return this.zeroResult(result); }
   // @ts-ignore - unused param.
   normalizeScale(scale: number) { return this; }

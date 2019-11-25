@@ -236,6 +236,11 @@ export class Vector2 extends Vector {
     return result.set(this.x - other.x * scale, this.y - other.y * scale, 0, this.w - other.w);
   }
 
+  scaleSubScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
+    return result.set(this.x * scale - other.x * scale, this.y * scale - other.y * scale, 0, this.w - other.w);
+  }
+
   normalizeScaleO(scale: number, result?: Vector) {
     let x = this.x;
     let y = this.y;

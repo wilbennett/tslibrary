@@ -404,6 +404,17 @@ export abstract class Vector {
   }
   subScaled(other: Vector, scale: number) { return this.subScaledO(other, scale, this); }
 
+  scaledSubScaledO(other: Vector, scale: number, result?: Vector) {
+    result || (result = this.newVector());
+
+    return result.set(
+      this.x * scale - other.x * scale,
+      this.y * scale - other.y * scale,
+      this.z * scale - other.z * scale,
+      this.w - other.w);
+  }
+  scaledSubScaled(other: Vector, scale: number) { return this.scaledSubScaledO(other, scale, this); }
+
   normalizeScaleO(scale: number, result?: Vector) {
     let x = this.x;
     let y = this.y;
