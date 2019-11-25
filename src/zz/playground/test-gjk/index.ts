@@ -287,7 +287,6 @@ function updateMouse(ev: MouseEvent) {
 }
 
 function handleMouseMove(ev: MouseEvent) {
-  if (!loop.active) return;
   if (!dragTarget) return;
   if (!dragging) return;
 
@@ -296,11 +295,13 @@ function handleMouseMove(ev: MouseEvent) {
   dragTarget.setPosition(dragPos);
   applyGjk();
   isDirty = true;
+
+  if (!loop.active)
+    render();
 }
 
 function handleMouseDown(ev: MouseEvent) {
   if (dragging) return;
-  if (!loop.active) return;
   if (!pair) return;
   if (ev.button !== 0) return;
 
@@ -316,6 +317,7 @@ function handleMouseDown(ev: MouseEvent) {
     shape.position.subO(mouse, dragOffset);
     dragTarget = shape;
     dragging = true;
+    break;
   }
 }
 
