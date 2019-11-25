@@ -120,6 +120,29 @@ export function calcCircleVertices(
   return result;
 }
 
+export function calcCircleVerticesAndEdges(
+  circle: ICircleShape,
+  circleSegments: number = circleSegmentCount,
+  result?: [Vector[], Vector[]]): [Vector[], Vector[]] {
+  const segmentCount = Math.max(circleSegments, 5);
+  result || (result = [[], []]);
+  const [vertices, edges] = result;
+  vertices.length = segmentCount;
+  edges.length = segmentCount;
+
+  const center = circle.position;
+  let point = Vector.position(center.x + circle.radius, center.y);
+  let step = 360 / segmentCount * ONE_DEGREE;
+
+  for (let i = 0; i < segmentCount; i++) {
+    vertices[i] = point;
+    point = point.rotateAboutO(center, step);
+    edges[i] = point.subO(vertices[i]);
+  }
+
+  return result;
+}
+
 // Based on: http://www.arestlessmind.org/2014/12/21/
 function verticesVerticesV(
   verticesA: Vector[],
@@ -151,6 +174,47 @@ function verticesVerticesV(
       point = point.displaceByO(edgeB);
       b = (b + 1) % vertexCountB;
       verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
+    }
+  }
+
+  return result;
+}
+
+function verticesVerticesEdgesV(
+  verticesEdgesA: [Vector[], Vector[]],
+  verticesEdgesB: [Vector[], Vector[]],
+  start: MinkowskiPoint,
+  result?: Vector[]): Tristate<Vector[]> {
+  const [verticesA, edgesA] = verticesEdgesA;
+  const [verticesB, edgesB] = verticesEdgesB;
+  const vertexCountA = verticesA.length;
+  const vertexCountB = verticesB.length;
+  const edgeCountA = edgesA.length;
+  const edgeCountB = edgesB.length;
+
+  if (vertexCountA === 0 || vertexCountB === 0 || edgeCountA === 0 || edgeCountB == 0) return undefined;
+  if (vertexCountA !== edgeCountA || vertexCountB !== edgeCountB) return undefined;
+
+  const count = vertexCountA + vertexCountB;
+  result || (result = []);
+  result.length = count;
+  let a = start.indexA;
+  let b = start.indexB;
+  let edgeA = edgesA[a];
+  let edgeB = edgesB[b];
+  let point = start.point;
+
+  for (let i = 0; i < count; i++) {
+    result[i] = point;
+
+    if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
+      point = point.displaceByO(edgeA);
+      a = (a + 1) % vertexCountA;
+      edgeA = edgesA[a];
+    } else {
+      point = point.displaceByO(edgeB);
+      b = (b + 1) % vertexCountB;
+      edgeB = edgesB[b];
     }
   }
 
@@ -202,11 +266,74 @@ function verticesVerticesM(
   return result;
 }
 
+function verticesVerticesEdgesM(
+  first: Shape,
+  second: Shape,
+  verticesEdgesA: [Vector[], Vector[]],
+  verticesEdgesB: [Vector[], Vector[]],
+  start: MinkowskiPoint,
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]> {
+  const [verticesA, edgesA] = verticesEdgesA;
+  const [verticesB, edgesB] = verticesEdgesB;
+  const vertexCountA = verticesA.length;
+  const vertexCountB = verticesB.length;
+  const edgeCountA = edgesA.length;
+  const edgeCountB = edgesB.length;
+
+  if (vertexCountA === 0 || vertexCountB === 0 || edgeCountA === 0 || edgeCountB == 0) return undefined;
+  if (vertexCountA !== edgeCountA || vertexCountB !== edgeCountB) return undefined;
+
+  const count = vertexCountA + vertexCountB;
+  result || (result = []);
+  result.length = count;
+  const state: MinkowskiPointsState | undefined = stateCallback ? [result, result] : undefined;
+  let a = start.indexA;
+  let b = start.indexB;
+  let edgeA = edgesA[a];
+  let edgeB = edgesB[b];
+  let mp = start;
+  let point = mp.point;
+
+  for (let i = 0; i < count; i++) {
+    result[i] = mp;
+    stateCallback && stateCallback(state!);
+
+    if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
+      point = point.displaceByO(edgeA);
+      a = (a + 1) % vertexCountA;
+      edgeA = edgesA[a];
+    } else {
+      point = point.displaceByO(edgeB);
+      b = (b + 1) % vertexCountB;
+      edgeB = edgesB[b];
+    }
+
+    mp = new MinkowskiPoint(first, second, point, verticesA[a], verticesA[b], a, b);
+  }
+
+  stateCallback && stateCallback(state!);
+  return result;
+}
+
+export function verticesVertices(
+  start: MinkowskiPoint,
+  verticesEdgesA: [Vector[], Vector[]],
+  verticesEdgesB: [Vector[], Vector[]],
+  result?: Vector[]): Tristate<Vector[]>;
 export function verticesVertices(
   verticesA: Vector[],
   verticesB: Vector[],
   start: MinkowskiPoint,
   result?: Vector[]): Tristate<Vector[]>;
+export function verticesVertices(
+  first: Shape,
+  second: Shape,
+  start: MinkowskiPoint,
+  verticesEdgesA: [Vector[], Vector[]],
+  verticesEdgesB: [Vector[], Vector[]],
+  stateCallback?: MinkowskiPointsCallback,
+  result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
 export function verticesVertices(
   first: Shape,
   second: Shape,
@@ -216,8 +343,21 @@ export function verticesVertices(
   stateCallback?: MinkowskiPointsCallback,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
 export function verticesVertices(...args: any[]): Tristate<Vector[]> | Tristate<MinkowskiPoint[]> {
+  if (args.length <= 4) {
+    if (args[0] instanceof MinkowskiPoint)
+      // @ts-ignore - arguments length.
+      return verticesVerticesEdgesV(...args);
+
+    // @ts-ignore - arguments length.
+    return verticesVerticesV(...args);
+  }
+
+  if (args[2] instanceof MinkowskiPoint)
+    // @ts-ignore - arguments length.
+    return verticesVerticesEdgesM(...args);
+
   // @ts-ignore - arguments length.
-  return args.length <= 4 ? verticesVerticesV(...args) : verticesVerticesM(...args);
+  return verticesVerticesM(...args);
 }
 
 // TODO: Can create optimized circle versions by walking rotated circle vectors.
@@ -359,6 +499,22 @@ export function getWorldVertices(
     : result.map(v => shape.toWorld(v));
 }
 
+export function getWorldVerticesAndEdges(
+  shape: Shape,
+  negate: boolean = false,
+  circleSegments: number = circleSegmentCount,
+  // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
+  referenceShape?: Shape): [Vector[], Vector[]] {
+  if (shape.kind === "circle")
+    return calcCircleVerticesAndEdges(shape, circleSegments);
+
+  const result = [shape.vertexList.items, shape.edgeVectorList.items];
+
+  return negate
+    ? [result[0].map(v => shape.toWorld(v).negate()), result[1].map(v => shape.toWorld(v).negate())]
+    : [result[0].map(v => shape.toWorld(v)), result[1].map(v => shape.toWorld(v))];
+}
+
 export function createSum(
   kind: "vector",
   first: Shape,
@@ -388,11 +544,11 @@ export function createSum(
     const circleSegments = param5 || circleSegmentCount;
     const result = param6;
 
-    return verticesVerticesM(
+    return verticesVerticesEdgesM(
       first,
       second,
-      getWorldVertices(first, false, circleSegments, second),
-      getWorldVertices(second, false, circleSegments, first),
+      getWorldVerticesAndEdges(first, false, circleSegments, second),
+      getWorldVerticesAndEdges(second, false, circleSegments, first),
       start,
       stateCallback,
       result);
@@ -401,9 +557,9 @@ export function createSum(
   const circleSegments = param4 || circleSegmentCount;
   const result = param5;
 
-  return verticesVerticesV(
-    getWorldVertices(first, false, circleSegments, second),
-    getWorldVertices(second, false, circleSegments, first),
+  return verticesVerticesEdgesV(
+    getWorldVerticesAndEdges(first, false, circleSegments, second),
+    getWorldVerticesAndEdges(second, false, circleSegments, first),
     start,
     result);
 }
@@ -437,11 +593,11 @@ export function createDiff(
     const circleSegments = param5 || circleSegmentCount;
     const result = param6;
 
-    return verticesVerticesM(
+    return verticesVerticesEdgesM(
       first,
       second,
-      getWorldVertices(first, false, circleSegments, second),
-      getWorldVertices(second, true, circleSegments, first),
+      getWorldVerticesAndEdges(first, false, circleSegments, second),
+      getWorldVerticesAndEdges(second, true, circleSegments, first),
       start,
       stateCallback,
       result);
@@ -450,9 +606,9 @@ export function createDiff(
   const circleSegments = param4 || circleSegmentCount;
   const result = param5;
 
-  return verticesVerticesV(
-    getWorldVertices(first, false, circleSegments, second),
-    getWorldVertices(second, true, circleSegments, first),
+  return verticesVerticesEdgesV(
+    getWorldVerticesAndEdges(first, false, circleSegments, second),
+    getWorldVerticesAndEdges(second, true, circleSegments, first),
     start,
     result);
 }
