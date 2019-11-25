@@ -6,6 +6,11 @@ import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
+export enum Winding {
+  CCW = 1,
+  CW = -1
+}
+
 export interface IShape extends IGeometry {
   isWorld: boolean;
   readonly integrators: Integrator[];
