@@ -152,9 +152,9 @@ elChangeShapes.addEventListener("change", () => {
 elPrev.addEventListener("click", () => {
   if (simplices.length === 0) return;
 
-  simplex || (simplex = simplices[0]);
-  let i = simplices.indexOf(simplex);
-  i = (i - 1) % simplices.length;
+  let i = simplex ? simplices.indexOf(simplex) : 0;
+  i--;
+  i < 0 && (i = simplices.length - 1);
   simplex = simplices[i];
   elText.value = "" + (i + 1);
   isDirty = true;
@@ -168,8 +168,7 @@ elPrev.addEventListener("click", () => {
 elNext.addEventListener("click", () => {
   if (simplices.length === 0) return;
 
-  simplex || (simplex = simplices[0]);
-  let i = simplices.indexOf(simplex);
+  let i = simplex ? simplices.indexOf(simplex) : -1;
   i = (i + 1) % simplices.length;
   simplex = simplices[i];
   elText.value = "" + (i + 1);
@@ -184,7 +183,8 @@ elNext.addEventListener("click", () => {
 elPrevPair.addEventListener("click", () => {
   if (pairs.length === 0) return;
 
-  pairIndex = (pairIndex - 1) % pairs.length;
+  pairIndex--;
+  pairIndex < 0 && (pairIndex = pairs.length - 1);
 
   try {
     initPair();
@@ -399,6 +399,7 @@ function applyGjk() {
 
 function initPair() {
   const lineW = 1;
+  elText.value = "";
   pair = null;
   clearStateValues();
   pair = pairs[pairIndex];
