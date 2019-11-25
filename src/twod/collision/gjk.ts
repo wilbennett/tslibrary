@@ -125,7 +125,7 @@ export class Gjk extends ColliderBase {
             // TODO: Optimize. Splice is expensive.
             points.splice(1, 1); // Remove b.
           }
-        } else {
+        } else { // CW.
           if (baSide < 0) { // R4
             ba.perpLeftO(direction);
             points.shift(); // Remove c.
