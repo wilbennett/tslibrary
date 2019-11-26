@@ -101,6 +101,9 @@ export class MinkowskiPoint extends SupportPoint {
     super.clear();
     this._worldPointA = undefined;
     this._worldPointB = undefined;
+
+    if (this.isSum)
+      this.isSum = undefined;
   }
 
   clone(result?: SupportPoint | MinkowskiPoint): SupportPoint | MinkowskiPoint {
@@ -118,6 +121,9 @@ export class MinkowskiPoint extends SupportPoint {
     super.clone(result);
 
     if (result instanceof MinkowskiPoint) {
+      if (this.isSum)
+        result.isSum = this.isSum;
+
       if (this._worldPointA)
         result._worldPointA = this._worldPointA.clone();
 
