@@ -15,3 +15,4 @@ export * from "./polygon-shape";
 export * from "./aabb-shape";
 export * from "./triangle-shape";
 export * from "./minkowski-shape";
+export * from "./shape-utils";

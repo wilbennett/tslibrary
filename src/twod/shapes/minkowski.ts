@@ -1,20 +1,15 @@
-import { CircleShape, ICircleShape, MinkowskiPoint, MinkowskiShape, PolygonShape, Shape } from '.';
-import { isTriangleCW } from '..';
-import { MathEx, Tristate } from '../../core';
+import { CircleShape, MinkowskiPoint, MinkowskiShape, PolygonShape, Shape } from '.';
+import { calcCircleVertices, calcCircleVerticesAndEdges, isTriangleCW } from '..';
+import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { normal, Vector } from '../../vectors';
-
-const { ONE_DEGREE } = MathEx;
+import { CircleSegmentInfo } from '../utils';
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
 export type MinkowskiPointsState = [MinkowskiPoint[], MinkowskiPoint[]]; // Points, Vertices.
 export type MinkowskiPointsCallback = (state: MinkowskiPointsState) => void;
 
-let circleSegmentCount = 30;
 const START_DIRECTION = normal(1, 0);
-
-export function getCircleSegmentCount() { return circleSegmentCount; }
-export function setCircleSegmentCount(value: number) { circleSegmentCount = Math.max(value, 5); }
 
 // Andrew's Algorithm: https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 export function convexHull(points: MinkowskiPoint[], stateCallback?: MinkowskiPointsCallback, result?: MinkowskiPoint[]) {
@@ -98,49 +93,6 @@ export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
   return new MinkowskiPoint(first, second, point, spA.index, spB.index, spA.worldPoint, spB.worldPoint, direction);
-}
-
-export function calcCircleVertices(
-  circle: ICircleShape,
-  circleSegments: number = circleSegmentCount,
-  result?: Vector[]): Vector[] {
-  const segmentCount = Math.max(circleSegments, 5);
-  result || (result = []);
-  result.length = segmentCount;
-
-  const center = circle.position;
-  let point = Vector.position(center.x + circle.radius, center.y);
-  let step = 360 / segmentCount * ONE_DEGREE;
-
-  for (let i = 0; i < segmentCount; i++) {
-    result[i] = point;
-    point = point.rotateAboutO(center, step);
-  }
-
-  return result;
-}
-
-export function calcCircleVerticesAndEdges(
-  circle: ICircleShape,
-  circleSegments: number = circleSegmentCount,
-  result?: [Vector[], Vector[]]): [Vector[], Vector[]] {
-  const segmentCount = Math.max(circleSegments, 5);
-  result || (result = [[], []]);
-  const [vertices, edges] = result;
-  vertices.length = segmentCount;
-  edges.length = segmentCount;
-
-  const center = circle.position;
-  let point = Vector.position(center.x + circle.radius, center.y);
-  let step = 360 / segmentCount * ONE_DEGREE;
-
-  for (let i = 0; i < segmentCount; i++) {
-    vertices[i] = point;
-    point = point.rotateAboutO(center, step);
-    edges[i] = point.subO(vertices[i]);
-  }
-
-  return result;
 }
 
 // Based on: http://www.arestlessmind.org/2014/12/21/
@@ -486,11 +438,11 @@ function polyPoly(
 export function getWorldVertices(
   shape: Shape,
   negate: boolean = false,
-  circleSegments: number = circleSegmentCount,
+  circleSegments?: CircleSegmentInfo,
   // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
   referenceShape?: Shape): Vector[] {
   if (shape.kind === "circle")
-    return calcCircleVertices(shape, circleSegments);
+    return calcCircleVertices(shape, true, circleSegments);
 
   const result = shape.vertexList.items;
 
@@ -502,11 +454,11 @@ export function getWorldVertices(
 export function getWorldVerticesAndEdges(
   shape: Shape,
   negate: boolean = false,
-  circleSegments: number = circleSegmentCount,
+  circleSegments?: CircleSegmentInfo,
   // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
   referenceShape?: Shape): [Vector[], Vector[]] {
   if (shape.kind === "circle")
-    return calcCircleVerticesAndEdges(shape, circleSegments);
+    return calcCircleVerticesAndEdges(shape, true, circleSegments);
 
   const result = [shape.vertexList.items, shape.edgeVectorList.items];
 
@@ -519,14 +471,14 @@ export function createSum(
   kind: "vector",
   first: Shape,
   second: Shape,
-  circleSegments?: number,
+  circleSegments?: CircleSegmentInfo,
   result?: Vector[]): Tristate<Vector[]>;
 export function createSum(
   kind: "minkowski",
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
-  circleSegments?: number,
+  circleSegments?: CircleSegmentInfo,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
 export function createSum(
   kind: "vector" | "minkowski",
@@ -541,7 +493,7 @@ export function createSum(
 
   if (kind === "minkowski") {
     const stateCallback = param4;
-    const circleSegments = param5 || circleSegmentCount;
+    const circleSegments = param5;
     const result = param6;
 
     return verticesVerticesEdgesM(
@@ -554,7 +506,7 @@ export function createSum(
       result);
   }
 
-  const circleSegments = param4 || circleSegmentCount;
+  const circleSegments = param4;
   const result = param5;
 
   return verticesVerticesEdgesV(
@@ -568,14 +520,14 @@ export function createDiff(
   kind: "vector",
   first: Shape,
   second: Shape,
-  circleSegments?: number,
+  circleSegments?: CircleSegmentInfo,
   result?: Vector[]): Tristate<Vector[]>;
 export function createDiff(
   kind: "minkowski",
   first: Shape,
   second: Shape,
   stateCallback?: MinkowskiPointsCallback,
-  circleSegments?: number,
+  circleSegments?: CircleSegmentInfo,
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
 export function createDiff(
   kind: "vector" | "minkowski",
@@ -590,7 +542,7 @@ export function createDiff(
 
   if (kind === "minkowski") {
     const stateCallback = param4;
-    const circleSegments = param5 || circleSegmentCount;
+    const circleSegments = param5;
     const result = param6;
 
     return verticesVerticesEdgesM(
@@ -603,7 +555,7 @@ export function createDiff(
       result);
   }
 
-  const circleSegments = param4 || circleSegmentCount;
+  const circleSegments = param4;
   const result = param5;
 
   return verticesVerticesEdgesV(
@@ -617,7 +569,7 @@ export function createPoly(
   first: Shape,
   second: Shape,
   isSum: boolean,
-  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+  circleSegments?: CircleSegmentInfo): Tristate<Shape> {
   if (first.kind === "circle" && second.kind === "circle") {
     const radius = first.radius + second.radius;
 
@@ -638,17 +590,11 @@ export function createPoly(
   return poly;
 }
 
-export function createSumPoly(
-  first: Shape,
-  second: Shape,
-  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+export function createSumPoly(first: Shape, second: Shape, circleSegments?: CircleSegmentInfo): Tristate<Shape> {
   return createPoly(first, second, true, circleSegments);
 }
 
-export function createDiffPoly(
-  first: Shape,
-  second: Shape,
-  circleSegments: number = circleSegmentCount): Tristate<Shape> {
+export function createDiffPoly(first: Shape, second: Shape, circleSegments?: CircleSegmentInfo): Tristate<Shape> {
   return createPoly(first, second, false, circleSegments);
 }
 

@@ -2,6 +2,7 @@ export * from "./geometry-types";
 export * from "./geo-contain";
 export * from "./geo-closest";
 export * from "./geo-intersect";
+export * from "./circle-utils";
 export * from "./polygon-utils";
 export * from "./triangle-utils";
 export * from "./geometry-base";
