@@ -1,9 +1,6 @@
 import { ICircle } from '.';
-import { MathEx } from '../../core';
-import { Vector } from '../../vectors';
+import { pos, Vector } from '../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
-
-const { ONE_DEGREE } = MathEx;
 
 export function calcCircleVertices(
   circle: ICircle,
@@ -11,17 +8,22 @@ export function calcCircleVertices(
   circleSegments?: CircleSegmentInfo,
   result?: Vector[]): Vector[] {
   circleSegments || (circleSegments = getCircleSegmentInfo());
-  const { segmentCount } = circleSegments;
+  const { segmentCount, cos, sin } = circleSegments;
   result || (result = []);
   result.length = segmentCount;
 
   const center = isWorld ? circle.position : circle.center;
-  let point = Vector.position(center.x + circle.radius, center.y);
-  let step = 360 / segmentCount * ONE_DEGREE;
+  const cx = center.x;
+  const cy = center.y;
+  let point = Vector.position(cx + circle.radius, cy);
 
   for (let i = 0; i < segmentCount; i++) {
     result[i] = point;
-    point = point.rotateAboutO(center, step);
+    let x = point.x - cx;
+    let y = point.y - cy;
+    let rx = x * cos - y * sin;
+    let ry = x * sin + y * cos;
+    point = pos(rx + cx, ry + cy);
   }
 
   return result;
@@ -33,19 +35,26 @@ export function calcCircleVerticesAndEdges(
   circleSegments?: CircleSegmentInfo,
   result?: [Vector[], Vector[]]): [Vector[], Vector[]] {
   circleSegments || (circleSegments = getCircleSegmentInfo());
-  const { segmentCount } = circleSegments;
+  const { segmentCount, cos, sin } = circleSegments;
   result || (result = [[], []]);
   const [vertices, edges] = result;
   vertices.length = segmentCount;
   edges.length = segmentCount;
 
   const center = isWorld ? circle.position : circle.center;
-  let point = Vector.position(center.x + circle.radius, center.y);
-  let step = 360 / segmentCount * ONE_DEGREE;
+  const cx = center.x;
+  const cy = center.y;
+  let point = Vector.position(cx + circle.radius, cy);
 
   for (let i = 0; i < segmentCount; i++) {
     vertices[i] = point;
-    point = point.rotateAboutO(center, step);
+
+    let x = point.x - cx;
+    let y = point.y - cy;
+    let rx = x * cos - y * sin;
+    let ry = x * sin + y * cos;
+
+    point = pos(rx + cx, ry + cy);
     edges[i] = point.subO(vertices[i]);
   }
 
