@@ -8,8 +8,8 @@ export class SupportPoint {
     if (worldPoint)
       this._worldPoint = worldPoint;
 
-    this.index = index !== undefined ? index : -1;
-    this.distance = distance !== undefined ? distance : -Infinity;
+    this.index = index !== undefined ? index : NaN;
+    this.distance = distance !== undefined ? distance : NaN;
   }
 
   point: Vector;
@@ -24,23 +24,66 @@ export class SupportPoint {
     return this._worldPoint;
   }
   set worldPoint(value) { this._worldPoint = value; }
+
+  protected _direction?: Vector;
+  get direction() {
+    if (!this._direction) {
+      if (!this._worldDirection) return Vector.empty;
+
+      this._direction = this.shape.toLocal(this._worldDirection);
+    }
+
+    return this._direction;
+  }
+  set direction(value) { this._direction = value; }
+
+  protected _worldDirection?: Vector;
+  get worldDirection() {
+    if (!this._worldDirection) {
+      if (!this._direction) return Vector.empty;
+
+      this._worldDirection = this.shape.toWorld(this._direction);
+    }
+
+    return this._worldDirection;
+  }
+  set worldDirection(value) { this._worldDirection = value; }
+
   index: number;
   distance: number;
   get isValid() { return !this.point.isEmpty; }
 
   clear() {
     this.point = Vector.empty;
-    this._worldPoint = undefined;
-    this.index = -1;
-    this.distance = -Infinity;
+    this.index = NaN;
+    this.distance = NaN;
+
+    if (this._worldPoint)
+      this._worldPoint = undefined;
+
+    if (this._direction)
+      this._direction = undefined;
+
+    if (this._worldDirection)
+      this._worldDirection = undefined;
+
   }
 
   clone(result?: SupportPoint) {
     result || (result = new SupportPoint(this.shape));
-    result.point = this.point;
-    result.worldPoint = this.worldPoint;
+    result.point = this.point.clone();
     result.index = this.index;
     result.distance = this.distance;
+
+    if (this._worldPoint)
+      result._worldPoint = this._worldPoint.clone();
+
+    if (this._direction)
+      result._direction = this._direction.clone();
+
+    if (this._worldDirection)
+      result._worldDirection = this._worldDirection.clone();
+
     return result;
   }
 }

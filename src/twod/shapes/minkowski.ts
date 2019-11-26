@@ -84,7 +84,7 @@ export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector)
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
+  return new MinkowskiPoint(first, second, point, spA.index, spB.index, spA.worldPoint, spB.worldPoint, direction);
 }
 
 export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
@@ -97,7 +97,7 @@ export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.worldPoint, spB.worldPoint, spA.index, spB.index, direction);
+  return new MinkowskiPoint(first, second, point, spA.index, spB.index, spA.worldPoint, spB.worldPoint, direction);
 }
 
 export function calcCircleVertices(
@@ -259,7 +259,7 @@ function verticesVerticesM(
       verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
     }
 
-    mp = new MinkowskiPoint(first, second, point, verticesA[a], verticesA[b], a, b);
+    mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
   }
 
   stateCallback && stateCallback(state!);
@@ -309,7 +309,7 @@ function verticesVerticesEdgesM(
       edgeB = edgesB[b];
     }
 
-    mp = new MinkowskiPoint(first, second, point, verticesA[a], verticesA[b], a, b);
+    mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
   }
 
   stateCallback && stateCallback(state!);
