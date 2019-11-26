@@ -15,7 +15,7 @@ import { Brush, CanvasContext, ContextProps, getCircleEdge, getCircleVertex, Gra
 import { Gjk, ShapePair } from '../../../twod/collision';
 import { CircleShape, MinkowskiPoint, PolygonShape, Shape, Simplex, SupportPoint } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
+import { CircleSegmentInfo, getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -324,14 +324,6 @@ function getVertex(index: number, shape: Shape) {
   }
 
   return getCircleVertex(shape, index);
-  // const segs = getCircleSegmentInfo();
-  // let step = segs.step;
-  // const rad = step * index;
-  // const cos = Math.cos(rad);
-  // const sin = Math.sin(rad);
-  // const x = cos * shape.radius;
-  // const y = sin * shape.radius;
-  // return pos(x, y);
 }
 
 function getEdge(index: number, shape: Shape) {
@@ -343,16 +335,13 @@ function getEdge(index: number, shape: Shape) {
   }
 
   return getCircleEdge(shape, index);
-  // const segs = getCircleSegmentInfo();
-  // const nextIndex = (index + 1) % segs.segmentCount;
-  // return getVertex(nextIndex, shape).subO(getVertex(index, shape));
 }
 
-function getNextPoint(point: MinkowskiPoint) {
+function getNextPoint(point: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
   const { shapeA, shapeB } = point;
   const verticesA = shapeA.vertexList.items;
   const verticesB = shapeB.vertexList.items;
-  const { segmentCount } = getCircleSegmentInfo();
+  const { segmentCount } = (circleSegments || getCircleSegmentInfo());
   const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
   const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
   let indexA = point.indexA;
@@ -376,11 +365,11 @@ function getNextPoint(point: MinkowskiPoint) {
   return new MinkowskiPoint(shapeA, shapeB, vertex, indexA, indexB, pointA, pointB);
 }
 
-function getPrevPoint(point: MinkowskiPoint): MinkowskiPoint {
+function getPrevPoint(point: MinkowskiPoint, circleSegments?: CircleSegmentInfo): MinkowskiPoint {
   const { shapeA, shapeB } = point;
   const verticesA = shapeA.vertexList.items;
   const verticesB = shapeB.vertexList.items;
-  const { segmentCount } = getCircleSegmentInfo();
+  const { segmentCount } = (circleSegments || getCircleSegmentInfo());
   const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
   const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
   let indexA = point.indexA;
