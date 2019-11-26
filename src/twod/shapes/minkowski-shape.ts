@@ -1,11 +1,20 @@
-import { EMPTY_SUPPORT_AXES, IMinkowskiShape, Projection, Shape, ShapeAxis, ShapeBase, SupportPoint } from '.';
+import {
+  EMPTY_SUPPORT_AXES,
+  IMinkowskiShape,
+  MinkowskiPoint,
+  Projection,
+  Shape,
+  ShapeAxis,
+  ShapeBase,
+  SupportPoint,
+} from '.';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
 
 export class MinkowskiShape extends ShapeBase implements IMinkowskiShape {
   kind: "minkowski" = "minkowski";
 
-  constructor(readonly first: Shape, readonly second: Shape, isSum: boolean = false) {
+  constructor(readonly shapeA: Shape, readonly shapeB: Shape, isSum: boolean = false) {
     super();
 
     if (isSum)
@@ -18,15 +27,15 @@ export class MinkowskiShape extends ShapeBase implements IMinkowskiShape {
   protected _isSum?: boolean;
   get isSum() { return !!this._isSum; }
 
-  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(direction: Vector, result?: SupportPoint | MinkowskiPoint): Tristate<SupportPoint>;
+  getSupport(axis: ShapeAxis, result?: SupportPoint | MinkowskiPoint): Tristate<SupportPoint>;
+  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint | MinkowskiPoint): Tristate<SupportPoint> {
     const axisDirection = param1 instanceof Vector ? param1 : param1.normal;
     const axisDirectionB = this._isSum ? axisDirection : axisDirection.negateO();
-    const first = this.first;
-    const second = this.second;
-    const supportA = first.getSupport(first.toLocal(axisDirection));
-    const supportB = second.getSupport(second.toLocal(axisDirectionB));
+    const shapeA = this.shapeA;
+    const shapeB = this.shapeB;
+    const supportA = shapeA.getSupport(shapeA.toLocal(axisDirection));
+    const supportB = shapeB.getSupport(shapeB.toLocal(axisDirectionB));
 
     if (!supportA || !supportB) return undefined;
 
@@ -34,14 +43,34 @@ export class MinkowskiShape extends ShapeBase implements IMinkowskiShape {
       ? supportA.worldPoint.displaceByO(supportB.worldPoint)
       : supportA.worldPoint.displaceByNegO(supportB.worldPoint);
 
-    result || (result = new SupportPoint(this));
+    if (!result) {
+      result = new MinkowskiPoint(this.shapeA, this.shapeB, point, supportA.index, supportB.index);
+    } else {
+      result.clear();
 
-    result.clear();
+      if (result instanceof MinkowskiPoint) {
+        result.shapeA = this.shapeA;
+        result.shapeB = this.shapeB;
+        result.indexA = supportA.index;
+        result.indexB = supportB.index;
+      }
+    }
+
     result.shape = this;
     result.point = point;
     result.worldPoint = point;
     result.index = NaN;
     result.distance = NaN;
+
+    if (result instanceof MinkowskiPoint) {
+      result.isSum = this._isSum;
+
+      if (param1 instanceof Vector)
+        result.directionA = axisDirection;
+      else
+        result.direction = param1.worldNormal;
+    };
+
     return result;
   }
 
