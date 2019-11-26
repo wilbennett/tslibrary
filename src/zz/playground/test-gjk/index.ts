@@ -1,18 +1,29 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx, Tristate } from '../../../core';
-import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
+import {
+  ArrayEaser,
+  ConcurrentEaser,
+  DelayEaser,
+  Ease,
+  Easer,
+  EaseRunner,
+  NumberEaser,
+  SequentialEaser,
+} from '../../../easing';
 import { Brush, CanvasContext, ContextProps, getCircleEdge, getCircleVertex, Graph, Viewport } from '../../../twod';
 import { Gjk, ShapePair } from '../../../twod/collision';
 import { CircleShape, MinkowskiPoint, PolygonShape, Shape, Simplex, SupportPoint } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { setCircleSegmentCount } from '../../../twod/utils';
+import { getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
 // const { ONE_DEGREE } = MathEx;
 
 // console.clear();
+
+//! BUG: Need to figure out issue with circle and triangle.
 
 const ZERO_DIRECTION = dir(0, 0);
 let maxSimplexCount = 0;
@@ -63,7 +74,7 @@ let autoChangeShapes = true;
 // let showStates = true;
 let showSimplices = false;
 setCircleSegmentCount(showSimplices ? 10 : 30);
-setCircleSegmentCount(8);
+setCircleSegmentCount(30);
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
@@ -76,7 +87,7 @@ const poly5 = new PolygonShape(20, 2, 0 * Math.PI / 180, false);
 poly5.setPosition(pos(7.0, 6.0));
 const circle1 = new CircleShape(2);
 circle1.setPosition(pos(3.0, 3.0));
-circle1.angle = 45 * Math.PI / 180;
+// circle1.angle = 45 * Math.PI / 180;
 const circle2 = new CircleShape(3);
 circle2.setPosition(pos(9.0, 6.0));
 const circle3 = new CircleShape(2);
@@ -84,12 +95,12 @@ circle3.setPosition(circle2.position);
 
 const pairs: ShapePair[] = [
   new ShapePair(circle1, circle2),
-  // new ShapePair(circle2, circle1),
-  // new ShapePair(circle3, circle2),
-  // new ShapePair(circle2, circle3),
-  // new ShapePair(poly1, circle2),
-  // new ShapePair(circle1, poly2),
-  // new ShapePair(circle1, poly4),
+  new ShapePair(circle2, circle1),
+  new ShapePair(circle3, circle2),
+  new ShapePair(circle2, circle3),
+  new ShapePair(poly1, circle2),
+  new ShapePair(circle1, poly2),
+  new ShapePair(circle1, poly4),
   new ShapePair(poly5, poly3),
   new ShapePair(poly5, poly4),
   new ShapePair(poly5, poly2),
@@ -229,6 +240,13 @@ canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
 
+const v1 = dir(circle1.radius, 0);
+const vanim = new NumberEaser(0, 360, 5, Ease.linear, v => {
+  v1.withDegreesMag(v, v1.mag);
+  isDirty = true;
+});
+// runner.add(vanim.repeat(Infinity));
+
 function drawGraph() {
   ctxb.beginPath().withFillStyle("grey").fillRect(ctxb.bounds);
 
@@ -272,6 +290,10 @@ function render() {
 
   const view = graph.getViewport(ctx);
   view.applyTransform();
+
+  // v1.render(view, circle1.position, { strokeStyle: "black", lineWidth: 1 });
+  // const index = calcCircleIndex(v1.radians);
+  // beginPath({ fillStyle: "blue" }, view).fillCircle(circle1.toWorld(getCircleVertex(circle1, index)), 0.4);
 
   if (pair) {
     const { first, second } = pair;
@@ -330,6 +352,9 @@ function getNextPoint(point: MinkowskiPoint) {
   const { shapeA, shapeB } = point;
   const verticesA = shapeA.vertexList.items;
   const verticesB = shapeB.vertexList.items;
+  const { segmentCount } = getCircleSegmentInfo();
+  const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
+  const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
   let indexA = point.indexA;
   let indexB = point.indexB;
   const edgeA = shapeA.toWorld(getEdge(indexA, shapeA));
@@ -339,15 +364,15 @@ function getNextPoint(point: MinkowskiPoint) {
 
   if (edgeA.cross2D(edgeB) > 0) {
     edge = edgeA;
-    indexA = (indexA + 1) % verticesA.length;
+    indexA = (indexA + 1) % vertexCountA;
   } else {
     edge = edgeB;
-    indexB = (indexB + 1) % verticesB.length;
+    indexB = (indexB + 1) % vertexCountB;
   }
 
   const vertex = point.point.addO(edge);
-  const pointA = shapeA.toWorld(verticesA[indexA]);
-  const pointB = shapeB.toWorld(verticesB[indexB]);
+  const pointA = shapeA.toWorld(getVertex(indexA, shapeA));
+  const pointB = shapeB.toWorld(getVertex(indexB, shapeB));
   return new MinkowskiPoint(shapeA, shapeB, vertex, indexA, indexB, pointA, pointB);
 }
 
@@ -355,12 +380,15 @@ function getPrevPoint(point: MinkowskiPoint): MinkowskiPoint {
   const { shapeA, shapeB } = point;
   const verticesA = shapeA.vertexList.items;
   const verticesB = shapeB.vertexList.items;
+  const { segmentCount } = getCircleSegmentInfo();
+  const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
+  const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
   let indexA = point.indexA;
   let indexB = point.indexB;
   let currA = indexA;
   let currB = indexB;
-  let prevA = point.indexA > 0 ? point.indexA - 1 : verticesA.length - 1;
-  let prevB = point.indexB > 0 ? point.indexB - 1 : verticesB.length - 1;
+  let prevA = point.indexA > 0 ? point.indexA - 1 : vertexCountA - 1;
+  let prevB = point.indexB > 0 ? point.indexB - 1 : vertexCountB - 1;
   const prevEdgeA = shapeA.toWorld(getEdge(prevA, shapeA));
   const prevEdgeB = shapeB.toWorld(getEdge(prevB, shapeB).negateO());
 
@@ -377,8 +405,8 @@ function getPrevPoint(point: MinkowskiPoint): MinkowskiPoint {
   }
 
   const vertex = point.point.subO(edge);
-  const pointA = shapeA.toWorld(verticesA[indexA]);
-  const pointB = shapeB.toWorld(verticesB[indexB]);
+  const pointA = shapeA.toWorld(getVertex(indexA, shapeA));
+  const pointB = shapeB.toWorld(getVertex(indexB, shapeB));
   return new MinkowskiPoint(shapeA, shapeB, vertex, indexA, indexB, pointA, pointB);
 }
 
@@ -489,6 +517,7 @@ function temp() {
   if (!pair) return;
   if (!polyd) return;
 
+  polydBrush = "green";
   simplices = [];
   const { first, second } = pair;
   let direction = second.position.subO(first.position);
@@ -528,6 +557,18 @@ function temp() {
   //   return;
   // }
 
+  // const segs = getCircleSegmentInfo();
+  // const count = (first.kind === "circle" ? segs.segmentCount : first.vertexList.items.length)
+  //   + (second.kind === "circle" ? segs.segmentCount : second.vertexList.items.length);
+  // for (let i = 0; i < count; i++) {
+  //   // mka = getNextPoint(mka);
+  //   mka = getPrevPoint(mka);
+  //   points.pop();
+  //   points.push(new SupportPoint(polyd, mka.point));
+  //   simplices.push(simplex.clone());
+  // }
+
+  // return;
   direction.negate();
   points.push(new SupportPoint(polyd, mkb.point));
   simplices.push(simplex.clone());

@@ -69,3 +69,8 @@ export function getCircleEdge(circle: ICircle, index: number, circleSegments?: C
   const nextIndex = (index + 1) % circleSegments.segmentCount;
   return getCircleVertex(circle, nextIndex, circleSegments).subO(getCircleVertex(circle, index, circleSegments));
 }
+
+export function calcCircleIndex(radians: number, circleSegments?: CircleSegmentInfo) {
+  circleSegments || (circleSegments = getCircleSegmentInfo());
+  return Math.floor(radians / circleSegments.step);
+}

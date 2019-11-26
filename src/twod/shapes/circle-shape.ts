@@ -2,6 +2,7 @@ import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase, SupportP
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
+import { calcCircleIndex } from '../geometry';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";
@@ -58,7 +59,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     result.clear();
     result.shape = this;
     result.point = point;
-    result.index = 0;
+    result.index = calcCircleIndex(direction.radians);
     result.distance = !axisPoint.isEmpty ? point.subO(axisPoint).dot(direction) : point.dot(direction);
     return result;
   }
