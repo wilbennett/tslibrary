@@ -43,11 +43,13 @@ export class Gjk extends ColliderBase {
 
     while (i-- > 0) {
       //! Always return with a 2 simplex for EPA to work. So don't process the first point.
+      const b = points[points.length - 1];
       shape.getSupport(direction, support);
       points.push(support.clone());
       callback && callback(simplex.clone());
 
-      if (support.worldPoint.dot(direction) <= 0)
+      // if (support.worldPoint.dot(direction) <= 0)
+      if (!(b.worldPoint.dot(direction) * support.worldPoint.dot(direction) <= 0))
         return false; // Point did not pass the origin.
 
       if (this.containsOrigin(simplex)) return true;
