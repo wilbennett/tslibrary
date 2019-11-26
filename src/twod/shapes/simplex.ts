@@ -16,7 +16,7 @@ export class Simplex {
 
   clone(result?: Simplex) {
     result || (result = new Simplex());
-    result.points = this.points.slice();
+    result.points = this.points.map(p => p.clone());
     result.direction = this.direction.clone();
     result.winding = this.winding;
     return result;
