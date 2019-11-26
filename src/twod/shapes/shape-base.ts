@@ -131,6 +131,7 @@ export abstract class ShapeBase implements IShape {
     result.point = bestVertex;
     result.index = bestIndex;
     result.distance = bestDistance;
+    result.direction = axisDirection.clone();
     return result;
   }
 
