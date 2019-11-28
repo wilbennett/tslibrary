@@ -13,6 +13,8 @@ export class CircleSegmentInfo {
     this._step = 360 / this._segmentCount * MathEx.ONE_DEGREE;
     this._cos = Math.cos(this._step);
     this._sin = Math.sin(this._step);
+    this._ncos = Math.cos(-this._step);
+    this._nsin = Math.sin(-this._step);
   }
 
   private _step!: number;
@@ -21,6 +23,10 @@ export class CircleSegmentInfo {
   get cos() { return this._cos; }
   private _sin!: number;
   get sin() { return this._sin; }
+  private _ncos!: number;
+  get ncos() { return this._ncos; }
+  private _nsin!: number;
+  get nsin() { return this._nsin; }
 };
 
 let circleSegmentInfo = new CircleSegmentInfo(30);

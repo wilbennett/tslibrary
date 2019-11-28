@@ -1,4 +1,4 @@
-import { MinkowskiPoint, Shape } from '.';
+import { MinkowskiPoint, Shape, SupportPoint } from '.';
 import { getCircleVertex, ICircle } from '..';
 import { Vector } from '../../vectors';
 import { getCircleEdge } from '../geometry';
@@ -12,6 +12,8 @@ export type Edge = {
   start: Vector;
   end: Vector;
 }
+
+type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
 
 export class MinkowskiDiffIterator extends MinkowskiPoint {
   constructor(start: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
@@ -49,13 +51,32 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
     }
   }
 
-  readonly circleSegments: CircleSegmentInfo;
-  readonly vertexCountA: number;
-  readonly vertexCountB: number;
+  circleSegments: CircleSegmentInfo;
+  vertexCountA: number;
+  vertexCountB: number;
   protected getWorldVertexA: GetVectorFunc;
   protected getWorldEdgeA: GetVectorFunc;
   protected getWorldVertexB: GetVectorFunc;
   protected getWorldEdgeB: GetVectorFunc;
+
+  clone(result?: SupportTypes): SupportTypes {
+    if (!result) {
+      result = new MinkowskiDiffIterator(this, this.circleSegments);
+    } else {
+      if (result instanceof MinkowskiDiffIterator) {
+        result.circleSegments = this.circleSegments;
+        result.vertexCountA = this.vertexCountA;
+        result.vertexCountB = this.vertexCountB;
+        result.getWorldVertexA = this.getWorldVertexA;
+        result.getWorldEdgeA = this.getWorldEdgeA;
+        result.getWorldVertexB = this.getWorldVertexB;
+        result.getWorldEdgeB = this.getWorldEdgeB;
+      }
+    }
+
+    super.clone(result);
+    return result;
+  }
 
   getEdgeA(): Edge {
     let index = this.indexA;
@@ -292,20 +313,18 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
   }
 
   protected getCircleWorldVertexA(index: number) {
-    return this.shapeA.toWorld(getCircleVertex(this.shapeA as ICircle, index, this.circleSegments));
+    return getCircleVertex(this.shapeA as ICircle, index, true, this.circleSegments);
   }
   protected getCircleWorldVertexB(index: number) {
-    const vertex = getCircleVertex(this.shapeB as ICircle, index, this.circleSegments);
-    return this.shapeB.toWorld(vertex);
+    return getCircleVertex(this.shapeB as ICircle, index, true, this.circleSegments);
   }
 
   protected getCircleWorldEdgeA(index: number) {
-    return this.shapeA.toWorld(getCircleEdge(this.shapeA as ICircle, index, this.circleSegments));
+    return getCircleEdge(this.shapeA as ICircle, index, true, this.circleSegments);
   }
 
   protected getCircleWorldEdgeB(index: number) {
-    const edge = getCircleEdge(this.shapeB as ICircle, index, this.circleSegments);
-    return this.shapeB.toWorld(edge);
+    return getCircleEdge(this.shapeB as ICircle, index, true, this.circleSegments);
   }
 
   protected getPolyWorldVertexA(index: number) {

@@ -61,22 +61,24 @@ export function calcCircleVerticesAndEdges(
   return result;
 }
 
-export function getCircleVertex(circle: ICircle, index: number, circleSegments?: CircleSegmentInfo) {
+export function getCircleVertex(circle: ICircle, index: number, isWorld: boolean = false, circleSegments?: CircleSegmentInfo) {
   circleSegments || (circleSegments = getCircleSegmentInfo());
-  let step = circleSegments.step;
-  const rad = step * index;
+  const center = isWorld ? circle.position : circle.center;
+  const rad = circleSegments.step * index;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
   const x = cos * circle.radius;
   const y = sin * circle.radius;
-  return Vector.position(x, y);
+  return Vector.position(x + center.x, y + center.y);
 }
 
-export function getCircleEdge(circle: ICircle, index: number, circleSegments?: CircleSegmentInfo) {
+export function getCircleEdge(circle: ICircle, index: number, isWorld: boolean = false, circleSegments?: CircleSegmentInfo) {
   circleSegments || (circleSegments = getCircleSegmentInfo());
 
   const nextIndex = (index + 1) % circleSegments.segmentCount;
-  return getCircleVertex(circle, nextIndex, circleSegments).subO(getCircleVertex(circle, index, circleSegments));
+
+  return getCircleVertex(circle, nextIndex, isWorld, circleSegments)
+    .subO(getCircleVertex(circle, index, isWorld, circleSegments));
 }
 
 export function calcCircleIndex(radians: number, circleSegments?: CircleSegmentInfo) {
