@@ -13,7 +13,7 @@ export type Edge = {
   end: Vector;
 }
 
-export class MinkowskiVertexIterator extends MinkowskiPoint {
+export class MinkowskiDiffIterator extends MinkowskiPoint {
   constructor(start: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
     super(
       start.shapeA,
