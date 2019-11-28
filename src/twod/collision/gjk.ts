@@ -52,9 +52,8 @@ export class Gjk extends ColliderBase {
       points.push(support.clone());
       callback && callback(simplex.clone());
 
-      // if (support.worldPoint.dot(direction) <= 0)
-      // if (!(b.worldPoint.dot(direction) * support.worldPoint.dot(direction) <= 0))
-      //   return false; // Point did not pass the origin.
+      if (support.worldPoint.dot(direction) <= 0)
+        return false; // Did not find a point further in the direction.
 
       if (this.containsOrigin(simplex)) return true;
     }
