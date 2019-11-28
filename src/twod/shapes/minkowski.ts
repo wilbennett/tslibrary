@@ -443,8 +443,11 @@ export function getWorldVertices(
   circleSegments?: CircleSegmentInfo,
   // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
   referenceShape?: Shape): Vector[] {
-  if (shape.kind === "circle")
-    return calcCircleVertices(shape, true, circleSegments);
+  if (shape.kind === "circle") {
+    let result = calcCircleVertices(shape, true, circleSegments);
+    negate && (result = result.map(v => v.negateO()));
+    return result;
+  }
 
   const result = shape.vertexList.items;
 
@@ -459,8 +462,11 @@ export function getWorldVerticesAndEdges(
   circleSegments?: CircleSegmentInfo,
   // @ts-ignore - unused param. TODO: Use to generate vertices for shapes with none. e.g. planes.
   referenceShape?: Shape): [Vector[], Vector[]] {
-  if (shape.kind === "circle")
-    return calcCircleVerticesAndEdges(shape, true, circleSegments);
+  if (shape.kind === "circle") {
+    const result = calcCircleVerticesAndEdges(shape, true, circleSegments);
+    negate && (result[1] = result[1].map(v => v.negateO()));
+    return result;
+  }
 
   const result = [shape.vertexList.items, shape.edgeVectorList.items];
 
