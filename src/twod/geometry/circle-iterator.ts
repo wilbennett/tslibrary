@@ -1,8 +1,8 @@
-import { getCircleVertex, ICircle } from '.';
+import { GeometryIterator, getCircleVertex, ICircle } from '.';
 import { pos, Vector } from '../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
-export class CircleIterator {
+export class CircleIterator implements GeometryIterator {
   constructor(readonly circle: ICircle, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
     this._index = index;
     this._center = isWorld ? circle.position : circle.center;
@@ -16,6 +16,7 @@ export class CircleIterator {
   protected _index: number;
   get index() { return this._index; }
   protected _vertex: Vector;
+  get vertexCount() { return this.segments.segmentCount; }
   get vertex() { return this._vertex; }
   get nextVertex() {
     const current = this._vertex;
@@ -43,8 +44,8 @@ export class CircleIterator {
 
     return pos(rx + cx, ry + cy);
   }
-  get edge() { return this.nextVertex.subO(this.vertex); }
-  get prevEdge() { return this.vertex.subO(this.prevVertex); }
+  get edgeVector() { return this.nextVertex.subO(this.vertex); }
+  get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
 
   next() {
     const current = this._vertex;
@@ -58,6 +59,7 @@ export class CircleIterator {
     let ry = x * sin + y * cos;
 
     this._vertex.withXY(rx + cx, ry + cy);
+    this._index = (this._index + 1) % this.segments.segmentCount;
     return this._vertex;
   }
 
@@ -73,6 +75,7 @@ export class CircleIterator {
     let ry = x * nsin + y * ncos;
 
     this._vertex.withXY(rx + cx, ry + cy);
+    this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this._vertex;
   }
 }

@@ -77,3 +77,16 @@ export type Geometry =
   | IPolygon
   | IAABB
   | ITriangle;
+
+export interface GeometryIterator {
+  readonly index: number;
+  readonly vertexCount: number;
+  readonly vertex: Vector;
+  readonly nextVertex: Vector;
+  readonly prevVertex: Vector;
+  readonly edgeVector: Vector;
+  readonly prevEdgeVector: Vector;
+
+  next(): void;
+  prev(): void;
+}

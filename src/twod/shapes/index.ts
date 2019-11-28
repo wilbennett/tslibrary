@@ -5,6 +5,7 @@ export * from "./shape-types";
 export * from "./shape-utils";
 export * from "./unique-shape-axes-list";
 export * from "./minkowski-point";
+export * from "./shape-iterator";
 export * from "./minkowski-diff-iterator";
 export * from "./simplex";
 export * from "./minkowski";
