@@ -1,5 +1,6 @@
 import { Shape, SupportPoint } from '.';
 import { Vector } from '../../vectors';
+import { getCircleVertex } from '../geometry';
 
 const ZERO_DIRECTION = Vector.direction(0, 0);
 
@@ -10,19 +11,10 @@ export class MinkowskiPoint extends SupportPoint {
     point: Vector,
     public indexA: number,
     public indexB: number,
-    worldPointA?: Vector,
-    worldPointB?: Vector,
     worldDirection: Vector = ZERO_DIRECTION) {
     super(shapeA, point);
 
     this._worldPoint = point;
-
-    if (worldPointA)
-      this._worldPointA = worldPointA;
-
-    if (worldPointB)
-      this._worldPointB = worldPointB;
-
     this.worldDirection = worldDirection;
   }
 
@@ -36,8 +28,17 @@ export class MinkowskiPoint extends SupportPoint {
     this.point = value;
   }
 
-  get pointA() { return this.shapeA.vertexList.items[this.indexA]; }
-  get pointB() { return this.shapeB.vertexList.items[this.indexB]; }
+  get pointA() {
+    return this.shapeA.kind === "circle"
+      ? getCircleVertex(this.shapeA, this.indexA)
+      : this.shapeA.vertexList.items[this.indexA];
+  }
+
+  get pointB() {
+    return this.shapeB.kind === "circle"
+      ? getCircleVertex(this.shapeB, this.indexB)
+      : this.shapeB.vertexList.items[this.indexB];
+  }
 
   protected _worldPointA?: Vector;
   get worldPointA() {

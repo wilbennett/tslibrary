@@ -79,7 +79,7 @@ export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector)
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.index, spB.index, spA.worldPoint, spB.worldPoint, direction);
+  return new MinkowskiPoint(first, second, point, spA.index, spB.index, direction);
 }
 
 export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
@@ -92,7 +92,7 @@ export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.index, spB.index, spA.worldPoint, spB.worldPoint, direction);
+  return new MinkowskiPoint(first, second, point, spA.index, spB.index, direction);
 }
 
 // Based on: http://www.arestlessmind.org/2014/12/21/
@@ -211,7 +211,8 @@ function verticesVerticesM(
       verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
     }
 
-    mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
+    // mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
+    mp = new MinkowskiPoint(first, second, point, a, b);
   }
 
   stateCallback && stateCallback(state!);
@@ -261,7 +262,8 @@ function verticesVerticesEdgesM(
       edgeB = edgesB[b];
     }
 
-    mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
+    // mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
+    mp = new MinkowskiPoint(first, second, point, a, b);
   }
 
   stateCallback && stateCallback(state!);

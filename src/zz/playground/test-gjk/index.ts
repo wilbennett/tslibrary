@@ -11,18 +11,19 @@ import {
   NumberEaser,
   SequentialEaser,
 } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, getCircleEdge, getCircleVertex, Graph, Viewport } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { Gjk, ShapePair } from '../../../twod/collision';
 import {
   CircleShape,
-  MinkowskiPoint,
+  Edge,
   MinkowskiVertexIterator,
   PolygonShape,
   Shape,
   Simplex,
+  SupportPoint,
 } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { CircleSegmentInfo, getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
+import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -104,9 +105,9 @@ circle3.setPosition(circle2.position);
 
 const pairs: ShapePair[] = [
   new ShapePair(circle1, circle2),
-  new ShapePair(circle2, circle1),
-  new ShapePair(circle3, circle2),
-  new ShapePair(circle2, circle3),
+  // new ShapePair(circle2, circle1),
+  // new ShapePair(circle3, circle2),
+  // new ShapePair(circle2, circle3),
   new ShapePair(poly1, circle2),
   new ShapePair(circle1, poly2),
   new ShapePair(circle1, poly4),
@@ -328,191 +329,6 @@ function render() {
   isDirty = false;
 }
 
-function getVertex(index: number, shape: Shape) {
-  if (shape.kind !== "circle") {
-    const vertices = shape.vertexList.items;
-    return vertices[index];
-  }
-
-  return getCircleVertex(shape, index);
-}
-
-function getEdge(index: number, shape: Shape) {
-  if (shape.kind !== "circle") {
-    const vertices = shape.vertexList.items;
-    const vertexCount = vertices.length;
-    const nextIndex = (index + 1) % vertexCount;
-    return vertices[nextIndex].subO(vertices[index]);
-  }
-
-  return getCircleEdge(shape, index);
-}
-
-function getNextPoint(point: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
-  const { shapeA, shapeB } = point;
-  const verticesA = shapeA.vertexList.items;
-  const verticesB = shapeB.vertexList.items;
-  const { segmentCount } = (circleSegments || getCircleSegmentInfo());
-  const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
-  const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
-  let indexA = point.indexA;
-  let indexB = point.indexB;
-  const edgeA = shapeA.toWorld(getEdge(indexA, shapeA));
-  const edgeB = shapeB.toWorld(getEdge(indexB, shapeB).negateO());
-
-  let edge: Vector;
-
-  if (edgeA.cross2D(edgeB) > 0) {
-    edge = edgeA;
-    indexA = (indexA + 1) % vertexCountA;
-  } else {
-    edge = edgeB;
-    indexB = (indexB + 1) % vertexCountB;
-  }
-
-  const vertex = point.point.addO(edge);
-  const pointA = shapeA.toWorld(getVertex(indexA, shapeA));
-  const pointB = shapeB.toWorld(getVertex(indexB, shapeB));
-  return new MinkowskiPoint(shapeA, shapeB, vertex, indexA, indexB, pointA, pointB);
-}
-
-function getPrevPoint(point: MinkowskiPoint, circleSegments?: CircleSegmentInfo): MinkowskiPoint {
-  const { shapeA, shapeB } = point;
-  const verticesA = shapeA.vertexList.items;
-  const verticesB = shapeB.vertexList.items;
-  const { segmentCount } = (circleSegments || getCircleSegmentInfo());
-  const vertexCountA = shapeA.kind === "circle" ? segmentCount : verticesA.length;
-  const vertexCountB = shapeB.kind === "circle" ? segmentCount : verticesB.length;
-  let indexA = point.indexA;
-  let indexB = point.indexB;
-  let currA = indexA;
-  let currB = indexB;
-  let prevA = point.indexA > 0 ? point.indexA - 1 : vertexCountA - 1;
-  let prevB = point.indexB > 0 ? point.indexB - 1 : vertexCountB - 1;
-  const prevEdgeA = shapeA.toWorld(getEdge(prevA, shapeA));
-  const prevEdgeB = shapeB.toWorld(getEdge(prevB, shapeB).negateO());
-
-  let edge: Vector;
-
-  if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-    edge = prevEdgeA;
-    indexA = prevA;
-    indexB = currB;
-  } else {
-    edge = prevEdgeB;
-    indexA = currA;
-    indexB = prevB;
-  }
-
-  const vertex = point.point.subO(edge);
-  const pointA = shapeA.toWorld(getVertex(indexA, shapeA));
-  const pointB = shapeB.toWorld(getVertex(indexB, shapeB));
-  return new MinkowskiPoint(shapeA, shapeB, vertex, indexA, indexB, pointA, pointB);
-}
-
-/*
-function temp() {
-  if (!pair) return;
-  if (!polyd) return;
-
-  polydBrush = "green";
-  simplices = [];
-  const { first, second } = pair;
-  let direction = second.position.subO(first.position);
-
-  if (direction.equals(ZERO_DIRECTION))
-    direction.withXY(1, 0);
-
-  let mka = Minkowski.getDiffPoint(first, second, direction);
-  let mkb = Minkowski.getDiffPoint(first, second, direction.negateO());
-
-  if (!mka || !mkb) return;
-
-  let simplex = new Simplex();
-  const points = simplex.points;
-  direction.clone(simplex.direction);
-  points.push(new SupportPoint(polyd, mka.point));
-  simplices.push(simplex.clone());
-  direction = simplex.direction;
-
-  // mka = getPrevPoint(mka);
-
-  for (let i = 0; i < first.vertexList.items.length + second.vertexList.items.length; i++) {
-    // mka = getNextPoint(mka);
-    mka = getPrevPoint(mka);
-    points.pop();
-    points.push(new SupportPoint(polyd, mka.point));
-    simplices.push(simplex.clone());
-  }
-
-  return;
-  direction.negate();
-  points.push(new SupportPoint(polyd, mkb.point));
-  simplices.push(simplex.clone());
-
-  if (!(mka.point.dot(direction) * mkb.point.dot(direction) <= 0)) return; // Did not cross origin.
-
-  const ao = mka.point.negateO();
-  const ab = mkb.point.subO(mka.point);
-  let containsOrigin = false;
-  let i = 15;
-
-  if (ao.cross2D(ab) > 0) { // Origin to right. Flip so origin is on left.
-    const temp = mka;
-    mka = mkb;
-    mkb = temp;
-
-    ao.negate();
-    ab.negate();
-
-    direction.negate();
-    points.shift();
-    points.push(new SupportPoint(polyd, mkb.point));
-    simplices.push(simplex.clone());
-  }
-
-  // Walk left.
-  let mkc = getNextPoint(mkb);
-
-  ab.perpLeftO(direction);
-  points.push(new SupportPoint(polyd, mkc.point));
-  simplices.push(simplex.clone());
-
-  const ac = mkc.point.subO(mka.point);
-
-  while (ao.cross2D(ac) < 0 && i-- > 0) {
-    mkb.point.copyFrom(mkc.point);
-    mkc = getNextPoint(mkc);
-    mkc.point.subO(mka.point, ac);
-
-    points.pop();
-    points.pop();
-    points.push(new SupportPoint(polyd, mkb.point));
-    points.push(new SupportPoint(polyd, mkc.point));
-    simplices.push(simplex.clone());
-  }
-
-  const bo = mkb.point.negateO();
-  const bc = mkc.point.subO(mkb.point);
-  containsOrigin = bo.cross2D(bc) <= 0;
-
-  i <= 0 && console.log("!!! EXCEEDED MAXIMUM ITERATIONS !!!");
-
-  if (simplices.length > maxSimplexCount) {
-    maxSimplexCount = simplices.length;
-    console.log(`Max simplices: ${maxSimplexCount}`);
-
-    // if (simplices.length > 5) {
-    if (i <= 0) {
-      // dragging = false;
-      // debugger;
-    }
-  }
-
-  polydBrush = containsOrigin ? "red" : "green";
-  createSimplexAnim();
-}
-/*/
 function temp() {
   if (!pair) return;
   if (!polyd) return;
@@ -595,10 +411,18 @@ function temp() {
   const ao = mka.point.negateO();
   const ab = mkb.point.subO(mka.point);
   let containsOrigin = false;
+  let edge: Edge;
   let i = 15;
 
+  const pushEdge = (e?: Edge) => {
+    e || (e = edge);
+    points.splice(0);
+    points.push(new SupportPoint(polyd!, e.start));
+    points.push(new SupportPoint(polyd!, e.end));
+    simplices.push(simplex.clone());
+  };
+
   if (ao.cross2D(ab) >= 0) { // Walk right.
-    // let mkc = getPrevPoint(mkb);
     let mkc = new MinkowskiVertexIterator(mkb);
     mkc.prev();
 
@@ -610,7 +434,6 @@ function temp() {
 
     while (ao.cross2D(ac) > 0 && i-- > 0) {
       mkb.point.copyFrom(mkc.point);
-      // mkc = getPrevPoint(mkc);
       mkc.prev();
       mkc.point.subO(mka.point, ac);
 
@@ -623,8 +446,32 @@ function temp() {
     const bc = mkc.point.subO(mkb.point);
     const cross = bo.cross2D(bc);
     containsOrigin = cross >= 0;
+
+    edge = mkc.getCurrentShapeEdge();
+    pushEdge();
+    let next = mkc.getNextShapeEdge();
+
+    while (next.shape === edge.shape) {
+      mkc.next();
+      next = mkc.getNextShapeEdge();
+    }
+
+    pushEdge(next);
+
+    // let prev = mkc.getPrevShapeEdge();
+
+    // while (prev.shape === edge.shape) {
+    //   mkc.prev();
+    //   prev = mkc.getPrevShapeEdge();
+    // }
+
+    // pushEdge(prev);
+
+    // if (prev.shape !== edge.shape)
+    //   pushEdge(prev);
+    // else
+    //   pushEdge(mkc.getNextShapeEdge());
   } else { // Walk left.
-    // let mkc = getNextPoint(mkb);
     let mkc = new MinkowskiVertexIterator(mkb);
     mkc.next();
 
@@ -636,7 +483,6 @@ function temp() {
 
     while (ao.cross2D(ac) < 0 && i-- > 0) {
       mkb.point.copyFrom(mkc.point);
-      // mkc = getNextPoint(mkc);
       mkc.next();
       mkc.point.subO(mka.point, ac);
 
@@ -649,6 +495,23 @@ function temp() {
     const bc = mkc.point.subO(mkb.point);
     const cross = bo.cross2D(bc);
     containsOrigin = cross <= 0;
+
+    mkc.prev();
+    edge = mkc.getCurrentShapeEdge();
+    pushEdge();
+    let next = mkc.getNextShapeEdge();
+
+    while (next.shape === edge.shape) {
+      mkc.next();
+      next = mkc.getNextShapeEdge();
+    }
+
+    pushEdge(next);
+
+    // if (prev.shape !== edge.shape)
+    //   pushEdge(prev);
+    // else
+    //   pushEdge(mkc.getNextShapeEdge());
   }
 
   i <= 0 && console.log("!!! EXCEEDED MAXIMUM ITERATIONS !!!");
@@ -734,7 +597,7 @@ function createSimplexAnim() {
   const anims: Easer[] = [];
 
   if (simplices.length > 0) {
-    const anim = new ArrayEaser(simplices, MathEx.clamp(simplices.length * 3.0, 2, 20), Ease.linear, v => {
+    const anim = new ArrayEaser(simplices, MathEx.clamp(simplices.length * 1.0, 2, 20), Ease.linear, v => {
       if (stepping) return;
 
       simplex = v;
