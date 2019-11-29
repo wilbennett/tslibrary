@@ -10,12 +10,19 @@ export abstract class TypedEaser<T> extends Easer {
   abstract get value(): T;
   abstract get start(): T;
   abstract get end(): T;
+  notifyDuplicates?: boolean;
+  protected _lastNotifiedValue?: T;
 
   protected _onValueChanged: EaserValueCallback<T> = () => { };
   get onValueChanged() { return this._onValueChanged; }
   set onValueChanged(value) { this._onValueChanged = value; }
   get onComplete() { return this._onComplete; }
   set onComplete(value) { this._onComplete = value; }
+
+  reset() {
+    super.reset();
+    this._lastNotifiedValue = undefined;
+  }
 
   moveNext() {
     if (this._isComplete) {
@@ -38,5 +45,14 @@ export abstract class TypedEaser<T> extends Easer {
   // @ts-ignore - unused param.
   protected setValue(value: T) { }
   // @ts-ignore - unused param.
-  protected notifyValue(percent: number) { this._onValueChanged(this.value, this); }
+
+  protected notifyValue(percent: number) {
+    const value = this.value;
+
+    if (!this.notifyDuplicates && this._lastNotifiedValue === value && value !== undefined) return false;
+
+    this._lastNotifiedValue = value;
+    this._onValueChanged(value, this);
+    return true;
+  }
 }

@@ -25,8 +25,9 @@ export class FunctionArrayEaser extends ValueEaser<ArrayFunction> {
   }
 
   protected notifyValue(percent: number) {
-    super.notifyValue(percent);
+    if (!super.notifyValue(percent)) return false;
 
     this.value(percent, this.isComplete);
+    return true;
   }
 }
