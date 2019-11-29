@@ -9,12 +9,22 @@ export class CircleIterator implements GeometryIterator {
     this.segments = segments || getCircleSegmentInfo();
 
     this._vertex = getCircleVertex(circle, index, isWorld, this.segments);
+
+    if (isWorld)
+      this._isWorld = isWorld;
   }
 
+  protected _isWorld?: boolean;
   protected _center: Vector;
   readonly segments: CircleSegmentInfo;
   protected _index: number;
   get index() { return this._index; }
+  set index(value) {
+    if (this._index === value) return;
+
+    this._index = value;
+    this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
+  }
   protected _vertex: Vector;
   get vertexCount() { return this.segments.segmentCount; }
   get vertex() { return this._vertex; }
