@@ -1,6 +1,7 @@
 import { Shape, SupportPoint } from '.';
 import { Vector } from '../../vectors';
 import { getCircleVertex } from '../geometry';
+import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
 const ZERO_DIRECTION = Vector.direction(0, 0);
 
@@ -9,16 +10,28 @@ export class MinkowskiPoint extends SupportPoint {
     public shapeA: Shape,
     public shapeB: Shape,
     point: Vector,
-    public indexA: number,
-    public indexB: number,
-    worldDirection: Vector = ZERO_DIRECTION) {
+    indexA: number,
+    indexB: number,
+    worldDirection: Vector = ZERO_DIRECTION,
+    circleSegments?: CircleSegmentInfo) {
     super(shapeA, point);
 
     this._worldPoint = point;
+    this._indexA = indexA;
+    this._indexB = indexB;
     this.worldDirection = worldDirection;
+    this.circleSegments = circleSegments || getCircleSegmentInfo();
   }
 
+  circleSegments: CircleSegmentInfo;
   isSum?: boolean;
+
+  protected _indexA: number;
+  get indexA() { return this._indexA; }
+  set indexA(value) { this._indexA = value; }
+  protected _indexB: number;
+  get indexB() { return this._indexB; }
+  set indexB(value) { this._indexB = value; }
 
   get worldPoint() {
     return this._worldPoint || (this._worldPoint = this.point);
@@ -30,13 +43,13 @@ export class MinkowskiPoint extends SupportPoint {
 
   get pointA() {
     return this.shapeA.kind === "circle"
-      ? getCircleVertex(this.shapeA, this.indexA)
+      ? getCircleVertex(this.shapeA, this.indexA, false, this.circleSegments)
       : this.shapeA.vertexList.items[this.indexA];
   }
 
   get pointB() {
     return this.shapeB.kind === "circle"
-      ? getCircleVertex(this.shapeB, this.indexB)
+      ? getCircleVertex(this.shapeB, this.indexB, false, this.circleSegments)
       : this.shapeB.vertexList.items[this.indexB];
   }
 
@@ -107,6 +120,14 @@ export class MinkowskiPoint extends SupportPoint {
       this.isSum = undefined;
   }
 
+  adjustDiffPointIfCircle() {
+    if (this.shapeA.kind !== "circle" && this.shapeB.kind !== "circle") return;
+
+    this._worldPointA = undefined;
+    this._worldPointB = undefined;
+    this._worldPoint = this.worldPointA.displaceByNegO(this.worldPointB, this._worldPoint);
+  }
+
   clone(result?: SupportPoint | MinkowskiPoint): SupportPoint | MinkowskiPoint {
     if (!result) {
       result = new MinkowskiPoint(this.shapeA, this.shapeB, this.point, this.indexA, this.indexB);
@@ -122,6 +143,8 @@ export class MinkowskiPoint extends SupportPoint {
     super.clone(result);
 
     if (result instanceof MinkowskiPoint) {
+      result.circleSegments = this.circleSegments;
+
       if (this.isSum)
         result.isSum = this.isSum;
 
