@@ -79,7 +79,7 @@ export type Geometry =
   | ITriangle;
 
 export interface GeometryIterator {
-  readonly index: number;
+  index: number;
   readonly vertexCount: number;
   readonly vertex: Vector;
   readonly nextVertex: Vector;
