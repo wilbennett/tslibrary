@@ -12,7 +12,7 @@ export type Edge = {
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
 
-export class MinkowskiDiffIterator extends MinkowskiPoint {
+export class MinkowskiDiffIterator extends MinkowskiPoint implements GeometryIterator {
   constructor(start: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
     super(
       start.shapeA,
@@ -43,6 +43,25 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
   set indexA(value) { this.iterA.index = value; }
   get indexB() { return this.iterB.index; }
   set indexB(value) { this.iterB.index = value; }
+  get vertex() { return this.worldPoint; }
+  get nextVertex() {
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
+
+    return edgeA.cross2D(edgeB) > 0
+      ? this.worldPoint.addO(edgeA)
+      : this.worldPoint.addO(edgeB);
+  }
+  get prevVertex() {
+    const prevEdgeA = this.iterA.prevEdgeVector;
+    const prevEdgeB = this.iterB.prevEdgeVector.negateO();
+
+    return prevEdgeA.cross2D(prevEdgeB) < 0
+      ? this.worldPoint.displaceByNegO(prevEdgeA)
+      : this.worldPoint.displaceByNegO(prevEdgeB);
+  }
+  get edgeVector() { return this.nextVertex.subO(this.vertex); }
+  get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
 
   clone(result?: SupportTypes): SupportTypes {
     if (!result) {
@@ -149,10 +168,10 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
     const prevEdgeB = this.iterB.prevEdgeVector.negateO();
 
     if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-      this.worldPoint = this.point.subO(prevEdgeA);
+      this.worldPoint.displaceByNeg(prevEdgeA);
       this.iterA.prev();
     } else {
-      this.worldPoint = this.point.subO(prevEdgeB);
+      this.worldPoint.displaceByNeg(prevEdgeB);
       this.iterB.prev();
     }
 

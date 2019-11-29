@@ -1,16 +1,7 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx, Tristate } from '../../../core';
-import {
-  ArrayEaser,
-  ConcurrentEaser,
-  DelayEaser,
-  Ease,
-  Easer,
-  EaseRunner,
-  NumberEaser,
-  SequentialEaser,
-} from '../../../easing';
+import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, IGeometry, Line, Viewport } from '../../../twod';
 import { Gjk, ShapePair } from '../../../twod/collision';
 import {
@@ -23,7 +14,7 @@ import {
   SupportPoint,
 } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
+import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -262,13 +253,6 @@ canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
 
-const v1 = dir(circle1.radius, 0);
-const vanim = new NumberEaser(0, 360, 5, Ease.linear, v => {
-  v1.withDegreesMag(v, v1.mag);
-  isDirty = true;
-});
-// runner.add(vanim.repeat(Infinity));
-
 let mkNormal: Vector | null = null;
 let contactPoint: Vector | null = null;
 let collisionNormal: Vector | null = null;
@@ -318,10 +302,6 @@ function render() {
   const view = graph.getViewport(ctx);
   view.applyTransform();
 
-  // v1.render(view, circle1.position, { strokeStyle: "black", lineWidth: 1 });
-  // const index = calcCircleIndex(v1.radians);
-  // beginPath({ fillStyle: "blue" }, view).fillCircle(circle1.toWorld(getCircleVertex(circle1, index)), 0.4);
-
   if (pair) {
     const { first, second } = pair;
     polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
@@ -335,11 +315,14 @@ function render() {
     second.render(view);
     first.render(view);
 
-    // if (first.kind === "circle") {
-    //   const vertices = Minkowski.getWorldVertices(first);
-    //   beginPath(first.props, view).strokePoly(vertices, true);
-    // }
+    /*
+    if (first.kind === "circle") {
+      const vertices = Minkowski.getWorldVertices(first);
+      beginPath(first.props, view).strokePoly(vertices, true);
+    }
+    //*/
 
+    /*
     if (first.kind === "circle" && second.kind === "circle") {
       const props: ContextProps = { strokeStyle: "purple" };
       const tpoly1 = new PolygonShape(getCircleSegmentInfo().segmentCount, first.radius);
@@ -354,6 +337,7 @@ function render() {
       tpoly2.render(view);
       mkPoly.render(view);
     }
+    //*/
   }
 
   // pair && drawSat(pair, view);
@@ -398,12 +382,12 @@ function temp() {
   direction.withXY(0, 0);
   const segs = getCircleSegmentInfo();
   const iter = new MinkowskiDiffIterator(mkb, segs);
-  const count = iter.vertexCountA + iter.vertexCountB;
+  const count = iter.vertexCount;
 
   if (first.kind === "circle" && second.kind === "circle") {
-    const ci1 = new CircleIterator(first, mkb.indexA, true, segs);
-    const ci2 = new CircleIterator(second, mkb.indexB, true, segs);
-    const p = ci1.vertex.displaceByNegO(ci2.vertex);
+    // const ci1 = new CircleIterator(first, mkb.indexA, true, segs);
+    // const ci2 = new CircleIterator(second, mkb.indexB, true, segs);
+    // const p = ci1.vertex.displaceByNegO(ci2.vertex);
     // mkb.worldPoint = p.clone();
     // console.log(`p: ${p}, ${mkb.worldPoint}`);
 
@@ -446,17 +430,21 @@ function temp() {
   // iter.worldPoint = mkb.worldPoint.clone();
   // console.log(`iter: ${iter.worldPoint}`);
   for (let i = 0; i < count; i++) {
-    points.pop();
+    points.splice(0);
     // points.push(iter.clone());
-    points.push(new SupportPoint(polyd, iter.worldPoint.clone()));
+    points.push(new SupportPoint(polyd, iter.prevVertex.clone()));
+    points.push(new SupportPoint(polyd, iter.vertex.clone()));
+    points.push(new SupportPoint(polyd, iter.nextVertex.clone()));
     simplices.push(simplex.clone());
     iter.next();
   }
 
   for (let i = 0; i < count; i++) {
-    points.pop();
+    points.splice(0);
     iter.prev();
-    points.push(iter.clone());
+    points.push(new SupportPoint(polyd, iter.prevVertex.clone()));
+    points.push(new SupportPoint(polyd, iter.vertex.clone()));
+    points.push(new SupportPoint(polyd, iter.nextVertex.clone()));
     simplices.push(simplex.clone());
   }
 
