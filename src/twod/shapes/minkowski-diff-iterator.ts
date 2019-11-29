@@ -1,4 +1,4 @@
-import { MinkowskiPoint, Shape, ShapeIterator, SupportPoint } from '.';
+import { MinkowskiPoint, MinkowskiPointImpl, Shape, ShapeIterator, SupportPoint } from '.';
 import { Vector } from '../../vectors';
 import { CircleIterator, GeometryIterator } from '../geometry';
 import { CircleSegmentInfo } from '../utils';
@@ -12,7 +12,7 @@ export type Edge = {
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
 
-export class MinkowskiDiffIterator extends MinkowskiPoint implements GeometryIterator {
+export class MinkowskiDiffIterator extends MinkowskiPointImpl implements GeometryIterator {
   constructor(start: MinkowskiPoint, circleSegments?: CircleSegmentInfo) {
     super(
       start.shapeA,

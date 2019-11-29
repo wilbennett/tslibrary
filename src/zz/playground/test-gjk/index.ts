@@ -11,7 +11,7 @@ import {
   PolygonShape,
   Shape,
   Simplex,
-  SupportPoint,
+  SupportPointImpl,
 } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
@@ -156,6 +156,10 @@ const delay = new DelayEaser(2);
 let frame = -1;
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner(loop);
+
+const items = ["one", "two", "three", "four", "five"];
+const tanim = new ArrayEaser(items, 1, Ease.linear, v => console.log(`${v}`));
+runner.add(tanim);
 
 drawGraph();
 changeShapes();
@@ -410,7 +414,7 @@ function temp() {
   let spSimplex = new Simplex();
   const spPoints = spSimplex.points;
   const mkai = new MinkowskiDiffIterator(mka);
-  spPoints.push(new SupportPoint(polyd, mkai.getShapeEdge().start));
+  spPoints.push(new SupportPointImpl(polyd, mkai.getShapeEdge().start));
   spSimplices.push(spSimplex.clone());
 
   /*
@@ -438,7 +442,7 @@ function temp() {
     //   v21.negate();
     //   v22.negate();
     //   e2.negate();
-    //   points.push(new SupportPoint(polyd, p.clone()));
+    //   points.push(new SupportPointImpl(polyd, p.clone()));
 
     //   if (e1.cross2D(e2) > 0) {
     //     p.add(e1);
@@ -447,9 +451,9 @@ function temp() {
     //     p.add(e2);
     //     ci2.next();
     //   }
-    //   // points.push(new SupportPoint(polyd, v11));
-    //   // points.push(new SupportPoint(polyd, v2));
-    //   // points.push(new SupportPoint(polyd, v11.addO(e1)));
+    //   // points.push(new SupportPointImpl(polyd, v11));
+    //   // points.push(new SupportPointImpl(polyd, v2));
+    //   // points.push(new SupportPointImpl(polyd, v11.addO(e1)));
     //   mkSimplices.push(simplex.clone());
     //   // ci1.next();
     //   // ci2.next();
@@ -457,7 +461,7 @@ function temp() {
 
     // for (let i = 0; i < segs.segmentCount; i++) {
     //   points.pop();
-    //   points.push(new SupportPoint(polyd, ci.vertex.clone()));
+    //   points.push(new SupportPointImpl(polyd, ci.vertex.clone()));
     //   mkSimplices.push(simplex.clone());
     //   ci.prev();
     // }
@@ -468,9 +472,9 @@ function temp() {
   for (let i = 0; i < count; i++) {
     points.splice(0);
     // points.push(iter.clone());
-    points.push(new SupportPoint(polyd, iter.prevVertex.clone()));
-    points.push(new SupportPoint(polyd, iter.vertex.clone()));
-    points.push(new SupportPoint(polyd, iter.nextVertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
     mkSimplices.push(simplex.clone());
     iter.next();
   }
@@ -478,9 +482,9 @@ function temp() {
   for (let i = 0; i < count; i++) {
     points.splice(0);
     iter.prev();
-    points.push(new SupportPoint(polyd, iter.prevVertex.clone()));
-    points.push(new SupportPoint(polyd, iter.vertex.clone()));
-    points.push(new SupportPoint(polyd, iter.nextVertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
+    points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
     mkSimplices.push(simplex.clone());
   }
 
@@ -492,7 +496,7 @@ function temp() {
   for (let i = 0; i < first.vertexList.items.length; i++) {
     const vertex = first.toWorld(getVertex(i, first));
     points.pop();
-    points.push(new SupportPoint(polyd, vertex));
+    points.push(new SupportPointImpl(polyd, vertex));
     mkSimplices.push(simplex.clone());
   }
   return;
@@ -507,7 +511,7 @@ function temp() {
     // mka = getNextPoint(mka);
     // mka = getPrevPoint(mka);
     // points.pop();
-    // points.push(new SupportPoint(polyd, mka.point));
+    // points.push(new SupportPointImpl(polyd, mka.point));
     points.push(iter.clone());
     mkSimplices.push(simplex.clone());
     points.pop();
@@ -531,7 +535,7 @@ function temp() {
   mkPoints.push(mkb.clone());
   mkSimplices.push(mkSimplex.clone());
   let mkbi = new MinkowskiDiffIterator(mkb);
-  spPoints.push(new SupportPoint(polyd, mkbi.getShapeEdge().start));
+  spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().start));
   spSimplices.push(spSimplex.clone());
 
   // Early out if distance between shapes not needed.
@@ -547,7 +551,7 @@ function temp() {
     mkPoints.push(mkb.clone());
     mkSimplices.push(mkSimplex.clone());
     mkbi = new MinkowskiDiffIterator(mkb);
-    spPoints.push(new SupportPoint(polyd, mkbi.getShapeEdge().start));
+    spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().start));
     spSimplices.push(spSimplex.clone());
   }
 
@@ -563,8 +567,8 @@ function temp() {
   const pushEdge = (e?: Edge) => {
     e || (e = edge1);
     spPoints.splice(0);
-    spPoints.push(new SupportPoint(polyd!, e.start));
-    spPoints.push(new SupportPoint(polyd!, e.end));
+    spPoints.push(new SupportPointImpl(polyd!, e.start));
+    spPoints.push(new SupportPointImpl(polyd!, e.end));
     spSimplices.push(spSimplex.clone());
     mkSimplices.push(mkSimplex.clone());
   };
@@ -576,8 +580,8 @@ function temp() {
     mkPoints.push(mkc.clone());
     mkSimplices.push(mkSimplex.clone());
     spPoints.pop();
-    spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().end));
-    spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().start));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
     spSimplices.push(spSimplex.clone());
 
     const ac = mkc.point.subO(mka.point);
@@ -591,8 +595,8 @@ function temp() {
       mkPoints.push(mkc.clone());
       mkSimplices.push(mkSimplex.clone());
       spPoints.splice(1, 2);
-      spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().end));
-      spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().start));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
       spSimplices.push(spSimplex.clone());
     }
 
@@ -616,8 +620,8 @@ function temp() {
     pushEdge(edge2);
   } else { // Walk left.
     spPoints.pop();
-    spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().start));
-    spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().end));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
     spSimplices.push(spSimplex.clone());
 
     mkc.next();
@@ -630,8 +634,8 @@ function temp() {
 
     while (ao.cross2D(ac) < 0 && i-- > 0) {
       spPoints.splice(1, 2);
-      spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().start));
-      spPoints.push(new SupportPoint(polyd, mkc.getShapeEdge().end));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
       spSimplices.push(spSimplex.clone());
 
       mkb.point.copyFrom(mkc.point);

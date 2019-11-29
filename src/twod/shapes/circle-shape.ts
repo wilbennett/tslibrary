@@ -1,4 +1,4 @@
-import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase, SupportPoint } from '.';
+import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase, SupportPoint, SupportPointImpl } from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
@@ -38,7 +38,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
   getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
   getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
-    result || (result = new SupportPoint(this));
+    result || (result = new SupportPointImpl(this));
 
     let direction: Vector;
     let axisPoint: Vector;

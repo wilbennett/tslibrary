@@ -1,4 +1,4 @@
-import { CircleShape, MinkowskiPoint, MinkowskiShape, PolygonShape, Shape } from '.';
+import { CircleShape, MinkowskiPoint, MinkowskiPointImpl, MinkowskiShape, PolygonShape, Shape } from '.';
 import { calcCircleVertices, calcCircleVerticesAndEdges, isTriangleCW } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
@@ -79,7 +79,7 @@ export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector)
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.index, spB.index, direction);
+  return new MinkowskiPointImpl(first, second, point, spA.index, spB.index, direction);
 }
 
 export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
@@ -92,7 +92,7 @@ export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector
   if (!spA.isValid || !spB.isValid) return null;
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
-  return new MinkowskiPoint(first, second, point, spA.index, spB.index, direction);
+  return new MinkowskiPointImpl(first, second, point, spA.index, spB.index, direction);
 }
 
 // Based on: http://www.arestlessmind.org/2014/12/21/
@@ -211,8 +211,8 @@ function verticesVerticesM(
       verticesB[(b + 1) % vertexCountB].subO(verticesB[b], edgeB);
     }
 
-    // mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
-    mp = new MinkowskiPoint(first, second, point, a, b);
+    // mp = new MinkowskiPointImpl(first, second, point, a, b, verticesA[a], verticesA[b]);
+    mp = new MinkowskiPointImpl(first, second, point, a, b);
   }
 
   stateCallback && stateCallback(state!);
@@ -262,8 +262,8 @@ function verticesVerticesEdgesM(
       edgeB = edgesB[b];
     }
 
-    // mp = new MinkowskiPoint(first, second, point, a, b, verticesA[a], verticesA[b]);
-    mp = new MinkowskiPoint(first, second, point, a, b);
+    // mp = new MinkowskiPointImpl(first, second, point, a, b, verticesA[a], verticesA[b]);
+    mp = new MinkowskiPointImpl(first, second, point, a, b);
   }
 
   stateCallback && stateCallback(state!);
@@ -298,7 +298,7 @@ export function verticesVertices(
   result?: MinkowskiPoint[]): Tristate<MinkowskiPoint[]>;
 export function verticesVertices(...args: any[]): Tristate<Vector[]> | Tristate<MinkowskiPoint[]> {
   if (args.length <= 4) {
-    if (args[0] instanceof MinkowskiPoint)
+    if (!Array.isArray(args[0]))
       // @ts-ignore - arguments length.
       return verticesVerticesEdgesV(...args);
 
@@ -306,7 +306,7 @@ export function verticesVertices(...args: any[]): Tristate<Vector[]> | Tristate<
     return verticesVerticesV(...args);
   }
 
-  if (args[2] instanceof MinkowskiPoint)
+  if (!Array.isArray(args[2]))
     // @ts-ignore - arguments length.
     return verticesVerticesEdgesM(...args);
 
@@ -338,7 +338,7 @@ function circleCircle(
     for (let c2 = 0; c2 < segmentCount; c2++) {
       const circle2Point = circle2Vertices[c2];
       const point = op(circle1Point, circle2Point);
-      const mp = new MinkowskiPoint(circle1, circle2, point, circle1Point, circle2Point, c1, c2);
+      const mp = new MinkowskiPointImpl(circle1, circle2, point, circle1Point, circle2Point, c1, c2);
       result.push(mp);
 
       stateCallback && stateCallback(state!);
@@ -382,7 +382,7 @@ function circlePoly(
     for (let p = 0; p < vertexCount; p++) {
       const polyPoint = polyVertices[p];
       const point = op(circlePoint, polyPoint);
-      const mp = new MinkowskiPoint(circle, poly, point, circlePoint, polyPoint, c, p);
+      const mp = new MinkowskiPointImpl(circle, poly, point, circlePoint, polyPoint, c, p);
       result.push(mp);
 
       stateCallback && stateCallback(state!);

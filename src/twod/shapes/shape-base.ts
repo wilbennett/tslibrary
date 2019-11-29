@@ -1,4 +1,4 @@
-import { IShape, Projection, Shape, ShapeAxis, shapeContainsPoint, SupportPoint } from '.';
+import { IShape, Projection, Shape, ShapeAxis, shapeContainsPoint, SupportPoint, SupportPointImpl } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
@@ -120,7 +120,7 @@ export abstract class ShapeBase implements IShape {
     }
 
     // @ts-ignore - "this" not assignable to Shape.
-    result || (result = new SupportPoint(this));
+    result || (result = new SupportPointImpl(this));
 
     // Force typescript to realize result is assigned.
     if (!result) return undefined;
