@@ -130,7 +130,7 @@ export class MinkowskiPoint extends SupportPoint {
 
   clone(result?: SupportPoint | MinkowskiPoint): SupportPoint | MinkowskiPoint {
     if (!result) {
-      result = new MinkowskiPoint(this.shapeA, this.shapeB, this.point, this.indexA, this.indexB);
+      result = new MinkowskiPoint(this.shapeA, this.shapeB, this.point.clone(), this.indexA, this.indexB);
     } else {
       if (result instanceof MinkowskiPoint) {
         result.shapeA = this.shapeA;
