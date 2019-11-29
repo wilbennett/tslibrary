@@ -19,6 +19,7 @@ export class ShapeIterator implements GeometryIterator {
   protected readonly edgeVectors: Vector[];
   protected _index: number;
   get index() { return this._index; }
+  set index(value) { this._index = value; }
   get vertex() {
     return this.isWorld
       ? this.shape.toWorld(this.vertices[this._index])
