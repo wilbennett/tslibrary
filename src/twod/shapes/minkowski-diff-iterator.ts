@@ -1,10 +1,7 @@
-import { MinkowskiPoint, Shape, SupportPoint } from '.';
-import { getCircleVertex, ICircle } from '..';
+import { MinkowskiPoint, Shape, ShapeIterator, SupportPoint } from '.';
 import { Vector } from '../../vectors';
-import { getCircleEdge } from '../geometry';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
-
-type GetVectorFunc = (index: number) => Vector;
+import { CircleIterator, GeometryIterator } from '../geometry';
+import { CircleSegmentInfo } from '../utils';
 
 export type Edge = {
   shape: Shape;
@@ -20,57 +17,47 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
     super(
       start.shapeA,
       start.shapeB,
-      start.point.clone(),
+      start.worldPoint.clone(),
       start.indexA,
       start.indexB,
-      start.worldDirection.clone());
-    this.circleSegments = circleSegments || getCircleSegmentInfo();
+      start.worldDirection.clone(),
+      circleSegments);
 
-    const verticesA = this.shapeA.vertexList.items;
-    const verticesB = this.shapeB.vertexList.items;
-    const { segmentCount } = this.circleSegments;
+    this.iterA = this.shapeA.kind === "circle"
+      ? new CircleIterator(this.shapeA, start.indexA, true, this.circleSegments)
+      : new ShapeIterator(this.shapeA, start.indexA, true);
 
-    if (this.shapeA.kind === "circle") {
-      this.vertexCountA = segmentCount;
-      this.getWorldVertexA = this.getCircleWorldVertexA;
-      this.getWorldEdgeA = this.getCircleWorldEdgeA;
-    } else {
-      this.vertexCountA = verticesA.length;
-      this.getWorldVertexA = this.getPolyWorldVertexA;
-      this.getWorldEdgeA = this.getPolyWorldEdgeA;
-    }
-
-    if (this.shapeB.kind === "circle") {
-      this.vertexCountB = segmentCount;
-      this.getWorldVertexB = this.getCircleWorldVertexB;
-      this.getWorldEdgeB = this.getCircleWorldEdgeB;
-    } else {
-      this.vertexCountB = verticesB.length;
-      this.getWorldVertexB = this.getPolyWorldVertexB;
-      this.getWorldEdgeB = this.getPolyWorldEdgeB;
-    }
+    this.iterB = this.shapeB.kind === "circle"
+      ? new CircleIterator(this.shapeB, start.indexB, true, this.circleSegments)
+      : new ShapeIterator(this.shapeB, start.indexB, true);
   }
 
-  circleSegments: CircleSegmentInfo;
-  vertexCountA: number;
-  vertexCountB: number;
-  protected getWorldVertexA: GetVectorFunc;
-  protected getWorldEdgeA: GetVectorFunc;
-  protected getWorldVertexB: GetVectorFunc;
-  protected getWorldEdgeB: GetVectorFunc;
+  protected iterA: GeometryIterator;
+  protected iterB: GeometryIterator;
+  get vertexCount() { return this.iterA.vertexCount + this.iterB.vertexCount; }
+
+  get index() { return NaN; }
+  // @ts-ignore - unused param.
+  set index(value) { }
+  get indexA() { return this.iterA.index; }
+  set indexA(value) { this.iterA.index = value; }
+  get indexB() { return this.iterB.index; }
+  set indexB(value) { this.iterB.index = value; }
 
   clone(result?: SupportTypes): SupportTypes {
     if (!result) {
       result = new MinkowskiDiffIterator(this, this.circleSegments);
     } else {
       if (result instanceof MinkowskiDiffIterator) {
-        result.circleSegments = this.circleSegments;
-        result.vertexCountA = this.vertexCountA;
-        result.vertexCountB = this.vertexCountB;
-        result.getWorldVertexA = this.getWorldVertexA;
-        result.getWorldEdgeA = this.getWorldEdgeA;
-        result.getWorldVertexB = this.getWorldVertexB;
-        result.getWorldEdgeB = this.getWorldEdgeB;
+        const { iterA, iterB } = this;
+
+        result.iterA = iterA instanceof CircleIterator
+          ? new CircleIterator(iterA.circle, iterA.index, true, iterA.segments)
+          : new ShapeIterator(this.shapeA, iterA.index, true);
+
+        result.iterB = iterB instanceof CircleIterator
+          ? new CircleIterator(iterB.circle, iterB.index, true, iterB.segments)
+          : new ShapeIterator(this.shapeB, iterB.index, true);
       }
     }
 
@@ -78,98 +65,9 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
     return result;
   }
 
-  getEdgeA(): Edge {
-    let index = this.indexA;
-    const edge = this.getWorldEdgeA(index);
-
-    let start = this.worldPointA;
-    let end = start.addO(edge);
-    return { shape: this.shapeA, index, start, end };
-  }
-
-  getEdgeB(): Edge {
-    let index = this.indexB;
-    const edge = this.getWorldEdgeB(index);
-
-    let start = this.worldPointB;
-    let end = start.addO(edge);
-    return { shape: this.shapeB, index, start, end };
-  }
-
-  getNextEdgeA(): Edge {
-    let index = this.indexA;
-    const currEdge = this.getWorldEdgeA(index);
-    index = (index + 1) % this.vertexCountA;
-    const edge = this.getWorldEdgeA(index);
-
-    let curr = this.worldPointA;
-    let start = curr.addO(currEdge);
-    let end = start.addO(edge);
-    return { shape: this.shapeA, index, start, end };
-  }
-
-  getNextEdgeB(): Edge {
-    let index = this.indexB;
-    const currEdge = this.getWorldEdgeB(index);
-    index = (index + 1) % this.vertexCountB;
-    const edge = this.getWorldEdgeB(index);
-
-    let curr = this.worldPointB;
-    let start = curr.addO(currEdge);
-    let end = start.addO(edge);
-    return { shape: this.shapeB, index, start, end };
-  }
-
-  getPrevEdgeA(): Edge {
-    let index = this.indexA;
-    index = index > 0 ? index - 1 : this.vertexCountA - 1;
-    const edge = this.getWorldEdgeA(index);
-
-    let end = this.worldPointA;
-    let start = end.subO(edge);
-    return { shape: this.shapeA, index, start, end };
-  }
-
-  getPrevEdgeB(): Edge {
-    let index = this.indexB;
-    index = index > 0 ? index - 1 : this.vertexCountB - 1;
-    const edge = this.getWorldEdgeB(index);
-
-    let end = this.worldPointB;
-    let start = end.subO(edge);
-    return { shape: this.shapeB, index, start, end };
-  }
-
-  getPrevPrevEdgeA(): Edge {
-    let index = this.indexA;
-    index = index > 0 ? index - 1 : this.vertexCountA - 1;
-    const prevEdge = this.getWorldEdgeA(index);
-    index = index > 0 ? index - 1 : this.vertexCountA - 1;
-    const edge = this.getWorldEdgeA(index);
-
-    let curr = this.worldPointA;
-    let end = curr.subO(prevEdge);
-    let start = end.subO(edge);
-    return { shape: this.shapeA, index, start, end };
-  }
-
-  getPrevPrevEdgeB(): Edge {
-    let index = this.indexB;
-    index = index > 0 ? index - 1 : this.vertexCountB - 1;
-    const prevEdge = this.getWorldEdgeB(index);
-    index = index > 0 ? index - 1 : this.vertexCountB - 1;
-    const edge = this.getWorldEdgeB(index);
-
-    let curr = this.worldPointB;
-    let end = curr.subO(prevEdge);
-    let start = end.subO(edge);
-    return { shape: this.shapeB, index, start, end };
-  }
-
-  getCurrentShapeEdge(): Edge {
-    let { indexA, indexB } = this;
-    const edgeA = this.getWorldEdgeA(indexA);
-    const edgeB = this.getWorldEdgeB(indexB).negateO();
+  getShapeEdge(): Edge {
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
 
     let shape = this.shapeA;
     let index: number;
@@ -177,12 +75,12 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
     let end: Vector;
 
     if (edgeA.cross2D(edgeB) > 0) {
-      index = indexA;
+      index = this.iterA.index;
       start = this.worldPointA;
       end = start.addO(edgeA);
     } else {
       shape = this.shapeB;
-      index = indexB;
+      index = this.iterB.index;
       start = this.worldPointB;
       end = start.subO(edgeB);
     }
@@ -191,155 +89,75 @@ export class MinkowskiDiffIterator extends MinkowskiPoint {
   }
 
   getNextShapeEdge(): Edge {
-    let { indexA, indexB } = this;
-    let edgeA = this.getWorldEdgeA(indexA);
-    let edgeB = this.getWorldEdgeB(indexB).negateO();
+    const { iterA, iterB } = this;
+    let edgeA = iterA.edgeVector;
+    let edgeB = iterB.edgeVector.negateO();
 
     let shape = this.shapeA;
     let index: number;
     let start: Vector;
     let end: Vector;
+    let advancedA = false;
 
     if (edgeA.cross2D(edgeB) > 0) {
-      indexA = (indexA + 1) % this.vertexCountA;
-      edgeA = this.getWorldEdgeA(indexA);
+      iterA.next();
+      advancedA = true;
+      edgeA = iterA.edgeVector;
     } else {
-      indexB = (indexB + 1) % this.vertexCountB;
-      edgeB = this.getWorldEdgeB(indexB).negateO();
+      iterB.next();
+      iterB.edgeVector.negateO(edgeB);
     }
 
     if (edgeA.cross2D(edgeB) > 0) {
-      shape = this.shapeA;
-      index = indexA;
-      start = this.getWorldVertexA(index);
-      end = start.addO(edgeA);
+      index = iterA.index;
+      start = iterA.vertex;
+      end = iterA.nextVertex;
     } else {
       shape = this.shapeB;
-      index = indexB;
-      start = this.getWorldVertexB(index);
-      end = start.subO(edgeB);
+      index = iterB.index;
+      start = iterB.vertex;
+      end = iterB.nextVertex;
     }
 
-    return { shape, index, start, end };
-  }
-
-  getPrevShapeEdge(): Edge {
-    let { indexA, indexB } = this;
-    let prevA = indexA > 0 ? indexA - 1 : this.vertexCountA - 1;
-    let prevB = indexB > 0 ? indexB - 1 : this.vertexCountB - 1;
-    let prevEdgeA = this.getWorldEdgeA(prevA);
-    let prevEdgeB = this.getWorldEdgeB(prevB).negateO();
-
-    let shape: Shape;
-    let index: number;
-    let start: Vector;
-    let end: Vector;
-
-    if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-      indexA = prevA;
-      prevA = indexA > 0 ? indexA - 1 : this.vertexCountA - 1;
-      prevEdgeA = this.getWorldEdgeA(prevA);
-    } else {
-      indexB = prevB;
-      prevB = indexB > 0 ? indexB - 1 : this.vertexCountB - 1;
-      prevEdgeB = this.getWorldEdgeB(prevB).negateO();
-    }
-
-    if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-      shape = this.shapeA;
-      index = prevA;
-      start = this.getWorldVertexA(index);
-      end = start.addO(prevEdgeA);
-    } else {
-      shape = this.shapeB;
-      index = prevB;
-      start = this.getWorldVertexB(index);
-      end = start.subO(prevEdgeB);
-    }
+    if (advancedA)
+      iterA.prev();
+    else
+      iterB.prev();
 
     return { shape, index, start, end };
   }
 
   next() {
-    let { indexA, indexB } = this;
-    const edgeA = this.getWorldEdgeA(indexA);
-    const edgeB = this.getWorldEdgeB(indexB).negateO();
-
-    let edge: Vector;
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
 
     if (edgeA.cross2D(edgeB) > 0) {
-      edge = edgeA;
-      indexA = (indexA + 1) % this.vertexCountA;
+      this.worldPoint.add(edgeA);
+      this.iterA.next();
     } else {
-      edge = edgeB;
-      indexB = (indexB + 1) % this.vertexCountB;
+      this.worldPoint.add(edgeB);
+      this.iterB.next();
     }
 
-    this.worldPoint = this.worldPoint.addO(edge);
     this._worldPointA = undefined;
     this._worldPointB = undefined;
-    this.indexA = indexA;
-    this.indexB = indexB;
-    return this;
+    return this.worldPoint;
   }
 
   prev() {
-    let { indexA, indexB } = this;
-    let currA = indexA;
-    let currB = indexB;
-    let prevA = indexA > 0 ? indexA - 1 : this.vertexCountA - 1;
-    let prevB = indexB > 0 ? indexB - 1 : this.vertexCountB - 1;
-    const prevEdgeA = this.getWorldEdgeA(prevA);
-    const prevEdgeB = this.getWorldEdgeB(prevB).negateO();
-
-    let edge: Vector;
+    const prevEdgeA = this.iterA.prevEdgeVector;
+    const prevEdgeB = this.iterB.prevEdgeVector.negateO();
 
     if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-      edge = prevEdgeA;
-      indexA = prevA;
-      indexB = currB;
+      this.worldPoint = this.point.subO(prevEdgeA);
+      this.iterA.prev();
     } else {
-      edge = prevEdgeB;
-      indexA = currA;
-      indexB = prevB;
+      this.worldPoint = this.point.subO(prevEdgeB);
+      this.iterB.prev();
     }
 
-    this.worldPoint = this.point.subO(edge);
     this._worldPointA = undefined;
     this._worldPointB = undefined;
-    this.indexA = indexA;
-    this.indexB = indexB;
-    return this;
-  }
-
-  protected getCircleWorldVertexA(index: number) {
-    return getCircleVertex(this.shapeA as ICircle, index, true, this.circleSegments);
-  }
-  protected getCircleWorldVertexB(index: number) {
-    return getCircleVertex(this.shapeB as ICircle, index, true, this.circleSegments);
-  }
-
-  protected getCircleWorldEdgeA(index: number) {
-    return getCircleEdge(this.shapeA as ICircle, index, true, this.circleSegments);
-  }
-
-  protected getCircleWorldEdgeB(index: number) {
-    return getCircleEdge(this.shapeB as ICircle, index, true, this.circleSegments);
-  }
-
-  protected getPolyWorldVertexA(index: number) {
-    return this.shapeA.toWorld(this.shapeA.vertexList.items[index]);
-  }
-
-  protected getPolyWorldVertexB(index: number) {
-    return this.shapeB.toWorld(this.shapeB.vertexList.items[index]);
-  }
-
-  protected getPolyWorldEdgeA(index: number) {
-    return this.shapeA.toWorld(this.shapeA.edgeVectorList.items[index]);
-  }
-
-  protected getPolyWorldEdgeB(index: number) {
-    return this.shapeB.toWorld(this.shapeB.edgeVectorList.items[index]);
+    return this.worldPoint;
   }
 }

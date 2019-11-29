@@ -11,19 +11,19 @@ import {
   NumberEaser,
   SequentialEaser,
 } from '../../../easing';
-import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph, IGeometry, Line, Viewport } from '../../../twod';
 import { Gjk, ShapePair } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
-  MinkowskiVertexIterator,
+  MinkowskiDiffIterator,
   PolygonShape,
   Shape,
   Simplex,
   SupportPoint,
 } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { setCircleSegmentCount } from '../../../twod/utils';
+import { getCircleSegmentInfo, setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -77,12 +77,14 @@ const screenBounds = ctx.bounds;
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
+const pauseAfterSeconds = 30;
 let isDirty = true;
 let autoChangeShapes = true;
 // let showStates = true;
 let showSimplices = false;
 setCircleSegmentCount(showSimplices ? 10 : 30);
-setCircleSegmentCount(30);
+setCircleSegmentCount(360);
+setCircleSegmentCount(20);
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
@@ -102,12 +104,17 @@ const circle2 = new CircleShape(3);
 circle2.setPosition(pos(9.0, 6.0));
 const circle3 = new CircleShape(2);
 circle3.setPosition(circle2.position);
+const box1 = new PolygonShape([pos(2, 8), pos(6, 4), pos(9, 7), pos(5, 11)]);
+const box2 = new PolygonShape([pos(4, 2), pos(12, 2), pos(12, 5), pos(4, 5)]);
+const box3 = new PolygonShape([pos(9, 4), pos(13, 3), pos(14, 7), pos(10, 8)]);
+const box4 = new PolygonShape([pos(4, 2), pos(7, 2), pos(7, 4), pos(4, 4)]);
+box4.setPosition(pos(3, 3));
 
 const pairs: ShapePair[] = [
   new ShapePair(circle1, circle2),
-  // new ShapePair(circle2, circle1),
-  // new ShapePair(circle3, circle2),
-  // new ShapePair(circle2, circle3),
+  new ShapePair(circle2, circle1),
+  new ShapePair(circle3, circle2),
+  new ShapePair(circle2, circle3),
   new ShapePair(poly1, circle2),
   new ShapePair(circle1, poly2),
   new ShapePair(circle1, poly4),
@@ -122,6 +129,9 @@ const pairs: ShapePair[] = [
   new ShapePair(poly2, poly3),
   new ShapePair(poly1, poly2),
   new ShapePair(poly2, poly1),
+  new ShapePair(box1, box2),
+  new ShapePair(box3, box2),
+  new ShapePair(box4, box2),
 ]
 
 const gjk = new Gjk();
@@ -259,6 +269,11 @@ const vanim = new NumberEaser(0, 360, 5, Ease.linear, v => {
 });
 // runner.add(vanim.repeat(Infinity));
 
+let mkNormal: Vector | null = null;
+let contactPoint: Vector | null = null;
+let collisionNormal: Vector | null = null;
+let collisionDepth: number = 0;
+
 function drawGraph() {
   ctxb.beginPath().withFillStyle("grey").fillRect(ctxb.bounds);
 
@@ -285,7 +300,7 @@ function restoreTransform() {
 }
 
 function render() {
-  if (++frame === (60 * 5)) {
+  if (++frame === (60 * pauseAfterSeconds)) {
     loop.stop();
     elPause.checked = true;
   }
@@ -309,17 +324,35 @@ function render() {
 
   if (pair) {
     const { first, second } = pair;
-    second.render(view);
-    first.render(view);
     polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
     // mkVertices && drawMinkowskiVertices(mkVertices, { lineWidth: 2 }, view);
+    mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
+    contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
+    collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
     simplex && drawSimplex(simplex, view);
+    second.render(view);
+    first.render(view);
 
-    if (first.kind === "circle") {
-      const vertices = Minkowski.getWorldVertices(first);
-      beginPath(first.props, view).strokePoly(vertices, true);
+    // if (first.kind === "circle") {
+    //   const vertices = Minkowski.getWorldVertices(first);
+    //   beginPath(first.props, view).strokePoly(vertices, true);
+    // }
+
+    if (first.kind === "circle" && second.kind === "circle") {
+      const props: ContextProps = { strokeStyle: "purple" };
+      const tpoly1 = new PolygonShape(getCircleSegmentInfo().segmentCount, first.radius);
+      tpoly1.setPosition(first.position);
+      tpoly1.props = props;
+      const tpoly2 = new PolygonShape(getCircleSegmentInfo().segmentCount, second.radius);
+      tpoly2.setPosition(second.position);
+      tpoly2.props = props;
+      const mkPoly = Minkowski.createDiffPoly(tpoly1, tpoly2)!;
+      mkPoly.props = props;
+      tpoly1.render(view);
+      tpoly2.render(view);
+      mkPoly.render(view);
     }
   }
 
@@ -330,13 +363,18 @@ function render() {
 }
 
 function temp() {
+  polydBrush = "green";
+  simplices = [];
+  contactPoint = null;
+  collisionNormal = null;
+  mkNormal = null;
+
   if (!pair) return;
   if (!polyd) return;
 
-  polydBrush = "green";
-  simplices = [];
   const { first, second } = pair;
-  let direction = second.position.subO(first.position);
+  // let direction = second.position.subO(first.position);
+  let direction = first.position.subO(second.position);
 
   if (direction.equals(ZERO_DIRECTION))
     direction.withXY(1, 0);
@@ -346,6 +384,8 @@ function temp() {
 
   if (!mka || !mkb) return;
 
+  mka.adjustDiffPointIfCircle();
+  mkb.adjustDiffPointIfCircle();
   let simplex = new Simplex();
   const points = simplex.points;
   direction.clone(simplex.direction);
@@ -353,46 +393,113 @@ function temp() {
   simplices.push(simplex.clone());
   direction = simplex.direction;
 
-  // simplices.pop();
-  // if (first.kind === "circle") {
-  //   const segs = getCircleSegmentInfo();
-  //   for (let i = 0; i < segs.segmentCount; i++) {
-  //     const vertex = first.toWorld(getVertex(i, first));
-  //     points.pop();
-  //     points.push(new SupportPoint(polyd, vertex));
-  //     simplices.push(simplex.clone());
-  //   }
-  //   return;
-  // } else {
-  //   for (let i = 0; i < first.vertexList.items.length; i++) {
-  //     const vertex = first.toWorld(getVertex(i, first));
-  //     points.pop();
-  //     points.push(new SupportPoint(polyd, vertex));
-  //     simplices.push(simplex.clone());
-  //   }
-  //   return;
-  // }
+  /*
+  simplices.pop();
+  direction.withXY(0, 0);
+  const segs = getCircleSegmentInfo();
+  const iter = new MinkowskiDiffIterator(mkb, segs);
+  const count = iter.vertexCountA + iter.vertexCountB;
 
-  // const segs = getCircleSegmentInfo();
-  // const count = (first.kind === "circle" ? segs.segmentCount : first.vertexList.items.length)
-  //   + (second.kind === "circle" ? segs.segmentCount : second.vertexList.items.length);
-  // const iter = new MinkowskiVertexIterator(mka);
-  // for (let i = 0; i < count; i++) {
-  //   // mka = getNextPoint(mka);
-  //   // mka = getPrevPoint(mka);
-  //   // points.pop();
-  //   // points.push(new SupportPoint(polyd, mka.point));
-  //   points.push(iter.clone());
-  //   simplices.push(simplex.clone());
-  //   points.pop();
-  //   // iter.next();
-  //   iter.prev();
-  // }
+  if (first.kind === "circle" && second.kind === "circle") {
+    const ci1 = new CircleIterator(first, mkb.indexA, true, segs);
+    const ci2 = new CircleIterator(second, mkb.indexB, true, segs);
+    const p = ci1.vertex.displaceByNegO(ci2.vertex);
+    // mkb.worldPoint = p.clone();
+    // console.log(`p: ${p}, ${mkb.worldPoint}`);
 
-  // return;
+    // for (let i = 0; i < segs.segmentCount * 2; i++) {
+    //   points.splice(0);
+    //   const v11 = ci1.vertex.clone();
+    //   const v12 = ci1.nextVertex.clone();
+    //   const e1 = ci1.edgeVector.clone();
+    //   const v21 = ci2.vertex.clone();
+    //   const v22 = ci2.nextVertex.clone();
+    //   const e2 = ci2.edgeVector.clone();
+    //   v21.negate();
+    //   v22.negate();
+    //   e2.negate();
+    //   points.push(new SupportPoint(polyd, p.clone()));
+
+    //   if (e1.cross2D(e2) > 0) {
+    //     p.add(e1);
+    //     ci1.next();
+    //   } else {
+    //     p.add(e2);
+    //     ci2.next();
+    //   }
+    //   // points.push(new SupportPoint(polyd, v11));
+    //   // points.push(new SupportPoint(polyd, v2));
+    //   // points.push(new SupportPoint(polyd, v11.addO(e1)));
+    //   simplices.push(simplex.clone());
+    //   // ci1.next();
+    //   // ci2.next();
+    // }
+
+    // for (let i = 0; i < segs.segmentCount; i++) {
+    //   points.pop();
+    //   points.push(new SupportPoint(polyd, ci.vertex.clone()));
+    //   simplices.push(simplex.clone());
+    //   ci.prev();
+    // }
+  }
+
+  // iter.worldPoint = mkb.worldPoint.clone();
+  // console.log(`iter: ${iter.worldPoint}`);
+  for (let i = 0; i < count; i++) {
+    points.pop();
+    // points.push(iter.clone());
+    points.push(new SupportPoint(polyd, iter.worldPoint.clone()));
+    simplices.push(simplex.clone());
+    iter.next();
+  }
+
+  for (let i = 0; i < count; i++) {
+    points.pop();
+    iter.prev();
+    points.push(iter.clone());
+    simplices.push(simplex.clone());
+  }
+
+  createSimplexAnim();
+  return;
+  //*/
+  /*
+  simplices.pop();
+  for (let i = 0; i < first.vertexList.items.length; i++) {
+    const vertex = first.toWorld(getVertex(i, first));
+    points.pop();
+    points.push(new SupportPoint(polyd, vertex));
+    simplices.push(simplex.clone());
+  }
+  return;
+  //*/
+
+  /*
+  const segs = getCircleSegmentInfo();
+  const count = (first.kind === "circle" ? segs.segmentCount : first.vertexList.items.length)
+    + (second.kind === "circle" ? segs.segmentCount : second.vertexList.items.length);
+  const iter = new MinkowskiVertexIterator(mka);
+  for (let i = 0; i < count; i++) {
+    // mka = getNextPoint(mka);
+    // mka = getPrevPoint(mka);
+    // points.pop();
+    // points.push(new SupportPoint(polyd, mka.point));
+    points.push(iter.clone());
+    simplices.push(simplex.clone());
+    points.pop();
+    // iter.next();
+    iter.prev();
+  }
+
+  return;
+  //*/
+
   direction.negate();
+  const adot = mka.point.dot(direction);
 
-  if (mka.point.dot(direction) > 0) return; // a is in front of origin in direction.
+  if (adot > 0) return; // a is in front of origin in direction.
+  // Early out if distance between shapes not needed.
+  // if (!(mkb.point.dot(direction) * adot <= 0)) return; // ab did not cross origin in direction.
 
   points.push(mkb.clone());
   simplices.push(simplex.clone());
@@ -411,11 +518,14 @@ function temp() {
   const ao = mka.point.negateO();
   const ab = mkb.point.subO(mka.point);
   let containsOrigin = false;
-  let edge: Edge;
-  let i = 15;
+  let edge1: Edge;
+  let edge2: Edge;
+  let closestLine: IGeometry | null = null;
+  let mkc = new MinkowskiDiffIterator(mkb);
+  let i = mkc.vertexCount;
 
   const pushEdge = (e?: Edge) => {
-    e || (e = edge);
+    e || (e = edge1);
     points.splice(0);
     points.push(new SupportPoint(polyd!, e.start));
     points.push(new SupportPoint(polyd!, e.end));
@@ -423,7 +533,6 @@ function temp() {
   };
 
   if (ao.cross2D(ab) >= 0) { // Walk right.
-    let mkc = new MinkowskiVertexIterator(mkb);
     mkc.prev();
 
     ab.perpRightO(direction);
@@ -446,33 +555,20 @@ function temp() {
     const bc = mkc.point.subO(mkb.point);
     const cross = bo.cross2D(bc);
     containsOrigin = cross >= 0;
+    closestLine = new Line(mkc.point.clone(), mkb.point.clone());
 
-    edge = mkc.getCurrentShapeEdge();
+    simplex.direction = Vector.empty;
+    edge1 = mkc.getShapeEdge();
     pushEdge();
-    let next = mkc.getNextShapeEdge();
+    edge2 = mkc.getNextShapeEdge();
 
-    while (next.shape === edge.shape) {
+    while (edge2.shape === edge1.shape) {
       mkc.next();
-      next = mkc.getNextShapeEdge();
+      edge2 = mkc.getNextShapeEdge();
     }
 
-    pushEdge(next);
-
-    // let prev = mkc.getPrevShapeEdge();
-
-    // while (prev.shape === edge.shape) {
-    //   mkc.prev();
-    //   prev = mkc.getPrevShapeEdge();
-    // }
-
-    // pushEdge(prev);
-
-    // if (prev.shape !== edge.shape)
-    //   pushEdge(prev);
-    // else
-    //   pushEdge(mkc.getNextShapeEdge());
+    pushEdge(edge2);
   } else { // Walk left.
-    let mkc = new MinkowskiVertexIterator(mkb);
     mkc.next();
 
     ab.perpLeftO(direction);
@@ -495,23 +591,39 @@ function temp() {
     const bc = mkc.point.subO(mkb.point);
     const cross = bo.cross2D(bc);
     containsOrigin = cross <= 0;
+    closestLine = new Line(mkb.point.clone(), mkc.point.clone());
 
+    simplex.direction = Vector.empty;
     mkc.prev();
-    edge = mkc.getCurrentShapeEdge();
+    edge1 = mkc.getShapeEdge();
     pushEdge();
-    let next = mkc.getNextShapeEdge();
+    edge2 = mkc.getNextShapeEdge();
 
-    while (next.shape === edge.shape) {
+    while (edge2.shape === edge1.shape) {
       mkc.next();
-      next = mkc.getNextShapeEdge();
+      edge2 = mkc.getNextShapeEdge();
     }
 
-    pushEdge(next);
+    pushEdge(edge2);
+  }
 
-    // if (prev.shape !== edge.shape)
-    //   pushEdge(prev);
-    // else
-    //   pushEdge(mkc.getNextShapeEdge());
+  if (edge1 && edge2 && closestLine) {
+    const closestPoint = closestLine.closestPoint(pos(0, 0));
+
+    if (closestPoint) {
+      collisionDepth = closestPoint.mag;
+      mkNormal = closestPoint.asDirection().normalize();
+      collisionNormal = mkNormal.clone();
+      contactPoint = edge2.start;
+
+      const normal1 = edge1.end.subO(edge1.start).perpRight();
+
+      if (collisionNormal.dot(normal1) < 0)
+        collisionNormal.negate();
+
+      if (!containsOrigin)
+        collisionNormal.negate();
+    }
   }
 
   i <= 0 && console.log("!!! EXCEEDED MAXIMUM ITERATIONS !!!");
