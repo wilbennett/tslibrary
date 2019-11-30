@@ -157,10 +157,6 @@ let frame = -1;
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner(loop);
 
-const items = ["one", "two", "three", "four", "five"];
-const tanim = new ArrayEaser(items, 1, Ease.linear, v => console.log(`${v}`));
-runner.add(tanim);
-
 drawGraph();
 changeShapes();
 loop.start();
