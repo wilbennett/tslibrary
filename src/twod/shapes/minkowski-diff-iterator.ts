@@ -1,6 +1,13 @@
-import { Edge, MinkowskiPoint, MinkowskiPointImpl, ShapeIterator, SupportPoint } from '.';
+import {
+  CircleIterator,
+  Edge,
+  GeometryIterator,
+  MinkowskiPoint,
+  MinkowskiPointImpl,
+  ShapeIterator,
+  SupportPoint,
+} from '.';
 import { Vector } from '../../vectors';
-import { CircleIterator, GeometryIterator } from '../geometry';
 import { CircleSegmentInfo } from '../utils';
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
@@ -110,7 +117,6 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     let edgeB = iterB.edgeVector.negateO();
 
     let shape = this.shapeA;
-    let iter = this.iterA;
     let index: number;
     let start: Vector;
     let end: Vector;

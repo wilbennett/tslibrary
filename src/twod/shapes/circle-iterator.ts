@@ -1,5 +1,6 @@
-import { GeometryIterator, getCircleVertex, ICircle } from '.';
+import { GeometryIterator } from '.';
 import { pos, Vector } from '../../vectors';
+import { getCircleVertex, ICircle } from '../geometry';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
 export class CircleIterator implements GeometryIterator {

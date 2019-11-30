@@ -78,3 +78,18 @@ export type Shape =
   | IAABBShape
   | ITriangleShape
   ;
+
+export interface GeometryIterator {
+  index: number;
+  readonly vertexCount: number;
+  readonly vertex: Vector;
+  readonly nextVertex: Vector;
+  readonly prevVertex: Vector;
+  readonly edgeVector: Vector;
+  readonly prevEdgeVector: Vector;
+  readonly normalDirection: Vector;
+  readonly normal: Vector;
+
+  next(): void;
+  prev(): void;
+}

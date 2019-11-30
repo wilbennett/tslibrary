@@ -1,5 +1,4 @@
-import { Shape } from '.';
-import { GeometryIterator } from '..';
+import { GeometryIterator, Shape } from '.';
 import { Vector } from '../../vectors';
 
 export class ShapeIterator implements GeometryIterator {
