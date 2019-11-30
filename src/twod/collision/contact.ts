@@ -124,5 +124,7 @@ export class Contact {
       !this._referenceEdge && (this._referenceEdge = edgeB);
       !this._incidentEdge && (this._incidentEdge = edgeA);
     }
+
+    this.ensureNormalDirection();
   }
 }
