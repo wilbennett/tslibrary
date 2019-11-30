@@ -16,12 +16,18 @@ export class ContactPoint {
 // TODO: Add Contact ID.
 export class Contact {
   constructor(public shapes: ShapePair) {
+    this._shapeA = shapes.shapeA;
+    this._shapeB = shapes.shapeB;
     this.normal = Vector.direction(0, 0);
     this.points = [];
   }
 
-  get shapeA() { return this.shapes.shapeA; }
-  get shapeB() { return this.shapes.shapeB; }
+  protected _shapeA: Shape;
+  get shapeA(): Shape { return this.shapeA; }
+  set shapeA(value) { this.shapeA = value; }
+  protected _shapeB: Shape;
+  get shapeB(): Shape { return this.shapeB; }
+  set shapeB(value) { this.shapeB = value; }
   normal: Vector;
   points: ContactPoint[];
   get isContacting() { return this.points.length > 0 && this.points.some(p => p.isPenetrating); }
@@ -66,6 +72,15 @@ export class Contact {
       cp.point.render(view, undefined, props);
       this.normal.scaleO(cp.depth, temp).render(view, cp.point, props);
     });
+  }
+
+  ensureNormalDirection() {
+    if (!this.referenceEdge) return;
+    if (this.referenceEdge.shape === this.shapeB) return;
+
+    const temp = this.shapeA;
+    this.shapeA = this.shapeB;
+    this.shapeB = temp;
   }
 
   protected calcBestEdge(shape: Shape, direction: Vector) {
