@@ -8,7 +8,6 @@ import {
   ShapeIterator,
   SupportPoint,
 } from '.';
-import { Vector } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
@@ -94,26 +93,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   getShapeEdge(): Edge {
     const edgeA = this.iterA.edgeVector;
     const edgeB = this.iterB.edgeVector.negateO();
-
-    let shape = this.shapeA;
-    let iter = this.iterA;
-    let index: number;
-    let start: Vector;
-    let end: Vector;
-
-    if (edgeA.cross2D(edgeB) > 0) {
-      index = this.iterA.index;
-      start = this.worldPointA;
-      end = start.addO(edgeA);
-    } else {
-      shape = this.shapeB;
-      iter = this.iterB;
-      index = this.iterB.index;
-      start = this.worldPointB;
-      end = start.subO(edgeB);
-    }
-
-    return new EdgeImpl(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, iter.normalDirection);
+    return edgeA.cross2D(edgeB) > 0 ? this.iterA.edge : this.iterB.edge;
   }
 
   getNextShapeEdge(): Edge {
@@ -121,12 +101,8 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     let edgeA = iterA.edgeVector;
     let edgeB = iterB.edgeVector.negateO();
 
-    let shape = this.shapeA;
-    let index: number;
-    let start: Vector;
-    let end: Vector;
-    let normalDirection: Vector;
     let advancedA = false;
+    let edge: Edge;
 
     if (edgeA.cross2D(edgeB) > 0) {
       iterA.next();
@@ -137,25 +113,14 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       iterB.edgeVector.negateO(edgeB);
     }
 
-    if (edgeA.cross2D(edgeB) > 0) {
-      index = iterA.index;
-      start = iterA.vertex;
-      end = iterA.nextVertex;
-      normalDirection = iterA.normalDirection;
-    } else {
-      shape = this.shapeB;
-      index = iterB.index;
-      start = iterB.vertex;
-      end = iterB.nextVertex;
-      normalDirection = iterB.normalDirection;
-    }
+    edge = edgeA.cross2D(edgeB) > 0 ? iterA.edge : iterB.edge;
 
     if (advancedA)
       iterA.prev();
     else
       iterB.prev();
 
-    return new EdgeImpl(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, normalDirection);
+    return edge;
   }
 
   next() {
