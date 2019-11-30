@@ -226,8 +226,107 @@ export class Wcb extends ColliderBase {
     return containsOrigin;
   }
 
+  protected walkCcw(
+    mka: MinkowskiPoint,
+    mkb: MinkowskiPoint,
+    mkc: MinkowskiDiffIterator,
+    ao: Vector): boolean | undefined {
+    const a = mka.worldPoint;
+    const b = mkb.worldPoint.clone();
+    let i = mkc.vertexCount;
+
+    mkc.init(mkb);
+    mkc.next();
+    let c = mkc.worldPoint;
+    const ac = c.subO(a);
+
+    while (ao.cross2D(ac) < 0 && i-- > 0) {
+      b.copyFrom(c);
+      mkc.next();
+      c = mkc.worldPoint;
+      c.subO(a, ac);
+    }
+
+    const bo = b.negateO();
+    const bc = c.subO(b);
+    const containsOrigin = bo.cross2D(bc) <= 0;
+    return containsOrigin;
+  }
+
+  protected walkCw(
+    mka: MinkowskiPoint,
+    mkb: MinkowskiPoint,
+    mkc: MinkowskiDiffIterator,
+    ao: Vector): boolean | undefined {
+    const a = mka.worldPoint;
+    const b = mkb.worldPoint.clone();
+    let i = mkc.vertexCount;
+
+    mkc.init(mkb);
+    mkc.prev();
+    let c = mkc.worldPoint;
+    const ac = c.subO(a);
+
+    while (ao.cross2D(ac) > 0 && i-- > 0) {
+      b.copyFrom(c);
+      mkc.prev();
+      c = mkc.worldPoint;
+      c.subO(a, ac);
+    }
+
+    const bo = b.negateO();
+    const bc = c.subO(b);
+    const containsOrigin = bo.cross2D(bc) >= 0;
+    return containsOrigin;
+  }
+
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    return this.isCollidingProgress(shapes);
+    const state = this.getState(shapes);
+
+    if (state.unsupported) return undefined;
+
+    const { shapeA, shapeB } = shapes;
+    let direction: Vector | undefined = undefined;
+
+    // This normally gets us closest to the origin.
+    // direction = shapeA.position.subO(shapeB.position, direction);
+    //* This normally gets us furthest from the origin.
+    //* Use it because swapping mka and mkb is faster than getting support when not colliding.
+    direction = shapeB.position.subO(shapeA.position, direction);
+
+    if (direction.equals(ZERO_DIRECTION))
+      direction.withXY(1, 0);
+
+    let mka = Minkowski.getDiffPoint(shapeA, shapeB, direction);
+    mka.adjustDiffPointIfCircle();
+    let a = mka.worldPoint;
+    direction.negate();
+
+    if (a.dot(direction) > 0) return false; // a is in front of origin in direction.
+
+    let mkb = Minkowski.getDiffPoint(shapeA, shapeB, direction);
+    mkb.adjustDiffPointIfCircle();
+    let b = mkb.worldPoint;
+
+    if (b.dot(direction) <= 0) return false; // b did not cross origin in direction.
+
+    if (a.magSquared < b.magSquared) {
+      const temp = mka;
+      mka = mkb;
+      mkb = temp;
+
+      direction.negate();
+      a = mka.worldPoint;
+      b = mkb.worldPoint;
+    }
+
+    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb));
+    const ao = a.negateO();
+    const ab = b.subO(a);
+
+    return ao.cross2D(ab) < 0
+      ? this.walkCcw(mka, mkb, state.mkc, ao)
+      : this.walkCw(mka, mkb, state.mkc, ao);
   }
 
   protected getState(shapes: ShapePair) {

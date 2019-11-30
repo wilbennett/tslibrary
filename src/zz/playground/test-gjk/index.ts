@@ -861,6 +861,7 @@ function applyCollider() {
   if (collider instanceof Gjk || collider instanceof Wcb)
     isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
+  // isColliding = !!collider.isColliding(pair);
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   polydBrush = isColliding ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
