@@ -1,4 +1,4 @@
-import { GeometryIterator, Shape } from '.';
+import { Edge, EdgeImpl, GeometryIterator, Shape } from '.';
 import { Vector } from '../../vectors';
 
 export class ShapeIterator implements GeometryIterator {
@@ -38,6 +38,7 @@ export class ShapeIterator implements GeometryIterator {
       ? this.shape.toWorld(this.vertices[index])
       : this.vertices[index];
   }
+  get edge(): Edge { return new EdgeImpl(this.shape, this.index); }
   get edgeVector() {
     return this.isWorld
       ? this.shape.toWorld(this.edgeVectors[this._index])

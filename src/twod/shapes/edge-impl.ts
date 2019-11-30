@@ -1,7 +1,7 @@
-import { Shape } from '.';
+import { Edge, Shape } from '.';
 import { Vector } from '../../vectors';
 
-export class Edge {
+export class EdgeImpl implements Edge {
   constructor(
     public shape: Shape,
     public index: number,

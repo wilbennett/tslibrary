@@ -1,10 +1,11 @@
-import { GeometryIterator } from '.';
+import { Edge, GeometryIterator, ICircleShape } from '.';
 import { pos, Vector } from '../../vectors';
-import { getCircleVertex, ICircle } from '../geometry';
+import { getCircleVertex } from '../geometry';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
+import { EdgeImpl } from './edge-impl';
 
 export class CircleIterator implements GeometryIterator {
-  constructor(readonly circle: ICircle, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
+  constructor(readonly circle: ICircleShape, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
     this._index = index;
     this._center = isWorld ? circle.position : circle.center;
     this.segments = segments || getCircleSegmentInfo();
@@ -54,6 +55,33 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * nsin + y * ncos;
 
     return pos(rx + cx, ry + cy);
+  }
+  get edge(): Edge {
+    if (this._isWorld) {
+      return new EdgeImpl(
+        this.circle,
+        this.index,
+        undefined,
+        undefined,
+        this.vertex,
+        this.nextVertex,
+        undefined,
+        undefined,
+        undefined,
+        this.normalDirection);
+    }
+
+    return new EdgeImpl(
+      this.circle,
+      this.index,
+      this.vertex,
+      this.nextVertex,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      this.normalDirection,
+      undefined);
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }

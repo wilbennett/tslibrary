@@ -1,6 +1,7 @@
 import {
   CircleIterator,
   Edge,
+  EdgeImpl,
   GeometryIterator,
   MinkowskiPoint,
   MinkowskiPointImpl,
@@ -60,6 +61,10 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       ? this.worldPoint.displaceByNegO(prevEdgeA)
       : this.worldPoint.displaceByNegO(prevEdgeB);
   }
+  get edge(): Edge {
+    // TODO: Need to fix this.
+    return new EdgeImpl(this.shape, NaN);
+  }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
   get normalDirection() { return this.edgeVector.perpRight(); }
@@ -108,7 +113,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       end = start.subO(edgeB);
     }
 
-    return new Edge(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, iter.normalDirection);
+    return new EdgeImpl(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, iter.normalDirection);
   }
 
   getNextShapeEdge(): Edge {
@@ -150,7 +155,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     else
       iterB.prev();
 
-    return new Edge(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, normalDirection);
+    return new EdgeImpl(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, normalDirection);
   }
 
   next() {

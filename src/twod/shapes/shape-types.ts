@@ -79,12 +79,25 @@ export type Shape =
   | ITriangleShape
   ;
 
+export interface Edge {
+  shape: Shape;
+  start: Vector;
+  worldStart: Vector;
+  end: Vector;
+  worldEnd: Vector;
+  normalDirection: Vector;
+  worldNormalDirection: Vector;
+  normal: Vector;
+  worldNormal: Vector;
+}
+
 export interface GeometryIterator {
   index: number;
   readonly vertexCount: number;
   readonly vertex: Vector;
   readonly nextVertex: Vector;
   readonly prevVertex: Vector;
+  readonly edge: Edge;
   readonly edgeVector: Vector;
   readonly prevEdgeVector: Vector;
   readonly normalDirection: Vector;
