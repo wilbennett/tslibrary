@@ -4,7 +4,7 @@ import { Shape } from '../shapes';
 export type ShapePairCustomData = { [index: string]: any };
 
 export class ShapePair {
-  constructor(public readonly first: Shape, public readonly second: Shape) {
+  constructor(public readonly shapeA: Shape, public readonly shapeB: Shape) {
     this.contact = new Contact(this);
     this.customData = {};
   }
@@ -13,7 +13,7 @@ export class ShapePair {
   customData: ShapePairCustomData;
 
   equals(other: ShapePair) {
-    return this.first === other.first && this.second === other.second
-      || this.first === other.second && this.second === other.first;
+    return this.shapeA === other.shapeA && this.shapeB === other.shapeB
+      || this.shapeA === other.shapeB && this.shapeB === other.shapeA;
   }
 }

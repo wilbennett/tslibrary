@@ -16,7 +16,7 @@ export class SATProjection extends ColliderBase {
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -50,7 +50,7 @@ export class SATProjection extends ColliderBase {
 
 
   protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -111,7 +111,7 @@ export class SATProjection extends ColliderBase {
     let state = <SATProjectionState>shapes.customData["satProjectionState"];
 
     if (!state) {
-      const { first, second } = shapes;
+      const { shapeA: first, shapeB: second } = shapes;
       state = new SATProjectionState();
       shapes.customData["satProjectionState"] = state;
       const axesA = first.getAxes();

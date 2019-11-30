@@ -342,7 +342,7 @@ function render() {
   view.applyTransform();
 
   if (pair) {
-    const { first, second } = pair;
+    const { shapeA: first, shapeB: second } = pair;
     polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
     drawShape1Vertices(first, view);
     drawShape2Vertices(second, view);
@@ -396,7 +396,7 @@ function temp() {
   if (!pair) return;
   if (!polyd) return;
 
-  const { first, second } = pair;
+  const { shapeA: first, shapeB: second } = pair;
   // let direction = second.position.subO(first.position);
   let direction = first.position.subO(second.position);
 
@@ -745,7 +745,7 @@ function handleMouseDown(ev: MouseEvent) {
   if (ev.button !== 0) return;
 
   updateMouse(ev);
-  const shapes = [pair.first, pair.second];
+  const shapes = [pair.shapeA, pair.shapeB];
 
   for (let i = 0; i < 2; i++) {
     const shape = shapes[i];
@@ -855,7 +855,7 @@ function applyCollider() {
 
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   polydBrush = isColliding ? "red" : "green";
-  polyd = Minkowski.createDiffPoly(pair.first, pair.second);
+  polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
   createSimplexAnim();
   // polyd && temp();
@@ -868,7 +868,7 @@ function initPair() {
   pair = null;
   clearStateValues();
   pair = pairs[pairIndex];
-  const { first, second } = pair;
+  const { shapeA: first, shapeB: second } = pair;
 
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };

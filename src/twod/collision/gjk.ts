@@ -6,7 +6,7 @@ const ZERO_DIRECTION = dir(0, 0);
 
 export class GjkState {
   constructor(shapes: ShapePair) {
-    this.shape = new MinkowskiShape(shapes.first, shapes.second, false);
+    this.shape = new MinkowskiShape(shapes.shapeA, shapes.shapeB, false);
   }
 
   shape: MinkowskiShape;
@@ -27,7 +27,7 @@ export class Gjk extends ColliderBase {
     const points = simplex.points;
     const direction = simplex.direction;
     simplex.reset();
-    shapes.second.position.subO(shapes.first.position, direction);
+    shapes.shapeB.position.subO(shapes.shapeA.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);

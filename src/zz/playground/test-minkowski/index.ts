@@ -6,6 +6,7 @@ import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../tw
 import { ShapePair } from '../../../twod/collision';
 import { CircleShape, MinkowskiPoint, PolygonShape, Shape } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
+import { setCircleSegmentCount } from '../../../twod/utils/utils2d';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -51,7 +52,7 @@ let angle = 0;
 let isDirty = true;
 // let showStates = true;
 let showStates = false;
-Minkowski.setCircleSegmentCount(showStates ? 10 : 30);
+setCircleSegmentCount(showStates ? 10 : 30);
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
@@ -173,7 +174,7 @@ function render() {
   view.applyTransform();
 
   if (pair) {
-    const { first, second } = pair;
+    const { shapeA: first, shapeB: second } = pair;
     second.render(view);
     first.render(view);
     polys && polys.render(view);
@@ -255,8 +256,8 @@ function createMinkowskiStates() {
   if (!pair) return;
 
   if (showStates) {
-    Minkowski.createSum("minkowski", pair.first, pair.second, s => sumStates.push([[...s[0]], [...s[1]]]));
-    Minkowski.createDiff("minkowski", pair.first, pair.second, s => diffStates.push([[...s[0]], [...s[1]]]));
+    Minkowski.createSum("minkowski", pair.shapeA, pair.shapeB, s => sumStates.push([[...s[0]], [...s[1]]]));
+    Minkowski.createDiff("minkowski", pair.shapeA, pair.shapeB, s => diffStates.push([[...s[0]], [...s[1]]]));
 
     const anims: Easer[] = [];
 
@@ -312,7 +313,7 @@ function createPolyShapes() {
     polyd = null;
     pairIndex = (pairIndex + 1) % pairs.length;
     pair = pairs[pairIndex];
-    const { first, second } = pair;
+    const { shapeA: first, shapeB: second } = pair;
 
     try {
       polys = Minkowski.createSumPoly(first, second);

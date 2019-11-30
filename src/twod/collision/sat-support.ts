@@ -1,6 +1,6 @@
 import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { Tristate } from '../../core';
-import { Shape, ShapeAxis, SupportPoint } from '../shapes';
+import { Shape, ShapeAxis, SupportPointImpl } from '../shapes';
 
 export class SATSupportState {
   protected _axes?: ShapeAxis[];
@@ -16,7 +16,7 @@ export class SATSupport extends ColliderBase {
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -26,7 +26,7 @@ export class SATSupport extends ColliderBase {
 
     if (count === 0) return undefined;
 
-    let support = new SupportPoint(first);
+    let support = new SupportPointImpl(first);
     let index = state.startIndex;
 
     for (let i = 0; i < count; i++) {
@@ -50,7 +50,7 @@ export class SATSupport extends ColliderBase {
   }
 
   protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -60,8 +60,8 @@ export class SATSupport extends ColliderBase {
 
     if (count === 0) return undefined;
 
-    let support = new SupportPoint(first);
-    const bestSupport = new SupportPoint(first);
+    let support = new SupportPointImpl(first);
+    const bestSupport = new SupportPointImpl(first);
     let bestAxis = axes[0];
     let bestDistance = Infinity;
     let index = state.startIndex;
@@ -107,7 +107,7 @@ export class SATSupport extends ColliderBase {
     let state = <SATSupportState>shapes.customData["satSupportState"];
 
     if (!state) {
-      const { first, second } = shapes;
+      const { shapeA: first, shapeB: second } = shapes;
       state = new SATSupportState();
       shapes.customData["satSupportState"] = state;
       const axesA = first.getAxes();

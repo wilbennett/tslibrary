@@ -102,13 +102,13 @@ const pairs: ShapePair[] = [
   new ShapePair(plane1, aabb1),
 ]
 
-pairs[0].second.setPosition(Vector.position(2.5, 2.5));
+pairs[0].shapeB.setPosition(Vector.position(2.5, 2.5));
 
-pairs[0].first.setPosition(Vector.position(2.5, 2.5));
-pairs[0].first.setPosition(Vector.position(2.5, 5.5));
-pairs[0].first.setPosition(Vector.position(2.5, 3.5));
-pairs[0].first.setPosition(Vector.position(1.5, 4.5));
-pairs[0].first.setPosition(Vector.position(1.5, 0.5));
+pairs[0].shapeA.setPosition(Vector.position(2.5, 2.5));
+pairs[0].shapeA.setPosition(Vector.position(2.5, 5.5));
+pairs[0].shapeA.setPosition(Vector.position(2.5, 3.5));
+pairs[0].shapeA.setPosition(Vector.position(1.5, 4.5));
+pairs[0].shapeA.setPosition(Vector.position(1.5, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(4.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(5.0, 0.5));
 // pairs[0].first.setPosition(Vector.createPosition(-0.6, 0.5));
@@ -174,7 +174,7 @@ function render() {
   const viewport = graph.getViewport(ctx);
   viewport.applyTransform();
 
-  const { first, second } = pairs[0];
+  const { shapeA: first, shapeB: second } = pairs[0];
   const lineW = collider.isColliding(pairs[0]) ? 4 : 2;
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };
@@ -273,7 +273,7 @@ function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view
 }
 
 function drawProjection(pair: ShapePair, axis: ShapeAxis, axisLine: Line, view: Viewport) {
-  const { first, second } = pair;
+  const { shapeA: first, shapeB: second } = pair;
   drawShapeProjection(first, axis, axisLine, view, 0.5);
   drawShapeProjection(second, axis, axisLine, view);
 }
@@ -289,7 +289,7 @@ function createAxisLine(axis: ShapeAxis, radius: number) {
 }
 
 function drawSat(shapes: ShapePair, view: Viewport) {
-  const { first, second } = shapes;
+  const { shapeA: first, shapeB: second } = shapes;
   const axesList = new UniqueShapeAxesList(true);
 
   axesList.addAxes([

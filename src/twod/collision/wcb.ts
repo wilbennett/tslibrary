@@ -19,7 +19,7 @@ export class Wcb extends ColliderBase {
 
     if (state.unsupported) return undefined;
 
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
     let simplex: Simplex | undefined = undefined;
     let points: SupportPoint[];
     let direction: Vector | undefined = undefined;

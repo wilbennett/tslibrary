@@ -9,7 +9,7 @@ export class SimpleCollider extends ColliderBase {
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
 
     switch (first.kind) {
       case "circle":
@@ -28,7 +28,7 @@ export class SimpleCollider extends ColliderBase {
   }
 
   protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
-    const { first, second } = shapes;
+    const { shapeA: first, shapeB: second } = shapes;
 
     switch (first.kind) {
       case "circle":
