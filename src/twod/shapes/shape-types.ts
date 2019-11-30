@@ -21,9 +21,12 @@ export interface IShape extends IGeometry {
   edgeVectorList: VectorCollection;
   normalList: VectorCollection;
   boundingShape?: Shape;
+  referenceShape?: Shape;
+  usesReferenceShape: boolean; // e.g. plane can use another shape to determine vertices/edges.
   hasDynamicAxes: boolean;
   props: ContextProps;
 
+  getFurthestEdges(worldDirection: Vector): Edge[];
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
   getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
   getAxes(result?: ShapeAxis[]): ShapeAxis[];

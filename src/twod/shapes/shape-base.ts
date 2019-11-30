@@ -1,4 +1,6 @@
 import {
+  Edge,
+  EdgeImpl,
   GeometryIterator,
   IShape,
   NullSupportPoint,
@@ -48,6 +50,8 @@ export abstract class ShapeBase implements IShape {
   get normalList() { return this.data.get("normal"); }
   get hasDynamicAxes() { return false; }
   boundingShape?: Shape;
+  referenceShape?: Shape;
+  get usesReferenceShape() { return false; }
   protected _isTransformDirty = true;
   protected _transform: MatrixValues;
   get transform() {
@@ -79,6 +83,34 @@ export abstract class ShapeBase implements IShape {
   protected setAngle(radians: number) {
     this.integrators.forEach(integrator => integrator.angle = radians);
     this.dirtyTransform();
+  }
+
+  getFurthestEdges(worldDirection: Vector): Edge[] {
+    const vertices = this.vertexList.items;
+    const vertexCount = this.vertexList.length;
+
+    if (vertexCount < 2) return [];
+
+    // @ts-ignore - "this" not assignable to Shape.
+    if (vertexCount === 2) return new EdgeImpl(this, 0);
+
+    let direction = this.toLocal(worldDirection);
+
+    let bestDot = -Infinity;
+    let index = -1;
+
+    for (let i = 0; i < vertexCount; i++) {
+      const dot = vertices[i].dot(direction);
+
+      if (dot > bestDot) {
+        bestDot = dot;
+        index = i;
+      }
+    }
+
+    const prevIndex = index > 0 ? index - 1 : vertexCount - 1;
+    // @ts-ignore - "this" not assignable to Shape.
+    return [new EdgeImpl(this, prevIndex), new EdgeImpl(this, index)];
   }
 
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
