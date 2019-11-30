@@ -5,17 +5,36 @@ import * as Minkowski from '../shapes/minkowski';
 
 const ZERO_DIRECTION = dir(0, 0);
 
+export class WcbState {
+  constructor() {
+  }
+
+  mkc?: MinkowskiDiffIterator;
+  unsupported?: boolean;
+}
+
 export class Wcb extends ColliderBase {
   isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
+    const state = this.getState(shapes);
+
+    if (state.unsupported) return undefined;
+
     const { first, second } = shapes;
     let simplex: Simplex | undefined = undefined;
     let points: SupportPoint[];
+    let direction: Vector | undefined = undefined;
+
+    if (callback) {
+      simplex = new Simplex();
+      points = simplex.points;
+      direction = simplex.direction;
+    }
 
     // This normally gets us closest to the origin.
-    // let direction = first.position.subO(second.position);
+    // direction = first.position.subO(second.position, direction);
+    //* This normally gets us furthest from the origin.
     //* Use it because swapping mka and mkb is faster than getting support when not colliding.
-    //* This normally gets us furthest from to the origin.
-    let direction = second.position.subO(first.position);
+    direction = second.position.subO(first.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
@@ -25,12 +44,9 @@ export class Wcb extends ColliderBase {
     let a = mka.worldPoint;
 
     if (callback) {
-      simplex = new Simplex();
-      points = simplex.points;
-      direction.clone(simplex.direction);
-      points.push(mka.clone());
-      callback && callback(simplex.clone());
-      direction = simplex.direction;
+      points!.push(mka.clone());
+      callback && callback(simplex!.clone());
+      direction = simplex!.direction;
     }
 
     direction.negate();
@@ -64,26 +80,28 @@ export class Wcb extends ColliderBase {
       }
     }
 
+    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb));
     const ao = a.negateO();
     const ab = b.subO(a);
 
     return ao.cross2D(ab) < 0
-      ? this.walkCcwProgress(mka, mkb, ao, simplex, callback)
-      : this.walkCwProgress(mka, mkb, ao, simplex, callback);
+      ? this.walkCcwProgress(mka, mkb, state.mkc, ao, simplex, callback)
+      : this.walkCwProgress(mka, mkb, state.mkc, ao, simplex, callback);
   }
 
   protected walkCcwProgress(
     mka: MinkowskiPoint,
     mkb: MinkowskiPoint,
+    mkc: MinkowskiDiffIterator,
     ao: Vector,
     simplex?: Simplex,
     callback?: SimplexCallback): boolean | undefined {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
-    let mkc = new MinkowskiDiffIterator(mkb);
     let i = mkc.vertexCount;
     let points: SupportPoint[];
 
+    mkc.init(mkb);
     mkc.next();
     let c = mkc.worldPoint;
 
@@ -119,15 +137,16 @@ export class Wcb extends ColliderBase {
   protected walkCwProgress(
     mka: MinkowskiPoint,
     mkb: MinkowskiPoint,
+    mkc: MinkowskiDiffIterator,
     ao: Vector,
     simplex?: Simplex,
     callback?: SimplexCallback): boolean | undefined {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
-    let mkc = new MinkowskiDiffIterator(mkb);
     let i = mkc.vertexCount;
     let points: SupportPoint[];
 
+    mkc.init(mkb);
     mkc.prev();
     let c = mkc.worldPoint;
 
@@ -162,5 +181,17 @@ export class Wcb extends ColliderBase {
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
     return this.isCollidingProgress(shapes);
+  }
+
+  protected getState(shapes: ShapePair) {
+    let state = <WcbState>shapes.customData["wcbState"];
+
+    if (!state) {
+      // const { first, second } = shapes;
+      state = new WcbState();
+      shapes.customData["wcbState"] = state;
+    }
+
+    return state;
   }
 }
