@@ -2,6 +2,7 @@ import { MinkowskiPoint, NullSupportPoint, SupportPoint } from '.';
 import { getCircleSegmentInfo } from '../utils';
 
 export class NullMinkowskiPoint extends NullSupportPoint implements MinkowskiPoint {
+  static instance = new NullMinkowskiPoint();
   get shapeA() { return this.shape; }
   get shapeB() { return this.shape; }
   get circleSegments() { return getCircleSegmentInfo(); }

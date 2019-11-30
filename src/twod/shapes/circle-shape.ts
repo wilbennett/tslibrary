@@ -35,9 +35,9 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
-  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
+  getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
+  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {
     result || (result = new SupportPointImpl(this));
 
     let direction: Vector;

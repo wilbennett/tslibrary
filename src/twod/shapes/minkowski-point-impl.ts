@@ -26,6 +26,7 @@ export class MinkowskiPointImpl extends SupportPointImpl implements MinkowskiPoi
   circleSegments: CircleSegmentInfo;
   protected _isSum?: boolean;
   get isSum() { return !!this._isSum; }
+  set isSum(value) { this._isSum = value; }
 
   protected _indexA: number;
   get indexA() { return this._indexA; }

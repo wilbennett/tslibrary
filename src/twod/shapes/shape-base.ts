@@ -1,4 +1,13 @@
-import { IShape, Projection, Shape, ShapeAxis, shapeContainsPoint, SupportPoint, SupportPointImpl } from '.';
+import {
+  IShape,
+  NullSupportPoint,
+  Projection,
+  Shape,
+  ShapeAxis,
+  shapeContainsPoint,
+  SupportPoint,
+  SupportPointImpl,
+} from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
@@ -69,13 +78,13 @@ export abstract class ShapeBase implements IShape {
     this.dirtyTransform();
   }
 
-  getSupport(direction: Vector, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): Tristate<SupportPoint>;
-  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): Tristate<SupportPoint> {
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
+  getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
+  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
 
-    if (vertexCount === 0) return undefined;
+    if (vertexCount === 0) return NullSupportPoint.instance;
 
     let axisDirection: Vector;
     let axisPoint: Vector;
@@ -123,7 +132,7 @@ export abstract class ShapeBase implements IShape {
     result || (result = new SupportPointImpl(this));
 
     // Force typescript to realize result is assigned.
-    if (!result) return undefined;
+    if (!result) return NullSupportPoint.instance;
 
     result.clear();
     // @ts-ignore - "this" not assignable to Shape.

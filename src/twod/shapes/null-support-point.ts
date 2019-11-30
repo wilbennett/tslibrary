@@ -4,6 +4,7 @@ import { pos, Vector } from '../../vectors';
 const NULL_SHAPE = new PolygonShape([pos(0, 0)]);
 
 export class NullSupportPoint implements SupportPoint {
+  static instance = new NullSupportPoint();
   get shape() { return NULL_SHAPE; }
   get point() { return Vector.empty; }
   get worldPoint() { return Vector.empty; }
