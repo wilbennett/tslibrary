@@ -6,3 +6,4 @@ export * from "./simple-collider";
 export * from "./sat-projection";
 export * from "./sat-support";
 export * from "./gjk";
+export * from "./wcb";

@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { Gjk, ShapePair } from '../../../twod/collision';
+import { Collider, Gjk, ShapePair, Wcb } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
@@ -46,6 +46,7 @@ const elNext = UiUtils.getInputElement("next");
 const elPrevPair = UiUtils.getInputElement("prevpair");
 const elNextPair = UiUtils.getInputElement("nextpair");
 const elText = UiUtils.getInputElement("text");
+const elCollider = UiUtils.getSelectElement("collider");
 
 ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
@@ -125,7 +126,11 @@ const pairs: ShapePair[] = [
   new ShapePair(box4, box2),
 ]
 
-const gjk = new Gjk();
+const colliders: [string, Collider][] = [
+  ["WCB", new Wcb()],
+  ["GJK", new Gjk()],
+];
+
 let pairIndex = -1;
 let pair: ShapePair | null = null;
 let polyd: Tristate<Shape> = null;
@@ -157,6 +162,7 @@ let frame = -1;
 const loop = new AnimationLoop(undefined, render);
 const runner = new EaseRunner(loop);
 
+populateColliders();
 drawGraph();
 changeShapes();
 loop.start();
@@ -272,6 +278,13 @@ elNextPair.addEventListener("click", () => {
   } catch (e) {
     console.log(e.message);
   }
+});
+
+elCollider.addEventListener("change", () => {
+  applyCollider();
+
+  if (!loop.active)
+    render();
 });
 
 elStep.addEventListener("change", () => stepping = elStep.checked);
@@ -391,9 +404,6 @@ function temp() {
     direction.withXY(1, 0);
 
   let mka = Minkowski.getDiffPoint(first, second, direction);
-
-  if (!mka) return;
-
   mka.adjustDiffPointIfCircle();
 
   const mkSimplices: Simplex[] = [];
@@ -722,7 +732,7 @@ function handleMouseMove(ev: MouseEvent) {
   updateMouse(ev);
   mouse.displaceByO(dragOffset, dragPos);
   dragTarget.setPosition(dragPos);
-  applyGjk();
+  applyCollider();
   isDirty = true;
 
   if (!loop.active)
@@ -757,6 +767,12 @@ function handleMouseUp(ev: MouseEvent) {
   // updateMouse(ev);
   dragging = false;
   dragTarget = null;
+}
+
+function populateColliders() {
+  for (const [colliderName] of colliders) {
+    elCollider.appendChild(UiUtils.createOption(colliderName));
+  }
 }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
@@ -819,7 +835,7 @@ function clearStateValues() {
   simplices = [];
 }
 
-function applyGjk() {
+function applyCollider() {
   if (simplexAnim)
     runner.remove(simplexAnim);
 
@@ -828,15 +844,21 @@ function applyGjk() {
 
   if (!pair) return;
 
+  const collider: any = colliders.find(c => c[0] === elCollider.value)![1];
   // mkVertices = Minkowski.createDiff("minkowski", pair.first, pair.second);
-  // const simplices1: Simplex[] = [];
-  // simplexList.push(simplices1);
+  const simplices1: Simplex[] = [];
+  simplexList.push(simplices1);
+  let isColliding = false;
+
+  if (collider instanceof Gjk || collider instanceof Wcb)
+    isColliding = !!collider.isCollidingProgress(pair, s => simplices1.push(s));
+
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
-  // polydBrush = isColliding ? "red" : "green";
+  polydBrush = isColliding ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.first, pair.second);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
-  // createSimplexAnim();
-  polyd && temp();
+  createSimplexAnim();
+  // polyd && temp();
   isDirty = true;
 }
 
@@ -851,7 +873,7 @@ function initPair() {
   first.props = { strokeStyle: colors[0], lineWidth: lineW };
   second.props = { strokeStyle: refBrush, lineWidth: lineW };
 
-  applyGjk();
+  applyCollider();
 }
 
 function changeShapes() {

@@ -32,4 +32,11 @@ export class UiUtils {
     else
       UiUtils.hideElement(element);
   }
+
+  static createOption(value: string, caption?: string) {
+    const option = document.createElement("option");
+    option.text = caption || value;
+    option.value = value;
+    return option;
+  }
 }

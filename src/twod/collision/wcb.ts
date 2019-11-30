@@ -11,14 +11,18 @@ export class Wcb extends ColliderBase {
     let simplex: Simplex | undefined = undefined;
     let points: SupportPoint[];
 
-    let direction = first.position.subO(second.position);
+    // This normally gets us closest to the origin.
+    // let direction = first.position.subO(second.position);
+    //* Use it because swapping mka and mkb is faster than getting support when not colliding.
+    //* This normally gets us furthest from to the origin.
+    let direction = second.position.subO(first.position);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
 
     let mka = Minkowski.getDiffPoint(first, second, direction);
     mka.adjustDiffPointIfCircle();
-    const a = mka.worldPoint;
+    let a = mka.worldPoint;
 
     if (callback) {
       simplex = new Simplex();
@@ -33,9 +37,9 @@ export class Wcb extends ColliderBase {
 
     if (a.dot(direction) > 0) return false; // a is in front of origin in direction.
 
-    let mkb = Minkowski.getDiffPoint(first, second, direction.negateO());
+    let mkb = Minkowski.getDiffPoint(first, second, direction);
     mkb.adjustDiffPointIfCircle();
-    const b = mkb.worldPoint;
+    let b = mkb.worldPoint;
 
     if (callback) {
       points!.push(mkb.clone());
@@ -50,6 +54,8 @@ export class Wcb extends ColliderBase {
       mkb = temp;
 
       direction.negate();
+      a = mka.worldPoint;
+      b = mkb.worldPoint;
 
       if (callback) {
         points!.shift();
@@ -63,7 +69,7 @@ export class Wcb extends ColliderBase {
 
     return ao.cross2D(ab) < 0
       ? this.walkCcwProgress(mka, mkb, ao, simplex, callback)
-      : this.walkCwProgress(mka, mkb, ao, simplex, callback)
+      : this.walkCwProgress(mka, mkb, ao, simplex, callback);
   }
 
   protected walkCcwProgress(
@@ -82,6 +88,8 @@ export class Wcb extends ColliderBase {
     let c = mkc.worldPoint;
 
     if (callback) {
+      const ab = b.subO(a);
+      ab.perpLeftO(simplex!.direction);
       points = simplex!.points;
       points.push(mkc.clone());
       callback(simplex!.clone());
@@ -124,6 +132,8 @@ export class Wcb extends ColliderBase {
     let c = mkc.worldPoint;
 
     if (callback) {
+      const ab = b.subO(a);
+      ab.perpRightO(simplex!.direction);
       points = simplex!.points;
       points!.push(mkc.clone());
       callback(simplex!.clone());
