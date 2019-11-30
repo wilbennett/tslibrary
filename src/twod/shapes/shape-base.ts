@@ -1,10 +1,12 @@
 import {
+  GeometryIterator,
   IShape,
   NullSupportPoint,
   Projection,
   Shape,
   ShapeAxis,
   shapeContainsPoint,
+  ShapeIterator,
   SupportPoint,
   SupportPointImpl,
 } from '.';
@@ -12,6 +14,7 @@ import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, V
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
+import { CircleSegmentInfo } from '../utils';
 
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
@@ -257,6 +260,12 @@ export abstract class ShapeBase implements IShape {
   getIntersectPoint(other: Geometry, result?: Vector): Tristate<Vector> {
     // @ts-ignore - assigment compatibility.
     return calcIntersectPoint(this, other, result);
+  }
+
+  // @ts-ignore - unused param.
+  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
+    // @ts-ignore - assigment compatibility.
+    return new ShapeIterator(this, index, isWorld);
   }
 
   // @ts-ignore - unused param.

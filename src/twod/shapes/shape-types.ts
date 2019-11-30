@@ -3,6 +3,7 @@ import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } f
 import { Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
+import { CircleSegmentInfo } from '../utils';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 
@@ -33,6 +34,7 @@ export interface IShape extends IGeometry {
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
+  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator;
   // createWorldShape(): this;
 }
 

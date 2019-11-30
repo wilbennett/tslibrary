@@ -1,7 +1,7 @@
-import { PolygonShape, SupportPoint } from '.';
+import { PolygonShape, Shape, SupportPoint } from '.';
 import { pos, Vector } from '../../vectors';
 
-const NULL_SHAPE = new PolygonShape([pos(0, 0)]);
+const NULL_SHAPE: Shape = new PolygonShape([pos(0, 0)]);
 
 export class NullSupportPoint implements SupportPoint {
   static instance = new NullSupportPoint();

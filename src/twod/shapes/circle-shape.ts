@@ -1,8 +1,20 @@
-import { ICircleShape, ORIGIN, Projection, Shape, ShapeAxis, ShapeBase, SupportPoint, SupportPointImpl } from '.';
+import {
+  CircleIterator,
+  GeometryIterator,
+  ICircleShape,
+  ORIGIN,
+  Projection,
+  Shape,
+  ShapeAxis,
+  ShapeBase,
+  SupportPoint,
+  SupportPointImpl,
+} from '.';
 import { ContextProps, EulerSemiImplicit, Integrator, IntegratorConstructor, Viewport } from '..';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import { calcCircleIndex } from '../geometry';
+import { CircleSegmentInfo } from '../utils';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";
@@ -101,6 +113,10 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     result.maxPoint = maxPoint;
 
     return result;
+  }
+
+  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
+    return new CircleIterator(this, index, isWorld, circleSegments);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {
