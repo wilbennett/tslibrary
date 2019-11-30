@@ -56,6 +56,8 @@ export class CircleIterator implements GeometryIterator {
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
+  get normalDirection() { return this.edgeVector.perpRight(); }
+  get normal() { return this.normalDirection.normalize(); }
 
   next() {
     const current = this._vertex;

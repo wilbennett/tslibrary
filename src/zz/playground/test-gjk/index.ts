@@ -608,9 +608,13 @@ function temp() {
     pushEdge();
     edge2 = mkc.getNextShapeEdge();
 
-    while (edge2.shape === edge1.shape) {
+    if (edge2.shape === edge1.shape) {
       mkc.next();
-      edge2 = mkc.getNextShapeEdge();
+
+      while (edge2.shape === edge1.shape) {
+        mkc.next();
+        edge2 = mkc.getShapeEdge();
+      }
     }
 
     pushEdge(edge2);
@@ -656,9 +660,13 @@ function temp() {
     pushEdge();
     edge2 = mkc.getNextShapeEdge();
 
-    while (edge2.shape === edge1.shape) {
+    if (edge2.shape === edge1.shape) {
       mkc.next();
-      edge2 = mkc.getNextShapeEdge();
+
+      while (edge2.shape === edge1.shape) {
+        mkc.next();
+        edge2 = mkc.getShapeEdge();
+      }
     }
 
     pushEdge(edge2);

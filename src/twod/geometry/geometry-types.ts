@@ -86,6 +86,8 @@ export interface GeometryIterator {
   readonly prevVertex: Vector;
   readonly edgeVector: Vector;
   readonly prevEdgeVector: Vector;
+  readonly normalDirection: Vector;
+  readonly normal: Vector;
 
   next(): void;
   prev(): void;

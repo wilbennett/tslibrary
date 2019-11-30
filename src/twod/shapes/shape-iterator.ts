@@ -51,6 +51,12 @@ export class ShapeIterator implements GeometryIterator {
       ? this.shape.toWorld(this.edgeVectors[index])
       : this.edgeVectors[index];
   }
+  get normalDirection() {
+    return this.isWorld
+      ? this.shape.toWorld(this.shape.normalList.items[this._index])
+      : this.shape.normalList.items[this._index];
+  }
+  get normal() { return this.normalDirection; }
 
   next() { this._index = (this._index + 1) % this.vertexCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.vertexCount - 1; }

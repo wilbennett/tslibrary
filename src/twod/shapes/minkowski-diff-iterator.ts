@@ -62,6 +62,8 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
+  get normalDirection() { return this.edgeVector.perpRight(); }
+  get normal() { return this.normalDirection.normalize(); }
 
   clone(result?: SupportTypes): SupportTypes {
     if (!result) {
