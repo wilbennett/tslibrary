@@ -9,6 +9,7 @@ import {
   SupportPointImpl,
 } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
+import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils/utils2d';
 
 const ZERO_DIRECTION = dir(0, 0);
 
@@ -21,6 +22,13 @@ export class WcbState {
 }
 
 export class Wcb extends ColliderBase {
+  constructor() {
+    super();
+    this.circleSegments = getCircleSegmentInfo();
+  }
+
+  circleSegments: CircleSegmentInfo;
+
   isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
     const state = this.getState(shapes);
 
@@ -57,7 +65,7 @@ export class Wcb extends ColliderBase {
     if (callback) {
       mkPoints!.push(mka.clone());
       direction = mkSimplex!.direction;
-      const mkai = new MinkowskiDiffIterator(mka);
+      const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
       spPoints!.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
       callback([mkSimplex!.clone(), spSimplex!.clone()]);
     }
@@ -72,7 +80,7 @@ export class Wcb extends ColliderBase {
 
     if (callback) {
       mkPoints!.push(mkb.clone());
-      let mkbi = new MinkowskiDiffIterator(mkb);
+      let mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
       callback([mkSimplex!.clone(), spSimplex!.clone()]);
     }
@@ -91,14 +99,14 @@ export class Wcb extends ColliderBase {
       if (callback) {
         mkPoints!.shift();
         mkPoints!.push(mkb.clone());
-        const mkbi = new MinkowskiDiffIterator(mkb);
+        const mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
         spPoints!.shift();
         spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
         callback([mkSimplex!.clone(), spSimplex!.clone()]);
       }
     }
 
-    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb));
+    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb, this.circleSegments));
     const ao = a.negateO();
     const ab = b.subO(a);
 
@@ -320,7 +328,7 @@ export class Wcb extends ColliderBase {
       b = mkb.worldPoint;
     }
 
-    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb));
+    state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb, this.circleSegments));
     const ao = a.negateO();
     const ab = b.subO(a);
 
