@@ -4,6 +4,7 @@ export * from "./minkowski-point";
 export * from "./projection";
 export * from "./shape-types";
 export * from "./shape-utils";
+export * from "./edge";
 export * from "./unique-shape-axes-list";
 export * from "./support-point-impl";
 export * from "./minkowski-point-impl";

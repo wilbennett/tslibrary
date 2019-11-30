@@ -1,14 +1,7 @@
-import { MinkowskiPoint, MinkowskiPointImpl, Shape, ShapeIterator, SupportPoint } from '.';
+import { Edge, MinkowskiPoint, MinkowskiPointImpl, ShapeIterator, SupportPoint } from '.';
 import { Vector } from '../../vectors';
 import { CircleIterator, GeometryIterator } from '../geometry';
 import { CircleSegmentInfo } from '../utils';
-
-export type Edge = {
-  shape: Shape;
-  index: number;
-  start: Vector;
-  end: Vector;
-}
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
 
@@ -91,6 +84,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     const edgeB = this.iterB.edgeVector.negateO();
 
     let shape = this.shapeA;
+    let iter = this.iterA;
     let index: number;
     let start: Vector;
     let end: Vector;
@@ -101,12 +95,13 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       end = start.addO(edgeA);
     } else {
       shape = this.shapeB;
+      iter = this.iterB;
       index = this.iterB.index;
       start = this.worldPointB;
       end = start.subO(edgeB);
     }
 
-    return { shape, index, start, end };
+    return new Edge(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, iter.normalDirection);
   }
 
   getNextShapeEdge(): Edge {
@@ -115,9 +110,11 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     let edgeB = iterB.edgeVector.negateO();
 
     let shape = this.shapeA;
+    let iter = this.iterA;
     let index: number;
     let start: Vector;
     let end: Vector;
+    let normalDirection: Vector;
     let advancedA = false;
 
     if (edgeA.cross2D(edgeB) > 0) {
@@ -133,11 +130,13 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       index = iterA.index;
       start = iterA.vertex;
       end = iterA.nextVertex;
+      normalDirection = iterA.normalDirection;
     } else {
       shape = this.shapeB;
       index = iterB.index;
       start = iterB.vertex;
       end = iterB.nextVertex;
+      normalDirection = iterB.normalDirection;
     }
 
     if (advancedA)
@@ -145,7 +144,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     else
       iterB.prev();
 
-    return { shape, index, start, end };
+    return new Edge(shape, index, undefined, undefined, start, end, undefined, undefined, undefined, normalDirection);
   }
 
   next() {

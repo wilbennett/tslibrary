@@ -1,4 +1,12 @@
-import { CircleShape, MinkowskiPoint, MinkowskiPointImpl, MinkowskiShape, PolygonShape, Shape } from '.';
+import {
+  CircleShape,
+  MinkowskiPoint,
+  MinkowskiPointImpl,
+  MinkowskiShape,
+  NullMinkowskiPoint,
+  PolygonShape,
+  Shape,
+} from '.';
 import { calcCircleVertices, calcCircleVerticesAndEdges, isTriangleCW } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
@@ -69,27 +77,27 @@ export function convexHull(points: MinkowskiPoint[], stateCallback?: MinkowskiPo
   return result;
 }
 
-export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
+export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector): MinkowskiPoint {
   const direction = worldDirection.normalizeO();
   const spA = first.getSupport(first.toLocal(direction));
   const spB = second.getSupport(second.toLocal(direction));
 
-  if (!spA) return spA;
-  if (!spB) return spB;
-  if (!spA.isValid || !spB.isValid) return null;
+  if (!spA) return NullMinkowskiPoint.instance;
+  if (!spB) return NullMinkowskiPoint.instance;
+  if (!spA.isValid || !spB.isValid) return NullMinkowskiPoint.instance;
 
   const point = spA.worldPoint.displaceByO(spB.worldPoint);
   return new MinkowskiPointImpl(first, second, point, spA.index, spB.index, direction);
 }
 
-export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): Tristate<MinkowskiPoint> {
+export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): MinkowskiPoint {
   const direction = worldDirection.normalizeO();
   const spA = first.getSupport(first.toLocal(direction));
   const spB = second.getSupport(second.toLocal(direction.negateO()));
 
-  if (!spA) return spA;
-  if (!spB) return spB;
-  if (!spA.isValid || !spB.isValid) return null;
+  if (!spA) return NullMinkowskiPoint.instance;
+  if (!spB) return NullMinkowskiPoint.instance;
+  if (!spA.isValid || !spB.isValid) return NullMinkowskiPoint.instance;
 
   const point = spA.worldPoint.displaceByNegO(spB.worldPoint);
   return new MinkowskiPointImpl(first, second, point, spA.index, spB.index, direction);

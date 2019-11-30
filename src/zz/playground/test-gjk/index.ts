@@ -410,7 +410,7 @@ function temp() {
   let spSimplex = new Simplex();
   const spPoints = spSimplex.points;
   const mkai = new MinkowskiDiffIterator(mka);
-  spPoints.push(new SupportPointImpl(polyd, mkai.getShapeEdge().start));
+  spPoints.push(new SupportPointImpl(polyd, mkai.getShapeEdge().worldStart));
   spSimplices.push(spSimplex.clone());
 
   /*
@@ -531,7 +531,7 @@ function temp() {
   mkPoints.push(mkb.clone());
   mkSimplices.push(mkSimplex.clone());
   let mkbi = new MinkowskiDiffIterator(mkb);
-  spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().start));
+  spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
   spSimplices.push(spSimplex.clone());
 
   // Early out if distance between shapes not needed.
@@ -547,7 +547,7 @@ function temp() {
     mkPoints.push(mkb.clone());
     mkSimplices.push(mkSimplex.clone());
     mkbi = new MinkowskiDiffIterator(mkb);
-    spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().start));
+    spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
     spSimplices.push(spSimplex.clone());
   }
 
@@ -563,8 +563,8 @@ function temp() {
   const pushEdge = (e?: Edge) => {
     e || (e = edge1);
     spPoints.splice(0);
-    spPoints.push(new SupportPointImpl(polyd!, e.start));
-    spPoints.push(new SupportPointImpl(polyd!, e.end));
+    spPoints.push(new SupportPointImpl(polyd!, e.worldStart));
+    spPoints.push(new SupportPointImpl(polyd!, e.worldEnd));
     spSimplices.push(spSimplex.clone());
     mkSimplices.push(mkSimplex.clone());
   };
@@ -576,8 +576,8 @@ function temp() {
     mkPoints.push(mkc.clone());
     mkSimplices.push(mkSimplex.clone());
     spPoints.pop();
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
     spSimplices.push(spSimplex.clone());
 
     const ac = mkc.point.subO(mka.point);
@@ -591,8 +591,8 @@ function temp() {
       mkPoints.push(mkc.clone());
       mkSimplices.push(mkSimplex.clone());
       spPoints.splice(1, 2);
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
       spSimplices.push(spSimplex.clone());
     }
 
@@ -620,8 +620,8 @@ function temp() {
     pushEdge(edge2);
   } else { // Walk left.
     spPoints.pop();
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
     spSimplices.push(spSimplex.clone());
 
     mkc.next();
@@ -634,8 +634,8 @@ function temp() {
 
     while (ao.cross2D(ac) < 0 && i-- > 0) {
       spPoints.splice(1, 2);
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().start));
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().end));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
       spSimplices.push(spSimplex.clone());
 
       mkb.point.copyFrom(mkc.point);
@@ -679,9 +679,9 @@ function temp() {
       collisionDepth = closestPoint.mag;
       mkNormal = closestPoint.asDirection().normalize();
       collisionNormal = mkNormal.clone();
-      contactPoint = edge2.start;
+      contactPoint = edge2.worldStart;
 
-      const normal1 = edge1.end.subO(edge1.start).perpRight();
+      const normal1 = edge1.worldEnd.subO(edge1.worldStart).perpRight();
 
       if (collisionNormal.dot(normal1) < 0)
         collisionNormal.negate();
