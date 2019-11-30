@@ -41,6 +41,8 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     const edgeB = this.iterB.edgeVector.negateO();
     return edgeA.cross2D(edgeB) > 0 ? this.shapeA : this.shapeB;
   }
+  // @ts-ignore - unused param.
+  set shape(value) { }
   get index() {
     const edgeA = this.iterA.edgeVector;
     const edgeB = this.iterB.edgeVector.negateO();
