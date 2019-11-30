@@ -36,7 +36,16 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   protected iterB: GeometryIterator;
   get vertexCount() { return this.iterA.vertexCount + this.iterB.vertexCount; }
 
-  get index() { return NaN; }
+  get shape() {
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
+    return edgeA.cross2D(edgeB) > 0 ? this.shapeA : this.shapeB;
+  }
+  get index() {
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
+    return edgeA.cross2D(edgeB) > 0 ? this.iterA.index : this.iterB.index;
+  }
   // @ts-ignore - unused param.
   set index(value) { }
   get indexA() { return this.iterA.index; }
