@@ -42,7 +42,8 @@ export class EdgeImpl implements Edge {
   protected _worldStart?: Vector;
   get worldStart() {
     if (!this._worldStart) {
-      this._worldStart = this._start && !this._start.isEmpty ? this.shape.toWorld(this._start) : Vector.empty;
+      const start = this.start;
+      this._worldStart = start && !start.isEmpty ? this.shape.toWorld(start) : Vector.empty;
     }
 
     return this._worldStart;
@@ -68,7 +69,8 @@ export class EdgeImpl implements Edge {
   protected _worldEnd?: Vector;
   get worldEnd() {
     if (!this._worldEnd) {
-      this._worldEnd = this._end && !this._end.isEmpty ? this.shape.toWorld(this._end) : Vector.empty;
+      const end = this.end;
+      this._worldEnd = end && !end.isEmpty ? this.shape.toWorld(end) : Vector.empty;
     }
 
     return this._worldEnd;
@@ -96,8 +98,10 @@ export class EdgeImpl implements Edge {
   protected _worldNormalDirection?: Vector;
   get worldNormalDirection() {
     if (!this._worldNormalDirection) {
-      this._worldNormalDirection = this._normalDirection && !this._normalDirection.isEmpty
-        ? this.shape.toWorld(this._normalDirection)
+      const normalDirection = this.normalDirection;
+
+      this._worldNormalDirection = normalDirection && !normalDirection.isEmpty
+        ? this.shape.toWorld(normalDirection)
         : Vector.empty;
     }
 
@@ -126,8 +130,10 @@ export class EdgeImpl implements Edge {
   protected _worldNormal?: Vector;
   get worldNormal() {
     if (!this._worldNormal) {
-      this._worldNormal = this._normal && !this._normal.isEmpty
-        ? this.shape.toWorld(this._normal)
+      const normal = this.normal;
+
+      this._worldNormal = normal && !normal.isEmpty
+        ? this.shape.toWorld(normal)
         : Vector.empty;
     }
 
