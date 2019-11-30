@@ -49,7 +49,7 @@ export class SATProjection extends ColliderBase {
   }
 
 
-  protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
+  protected calcContactCore(shapes: ShapePair, result: Contact): Tristate<Contact> {
     const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
@@ -100,11 +100,10 @@ export class SATProjection extends ColliderBase {
       point = maxPoint;
     }
 
-    const contact = shapes.contact;
-    contact.reset();
-    contact.normal = minAxis;
-    contact.points.push(new ContactPoint(point, minOverlap));
-    return contact;
+    result.reset();
+    result.normal = minAxis;
+    result.points.push(new ContactPoint(point, minOverlap));
+    return result;
   }
 
   protected getState(shapes: ShapePair) {

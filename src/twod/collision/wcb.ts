@@ -341,7 +341,6 @@ export class Wcb extends ColliderBase {
     let state = <WcbState>shapes.customData["wcbState"];
 
     if (!state) {
-      // const { first, second } = shapes;
       state = new WcbState();
       shapes.customData["wcbState"] = state;
     }

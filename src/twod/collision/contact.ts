@@ -74,13 +74,17 @@ export class Contact {
     });
   }
 
+  swapShapes() {
+    const temp = this.shapeA;
+    this.shapeA = this.shapeB;
+    this.shapeB = temp;
+  }
+
   ensureNormalDirection() {
     if (!this.referenceEdge) return;
     if (this.referenceEdge.shape === this.shapeB) return;
 
-    const temp = this.shapeA;
-    this.shapeA = this.shapeB;
-    this.shapeB = temp;
+    this.swapShapes();
   }
 
   protected calcBestEdge(shape: Shape, direction: Vector) {

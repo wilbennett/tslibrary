@@ -49,7 +49,7 @@ export class SATSupport extends ColliderBase {
     return true;
   }
 
-  protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
+  protected calcContactCore(shapes: ShapePair, result: Contact): Tristate<Contact> {
     const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 
@@ -89,18 +89,17 @@ export class SATSupport extends ColliderBase {
       index = (index + 1) % count;
     }
 
-    const contact = shapes.contact;
-    contact.reset();
+    result.reset();
 
     if (bestAxis.shape === second) {
-      contact.normal = bestAxis.worldNormal;
-      contact.points.push(new ContactPoint(bestSupport.worldPoint, bestDistance));
+      result.normal = bestAxis.worldNormal;
+      result.points.push(new ContactPoint(bestSupport.worldPoint, bestDistance));
     } else {
-      contact.normal = bestAxis.worldNormal.negateO();
-      contact.points.push(new ContactPoint(bestAxis.worldPoint, bestDistance));
+      result.normal = bestAxis.worldNormal.negateO();
+      result.points.push(new ContactPoint(bestAxis.worldPoint, bestDistance));
     }
 
-    return contact;
+    return result;
   }
 
   protected getState(shapes: ShapePair) {

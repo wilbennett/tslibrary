@@ -27,19 +27,19 @@ export class SimpleCollider extends ColliderBase {
     }
   }
 
-  protected calcContactCore(shapes: ShapePair): Tristate<Contact> {
+  protected calcContactCore(shapes: ShapePair, result: Contact): Tristate<Contact> {
     const { shapeA: first, shapeB: second } = shapes;
 
     switch (first.kind) {
       case "circle":
         switch (second.kind) {
-          case "circle": return circleCalcContactCircle(first, second, shapes.contact);
-          case "plane": return circleCalcContactPlane(first, second, shapes.contact);
+          case "circle": return circleCalcContactCircle(first, second, result);
+          case "plane": return circleCalcContactPlane(first, second, result);
           default: return undefined;
         }
       case "plane":
         switch (second.kind) {
-          case "circle": return circleCalcContactPlane(second, first, shapes.contact, true);
+          case "circle": return circleCalcContactPlane(second, first, result, true);
           default: return undefined;
         }
       default: return undefined;
