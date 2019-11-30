@@ -37,7 +37,7 @@ export class Gjk extends ColliderBase {
     if (!support) return undefined;
 
     points.push(support.clone());
-    callback && callback(simplex.clone());
+    callback && callback([simplex.clone()]);
     direction.negate();
     let i = this.maxIterations;
 
@@ -50,7 +50,7 @@ export class Gjk extends ColliderBase {
 
       shape.getSupport(direction, support);
       points.push(support.clone());
-      callback && callback(simplex.clone());
+      callback && callback([simplex.clone()]);
 
       if (support.worldPoint.dot(direction) <= 0)
         return false; // Did not find a point further in the direction.

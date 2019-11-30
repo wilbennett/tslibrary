@@ -828,6 +828,14 @@ function createSimplexAnim() {
   runner.add(simplexAnim);
 }
 
+function pushSimplices(values: Simplex[]) {
+  while (simplexList.length < values.length) {
+    simplexList.push([]);
+  }
+
+  values.forEach((s, i) => simplexList[i].push(s));
+}
+
 function clearStateValues() {
   polyd = null;
   // mkVertices = [];
@@ -851,7 +859,7 @@ function applyCollider() {
   let isColliding = false;
 
   if (collider instanceof Gjk || collider instanceof Wcb)
-    isColliding = !!collider.isCollidingProgress(pair, s => simplices1.push(s));
+    isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   polydBrush = isColliding ? "red" : "green";
