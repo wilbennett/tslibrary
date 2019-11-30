@@ -69,6 +69,13 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
+  init(start: MinkowskiPoint) {
+    this.worldPoint = start.worldPoint.clone();
+    this.indexA = start.indexA;
+    this.indexB = start.indexB;
+    this.worldDirection = start.worldDirection.clone();
+  }
+
   clone(result?: SupportTypes): SupportTypes {
     if (!result) {
       result = new MinkowskiDiffIterator(this, this.circleSegments);
