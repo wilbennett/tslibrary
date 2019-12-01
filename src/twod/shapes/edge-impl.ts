@@ -140,5 +140,32 @@ export class EdgeImpl implements Edge {
     return this._worldNormal;
   }
   set worldNormal(value) { this._worldNormal = value; }
-}
 
+  clear() {
+    this.index = NaN;
+    this._start && (this._start = undefined);
+    this._worldStart && (this._worldStart = undefined);
+    this._end && (this._end = undefined);
+    this._worldEnd && (this._worldEnd = undefined);
+    this._normalDirection && (this._normalDirection = undefined);
+    this._worldNormalDirection && (this._worldNormalDirection = undefined);
+    this._normal && (this._normal = undefined);
+    this._worldNormal && (this._worldNormal = undefined);
+  }
+
+  clone(result?: Edge): Edge {
+    result || (result = new EdgeImpl(this.shape, this.index));
+    result.clear();
+    result.shape = this.shape;
+    result.index = this.index;
+    this._start && (result.start = this._start.clone());
+    this._worldStart && (result.worldStart = this._worldStart.clone());
+    this._end && (result.end = this._end.clone());
+    this._worldEnd && (result.worldEnd = this._worldEnd.clone());
+    this._normalDirection && (result.normalDirection = this._normalDirection.clone());
+    this._worldNormalDirection && (result.worldNormalDirection = this._worldNormalDirection.clone());
+    this._normal && (result.normal = this._normal.clone());
+    this._worldNormal && (result.worldNormal = this._worldNormal.clone());
+    return result;
+  }
+}

@@ -11,6 +11,14 @@ export class ContactPoint {
   }
 
   get isPenetrating() { return this.depth > 0; }
+
+  clone(result?: ContactPoint): ContactPoint {
+    if (!result) return new ContactPoint(this.point, this.depth);
+
+    result.point = this.point;
+    result.depth = this.depth;
+    return result;
+  }
 };
 
 // TODO: Add Contact ID.
@@ -56,6 +64,19 @@ export class Contact {
     this._referenceEdge = undefined;
     this._incidentEdge = undefined;
     this.points.splice(0);
+  }
+
+  clone(result?: Contact) {
+    result || (result = new Contact(this.shapes));
+
+    result.shapes = this.shapes;
+    result.shapeA = this.shapeA;
+    result.shapeB = this.shapeB;
+    result.normal.copyFrom(this.normal);
+    result.points.splice(0);
+    result.points.push(...this.points.map(p => p.clone()));
+    this._referenceEdge && (result._referenceEdge = this._referenceEdge.clone());
+    this._incidentEdge && (result._incidentEdge = this._incidentEdge.clone());
   }
 
   flipNormal() {

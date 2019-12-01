@@ -86,6 +86,7 @@ export type Shape =
 
 export interface Edge {
   shape: Shape;
+  index: number;
   start: Vector;
   worldStart: Vector;
   end: Vector;
@@ -94,6 +95,9 @@ export interface Edge {
   worldNormalDirection: Vector;
   normal: Vector;
   worldNormal: Vector;
+
+  clear(): void;
+  clone(result?: Edge): Edge;
 }
 
 export interface GeometryIterator {
