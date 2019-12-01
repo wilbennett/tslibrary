@@ -63,7 +63,7 @@ export class CircleIterator implements GeometryIterator {
         this.index,
         undefined,
         undefined,
-        this.vertex,
+        this.vertex.clone(),
         this.nextVertex,
         undefined,
         undefined,
@@ -74,13 +74,45 @@ export class CircleIterator implements GeometryIterator {
     return new EdgeImpl(
       this.circle,
       this.index,
-      this.vertex,
+      this.vertex.clone(),
       this.nextVertex,
       undefined,
       undefined,
       undefined,
       undefined,
       this.normalDirection,
+      undefined);
+  }
+  get prevEdge(): Edge {
+    const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
+    const vertex = this.vertex.clone();
+    const prevVertex = this.prevVertex;
+    const normalDirection = vertex.subO(prevVertex).perpRight();
+
+    if (this._isWorld) {
+      return new EdgeImpl(
+        this.circle,
+        index,
+        undefined,
+        undefined,
+        prevVertex,
+        vertex,
+        undefined,
+        undefined,
+        undefined,
+        normalDirection);
+    }
+
+    return new EdgeImpl(
+      this.circle,
+      index,
+      prevVertex,
+      vertex,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      normalDirection,
       undefined);
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
