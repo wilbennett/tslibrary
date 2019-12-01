@@ -31,14 +31,17 @@ export class Contact {
   }
 
   protected _shapeA: Shape;
-  get shapeA(): Shape { return this.shapeA; }
-  set shapeA(value) { this.shapeA = value; }
+  get shapeA(): Shape { return this._shapeA; }
+  set shapeA(value) { this._shapeA = value; }
   protected _shapeB: Shape;
-  get shapeB(): Shape { return this.shapeB; }
-  set shapeB(value) { this.shapeB = value; }
+  get shapeB(): Shape { return this._shapeB; }
+  set shapeB(value) { this._shapeB = value; }
   normal: Vector;
   points: ContactPoint[];
-  get isContacting() { return this.points.length > 0 && this.points.some(p => p.isPenetrating); }
+  protected _isNormalToA?: boolean;
+  get isNormalToA() { return !!this._isNormalToA; }
+  set isNormalToA(value) { this._isNormalToA = value; }
+  get isCollision() { return this.points.length > 0 && this.points.some(p => p.isPenetrating); }
   protected _referenceEdge: Tristate<Edge>;
   get referenceEdge() {
     if (this._referenceEdge === undefined)
@@ -49,7 +52,7 @@ export class Contact {
   set referenceEdge(value) { this._referenceEdge = value; }
   protected _incidentEdge: Tristate<Edge>;
   get incidentEdge() {
-    if (this._referenceEdge === undefined)
+    if (this._incidentEdge === undefined)
       this.calcEdgeTypes();
 
     return this._incidentEdge;
@@ -61,8 +64,9 @@ export class Contact {
 
   reset() {
     this.normal.withXY(0, 0);
-    this._referenceEdge = undefined;
-    this._incidentEdge = undefined;
+    this._isNormalToA && (this._isNormalToA = false);
+    this._referenceEdge !== undefined && (this._referenceEdge = undefined);
+    this._incidentEdge !== undefined && (this._incidentEdge = undefined);
     this.points.splice(0);
   }
 
@@ -81,7 +85,7 @@ export class Contact {
 
   flipNormal() {
     const normal = this.normal;
-    this.points.forEach(cp => cp.point.displaceBy(normal.scaleO(cp.depth)));
+    // this.points.forEach(cp => cp.point.displaceBy(normal.scaleO(cp.depth)));
     normal.negate();
   }
 
@@ -102,10 +106,18 @@ export class Contact {
   }
 
   ensureNormalDirection() {
-    if (!this.referenceEdge) return;
-    if (this.referenceEdge.shape === this.shapeB) return;
+    if (!this._referenceEdge) return;
+    if (this._referenceEdge.shape === this.shapeB) return;
 
     this.swapShapes();
+  }
+
+  protected markEdgesNull() {
+    if (this._referenceEdge === undefined)
+      this._referenceEdge = null;
+
+    if (this._incidentEdge === undefined)
+      this._incidentEdge = null;
   }
 
   protected calcBestEdge(shape: Shape, direction: Vector) {
@@ -114,42 +126,41 @@ export class Contact {
     if (edges.length === 0) return null;
     if (edges.length === 1) return edges[0];
 
-    const v0 = edges[0].worldStart;
-    const v = edges[0].worldEnd;
-    const v1 = edges[1].worldEnd;
+    const rightEdge = edges[0];
+    const leftEdge = edges[1];
+
+    const v0 = rightEdge.worldStart;
+    const v = rightEdge.worldEnd;
+    const v1 = leftEdge.worldEnd;
 
     const left = v.subO(v1).normalize();
     const right = v.subO(v0).normalize();
 
     if (right.dot(direction) <= left.dot(direction))
-      return edges[0]; // Right edge is most perpendicular to direction.
+      return rightEdge; // Right edge is most perpendicular to direction.
 
-    return edges[1];
+    return leftEdge;
   }
 
   protected calcEdgeTypes() {
-    const direction = this.normal;
-    const edgeA = this.calcBestEdge(this.shapeA, direction);
-    const edgeB = this.calcBestEdge(this.shapeB, direction.negateO());
+    if (this.shapeA.vertexList.items.length < 2 || this.shapeB.vertexList.items.length < 2)
+      return this.markEdgesNull();
 
-    if (!edgeA || !edgeB) {
-      if (this._referenceEdge === undefined)
-        this._referenceEdge = null;
+    const direction = this._isNormalToA ? this.normal.negateO() : this.normal;
+    let ref: Edge | null;
+    let inc: Edge | null;
 
-      if (this._incidentEdge === undefined)
-        this._incidentEdge = null;
+    ref = this.calcBestEdge(this.shapeA, direction);
+    inc = this.calcBestEdge(this.shapeB, direction.negateO());
 
-      return;
-    }
+    if (!ref || !inc) return this.markEdgesNull();
 
-    if (edgeA.normal.dot(direction) <= edgeB.normal.dot(direction)) {
-      !this._referenceEdge && (this._referenceEdge = edgeA);
-      !this._incidentEdge && (this._incidentEdge = edgeB);
+    if (ref.normal.dot(direction) <= inc.normal.dot(direction)) {
+      !this._referenceEdge && (this._referenceEdge = ref);
+      !this._incidentEdge && (this._incidentEdge = inc);
     } else {
-      !this._referenceEdge && (this._referenceEdge = edgeB);
-      !this._incidentEdge && (this._incidentEdge = edgeA);
+      !this._referenceEdge && (this._referenceEdge = inc);
+      !this._incidentEdge && (this._incidentEdge = ref);
     }
-
-    this.ensureNormalDirection();
   }
 }
