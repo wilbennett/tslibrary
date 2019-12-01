@@ -54,7 +54,7 @@ export function segmentClosestPoint(segment: ISegment, point: Vector, hullOnly: 
   const edge = segment.edgeVector;
   const t = point.subO(segment.start).dot(edge) / edge.dot(edge);
 
-  if (t <= 0) return segment.start.clone(result);
+  if (t <= 0 || isNaN(t)) return segment.start.clone(result);
   if (t >= 1) return segment.end.clone(result);
 
   return segment.start.addScaledO(edge, t, result);
