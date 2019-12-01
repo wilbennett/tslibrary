@@ -39,6 +39,7 @@ export class ShapeIterator implements GeometryIterator {
       : this.vertices[index];
   }
   get edge(): Edge { return new EdgeImpl(this.shape, this.index); }
+  get prevEdge(): Edge { return new EdgeImpl(this.shape, this._index > 0 ? this._index - 1 : this.vertexCount - 1); }
   get edgeVector() {
     return this.isWorld
       ? this.shape.toWorld(this.edgeVectors[this._index])
