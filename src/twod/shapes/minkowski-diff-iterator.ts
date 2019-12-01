@@ -29,6 +29,11 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
 
   protected iterA: GeometryIterator;
   protected iterB: GeometryIterator;
+  get iterator() {
+    const edgeA = this.iterA.edgeVector;
+    const edgeB = this.iterB.edgeVector.negateO();
+    return edgeA.cross2D(edgeB) > 0 ? this.iterA : this.iterB;
+  }
   get vertexCount() { return this.iterA.vertexCount + this.iterB.vertexCount; }
 
   get shape() {
@@ -70,6 +75,10 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     // TODO: Need to fix this.
     return new EdgeImpl(this.shape, NaN);
   }
+  get prevEdge(): Edge {
+    // TODO: Need to fix this.
+    return new EdgeImpl(this.shape, NaN);
+  }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
   get normalDirection() { return this.edgeVector.perpRight(); }
@@ -80,6 +89,9 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     this.indexA = start.indexA;
     this.indexB = start.indexB;
     this.worldDirection = start.worldDirection.clone();
+
+    this.iterA.index = this.indexA;
+    this.iterB.index = this.indexB;
   }
 
   clone(result?: SupportTypes): SupportTypes {

@@ -22,7 +22,7 @@ export class CircleIterator implements GeometryIterator {
   protected _index: number;
   get index() { return this._index; }
   set index(value) {
-    if (this._index === value) return;
+    // if (this._index === value) return; //! Need to recalc vertex in case center/position has changed.
 
     this._index = value;
     this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
@@ -64,6 +64,7 @@ export class CircleIterator implements GeometryIterator {
         undefined,
         undefined,
         this.vertex.clone(),
+        // pos(this.vertex.x, this.vertex.y),
         this.nextVertex,
         undefined,
         undefined,
@@ -132,6 +133,7 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * sin + y * cos;
 
     this._vertex.withXY(rx + cx, ry + cy);
+    // this._vertex = pos(rx + cx, ry + cy);
     this._index = (this._index + 1) % this.segments.segmentCount;
     return this._vertex;
   }
@@ -148,6 +150,7 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * nsin + y * ncos;
 
     this._vertex.withXY(rx + cx, ry + cy);
+    // this._vertex = pos(rx + cx, ry + cy);
     this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this._vertex;
   }
