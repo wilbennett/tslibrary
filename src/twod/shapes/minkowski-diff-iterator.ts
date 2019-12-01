@@ -5,6 +5,7 @@ import {
   GeometryIterator,
   MinkowskiPoint,
   MinkowskiPointImpl,
+  Shape,
   ShapeIterator,
   SupportPoint,
 } from '.';
@@ -25,29 +26,43 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
 
     this.iterA = this.shapeA.getIterator(start.indexA, true, this.circleSegments);
     this.iterB = this.shapeB.getIterator(start.indexB, true, this.circleSegments);
+
+    this.init(start);
   }
 
   protected iterA: GeometryIterator;
   protected iterB: GeometryIterator;
+  protected _iterator?: GeometryIterator;
   get iterator() {
-    const edgeA = this.iterA.edgeVector;
-    const edgeB = this.iterB.edgeVector.negateO();
-    return edgeA.cross2D(edgeB) > 0 ? this.iterA : this.iterB;
+    if (!this._iterator) {
+      const iterA = this.iterA;
+      const iterB = this.iterB;
+      let edgeA = iterA.edgeVector;
+      let edgeB = iterB.edgeVector.negateO();
+
+      if (edgeA.cross2D(edgeB) > 0) {
+        this._iterator = iterA;
+        this._shape = this.shapeA;
+      } else {
+        this._iterator = iterB;
+        this._shape = this.shapeB;
+      }
+    }
+
+    return this._iterator;
   }
   get vertexCount() { return this.iterA.vertexCount + this.iterB.vertexCount; }
-
+  protected _shape?: Shape;
   get shape() {
-    const edgeA = this.iterA.edgeVector;
-    const edgeB = this.iterB.edgeVector.negateO();
-    return edgeA.cross2D(edgeB) > 0 ? this.shapeA : this.shapeB;
+    if (!this._shape) {
+      this._shape = this.iterator === this.iterA ? this.shapeA : this.shapeB;
+    }
+
+    return this._shape;
   }
   // @ts-ignore - unused param.
   set shape(value) { }
-  get index() {
-    const edgeA = this.iterA.edgeVector;
-    const edgeB = this.iterB.edgeVector.negateO();
-    return edgeA.cross2D(edgeB) > 0 ? this.iterA.index : this.iterB.index;
-  }
+  get index() { return this.iterator.index; }
   // @ts-ignore - unused param.
   set index(value) { }
   get indexA() { return this.iterA.index; }
@@ -86,12 +101,13 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
 
   init(start: MinkowskiPoint) {
     this.worldPoint = start.worldPoint.clone();
-    this.indexA = start.indexA;
-    this.indexB = start.indexB;
     this.worldDirection = start.worldDirection.clone();
 
-    this.iterA.index = this.indexA;
-    this.iterB.index = this.indexB;
+    this.iterA.index = start.indexA;
+    this.iterB.index = start.indexB;
+
+    this._shape = undefined;
+    this._iterator = undefined;
   }
 
   clone(result?: SupportTypes): SupportTypes {
@@ -112,14 +128,11 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     }
 
     super.clone(result);
+    result instanceof MinkowskiDiffIterator && result.init(this);
     return result;
   }
 
-  getShapeEdge(): Edge {
-    const edgeA = this.iterA.edgeVector;
-    const edgeB = this.iterB.edgeVector.negateO();
-    return edgeA.cross2D(edgeB) > 0 ? this.iterA.edge : this.iterB.edge;
-  }
+  getShapeEdge(): Edge { return this.iterator.edge; }
 
   getNextShapeEdge(): Edge {
     const { iterA, iterB } = this;
@@ -149,34 +162,42 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   }
 
   next() {
-    const edgeA = this.iterA.edgeVector;
-    const edgeB = this.iterB.edgeVector.negateO();
+    const iterA = this.iterA;
+    const iterB = this.iterB;
+    let edgeA = iterA.edgeVector;
+    let edgeB = iterB.edgeVector.negateO();
 
     if (edgeA.cross2D(edgeB) > 0) {
       this.worldPoint.add(edgeA);
-      this.iterA.next();
+      iterA.next();
     } else {
       this.worldPoint.add(edgeB);
-      this.iterB.next();
+      iterB.next();
     }
 
+    this._shape = undefined;
+    this._iterator = undefined;
     this._worldPointA = undefined;
     this._worldPointB = undefined;
     return this.worldPoint;
   }
 
   prev() {
-    const prevEdgeA = this.iterA.prevEdgeVector;
-    const prevEdgeB = this.iterB.prevEdgeVector.negateO();
+    const iterA = this.iterA;
+    const iterB = this.iterB;
+    const edgeA = iterA.prevEdgeVector;
+    const edgeB = iterB.prevEdgeVector.negateO();
 
-    if (prevEdgeA.cross2D(prevEdgeB) < 0) {
-      this.worldPoint.displaceByNeg(prevEdgeA);
-      this.iterA.prev();
+    if (edgeA.cross2D(edgeB) < 0) {
+      this.worldPoint.displaceByNeg(edgeA);
+      iterA.prev();
     } else {
-      this.worldPoint.displaceByNeg(prevEdgeB);
-      this.iterB.prev();
+      this.worldPoint.displaceByNeg(edgeB);
+      iterB.prev();
     }
 
+    this._shape = undefined;
+    this._iterator = undefined;
     this._worldPointA = undefined;
     this._worldPointB = undefined;
     return this.worldPoint;
