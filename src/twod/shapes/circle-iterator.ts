@@ -64,7 +64,6 @@ export class CircleIterator implements GeometryIterator {
         undefined,
         undefined,
         this.vertex.clone(),
-        // pos(this.vertex.x, this.vertex.y),
         this.nextVertex,
         undefined,
         undefined,
@@ -133,7 +132,6 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * sin + y * cos;
 
     this._vertex.withXY(rx + cx, ry + cy);
-    // this._vertex = pos(rx + cx, ry + cy);
     this._index = (this._index + 1) % this.segments.segmentCount;
     return this._vertex;
   }
@@ -150,7 +148,6 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * nsin + y * ncos;
 
     this._vertex.withXY(rx + cx, ry + cy);
-    // this._vertex = pos(rx + cx, ry + cy);
     this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this._vertex;
   }
