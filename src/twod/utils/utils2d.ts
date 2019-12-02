@@ -61,7 +61,8 @@ export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, r
   const edge = end.subO(start);
   const t = point.subO(start).dot(edge) / edge.dot(edge);
 
-  return t < 0 || t > 1 || isNaN(t)
-    ? result.copyFrom(start)
-    : start.addScaledO(edge, t, result);
+  if (t <= 0 || isNaN(t)) return result.copyFrom(start);
+  if (t >= 1) return result.copyFrom(end);
+
+  return start.addScaledO(edge, t, result);
 }
