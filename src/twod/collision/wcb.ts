@@ -1,6 +1,8 @@
-import { ColliderBase, ShapePair } from '.';
+import { ColliderBase, Contact, ShapePair } from '.';
+import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import {
+  Edge,
   MinkowskiDiffIterator,
   MinkowskiPoint,
   Simplex,
@@ -9,7 +11,8 @@ import {
   SupportPointImpl,
 } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils/utils2d';
+import { CircleSegmentInfo, getCircleSegmentInfo, segmentClosestPoint } from '../utils/utils2d';
+import { ContactPoint } from './contact';
 
 const ZERO_DIRECTION = dir(0, 0);
 
@@ -29,7 +32,11 @@ export class Wcb extends ColliderBase {
 
   circleSegments: CircleSegmentInfo;
 
-  isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
+  protected calcCollisionProgress(
+    shapes: ShapePair,
+    contact?: Contact,
+    calcDistance: boolean = false,
+    callback?: SimplexCallback): boolean | Contact | undefined | null {
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -49,11 +56,18 @@ export class Wcb extends ColliderBase {
       spPoints = spSimplex.points;
     }
 
-    // This normally gets us closest to the origin.
-    // direction = shapeA.position.subO(shapeB.position, direction);
-    //* This normally gets us furthest from the origin.
-    //* Use it because swapping mka and mkb is faster than getting support when not colliding.
-    direction = shapeB.position.subO(shapeA.position, direction);
+    if (calcDistance && contact)
+      //* This normally gets us furthest from the origin but forces us to get a second support point
+      //* when not colliding.
+      //* If we have to calc distance, then we have to have a second support point anyway so use this
+      //* as it won't require swapping support points.
+      direction = shapeA.position.subO(shapeB.position, direction);
+    else
+      //* This normally gets us closest to the origin and we can early exit without getting another
+      //* support point. It requires a swap but only if the shapes are colliding.
+      //* Swapping the support points is faster than getting a new support point so use this if
+      //* we don't have to calculate distance.
+      direction = shapeB.position.subO(shapeA.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
@@ -72,7 +86,7 @@ export class Wcb extends ColliderBase {
 
     direction.negate();
 
-    if (a.dot(direction) > 0) return false; // a is in front of origin in direction.
+    if (!calcDistance && a.dot(direction) > 0) return false; // a is in front of origin in direction.
 
     let mkb = Minkowski.getDiffPoint(shapeA, shapeB, direction);
     mkb.adjustDiffPointIfCircle();
@@ -85,7 +99,7 @@ export class Wcb extends ColliderBase {
       callback([mkSimplex!.clone(), spSimplex!.clone()]);
     }
 
-    if (b.dot(direction) <= 0) return false; // b did not cross origin in direction.
+    if (!calcDistance && b.dot(direction) <= 0) return false; // b did not cross origin in direction.
 
     if (a.magSquared < b.magSquared) {
       const temp = mka;
@@ -111,8 +125,82 @@ export class Wcb extends ColliderBase {
     const ab = b.subO(a);
 
     return ao.cross2D(ab) < 0
-      ? this.walkCcwProgress(mka, mkb, state.mkc, ao, mkSimplex, spSimplex, callback)
-      : this.walkCwProgress(mka, mkb, state.mkc, ao, mkSimplex, spSimplex, callback);
+      ? this.walkCcwProgress(mka, mkb, state.mkc, ao, contact, mkSimplex, spSimplex, callback)
+      : this.walkCwProgress(mka, mkb, state.mkc, ao, contact, mkSimplex, spSimplex, callback);
+  }
+
+  isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
+    const result = this.calcCollisionProgress(shapes, undefined, false, callback);
+    return typeof result === "boolean" || result === undefined ? result : undefined;
+  }
+
+  calcContactProgress(
+    shapes: ShapePair,
+    contact?: Contact,
+    calcDistance: boolean = false,
+    callback?: SimplexCallback): Tristate<Contact> {
+    const result = this.calcCollisionProgress(shapes, contact, calcDistance, callback);
+    return result instanceof Contact || result === undefined || result === null ? result : undefined;
+  }
+
+  protected getBestEdge(direction: Vector, leftEdge: Edge, rightEdge: Edge) {
+    const v0 = rightEdge.worldStart;
+    const v = rightEdge.worldEnd;
+    const v1 = leftEdge.worldEnd;
+
+    const left = v.subO(v1).normalize();
+    const right = v.subO(v0).normalize();
+
+    if (right.dot(direction) <= left.dot(direction))
+      return rightEdge; // Right edge is most perpendicular to direction.
+
+    return leftEdge;
+  }
+
+  protected populateContact(contact: Contact, mkc: MinkowskiDiffIterator, containsOrigin: boolean) {
+    contact.reset();
+    const refLeftEdge = mkc.getShapeEdge();
+    const refRightEdge = mkc.iterator.prevEdge;
+
+    while (mkc.shape === refLeftEdge.shape)
+      mkc.next();
+
+    let incLeftEdge = mkc.getShapeEdge();
+    let incidentVertex = incLeftEdge.worldStart;
+
+    const closestPoint = segmentClosestPoint(refLeftEdge.worldStart, refLeftEdge.worldEnd, incidentVertex);
+    closestPoint.subO(incidentVertex, contact.normal);
+    const depth = containsOrigin ? contact.normal.mag : -contact.normal.mag;
+    !containsOrigin && contact.normal.negate();
+
+    contact.points.push(new ContactPoint(incidentVertex, depth));
+    contact.normal.normalize();
+    refLeftEdge.shape === contact.shapeB && (contact.isNormalToA = true);
+
+    if (!containsOrigin || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) return;
+
+    const incRightEdge = mkc.iterator.prevEdge;
+    let collisionNormal = contact.normal.clone();
+    let referenceEdge: Edge;
+    let incidentEdge: Edge;
+    incidentEdge = incLeftEdge;
+    referenceEdge = refLeftEdge;
+
+    if (refLeftEdge.shape === contact.shapeA) {
+      referenceEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
+      incidentEdge = this.getBestEdge(collisionNormal.negateO(), incLeftEdge, incRightEdge);
+    } else {
+      incidentEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
+      referenceEdge = this.getBestEdge(collisionNormal.negate(), incLeftEdge, incRightEdge);
+    }
+
+    if (referenceEdge.normal.dot(collisionNormal) <= incidentEdge.normal.dot(collisionNormal)) {
+      contact.referenceEdge = referenceEdge;
+      contact.incidentEdge = incidentEdge;
+    } else {
+      contact.referenceEdge = incidentEdge;
+      contact.incidentEdge = referenceEdge;
+    }
   }
 
   protected walkCcwProgress(
@@ -120,9 +208,10 @@ export class Wcb extends ColliderBase {
     mkb: MinkowskiPoint,
     mkc: MinkowskiDiffIterator,
     ao: Vector,
+    contact?: Contact,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback): boolean | undefined {
+    callback?: SimplexCallback): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
@@ -155,7 +244,7 @@ export class Wcb extends ColliderBase {
     while (ao.cross2D(ac) < 0 && i-- > 0) {
       if (callback) {
         const edge = mkc.getShapeEdge();
-        spPoints!.pop();
+        spPoints!.splice(1, 2);
         spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
         spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
       }
@@ -175,6 +264,13 @@ export class Wcb extends ColliderBase {
     const bo = b.negateO();
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) <= 0;
+
+    if (contact) {
+      mkc.prev();
+      this.populateContact(contact, mkc, containsOrigin);
+      return contact;
+    }
+
     return containsOrigin;
   }
 
@@ -183,9 +279,10 @@ export class Wcb extends ColliderBase {
     mkb: MinkowskiPoint,
     mkc: MinkowskiDiffIterator,
     ao: Vector,
+    contact?: Contact,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback): boolean | undefined {
+    callback?: SimplexCallback): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
@@ -231,6 +328,13 @@ export class Wcb extends ColliderBase {
     const bo = b.negateO();
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) >= 0;
+
+    if (contact) {
+      contact.reset();
+      this.populateContact(contact, mkc, containsOrigin);
+      return contact;
+    }
+
     return containsOrigin;
   }
 
@@ -296,10 +400,15 @@ export class Wcb extends ColliderBase {
     const { shapeA, shapeB } = shapes;
     let direction: Vector | undefined = undefined;
 
-    // This normally gets us closest to the origin.
+    //* This normally gets us furthest from the origin but forces us to get a second support point
+    //* when not colliding.
+    //* If we have to calc distance, then we have to have a second support point anyway so use this
+    //* as it won't require swapping support points.
     // direction = shapeA.position.subO(shapeB.position, direction);
-    //* This normally gets us furthest from the origin.
-    //* Use it because swapping mka and mkb is faster than getting support when not colliding.
+    //* This normally gets us closest to the origin and we can early exit without getting another
+    //* support point. It requires a swap but only if the shapes are colliding.
+    //* Swapping the support points is faster than getting a new support point so use this if
+    //* we don't have to calculate distance.
     direction = shapeB.position.subO(shapeA.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))

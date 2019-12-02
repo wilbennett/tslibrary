@@ -2,8 +2,9 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
+import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { Collider, Gjk, ShapePair, Wcb } from '../../../twod/collision';
+import { Collider, Contact, Gjk, ShapePair, Wcb } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
@@ -77,6 +78,7 @@ let showSimplices = false;
 setCircleSegmentCount(showSimplices ? 10 : 30);
 setCircleSegmentCount(360);
 setCircleSegmentCount(20);
+// setCircleSegmentCount(8);
 
 const graph = new Graph(ctx.bounds, gridSize);
 const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
@@ -91,6 +93,7 @@ const poly6 = new PolygonShape(40, 2.5, 0 * Math.PI / 180, false);
 poly6.setPosition(pos(7.0, 6.0));
 const circle1 = new CircleShape(2);
 circle1.setPosition(pos(3.0, 3.0));
+// circle1.setPosition(pos(9.0, 3.0));
 // circle1.angle = 45 * Math.PI / 180;
 const circle2 = new CircleShape(3);
 circle2.setPosition(pos(9.0, 6.0));
@@ -99,6 +102,7 @@ circle3.setPosition(circle2.position);
 const box1 = new PolygonShape([pos(2, 8), pos(6, 4), pos(9, 7), pos(5, 11)]);
 const box2 = new PolygonShape([pos(4, 2), pos(12, 2), pos(12, 5), pos(4, 5)]);
 const box3 = new PolygonShape([pos(9, 4), pos(13, 3), pos(14, 7), pos(10, 8)]);
+box3.setPosition(pos(7.5, 5.5));
 const box4 = new PolygonShape([pos(4, 2), pos(7, 2), pos(7, 4), pos(4, 4)]);
 box4.setPosition(pos(3, 3));
 
@@ -139,6 +143,7 @@ let polydBrush = "green";
 let simplexList: Simplex[][] = [];
 let simplices: Simplex[] = [];
 let simplexAnim: Easer | null = null;
+let contact: Tristate<Contact> = null;
 
 const delay = new DelayEaser(2);
 
@@ -348,16 +353,22 @@ function render() {
     drawShape2Vertices(second, view);
     // mkVertices && drawMinkowskiVertices(mkVertices, { lineWidth: 2 }, view);
     mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
-    contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
-    collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
+    // contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
+    // collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
     simplices.forEach(simplex => drawSimplex(simplex, view));
     second.render(view);
     first.render(view);
+    contact && drawContact(contact, view);
 
     /*
     if (first.kind === "circle") {
       const vertices = Minkowski.getWorldVertices(first);
       beginPath(first.props, view).strokePoly(vertices, true);
+    }
+
+    if (second.kind === "circle") {
+      const vertices = Minkowski.getWorldVertices(second);
+      beginPath(second.props, view).strokePoly(vertices, true);
     }
     //*/
 
@@ -389,6 +400,7 @@ function temp() {
   polydBrush = "green";
   simplexList.splice(0);
   simplices = [];
+  contact = null;
   contactPoint = null;
   collisionNormal = null;
   mkNormal = null;
@@ -579,7 +591,7 @@ function temp() {
     mkSimplices.push(mkSimplex.clone());
   };
 
-  if (ao.cross2D(ab) >= 0) { // Walk right.
+  if (ao.cross2D(ab) >= 0) { // Walk right (CW).
     mkc.prev();
 
     ab.perpRightO(direction);
@@ -628,7 +640,7 @@ function temp() {
     }
 
     pushEdge(edge2);
-  } else { // Walk left.
+  } else { // Walk left (CCW).
     spPoints.pop();
     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
@@ -841,6 +853,7 @@ function clearStateValues() {
   // mkVertices = [];
   simplexList.splice(0);
   simplices = [];
+  contact = null;
 }
 
 function applyCollider() {
@@ -857,13 +870,22 @@ function applyCollider() {
   const simplices1: Simplex[] = [];
   simplexList.push(simplices1);
   let isColliding = false;
+  // console.clear();
 
-  if (collider instanceof Gjk || collider instanceof Wcb)
-    isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
+  // if (collider instanceof Gjk || collider instanceof Wcb)
+  //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
+
+  if (collider instanceof Wcb)
+    contact = collider.calcContactProgress(pair, pair.contact, true, pushSimplices);
+
+  // if (contact) {
+  //   console.log(`${contact.normal}`);
+  // }
 
   // isColliding = !!collider.isColliding(pair);
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
-  polydBrush = isColliding ? "red" : "green";
+  // polydBrush = isColliding ? "red" : "green";
+  polydBrush = contact && contact.isCollision ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
   createSimplexAnim();
@@ -908,6 +930,24 @@ function changeShapes() {
     //   console.log(e.message);
     // }
   }
+}
+
+function drawContact(contact: Contact, view: Viewport) {
+  const propsc: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 2, lineDash: [] };
+  const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [0.2, 0.2] };
+  const propsn: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [] };
+
+  const normal = contact.normal;
+  const refEdge = contact.referenceEdge;
+  const incEdge = contact.incidentEdge;
+  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+
+  contact.points.forEach(cp => {
+    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.8, 0.8)));
+    normal.scaleO(cp.depth).render(view, cp.point, propsn);
+  });
 }
 
 function drawSimplex(simplex: Simplex, view: Viewport) {
