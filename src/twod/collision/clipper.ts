@@ -1,6 +1,6 @@
-import { Vector } from '../../vectors';
+import { ContactPoint } from '.';
 import { Edge } from '../shapes';
 
 export interface Clipper {
-  clip(incidentEdge: Edge, referenceEdge: Edge, result?: Vector[]): Vector[];
+  clip(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[];
 }
