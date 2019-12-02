@@ -5,13 +5,26 @@ import { Vector } from '../../vectors';
 export class Plane extends GeometryBase implements IPlane {
   kind: "plane" = "plane";
 
-  constructor(point1: Vector, point2: Vector) {
+  constructor(point1: Vector, point2: Vector);
+  constructor(kind: "pointnormal", point: Vector, normal: Vector);
+  constructor(param1: Vector | "pointnormal", param2: Vector, param3?: Vector) {
     super();
 
-    const ab = point2.subO(point1);
-    const axb = point1.cross2D(point2);
-    this.normal = axb >= 0 ? ab.perpLeft().normalize() : ab.perpRight().normalize();
-    this._distance = this.normal.dot(point1);
+    if (param1 instanceof Vector) {
+      const point1 = param1;
+      const point2 = param2;
+
+      const ab = point2.subO(point1);
+      const axb = point1.cross2D(point2);
+      this.normal = axb >= 0 ? ab.perpLeft().normalize() : ab.perpRight().normalize();
+      this._distance = this.normal.dot(point1);
+    } else {
+      const point = param2;
+      const normal = param3;
+
+      this.normal = normal!;
+      this._distance = this.normal.dot(point);
+    }
   }
 
   readonly normal: Vector;
