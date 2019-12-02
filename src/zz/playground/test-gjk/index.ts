@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { Collider, Contact, Gjk, ShapePair, Wcb } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
@@ -102,9 +102,10 @@ circle3.setPosition(circle2.position);
 const box1 = new PolygonShape([pos(2, 8), pos(6, 4), pos(9, 7), pos(5, 11)]);
 const box2 = new PolygonShape([pos(4, 2), pos(12, 2), pos(12, 5), pos(4, 5)]);
 const box3 = new PolygonShape([pos(9, 4), pos(13, 3), pos(14, 7), pos(10, 8)]);
-box3.setPosition(pos(7.5, 5.5));
+// box3.setPosition(pos(7.5, 5.5));
 const box4 = new PolygonShape([pos(4, 2), pos(7, 2), pos(7, 4), pos(4, 4)]);
 box4.setPosition(pos(3, 3));
+const box5 = new PolygonShape([pos(8, 4), pos(14, 4), pos(14, 9), pos(8, 9)]);
 
 const pairs: ShapePair[] = [
   new ShapePair(circle1, circle2),
@@ -125,6 +126,7 @@ const pairs: ShapePair[] = [
   new ShapePair(poly2, poly3),
   new ShapePair(poly1, poly2),
   new ShapePair(poly2, poly1),
+  new ShapePair(box5, box2),
   new ShapePair(box1, box2),
   new ShapePair(box3, box2),
   new ShapePair(box4, box2),
@@ -144,6 +146,9 @@ let simplexList: Simplex[][] = [];
 let simplices: Simplex[] = [];
 let simplexAnim: Easer | null = null;
 let contact: Tristate<Contact> = null;
+let clipStates: ClipState[] = [];
+let clipState: Tristate<ClipState> = null;
+let clipAnim: Easer | null = null;
 
 const delay = new DelayEaser(2);
 
@@ -329,8 +334,8 @@ function restoreTransform() {
 
 function render() {
   if (++frame === (60 * pauseAfterSeconds)) {
-    loop.stop();
-    elPause.checked = true;
+    // loop.stop();
+    // elPause.checked = true;
   }
 
   if (stepping) {
@@ -359,6 +364,7 @@ function render() {
     second.render(view);
     first.render(view);
     contact && drawContact(contact, view);
+    clipState && contact && drawClipState(clipState, view);
 
     /*
     if (first.kind === "circle") {
@@ -840,6 +846,25 @@ function createSimplexAnim() {
   runner.add(simplexAnim);
 }
 
+function createClipAnim() {
+  const anims: Easer[] = [];
+
+  if (clipStates.length === 0) return;
+
+  const anim = new ArrayEaser(clipStates, MathEx.clamp(clipStates.length * 2.0, 2, 20), Ease.linear, v => {
+    clipState = v;
+    isDirty = true;
+  });
+
+  anims.push(anim);
+
+  if (anims.length === 0) return;
+
+  clipAnim = new SequentialEaser([new ConcurrentEaser(anims), delay, delay]).repeat(Infinity);
+
+  runner.add(clipAnim);
+}
+
 function pushSimplices(values: Simplex[]) {
   while (simplexList.length < values.length) {
     simplexList.push([]);
@@ -848,19 +873,30 @@ function pushSimplices(values: Simplex[]) {
   values.forEach((s, i) => simplexList[i].push(s));
 }
 
+function pushClipState(clip: ClipState) {
+  clip.contact.ensureNormalDirection();
+  clipStates.push(clip);
+}
+
 function clearStateValues() {
   polyd = null;
   // mkVertices = [];
   simplexList.splice(0);
   simplices = [];
   contact = null;
+  clipStates = [];
+  clipState = null;
 }
 
 function applyCollider() {
   if (simplexAnim)
     runner.remove(simplexAnim);
 
+  if (clipAnim)
+    runner.remove(clipAnim);
+
   simplexAnim = null;
+  clipAnim = null;
   clearStateValues();
 
   if (!pair) return;
@@ -885,13 +921,23 @@ function applyCollider() {
   //   console.log(`${contact.normal}`);
   // }
 
+  //*
+  if (contact && contact.canClip) {
+    // cc.incidentEdge = undefined;
+    // cc.referenceEdge = undefined;
+    const clipper = new Sutherland();
+    clipper.clipProgress(contact.clone(), pushClipState);
+    createClipAnim();
+  }
+  //*/
+
   // isColliding = !!collider.isColliding(pair);
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   // polydBrush = isColliding ? "red" : "green";
   polydBrush = contact && contact.isCollision ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
-  createSimplexAnim();
+  // createSimplexAnim();
   // polyd && temp();
   isDirty = true;
 }
@@ -935,6 +981,30 @@ function changeShapes() {
   }
 }
 
+function drawClipState(clip: ClipState, view: Viewport) {
+  const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [0.2, 0.2] };
+  const propsp: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 3, lineDash: [] };
+  const propsn: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 4, lineDash: [] };
+  const propsc: ContextProps = { strokeStyle: WebColors.gray, fillStyle: WebColors.gray, lineWidth: 4, lineDash: [] };
+
+  const contact = clip.contact;
+  const plane = clip.clipPlane;
+  const refEdge = contact.referenceEdge;
+  const incEdge = contact.incidentEdge;
+  const points = contact.points;
+  const normal = contact.normal;
+  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+
+  points.forEach(cp => {
+    beginPath(propsp, view).strokeRect(Bounds.fromCenter(cp.point, dir(0.8, 0.8)));
+    normal && normal.scaleO(cp.depth).render(view, cp.point, propsc);
+  });
+
+  plane && (plane.props = propsn) && plane.render(view);
+}
+
 function drawContact(contact: Contact, view: Viewport) {
   const propsc: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 2, lineDash: [] };
   const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
@@ -948,7 +1018,7 @@ function drawContact(contact: Contact, view: Viewport) {
   incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
 
   contact.points.forEach(cp => {
-    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.8, 0.8)));
+    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
     normal.scaleO(cp.depth).render(view, cp.point, propsn);
   });
 }
