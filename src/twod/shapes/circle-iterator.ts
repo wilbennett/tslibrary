@@ -27,8 +27,8 @@ export class CircleIterator implements GeometryIterator {
     this._index = value;
     this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
   }
-  protected _vertex: Vector;
   get vertexCount() { return this.segments.segmentCount; }
+  protected _vertex: Vector;
   get vertex() { return this._vertex; }
   get nextVertex() {
     const current = this._vertex;
