@@ -78,32 +78,40 @@ export class Wcb extends ColliderBase {
 
     contact.points.push(new ContactPoint(incidentVertex, depth));
     contact.normal.normalize();
-    refLeftEdge.shape === contact.shapeB && (contact.isNormalToA = true);
 
-    if (contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2)
+    if (!containsOrigin || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
+      contact.referenceEdge = refLeftEdge;
+      contact.incidentEdge = incLeftEdge;
       return contact;
+    }
 
+    refLeftEdge.shape === contact.shapeB && contact.normal.negate();
     const incRightEdge = mkc.iterator.prevEdge;
     let collisionNormal = contact.normal.clone();
     let referenceEdge: Edge;
     let incidentEdge: Edge;
-    incidentEdge = incLeftEdge;
-    referenceEdge = refLeftEdge;
 
     if (refLeftEdge.shape === contact.shapeA) {
       referenceEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
       incidentEdge = this.getBestEdge(collisionNormal.negateO(), incLeftEdge, incRightEdge);
-    } else {
-      incidentEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
-      referenceEdge = this.getBestEdge(collisionNormal.negate(), incLeftEdge, incRightEdge);
+    } else { // Always start with reference on shapeA.
+      referenceEdge = this.getBestEdge(collisionNormal, incLeftEdge, incRightEdge);
+      incidentEdge = this.getBestEdge(collisionNormal.negateO(), refLeftEdge, refRightEdge);
     }
 
-    if (referenceEdge.normal.dot(collisionNormal) <= incidentEdge.normal.dot(collisionNormal)) {
+    const refVector = referenceEdge.worldEnd.subO(referenceEdge.worldStart);
+    const incVector = incidentEdge.worldEnd.subO(incidentEdge.worldStart);
+
+    const refDotNormal = Math.abs(refVector.dot(collisionNormal));
+    const incDotNormal = Math.abs(incVector.dot(collisionNormal));
+
+    if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
       contact.referenceEdge = referenceEdge;
       contact.incidentEdge = incidentEdge;
     } else {
       contact.referenceEdge = incidentEdge;
       contact.incidentEdge = referenceEdge;
+      contact.flip = true;
     }
 
     return contact;
