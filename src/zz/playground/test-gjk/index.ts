@@ -144,7 +144,7 @@ let polydBrush = "green";
 // let mkVertices: Tristate<MinkowskiPoint[]> = [];
 let simplexList: Simplex[][] = [];
 let simplices: Simplex[] = [];
-let simplexAnim: Easer | null = null;
+let stateAnim: Easer | null = null;
 let contact: Tristate<Contact> = null;
 let clipStates: ClipState[] = [];
 let clipState: Tristate<ClipState> = null;
@@ -334,8 +334,8 @@ function restoreTransform() {
 
 function render() {
   if (++frame === (60 * pauseAfterSeconds)) {
-    // loop.stop();
-    // elPause.checked = true;
+    loop.stop();
+    elPause.checked = true;
   }
 
   if (stepping) {
@@ -732,7 +732,7 @@ function temp() {
   }
 
   polydBrush = containsOrigin ? "red" : "green";
-  createSimplexAnim();
+  createStateAnim();
 }
 //*/
 
@@ -802,40 +802,54 @@ function beginPath(props: ContextProps, view: Viewport) {
   return view.ctx;
 }
 
-function createSimplexAnim() {
+function createStateAnim() {
   if (!pair) return;
 
   const anims: Easer[] = [];
+  const simplexAnims: Easer[] = [];
+  const clipAnims: Easer[] = [];
   simplices.splice(0);
 
-  if (simplexList.length === 0) return;
+  if (simplexList.length > 0) {
+    for (const list of simplexList) {
+      if (list.length > 0) {
+        let simplex = list[0];
 
-  for (const list of simplexList) {
-    if (list.length > 0) {
-      let simplex = list[0];
+        const anim = new ArrayEaser(list, MathEx.clamp(list.length * 1.0, 2, 20), Ease.linear, v => {
+          if (stepping) return;
 
-      const anim = new ArrayEaser(list, MathEx.clamp(list.length * 1.0, 2, 20), Ease.linear, v => {
-        if (stepping) return;
+          simplices.remove(simplex);
+          simplices.push(v);
+          simplex = v;
+          elText.value = "" + (simplices.indexOf(simplex) + 1);
+          isDirty = true;
+        }).onCompleted(() => simplices.splice(0));
 
-        simplices.remove(simplex);
-        simplices.push(v);
-        simplex = v;
-        elText.value = "" + (simplices.indexOf(simplex) + 1);
-        isDirty = true;
-      });
-
-      anims.push(anim);
+        simplexAnims.push(anim);
+      }
     }
   }
 
+  if (clipStates.length > 0) {
+    const anim = new ArrayEaser(clipStates, MathEx.clamp(clipStates.length * 2.0, 2, 20), Ease.linear, v => {
+      clipState = v;
+      isDirty = true;
+    }).onCompleted(() => clipState = null);
+
+    clipAnims.push(anim);
+  }
+
+  simplexAnims.length > 0 && anims.push(new ConcurrentEaser(simplexAnims));
+  clipAnims.length > 0 && anims.push(new ConcurrentEaser(clipAnims));
+
   if (anims.length === 0) return;
 
-  simplexAnim = new SequentialEaser([new ConcurrentEaser(anims), delay]).repeat(Infinity)
+  stateAnim = new SequentialEaser([...anims, delay]).repeat(Infinity)
     .onCompleted(() => {
       if (stepping) return;
 
       if (!autoChangeShapes) {
-        createSimplexAnim();
+        createStateAnim();
         return;
       }
 
@@ -843,26 +857,7 @@ function createSimplexAnim() {
       // changeShapes();
     });
 
-  runner.add(simplexAnim);
-}
-
-function createClipAnim() {
-  const anims: Easer[] = [];
-
-  if (clipStates.length === 0) return;
-
-  const anim = new ArrayEaser(clipStates, MathEx.clamp(clipStates.length * 2.0, 2, 20), Ease.linear, v => {
-    clipState = v;
-    isDirty = true;
-  });
-
-  anims.push(anim);
-
-  if (anims.length === 0) return;
-
-  clipAnim = new SequentialEaser([new ConcurrentEaser(anims), delay, delay]).repeat(Infinity);
-
-  runner.add(clipAnim);
+  runner.add(stateAnim);
 }
 
 function pushSimplices(values: Simplex[]) {
@@ -889,13 +884,13 @@ function clearStateValues() {
 }
 
 function applyCollider() {
-  if (simplexAnim)
-    runner.remove(simplexAnim);
+  if (stateAnim)
+    runner.remove(stateAnim);
 
   if (clipAnim)
     runner.remove(clipAnim);
 
-  simplexAnim = null;
+  stateAnim = null;
   clipAnim = null;
   clearStateValues();
 
@@ -927,7 +922,6 @@ function applyCollider() {
     // cc.referenceEdge = undefined;
     const clipper = new Sutherland();
     clipper.clipProgress(contact.clone(), pushClipState);
-    createClipAnim();
   }
   //*/
 
@@ -937,7 +931,7 @@ function applyCollider() {
   polydBrush = contact && contact.isCollision ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
-  // createSimplexAnim();
+  createStateAnim();
   // polyd && temp();
   isDirty = true;
 }
@@ -957,10 +951,10 @@ function initPair() {
 }
 
 function changeShapes() {
-  if (simplexAnim)
-    runner.remove(simplexAnim);
+  if (stateAnim)
+    runner.remove(stateAnim);
 
-  simplexAnim = null;
+  stateAnim = null;
   pair = null;
   clearStateValues();
 
