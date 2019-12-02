@@ -14,6 +14,28 @@ export class Sutherland implements Clipper {
   // @ts-ignore - unused param.
   clip(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[] {
     result || (result = []);
+
+    const refv = referenceEdge.worldEnd.subO(referenceEdge.worldStart).normalize();
+    const startDistance = refv.dot(referenceEdge.worldStart);
+    this.clipSegment(incidentEdge.worldStart, incidentEdge.worldEnd, refv, startDistance, result);
+
+    if (result.length < 2) return result;
+
+    const endDistance = refv.dot(referenceEdge.worldEnd);
+    this.clipSegment(result[0].point, result[1].point, refv.negate(), -endDistance, result);
+
+    if (result.length < 2) return result;
+
+    let refNorm = referenceEdge.worldNormal.negateO();
+    // flip && (refNorm = refNorm.negateO());
+
+    const distance = refNorm.dot(referenceEdge.worldStart);
+    result[0].depth = refNorm.dot(result[0].point) - distance;
+    result[1].depth = refNorm.dot(result[1].point) - distance;
+
+    result[1].depth < 0 && result.pop();
+    result[0].depth < 0 && result.shift();
+
     return result;
   }
 
@@ -25,7 +47,6 @@ export class Sutherland implements Clipper {
 
     callback({ contact: contact.clone() });
 
-    points.splice(0);
     const refv = referenceEdge.worldEnd.subO(referenceEdge.worldStart).normalize();
     const startDistance = refv.dot(referenceEdge.worldStart);
     this.clipSegment(incidentEdge.worldStart, incidentEdge.worldEnd, refv, startDistance, points);
