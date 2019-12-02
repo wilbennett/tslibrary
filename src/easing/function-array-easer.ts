@@ -1,7 +1,7 @@
 import { EaseFunction, EaserCallback, EaserValueCallback, ValueEaser } from '.';
 import { MathEx } from '../core';
 
-export type ArrayFunction = (percentComplete: number, isComplete: boolean) => void;
+export type ArrayFunction = (value: number, percentComplete: number, isComplete: boolean) => void;
 
 export class FunctionArrayEaser extends ValueEaser<ArrayFunction> {
   constructor(
@@ -16,6 +16,13 @@ export class FunctionArrayEaser extends ValueEaser<ArrayFunction> {
     this.init();
   }
 
+  protected _lastValue?: number;
+
+  reset() {
+    super.reset();
+    this._lastValue = undefined;
+  }
+
   protected calcChange() { return this.values.length; }
 
   protected calcValue(percent: number): ArrayFunction {
@@ -25,9 +32,14 @@ export class FunctionArrayEaser extends ValueEaser<ArrayFunction> {
   }
 
   protected notifyValue(percent: number) {
-    if (!super.notifyValue(percent)) return false;
+    super.notifyValue(percent);
 
-    this.value(percent, this.isComplete);
+    const value = MathEx.lerpc(0, 1, this.ease(percent));
+
+    if (this._lastNotifiedValue === this.value && value === this._lastValue) return false;
+
+    this._lastValue = value;
+    this.value(value, percent, this.isComplete);
     return true;
   }
 }
