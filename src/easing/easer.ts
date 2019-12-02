@@ -15,6 +15,7 @@ export abstract class Easer {
   }
 
   abstract get ease(): EaseFunction;
+  abstract set ease(value: EaseFunction);
   get duration() { return this._duration; }
 
   protected _isComplete = false;
