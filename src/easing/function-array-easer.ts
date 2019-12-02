@@ -28,6 +28,7 @@ export class FunctionArrayEaser extends ValueEaser<ArrayFunction> {
   protected calcValue(percent: number): ArrayFunction {
     let index = Math.round(MathEx.lerpc(0, this._change, this.ease(percent)));
     index = MathEx.clamp(index, 0, this.values.length - 1);
+    isNaN(index) && (index = 0);
     return this.values[index];
   }
 
