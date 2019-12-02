@@ -49,7 +49,8 @@ export class SATProjection extends ColliderBase {
   }
 
 
-  protected calcContactCore(shapes: ShapePair, result: Contact): Tristate<Contact> {
+  // @ts-ignore - unused param.
+  protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
     const { shapeA: first, shapeB: second } = shapes;
     const state = this.getState(shapes);
 

@@ -27,7 +27,8 @@ export class SimpleCollider extends ColliderBase {
     }
   }
 
-  protected calcContactCore(shapes: ShapePair, result: Contact): Tristate<Contact> {
+  // @ts-ignore - unused param.
+  protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
     const { shapeA: first, shapeB: second } = shapes;
 
     switch (first.kind) {

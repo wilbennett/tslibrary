@@ -869,7 +869,7 @@ function applyCollider() {
   // mkVertices = Minkowski.createDiff("minkowski", pair.first, pair.second);
   const simplices1: Simplex[] = [];
   simplexList.push(simplices1);
-  let isColliding = false;
+  // let isColliding = false;
   // console.clear();
 
   // if (collider instanceof Gjk || collider instanceof Wcb)
@@ -877,6 +877,9 @@ function applyCollider() {
 
   if (collider instanceof Wcb)
     contact = collider.calcContactProgress(pair, pair.contact, true, pushSimplices);
+
+  // if (collider instanceof Wcb)
+  //   contact = collider.calcContact(pair, pair.contact, true);
 
   // if (contact) {
   //   console.log(`${contact.normal}`);
