@@ -36,6 +36,19 @@ export abstract class Vector {
   set a(value) { this.w = value; }
   get minElement() { return Math.min(this.x, this.y, this.z); }
   get maxElement() { return Math.max(this.x, this.y, this.z); }
+  // TODO: Check if needed for 3D.
+  get quadrant() {
+    if (this.x >= 0)
+      return this.y >= 0 ? 1 : 4;
+
+    return this.y >= 0 ? 2 : 3;
+  }
+  // TODO: Check if needed for 3D.
+  get hemisphere() {
+    return this.y >= 0 && this.x >= 0
+      ? 1
+      : this.y > 0 ? 1 : 2;
+  }
   get isPosition() { return this.w !== 0; }
   get isDirection() { return this.w === 0; }
   get isEmpty() { return false; }
@@ -824,6 +837,16 @@ export abstract class Vector {
     }
 
     return Math.abs(x - ox) < epsilon && Math.abs(y - oy) < epsilon && Math.abs(z - oz) < epsilon;
+  }
+
+  // TODO: 3D?
+  compareAngle(other: Vector) {
+    const quadrant = this.quadrant;
+    const otherQuadrant = other.quadrant;
+
+    return quadrant !== otherQuadrant
+      ? quadrant - otherQuadrant
+      : other.cross2D(this);
   }
 
   static fromRadians(angle: number, radius: number = 1, w: number = 0) {
