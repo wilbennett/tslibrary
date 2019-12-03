@@ -66,3 +66,22 @@ export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, r
 
   return start.addScaledO(edge, t, result);
 }
+
+//
+// Segment.
+// Christer Ericson - Real Time Collision Detection.
+export function segmentSqrDistToPoint(start: Vector, end: Vector, point: Vector) {
+  const startToEnd = end.subO(start);
+  const startToPoint = point.subO(start);
+  const endToPoint = point.subO(end);
+
+  const projection = startToPoint.dot(startToEnd);
+
+  if (projection <= 0) return startToPoint.magSquared;
+
+  const segmentLengthSqr = startToEnd.magSquared;
+
+  if (projection >= segmentLengthSqr) return endToPoint.magSquared;
+
+  return startToPoint.magSquared - projection * projection / segmentLengthSqr;
+}
