@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
@@ -133,6 +133,7 @@ const pairs: ShapePair[] = [
 ]
 
 const colliders: [string, Collider][] = [
+  ["WCB2", new Wcb2()],
   ["WCB", new Wcb()],
   ["GJK", new Gjk()],
 ];
@@ -191,6 +192,9 @@ elPause.addEventListener("change", () => {
     loop.stop();
   else
     loop.start();
+
+  stepping = false;
+  elStep.checked = false;
 });
 
 elChangeShapes.addEventListener("change", () => {
@@ -900,14 +904,16 @@ function applyCollider() {
   // mkVertices = Minkowski.createDiff("minkowski", pair.first, pair.second);
   const simplices1: Simplex[] = [];
   simplexList.push(simplices1);
-  // let isColliding = false;
+  let isColliding = false;
   // console.clear();
 
   // if (collider instanceof Gjk || collider instanceof Wcb)
   //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
-  if (collider instanceof Wcb)
+  if (collider instanceof Wcb || collider instanceof Wcb2)
     contact = collider.calcContactProgress(pair, pair.contact, true, pushSimplices);
+  else if (collider instanceof Gjk)
+    isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
   // if (collider instanceof Wcb)
   //   contact = collider.calcContact(pair, pair.contact, true);
@@ -928,7 +934,7 @@ function applyCollider() {
   // isColliding = !!collider.isColliding(pair);
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   // polydBrush = isColliding ? "red" : "green";
-  polydBrush = contact && contact.isCollision ? "red" : "green";
+  polydBrush = isColliding || contact && contact.isCollision ? "red" : "green";
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
   createStateAnim();

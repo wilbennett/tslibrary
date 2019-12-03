@@ -8,4 +8,5 @@ export * from "./sat-projection";
 export * from "./sat-support";
 export * from "./gjk";
 export * from "./wcb";
+export * from "./wcb2";
 export * from "./sutherland";
