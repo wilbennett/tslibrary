@@ -71,6 +71,7 @@ const supportChangeVectors: [Vector, SupportPoint][] = [];
 const badValue = new SupportPointImpl(poly, undefined, pos(8, 8));
 badValue.worldDirection = dir(5, 5);
 let badRadius = 0;
+let count = 0;
 
 const fps = 60;
 const secPerFrame = 1 / fps;
@@ -82,11 +83,14 @@ const dirAnimDuration = secPerDegree * degrees;
 const dirAnim = new NumberEaser(0, degrees, dirAnimDuration, Ease.linear, v => {
   direction.withDegreesMag(v, direction.mag);
   support1 = poly.getSupport(direction);
-  const cl = findClosestSupport(direction);
+  const cl = getSupport(direction);
   closestVector = cl.worldDirection;
   support2 = cl;
   isDirty = true;
-}).onCompleted(() => autoChangeShapes && changeShape());
+}).onCompleted(() => {
+  (++count % 10) === 0 && console.clear();
+  autoChangeShapes && changeShape();
+});
 
 let frame = -1;
 const loop = new AnimationLoop(undefined, render);
@@ -281,7 +285,7 @@ function compareVectorAngle(a: Vector, b: Vector) {
   return za !== zb ? za - zb : b.cross2D(a);
 }
 
-function findClosestSupport(target: Vector) {
+function getSupport(direction: Vector) {
   const count = supportChangeVectors.length;
   let left = 0;
   let right = count;
@@ -289,7 +293,8 @@ function findClosestSupport(target: Vector) {
   while (left < right) {
     const middle = Math.floor((left + right) * 0.5);
 
-    if (compareVectorAngle(supportChangeVectors[middle][0], target) > 0)
+    // if (compareVectorAngle(supportChangeVectors[middle][0], target) > 0)
+    if (supportChangeVectors[middle][0].compareAngle(direction) > 0)
       right = middle;
     else
       left = middle + 1;
@@ -338,9 +343,33 @@ function createSupportChangeVectors() {
   }
 }
 
+function testSupportPerf(direction: Vector, iterations: number) {
+  let support: SupportPoint;
+  console.time("support");
+
+  for (let i = 0; i < iterations; i++) {
+    support = poly.getSupport(direction);
+  }
+
+  console.timeEnd(`support`);
+  console.log(`${iterations.toLocaleString()}: ${support!.index} - Vertices ${poly.vertexList.length}`);
+}
+
+function testBinaryPerf(direction: Vector, iterations: number) {
+  let support: SupportPoint;
+  console.time("binary");
+
+  for (let i = 0; i < iterations; i++) {
+    support = getSupport(direction);
+  }
+
+  console.timeEnd(`binary`);
+  console.log(`${iterations.toLocaleString()}: ${support!.index} - Vertices ${poly.vertexList.length}`);
+}
+
 function changeShape() {
   //*
-  const vertexCount = MathEx.randomInt(5, 20);
+  const vertexCount = MathEx.randomInt(3, 20);
   const startAngle = MathEx.randomInt(0, 360) * ONE_DEGREE;
   const isRegular = Math.random() > 0.5;
   /*/
@@ -354,6 +383,14 @@ function changeShape() {
   poly.props = { strokeStyle: "blue", lineWidth: 2 };
 
   createSupportChangeVectors();
+  const direction = dir(1, 0);
+  testSupportPerf(direction, 1000);
+  testBinaryPerf(direction, 1000);
+  console.log("");
+  direction.withXY(-1, -1);
+  testSupportPerf(direction, 10000);
+  testBinaryPerf(direction, 10000);
+  console.log("");
 }
 
 function drawSupport1(support: SupportPoint, view: Viewport) {
