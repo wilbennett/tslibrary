@@ -1,4 +1,4 @@
-import { ShapePair } from '.';
+import { ShapePair, Clipper } from '.';
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -87,17 +87,18 @@ export class Contact {
     return result;
   }
 
-  flipNormal() { this.normal.negate(); }
+  clipPoints(clipper: Clipper) {
+    if (!this.canClip) return;
 
-  render(view: Viewport) {
-    const props = this.props;
-    const temp = Vector.create(0, 0);
+    const referenceEdge = this.referenceEdge;
+    const incidentEdge = this.incidentEdge;
 
-    this.points.forEach(cp => {
-      cp.point.render(view, undefined, props);
-      this.normal.scaleO(cp.depth, temp).render(view, cp.point, props);
-    });
+    if (!referenceEdge || !incidentEdge) return;
+  
+    clipper.clip(incidentEdge, referenceEdge, this.points);
   }
+
+  flipNormal() { this.normal.negate(); }
 
   swapShapes() {
     const temp = this.shapeA;
@@ -110,6 +111,16 @@ export class Contact {
 
     if (this.normal.dot(this._referenceEdge.normal) < 0)
       this.normal.negate();
+  }
+
+  render(view: Viewport) {
+    const props = this.props;
+    const temp = Vector.create(0, 0);
+
+    this.points.forEach(cp => {
+      cp.point.render(view, undefined, props);
+      this.normal.scaleO(cp.depth, temp).render(view, cp.point, props);
+    });
   }
 
   protected markEdgesNull() {
