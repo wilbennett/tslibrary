@@ -67,6 +67,7 @@ const badVProps: ContextProps = { strokeStyle: "red", fillStyle: WebColors.orang
 const nextProps: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 10, lineDash: [1, 1], globalAlpha: 0.5 };
 const prevProps: ContextProps = { strokeStyle: "red", fillStyle: "red", lineWidth: 10, lineDash: [1, 1], globalAlpha: 0.5 };
 
+const supports: SupportPoint[] = [];
 const supportChangeVectors: [Vector, SupportPoint][] = [];
 const badValue = new SupportPointImpl(poly, undefined, pos(8, 8));
 badValue.worldDirection = dir(5, 5);
@@ -83,7 +84,7 @@ const dirAnimDuration = secPerDegree * degrees;
 const dirAnim = new NumberEaser(0, degrees, dirAnimDuration, Ease.linear, v => {
   direction.withDegreesMag(v, direction.mag);
   support1 = poly.getSupport(direction);
-  const cl = getSupport(direction);
+  const cl = getBinarySupport(direction);
   closestVector = cl.worldDirection;
   support2 = cl;
   isDirty = true;
@@ -285,7 +286,57 @@ function compareVectorAngle(a: Vector, b: Vector) {
   return za !== zb ? za - zb : b.cross2D(a);
 }
 
+function populateSupports() {
+  const vertices = poly.vertexList.items;
+  const vertexCount = poly.vertexList.length;
+
+  for (let i = 0; i < vertexCount; i++) {
+    const vertex = vertices[i];
+
+    const support = new SupportPointImpl(poly);
+    support.shape = poly;
+    support.point = vertex;
+    support.index = i;
+    support.distance = NaN;
+    support.direction = Vector.empty;
+
+    supports.push(support);
+  }
+}
+
 function getSupport(direction: Vector) {
+  const vertices = poly.vertexList.items;
+  const vertexCount = poly.vertexList.length;
+
+  // let bestVertex = vertices[0];
+  let bestDistance = -Infinity;
+  let bestIndex = -1;
+
+  for (let i = 0; i < vertexCount; i++) {
+    const vertex = vertices[i];
+    const distance = vertex.dot(direction);
+
+    if (distance > bestDistance) {
+      // bestVertex = vertex;
+      bestIndex = i;
+      bestDistance = distance;
+    }
+  }
+
+  //*
+  const result = supports[bestIndex];
+  /*/
+  const result = new SupportPointImpl(poly);
+  result.shape = poly;
+  result.point = bestVertex;
+  result.index = bestIndex;
+  result.distance = NaN;
+  result.direction = Vector.empty;
+  //*/
+  return result;
+}
+
+function getBinarySupport(direction: Vector) {
   const count = supportChangeVectors.length;
   let left = 0;
   let right = count;
@@ -348,7 +399,7 @@ function testSupportPerf(direction: Vector, iterations: number) {
   console.time("support");
 
   for (let i = 0; i < iterations; i++) {
-    support = poly.getSupport(direction);
+    support = getSupport(direction);
   }
 
   console.timeEnd(`support`);
@@ -360,7 +411,7 @@ function testBinaryPerf(direction: Vector, iterations: number) {
   console.time("binary");
 
   for (let i = 0; i < iterations; i++) {
-    support = getSupport(direction);
+    support = getBinarySupport(direction);
   }
 
   console.timeEnd(`binary`);
@@ -381,6 +432,9 @@ function changeShape() {
   // console.log(`${vertexCount}, ${startAngle * 180 / Math.PI}, ${isRegular}`);
   poly = new PolygonShape(vertexCount, 10, startAngle, isRegular);
   poly.props = { strokeStyle: "blue", lineWidth: 2 };
+
+  supports.splice(0);
+  populateSupports();
 
   createSupportChangeVectors();
   const direction = dir(1, 0);
