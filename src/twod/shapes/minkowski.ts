@@ -121,7 +121,7 @@ function verticesVerticesV(
   let b = start.indexB;
   let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
   let edgeB = verticesB[(b + 1) % vertexCountB].subO(verticesB[b]);
-  let point = start.point;
+  let point = start.point.clone();
 
   for (let i = 0; i < count; i++) {
     result[i] = point;
@@ -162,7 +162,7 @@ function verticesVerticesEdgesV(
   let b = start.indexB;
   let edgeA = edgesA[a];
   let edgeB = edgesB[b];
-  let point = start.point;
+  let point = start.point.clone();
 
   for (let i = 0; i < count; i++) {
     result[i] = point;
@@ -202,7 +202,7 @@ function verticesVerticesM(
   let b = start.indexB;
   let edgeA = verticesA[(a + 1) % vertexCountA].subO(verticesA[a]);
   let edgeB = verticesB[(b + 1) % vertexCountB].subO(verticesB[b]);
-  let mp = start;
+  let mp = <MinkowskiPoint>start.clone();
   let point = mp.point;
 
   for (let i = 0; i < count; i++) {
@@ -253,7 +253,7 @@ function verticesVerticesEdgesM(
   let b = start.indexB;
   let edgeA = edgesA[a];
   let edgeB = edgesB[b];
-  let mp = start;
+  let mp = <MinkowskiPoint>start.clone();
   let point = mp.point;
 
   for (let i = 0; i < count; i++) {
