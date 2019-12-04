@@ -20,7 +20,7 @@ export abstract class ColliderBase implements Collider {
       : this.fallback && this.fallback.isColliding(shapes);
   }
 
-  calcContact(shapes: ShapePair, result: Tristate<Contact>, calcDistance?: boolean): Tristate<Contact> {
+  calcContact(shapes: ShapePair, result?: Tristate<Contact>, calcDistance?: boolean): Tristate<Contact> {
     result || (result = shapes.contact);
     result = this.calcContactCore(shapes, result, !!calcDistance);
 
