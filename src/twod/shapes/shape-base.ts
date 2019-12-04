@@ -15,7 +15,7 @@ import {
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
 import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
-import { Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
+import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
 export const EMPTY_AXES: Vector[] = [];
@@ -30,6 +30,8 @@ export abstract class ShapeBase implements IShape {
   }
 
   static vectorClass: VectorClass = Vector2D;
+  protected _supportLookup?: [Vector, SupportPoint][] | null;
+
   protected get matrix() { return Matrix2D.instance; /* TODO: Make dimension agnostic. */ }
   protected _isWorld?: boolean = false;
   get isWorld() { return !!this._isWorld; }
@@ -116,10 +118,15 @@ export abstract class ShapeBase implements IShape {
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
   getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
   getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {
-    const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
+    let lookup = this._supportLookup;
 
     if (vertexCount === 0) return NullSupportPoint.instance;
+
+    if (lookup === undefined)
+      lookup = this.buildSupportLookup();
+
+    if (lookup === null) return NullSupportPoint.instance;
 
     let axisDirection: Vector;
     let axisPoint: Vector;
@@ -132,51 +139,36 @@ export abstract class ShapeBase implements IShape {
       axisPoint = param1.point;
     }
 
-    const pointToVertex = Vector.create();
-    const hasAxisPoint = !axisPoint.isEmpty;
-    let bestVertex = vertices[0];
-    let bestDistance = -Infinity;
-    let bestIndex = -1;
+    let low = 0;
+    let high = vertexCount;
 
-    if (hasAxisPoint) {
-      for (let i = 0; i < vertexCount; i++) {
-        const vertex = vertices[i];
-        vertex.subO(axisPoint, pointToVertex);
-        const distance = pointToVertex.dot(axisDirection);
+    while (low < high) {
+      const middle = Math.floor((low + high) * 0.5);
 
-        if (distance > bestDistance) {
-          bestVertex = vertex;
-          bestIndex = i;
-          bestDistance = distance;
-        }
-      }
-    } else {
-      for (let i = 0; i < vertexCount; i++) {
-        const vertex = vertices[i];
-        const distance = vertex.dot(axisDirection);
-
-        if (distance > bestDistance) {
-          bestVertex = vertex;
-          bestIndex = i;
-          bestDistance = distance;
-        }
-      }
+      if (lookup[middle][0].compareAngle(axisDirection) > 0)
+        high = middle;
+      else
+        low = middle + 1;
     }
 
-    // @ts-ignore - "this" not assignable to Shape.
-    result || (result = new SupportPointImpl(this));
+    const index = low > 0 ? low - 1 : vertexCount - 1;
+    let support = lookup[index][1];
+    support.direction = axisDirection.clone();
+    support.worldPoint = Vector.empty;
+    support.worldDirection = Vector.empty;
 
-    // Force typescript to realize result is assigned.
-    if (!result) return NullSupportPoint.instance;
+    if (!axisPoint.isEmpty) {
+      if (result)
+        support.clone(result);
+      else
+        result = support.clone();
 
-    result.clear();
-    // @ts-ignore - "this" not assignable to Shape.
-    result.shape = this;
-    result.point = bestVertex;
-    result.index = bestIndex;
-    result.distance = bestDistance;
-    result.direction = axisDirection.clone();
-    return result;
+      const pointToVertex = result.point.subO(axisPoint);
+      result.distance = pointToVertex.dot(axisDirection);
+      return result;
+    }
+
+    return result ? support.clone(result) : support;
   }
 
   getAxes(result?: ShapeAxis[]) {
@@ -315,6 +307,59 @@ export abstract class ShapeBase implements IShape {
 
     this.renderCore(viewport, props);
     ctx.popTransform();
+  }
+
+  protected calcSupport(direction: Vector, ignoreIndex: number = -1): SupportPoint | null {
+    const vertices = this.vertexList.items;
+    const vertexCount = this.vertexList.length;
+
+    let bestVertex = vertices[0];
+    let bestDistance = -Infinity;
+    let bestIndex = -1;
+
+    for (let i = 0; i < vertexCount; i++) {
+      const vertex = vertices[i];
+      const distance = vertex.dot(direction);
+
+      if (distance > bestDistance) {
+        bestVertex = vertex;
+        bestIndex = i;
+        bestDistance = distance;
+      }
+    }
+
+    if (bestIndex === ignoreIndex) return null;
+
+    // @ts-ignore - "this" not assignable to Shape.
+    const result = new SupportPointImpl(this);
+    // @ts-ignore - "this" not assignable to Shape.
+    result.shape = this;
+    result.point = bestVertex;
+    result.index = bestIndex;
+    result.distance = NaN;
+    result.direction = Vector.empty;
+    return result;
+  }
+
+  protected buildSupportLookup() {
+    const lookup: [Vector, SupportPoint][] = [];
+    this._supportLookup = lookup;
+    const direction = dir(1, 0);
+    const support = this.calcSupport(direction);
+    let prevIndex = support!.index;
+    direction.rotateNegativeOneDegree();
+
+    for (let a = 0; a < 360; a++) {
+      direction.rotateOneDegree();
+      const newSupport = this.calcSupport(direction, prevIndex);
+
+      if (!newSupport) continue;
+
+      prevIndex = newSupport.index;
+      lookup.push([direction.clone(), newSupport]);
+    }
+
+    return lookup;
   }
 
   protected dirtyTransform() { this._isTransformDirty = true; }

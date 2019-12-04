@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Wcb, Wcb2, Sutherland } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
@@ -267,15 +267,15 @@ elPrevPair.addEventListener("click", () => {
   pairIndex--;
   pairIndex < 0 && (pairIndex = pairs.length - 1);
 
-  try {
-    initPair();
-    isDirty = true;
+  // try {
+  initPair();
+  isDirty = true;
 
-    if (!loop.active)
-      render();
-  } catch (e) {
-    console.log(e.message);
-  }
+  if (!loop.active)
+    render();
+  // } catch (e) {
+  //   console.log(e.message);
+  // }
 });
 
 elNextPair.addEventListener("click", () => {
@@ -907,6 +907,7 @@ function applyCollider() {
   let isColliding = false;
   // console.clear();
 
+  //*
   // if (collider instanceof Gjk || collider instanceof Wcb)
   //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
@@ -914,13 +915,16 @@ function applyCollider() {
     contact = collider.calcContactProgress(pair, pair.contact, true, pushSimplices);
   else if (collider instanceof Gjk)
     isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
+  //*/
 
-  // if (collider instanceof Wcb)
-  //   contact = collider.calcContact(pair, pair.contact, true);
+  /*
+  if (collider instanceof Wcb)
+    contact = collider.calcContact(pair, pair.contact, true);
 
-  // if (contact) {
-  //   console.log(`${contact.normal}`);
-  // }
+  if (contact) {
+    console.log(`${contact.normal}`);
+  }
+  //*/
 
   //*
   if (contact && contact.canClip) {
