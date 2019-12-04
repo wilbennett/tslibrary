@@ -151,7 +151,7 @@ export abstract class ShapeBase implements IShape {
         low = middle + 1;
     }
 
-    const index = low > 0 ? low - 1 : vertexCount - 1;
+    const index = low > 0 ? low - 1 : lookup.length - 1;
     let support = lookup[index][1];
     support.direction = axisDirection.clone();
     support.worldPoint = Vector.empty;

@@ -300,7 +300,7 @@ function getSupport(direction: Vector) {
       left = middle + 1;
   }
 
-  const index = left > 0 ? left - 1 : count - 1;
+  const index = left > 0 ? left - 1 : supportChangeVectors.length - 1;
   let entry = supportChangeVectors[index][1];
 
   //*
