@@ -140,7 +140,7 @@ export abstract class ShapeBase implements IShape {
     }
 
     let low = 0;
-    let high = vertexCount;
+    let high = lookup.length;
 
     while (low < high) {
       const middle = Math.floor((low + high) * 0.5);
