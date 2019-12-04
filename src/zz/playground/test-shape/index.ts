@@ -194,7 +194,7 @@ function renderSupport(a: Shape, direction: Vector, props: ContextProps, viewpor
   const axis = a.createWorldAxis(dir);
   const support = new SupportPointImpl(a);
 
-  if (!a.getSupport(axis, support)) return;
+  if (!a.getSupportFromAxis(axis, support)) return;
 
   const point = support.worldPoint;
   beginPath(props, viewport);

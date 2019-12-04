@@ -27,8 +27,8 @@ export interface IShape extends IGeometry {
   props: ContextProps;
 
   getFurthestEdges(worldDirection: Vector): Edge[];
-  getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint; // Local.
+  getSupportFromAxis(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
   getAxes(result?: ShapeAxis[]): ShapeAxis[];
   getDynamicAxes(other: Shape, result?: ShapeAxis[]): ShapeAxis[];
   createAxis(normal: Vector, result?: ShapeAxis): ShapeAxis;

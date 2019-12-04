@@ -115,9 +115,7 @@ export abstract class ShapeBase implements IShape {
     return [new EdgeImpl(this, prevIndex), new EdgeImpl(this, index)];
   }
 
-  getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
-  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
     const vertexCount = this.vertexList.length;
     let lookup = this._supportLookup;
 
@@ -128,22 +126,52 @@ export abstract class ShapeBase implements IShape {
 
     if (lookup === null) return NullSupportPoint.instance;
 
-    let axisDirection: Vector;
-    let axisPoint: Vector;
+    let low = 0;
+    let high = lookup.length;
 
-    if (param1 instanceof Vector) {
-      axisDirection = param1;
-      axisPoint = Vector.empty;
-    } else {
-      axisDirection = param1.normal;
-      axisPoint = param1.point;
+    while (low < high) {
+      const middle = Math.floor((low + high) * 0.5);
+
+      if (middle < 0 || middle > lookup.length - 1)
+        debugger;
+
+      if (lookup[middle][0].compareAngle(direction) > 0)
+        high = middle;
+      else
+        low = middle + 1;
     }
+
+    const index = low > 0 ? low - 1 : lookup.length - 1;
+    let support = lookup[index][1];
+    // support.direction = direction.clone();
+    support.worldPoint = Vector.empty;
+    support.worldDirection = Vector.empty;
+
+    return result ? support.clone(result) : support;
+  }
+
+  getSupportFromAxis(axis: ShapeAxis, result?: SupportPoint): SupportPoint {
+    const vertexCount = this.vertexList.length;
+    let lookup = this._supportLookup;
+
+    if (vertexCount === 0) return NullSupportPoint.instance;
+
+    if (lookup === undefined)
+      lookup = this.buildSupportLookup();
+
+    if (lookup === null) return NullSupportPoint.instance;
+
+    let axisDirection = axis.normal;
+    let axisPoint = axis.point;
 
     let low = 0;
     let high = lookup.length;
 
     while (low < high) {
       const middle = Math.floor((low + high) * 0.5);
+
+      if (middle < 0 || middle > lookup.length - 1)
+        debugger;
 
       if (lookup[middle][0].compareAngle(axisDirection) > 0)
         high = middle;
@@ -153,20 +181,12 @@ export abstract class ShapeBase implements IShape {
 
     const index = low > 0 ? low - 1 : lookup.length - 1;
     let support = lookup[index][1];
+    support = support.clone();
     support.direction = axisDirection.clone();
     support.worldPoint = Vector.empty;
     support.worldDirection = Vector.empty;
-
-    if (!axisPoint.isEmpty) {
-      if (result)
-        support.clone(result);
-      else
-        result = support.clone();
-
-      const pointToVertex = result.point.subO(axisPoint);
-      result.distance = pointToVertex.dot(axisDirection);
-      return result;
-    }
+    const pointToVertex = support.point.subO(axisPoint);
+    support.distance = pointToVertex.dot(axisDirection);
 
     return result ? support.clone(result) : support;
   }

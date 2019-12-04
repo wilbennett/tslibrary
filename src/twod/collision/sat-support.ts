@@ -33,8 +33,8 @@ export class SATSupport extends ColliderBase {
       const axis = axes[index];
 
       const success = axis.shape === first
-        ? second.getSupport(axis.toWorldWithShape(second, true), support)
-        : first.getSupport(axis.toWorldWithShape(first, true), support);
+        ? second.getSupportFromAxis(axis.toWorldWithShape(second, true), support)
+        : first.getSupportFromAxis(axis.toWorldWithShape(first, true), support);
 
       if (!success) return undefined;
 
@@ -71,8 +71,8 @@ export class SATSupport extends ColliderBase {
       const axis = axes[index];
 
       const success = axis.shape === first
-        ? second.getSupport(axis.toWorldWithShape(second, true), support)
-        : first.getSupport(axis.toWorldWithShape(first, true), support);
+        ? second.getSupportFromAxis(axis.toWorldWithShape(second, true), support)
+        : first.getSupportFromAxis(axis.toWorldWithShape(first, true), support);
 
       if (!success) return undefined;
 
