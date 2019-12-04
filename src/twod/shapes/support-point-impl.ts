@@ -15,7 +15,7 @@ export class SupportPointImpl implements SupportPoint {
   point: Vector;
   protected _worldPoint?: Vector;
   get worldPoint() {
-    if (!this._worldPoint) {
+    if (!this._worldPoint || this._worldPoint.isEmpty) {
       if (this.point.isEmpty) return Vector.empty;
 
       this._worldPoint = this.shape.toWorld(this.point);
@@ -39,7 +39,7 @@ export class SupportPointImpl implements SupportPoint {
 
   protected _worldDirection?: Vector;
   get worldDirection() {
-    if (!this._worldDirection) {
+    if (!this._worldDirection || this._worldDirection.isEmpty) {
       if (!this._direction) return Vector.empty;
 
       this._worldDirection = this.shape.toWorld(this._direction);
