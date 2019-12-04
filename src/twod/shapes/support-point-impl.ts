@@ -27,8 +27,8 @@ export class SupportPointImpl implements SupportPoint {
 
   protected _direction?: Vector;
   get direction() {
-    if (!this._direction) {
-      if (!this._worldDirection) return Vector.empty;
+    if (!this._direction || this._direction.isEmpty) {
+      if (!this._worldDirection || this._worldDirection.isEmpty) return Vector.empty;
 
       this._direction = this.shape.toLocal(this._worldDirection);
     }
@@ -40,7 +40,7 @@ export class SupportPointImpl implements SupportPoint {
   protected _worldDirection?: Vector;
   get worldDirection() {
     if (!this._worldDirection || this._worldDirection.isEmpty) {
-      if (!this._direction) return Vector.empty;
+      if (!this._direction || this._direction.isEmpty) return Vector.empty;
 
       this._worldDirection = this.shape.toWorld(this._direction);
     }
