@@ -394,6 +394,18 @@ function createSupportChangeVectors() {
   }
 }
 
+function testShapeSupportPerf(direction: Vector, iterations: number) {
+  let support: SupportPoint;
+  console.time("shape support");
+
+  for (let i = 0; i < iterations; i++) {
+    support = poly.getSupport(direction);
+  }
+
+  console.timeEnd(`shape support`);
+  console.log(`${iterations.toLocaleString()}: ${support!.index} - Vertices ${poly.vertexList.length}`);
+}
+
 function testSupportPerf(direction: Vector, iterations: number) {
   let support: SupportPoint;
   console.time("support");
@@ -438,10 +450,12 @@ function changeShape() {
 
   createSupportChangeVectors();
   const direction = dir(1, 0);
+  testShapeSupportPerf(direction, 1000);
   testSupportPerf(direction, 1000);
   testBinaryPerf(direction, 1000);
   console.log("");
   direction.withXY(-1, -1);
+  testShapeSupportPerf(direction, 10000);
   testSupportPerf(direction, 10000);
   testBinaryPerf(direction, 10000);
   console.log("");
