@@ -80,8 +80,8 @@ export class Wcb extends ColliderBase {
     contact.normal.normalize();
 
     if (!containsOrigin || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
-      contact.referenceEdge = refLeftEdge;
-      contact.incidentEdge = incLeftEdge;
+      contact.referenceEdge = refLeftEdge.clone();
+      contact.incidentEdge = incLeftEdge.clone();
       return contact;
     }
 
@@ -106,11 +106,11 @@ export class Wcb extends ColliderBase {
     const incDotNormal = Math.abs(incVector.dot(collisionNormal));
 
     if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
-      contact.referenceEdge = referenceEdge;
-      contact.incidentEdge = incidentEdge;
+      contact.referenceEdge = referenceEdge.clone();
+      contact.incidentEdge = incidentEdge.clone();
     } else {
-      contact.referenceEdge = incidentEdge;
-      contact.incidentEdge = referenceEdge;
+      contact.referenceEdge = incidentEdge.clone();
+      contact.incidentEdge = referenceEdge.clone();
       contact.flip = true;
     }
 
@@ -348,6 +348,8 @@ export class Wcb extends ColliderBase {
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
 
+    shapeA.usesReferenceShape && (shapeA.referenceShape = shapeB);
+    shapeB.usesReferenceShape && (shapeB.referenceShape = shapeA);
     let mka = Minkowski.getDiffPoint(shapeA, shapeB, direction);
     mka.adjustDiffPointIfCircle();
     let a = mka.worldPoint;
