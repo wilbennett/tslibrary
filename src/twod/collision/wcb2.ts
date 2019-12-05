@@ -142,7 +142,7 @@ export class Wcb2 extends ColliderBase {
         mkPoints!.push(new SupportPointImpl(mkbi.shape, undefined, c));
         spPoints!.shift();
         spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
     }
 
@@ -163,14 +163,20 @@ export class Wcb2 extends ColliderBase {
       const edge = mkbi.getShapeEdge();
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldStart));
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldEnd));
-      callback!([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback!({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     const ao = a.negateO();
     const ab = b.subO(a);
     const containsOrigin = ab.cross2D(ao) >= 0;
 
-    return contact ? this.populateContact(contact, mkbi, containsOrigin) : containsOrigin;
+    if (contact) {
+      this.populateContact(contact, mkbi, containsOrigin);
+      callback && callback({ contact });
+      return contact;
+    }
+
+    return containsOrigin;
   }
 
   protected walkCwProgress(
@@ -207,7 +213,7 @@ export class Wcb2 extends ColliderBase {
         mkbi.prev();
         spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
         mkbi.next();
-        callback!([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback!({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
     }
 
@@ -228,14 +234,20 @@ export class Wcb2 extends ColliderBase {
       const edge = mkbi.getShapeEdge();
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldStart));
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldEnd));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     const ao = a.negateO();
     const ab = b.subO(a);
     const containsOrigin = ab.cross2D(ao) >= 0;
 
-    return contact ? this.populateContact(contact, mkbi, containsOrigin) : containsOrigin;
+    if (contact) {
+      this.populateContact(contact, mkbi, containsOrigin);
+      callback && callback({ contact });
+      return contact;
+    }
+
+    return containsOrigin;
   }
 
   protected walkCcw(
@@ -352,7 +364,7 @@ export class Wcb2 extends ColliderBase {
       mkPoints!.push(mka.clone());
       mkSimplex!.direction.copyFrom(direction);
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     if (!calcDistance && b.dot(direction) < 0) return false; // b is behind origin in direction.
@@ -370,7 +382,7 @@ export class Wcb2 extends ColliderBase {
       spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
       mkbi.next();
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     if (a.equals(b)) {
@@ -384,7 +396,7 @@ export class Wcb2 extends ColliderBase {
         mkPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, a));
         spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
         mkbi.next();
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
 
       mkbi.next();
@@ -401,7 +413,7 @@ export class Wcb2 extends ColliderBase {
         mkPoints!.push(new SupportPointImpl(mkbi.shape, undefined, c));
         spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
         mkbi.prev();
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
 
       mkbi.prev();

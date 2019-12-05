@@ -1,20 +1,11 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx, Tristate } from '../../../core';
-import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
+import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
-import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
+import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
-import {
-  CircleShape,
-  Edge,
-  MinkowskiDiffIterator,
-  PlaneShape,
-  PolygonShape,
-  Shape,
-  Simplex,
-  SupportPointImpl,
-} from '../../../twod/shapes';
+import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex, SimplexState } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
@@ -24,8 +15,8 @@ import { dir, pos, Vector } from '../../../vectors';
 
 // console.clear();
 
-const ZERO_DIRECTION = dir(0, 0);
-let maxSimplexCount = 0;
+// const ZERO_DIRECTION = dir(0, 0);
+// let maxSimplexCount = 0;
 
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
@@ -109,6 +100,8 @@ const box5 = new PolygonShape([pos(8, 4), pos(14, 4), pos(14, 9), pos(8, 9)]);
 const plane1 = new PlaneShape(pos(4, 3), pos(6, 0));
 plane1.setPosition(pos(9.2, 6.2));
 
+const mkNormalProps: ContextProps = { strokeStyle: "purple", lineWidth: 3 };
+
 const pairs: ShapePair[] = [
   new ShapePair(plane1, circle2),
   new ShapePair(plane1, poly6),
@@ -153,18 +146,27 @@ const colliders: [string, Collider][] = [
   ["GJK", new Gjk()],
 ];
 
+type State = {
+  contact?: Contact;
+  simplexState?: SimplexState;
+  clipState?: ClipState;
+};
+
+let stateIndex = -1;
+let states: State[] = [];
+let stateAnim: Easer | null = null;
+
 let pairIndex = -1;
 let pair: ShapePair | null = null;
 let polyd: Tristate<Shape> = null;
 let polydBrush = "green";
 // let mkVertices: Tristate<MinkowskiPoint[]> = [];
-let simplexList: Simplex[][] = [];
-let simplices: Simplex[] = [];
-let stateAnim: Easer | null = null;
-let contact: Tristate<Contact> = null;
-let clipStates: ClipState[] = [];
-let clipState: Tristate<ClipState> = null;
-let clipAnim: Easer | null = null;
+// let simplexList: Simplex[][] = [];
+// let simplices: Simplex[] = [];
+// let contact: Tristate<Contact> = null;
+// let clipStates: ClipState[] = [];
+// let clipState: Tristate<ClipState> = null;
+// let clipAnim: Easer | null = null;
 
 const delay = new DelayEaser(2);
 
@@ -209,26 +211,13 @@ elChangeShapes.addEventListener("change", () => {
 });
 
 elPrev.addEventListener("click", () => {
-  if (simplexList.length === 0) return;
+  if (states.length === 0) return;
 
-  const list = simplexList[0];
-
-  if (list.length === 0) return;
-
-  let simplex = simplices.find(s => list.find(ls => ls === s));
-  // simplex || (simplex = list[0]);
-
-  let i = simplex ? list.indexOf(simplex) : 0;
+  let i = stateIndex;
   i--;
-  i < 0 && (i = list.length - 1);
-  simplices = [];
+  i < 0 && (i = states.length - 1);
 
-  simplexList.forEach(l => {
-    if (i < l.length)
-      simplices.push(l[i]);
-  });
-
-  elText.value = "" + (i + 1);
+  stateIndex = i;
   isDirty = true;
   stepping = true;
   elStep.checked = true;
@@ -238,25 +227,11 @@ elPrev.addEventListener("click", () => {
 });
 
 elNext.addEventListener("click", () => {
-  if (simplexList.length === 0) return;
+  if (states.length === 0) return;
 
-  const list = simplexList[0];
-
-  if (list.length === 0) return;
-
-  let simplex = simplices.find(s => list.find(ls => ls === s));
-  // simplex || (simplex = list[0]);
-
-  let i = simplex ? list.indexOf(simplex) : list.length - 1;
-  i = (i + 1) % list.length;
-  simplices = [];
-
-  simplexList.forEach(l => {
-    if (i < l.length)
-      simplices.push(l[i]);
-  });
-
-  elText.value = "" + (i + 1);
+  let i = stateIndex;
+  i = (i + 1) % states.length;
+  stateIndex = i;
   isDirty = true;
   stepping = true;
   elStep.checked = true;
@@ -310,11 +285,6 @@ canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
 
-let mkNormal: Vector | null = null;
-let contactPoint: Vector | null = null;
-let collisionNormal: Vector | null = null;
-let collisionDepth: number = 0;
-
 function drawGraph() {
   ctxb.beginPath().withFillStyle("grey").fillRect(ctxb.bounds);
 
@@ -365,14 +335,15 @@ function render() {
     drawShape1Vertices(shapeA, view);
     drawShape2Vertices(shapeB, view);
     // mkVertices && drawMinkowskiVertices(mkVertices, { lineWidth: 2 }, view);
-    mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
+    // mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
     // contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
     // collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
-    simplices.forEach(simplex => drawSimplex(simplex, view));
+    // simplices.forEach(simplex => drawSimplex(simplex, view));
     shapeB.render(view);
     shapeA.render(view);
-    contact && drawContact(contact, view);
-    clipState && contact && drawClipState(clipState, view);
+    // contact && drawContact(contact, view);
+    // clipState && contact && drawClipState(clipState, view);
+    stateIndex >= 0 && showStateIndex() && drawState(states[stateIndex], view);
 
     //*
     if (shapeA.kind === "plane") {
@@ -419,338 +390,338 @@ function render() {
   isDirty = false;
 }
 
-function temp() {
-  polydBrush = "green";
-  simplexList.splice(0);
-  simplices = [];
-  contact = null;
-  contactPoint = null;
-  collisionNormal = null;
-  mkNormal = null;
+// function temp() {
+//   polydBrush = "green";
+//   simplexList.splice(0);
+//   simplices = [];
+//   contact = null;
+//   contactPoint = null;
+//   collisionNormal = null;
+//   mkNormal = null;
 
-  if (!pair) return;
-  if (!polyd) return;
+//   if (!pair) return;
+//   if (!polyd) return;
 
-  const { shapeA: first, shapeB: second } = pair;
-  // let direction = second.position.subO(first.position);
-  let direction = first.position.subO(second.position);
+//   const { shapeA: first, shapeB: second } = pair;
+//   // let direction = second.position.subO(first.position);
+//   let direction = first.position.subO(second.position);
 
-  if (direction.equals(ZERO_DIRECTION))
-    direction.withXY(1, 0);
+//   if (direction.equals(ZERO_DIRECTION))
+//     direction.withXY(1, 0);
 
-  let mka = Minkowski.getDiffPoint(first, second, direction);
-  mka.adjustDiffPointIfCircle();
+//   let mka = Minkowski.getDiffPoint(first, second, direction);
+//   mka.adjustDiffPointIfCircle();
 
-  const mkSimplices: Simplex[] = [];
-  const spSimplices: Simplex[] = [];
-  simplexList.push(mkSimplices, spSimplices);
+//   const mkSimplices: Simplex[] = [];
+//   const spSimplices: Simplex[] = [];
+//   simplexList.push(mkSimplices, spSimplices);
 
-  let mkSimplex = new Simplex();
-  const mkPoints = mkSimplex.points;
-  direction.clone(mkSimplex.direction);
-  mkPoints.push(mka.clone());
-  mkSimplices.push(mkSimplex.clone());
-  direction = mkSimplex.direction;
+//   let mkSimplex = new Simplex();
+//   const mkPoints = mkSimplex.points;
+//   direction.clone(mkSimplex.direction);
+//   mkPoints.push(mka.clone());
+//   mkSimplices.push(mkSimplex.clone());
+//   direction = mkSimplex.direction;
 
-  let spSimplex = new Simplex();
-  const spPoints = spSimplex.points;
-  const mkai = new MinkowskiDiffIterator(mka);
-  spPoints.push(new SupportPointImpl(polyd, mkai.getShapeEdge().worldStart));
-  spSimplices.push(spSimplex.clone());
+//   let spSimplex = new Simplex();
+//   const spPoints = spSimplex.points;
+//   const mkai = new MinkowskiDiffIterator(mka);
+//   spPoints.push(new SupportPointImpl(polyd, mkai.getShapeEdge().worldStart));
+//   spSimplices.push(spSimplex.clone());
 
-  /*
-  mkSimplices.pop();
-  direction.withXY(0, 0);
-  const segs = getCircleSegmentInfo();
-  const iter = new MinkowskiDiffIterator(mkb, segs);
-  const count = iter.vertexCount;
+//   /*
+//   mkSimplices.pop();
+//   direction.withXY(0, 0);
+//   const segs = getCircleSegmentInfo();
+//   const iter = new MinkowskiDiffIterator(mkb, segs);
+//   const count = iter.vertexCount;
 
-  if (first.kind === "circle" && second.kind === "circle") {
-    // const ci1 = new CircleIterator(first, mkb.indexA, true, segs);
-    // const ci2 = new CircleIterator(second, mkb.indexB, true, segs);
-    // const p = ci1.vertex.displaceByNegO(ci2.vertex);
-    // mkb.worldPoint = p.clone();
-    // console.log(`p: ${p}, ${mkb.worldPoint}`);
+//   if (first.kind === "circle" && second.kind === "circle") {
+//     // const ci1 = new CircleIterator(first, mkb.indexA, true, segs);
+//     // const ci2 = new CircleIterator(second, mkb.indexB, true, segs);
+//     // const p = ci1.vertex.displaceByNegO(ci2.vertex);
+//     // mkb.worldPoint = p.clone();
+//     // console.log(`p: ${p}, ${mkb.worldPoint}`);
 
-    // for (let i = 0; i < segs.segmentCount * 2; i++) {
-    //   points.splice(0);
-    //   const v11 = ci1.vertex.clone();
-    //   const v12 = ci1.nextVertex.clone();
-    //   const e1 = ci1.edgeVector.clone();
-    //   const v21 = ci2.vertex.clone();
-    //   const v22 = ci2.nextVertex.clone();
-    //   const e2 = ci2.edgeVector.clone();
-    //   v21.negate();
-    //   v22.negate();
-    //   e2.negate();
-    //   points.push(new SupportPointImpl(polyd, p.clone()));
+//     // for (let i = 0; i < segs.segmentCount * 2; i++) {
+//     //   points.splice(0);
+//     //   const v11 = ci1.vertex.clone();
+//     //   const v12 = ci1.nextVertex.clone();
+//     //   const e1 = ci1.edgeVector.clone();
+//     //   const v21 = ci2.vertex.clone();
+//     //   const v22 = ci2.nextVertex.clone();
+//     //   const e2 = ci2.edgeVector.clone();
+//     //   v21.negate();
+//     //   v22.negate();
+//     //   e2.negate();
+//     //   points.push(new SupportPointImpl(polyd, p.clone()));
 
-    //   if (e1.cross2D(e2) > 0) {
-    //     p.add(e1);
-    //     ci1.next();
-    //   } else {
-    //     p.add(e2);
-    //     ci2.next();
-    //   }
-    //   // points.push(new SupportPointImpl(polyd, v11));
-    //   // points.push(new SupportPointImpl(polyd, v2));
-    //   // points.push(new SupportPointImpl(polyd, v11.addO(e1)));
-    //   mkSimplices.push(simplex.clone());
-    //   // ci1.next();
-    //   // ci2.next();
-    // }
+//     //   if (e1.cross2D(e2) > 0) {
+//     //     p.add(e1);
+//     //     ci1.next();
+//     //   } else {
+//     //     p.add(e2);
+//     //     ci2.next();
+//     //   }
+//     //   // points.push(new SupportPointImpl(polyd, v11));
+//     //   // points.push(new SupportPointImpl(polyd, v2));
+//     //   // points.push(new SupportPointImpl(polyd, v11.addO(e1)));
+//     //   mkSimplices.push(simplex.clone());
+//     //   // ci1.next();
+//     //   // ci2.next();
+//     // }
 
-    // for (let i = 0; i < segs.segmentCount; i++) {
-    //   points.pop();
-    //   points.push(new SupportPointImpl(polyd, ci.vertex.clone()));
-    //   mkSimplices.push(simplex.clone());
-    //   ci.prev();
-    // }
-  }
+//     // for (let i = 0; i < segs.segmentCount; i++) {
+//     //   points.pop();
+//     //   points.push(new SupportPointImpl(polyd, ci.vertex.clone()));
+//     //   mkSimplices.push(simplex.clone());
+//     //   ci.prev();
+//     // }
+//   }
 
-  // iter.worldPoint = mkb.worldPoint.clone();
-  // console.log(`iter: ${iter.worldPoint}`);
-  for (let i = 0; i < count; i++) {
-    points.splice(0);
-    // points.push(iter.clone());
-    points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
-    points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
-    points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
-    mkSimplices.push(simplex.clone());
-    iter.next();
-  }
+//   // iter.worldPoint = mkb.worldPoint.clone();
+//   // console.log(`iter: ${iter.worldPoint}`);
+//   for (let i = 0; i < count; i++) {
+//     points.splice(0);
+//     // points.push(iter.clone());
+//     points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
+//     points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
+//     points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
+//     mkSimplices.push(simplex.clone());
+//     iter.next();
+//   }
 
-  for (let i = 0; i < count; i++) {
-    points.splice(0);
-    iter.prev();
-    points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
-    points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
-    points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
-    mkSimplices.push(simplex.clone());
-  }
+//   for (let i = 0; i < count; i++) {
+//     points.splice(0);
+//     iter.prev();
+//     points.push(new SupportPointImpl(polyd, iter.prevVertex.clone()));
+//     points.push(new SupportPointImpl(polyd, iter.vertex.clone()));
+//     points.push(new SupportPointImpl(polyd, iter.nextVertex.clone()));
+//     mkSimplices.push(simplex.clone());
+//   }
 
-  createSimplexAnim();
-  return;
-  //*/
-  /*
-  mkSimplices.pop();
-  for (let i = 0; i < first.vertexList.items.length; i++) {
-    const vertex = first.toWorld(getVertex(i, first));
-    points.pop();
-    points.push(new SupportPointImpl(polyd, vertex));
-    mkSimplices.push(simplex.clone());
-  }
-  return;
-  //*/
+//   createSimplexAnim();
+//   return;
+//   //*/
+//   /*
+//   mkSimplices.pop();
+//   for (let i = 0; i < first.vertexList.items.length; i++) {
+//     const vertex = first.toWorld(getVertex(i, first));
+//     points.pop();
+//     points.push(new SupportPointImpl(polyd, vertex));
+//     mkSimplices.push(simplex.clone());
+//   }
+//   return;
+//   //*/
 
-  /*
-  const segs = getCircleSegmentInfo();
-  const count = (first.kind === "circle" ? segs.segmentCount : first.vertexList.items.length)
-    + (second.kind === "circle" ? segs.segmentCount : second.vertexList.items.length);
-  const iter = new MinkowskiVertexIterator(mka);
-  for (let i = 0; i < count; i++) {
-    // mka = getNextPoint(mka);
-    // mka = getPrevPoint(mka);
-    // points.pop();
-    // points.push(new SupportPointImpl(polyd, mka.point));
-    points.push(iter.clone());
-    mkSimplices.push(simplex.clone());
-    points.pop();
-    // iter.next();
-    iter.prev();
-  }
+//   /*
+//   const segs = getCircleSegmentInfo();
+//   const count = (first.kind === "circle" ? segs.segmentCount : first.vertexList.items.length)
+//     + (second.kind === "circle" ? segs.segmentCount : second.vertexList.items.length);
+//   const iter = new MinkowskiVertexIterator(mka);
+//   for (let i = 0; i < count; i++) {
+//     // mka = getNextPoint(mka);
+//     // mka = getPrevPoint(mka);
+//     // points.pop();
+//     // points.push(new SupportPointImpl(polyd, mka.point));
+//     points.push(iter.clone());
+//     mkSimplices.push(simplex.clone());
+//     points.pop();
+//     // iter.next();
+//     iter.prev();
+//   }
 
-  return;
-  //*/
+//   return;
+//   //*/
 
-  direction.negate();
-  const adot = mka.point.dot(direction);
+//   direction.negate();
+//   const adot = mka.point.dot(direction);
 
-  if (adot > 0) return; // a is in front of origin in direction.
+//   if (adot > 0) return; // a is in front of origin in direction.
 
-  let mkb = Minkowski.getDiffPoint(first, second, direction);
+//   let mkb = Minkowski.getDiffPoint(first, second, direction);
 
-  if (!mkb) return;
+//   if (!mkb) return;
 
-  mkb.adjustDiffPointIfCircle();
-  mkPoints.push(mkb.clone());
-  mkSimplices.push(mkSimplex.clone());
-  let mkbi = new MinkowskiDiffIterator(mkb);
-  spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
-  spSimplices.push(spSimplex.clone());
+//   mkb.adjustDiffPointIfCircle();
+//   mkPoints.push(mkb.clone());
+//   mkSimplices.push(mkSimplex.clone());
+//   let mkbi = new MinkowskiDiffIterator(mkb);
+//   spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
+//   spSimplices.push(spSimplex.clone());
 
-  // Early out if distance between shapes not needed.
-  // if (!(mkb.point.dot(direction) * adot <= 0)) return; // ab did not cross origin in direction.
+//   // Early out if distance between shapes not needed.
+//   // if (!(mkb.point.dot(direction) * adot <= 0)) return; // ab did not cross origin in direction.
 
-  if (mka.point.magSquared < mkb.point.magSquared) {
-    const temp = mka;
-    mka = mkb;
-    mkb = temp;
+//   if (mka.point.magSquared < mkb.point.magSquared) {
+//     const temp = mka;
+//     mka = mkb;
+//     mkb = temp;
 
-    direction.negate();
-    mkPoints.shift();
-    mkPoints.push(mkb.clone());
-    mkSimplices.push(mkSimplex.clone());
-    mkbi = new MinkowskiDiffIterator(mkb);
-    spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
-    spSimplices.push(spSimplex.clone());
-  }
+//     direction.negate();
+//     mkPoints.shift();
+//     mkPoints.push(mkb.clone());
+//     mkSimplices.push(mkSimplex.clone());
+//     mkbi = new MinkowskiDiffIterator(mkb);
+//     spPoints.push(new SupportPointImpl(polyd, mkbi.getShapeEdge().worldStart));
+//     spSimplices.push(spSimplex.clone());
+//   }
 
-  const ao = mka.point.negateO();
-  const ab = mkb.point.subO(mka.point);
-  let containsOrigin = false;
-  let edge1: Edge;
-  let edge2: Edge;
-  let closestLine: ISegment | null = null;
-  let mkc = new MinkowskiDiffIterator(mkb);
-  let i = mkc.vertexCount;
+//   const ao = mka.point.negateO();
+//   const ab = mkb.point.subO(mka.point);
+//   let containsOrigin = false;
+//   let edge1: Edge;
+//   let edge2: Edge;
+//   let closestLine: ISegment | null = null;
+//   let mkc = new MinkowskiDiffIterator(mkb);
+//   let i = mkc.vertexCount;
 
-  const pushEdge = (e?: Edge) => {
-    e || (e = edge1);
-    spPoints.splice(0);
-    spPoints.push(new SupportPointImpl(polyd!, e.worldStart));
-    spPoints.push(new SupportPointImpl(polyd!, e.worldEnd));
-    spSimplices.push(spSimplex.clone());
-    mkSimplices.push(mkSimplex.clone());
-  };
+//   const pushEdge = (e?: Edge) => {
+//     e || (e = edge1);
+//     spPoints.splice(0);
+//     spPoints.push(new SupportPointImpl(polyd!, e.worldStart));
+//     spPoints.push(new SupportPointImpl(polyd!, e.worldEnd));
+//     spSimplices.push(spSimplex.clone());
+//     mkSimplices.push(mkSimplex.clone());
+//   };
 
-  if (ao.cross2D(ab) >= 0) { // Walk right (CW).
-    mkc.prev();
+//   if (ao.cross2D(ab) >= 0) { // Walk right (CW).
+//     mkc.prev();
 
-    ab.perpRightO(direction);
-    mkPoints.push(mkc.clone());
-    mkSimplices.push(mkSimplex.clone());
-    spPoints.pop();
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
-    spSimplices.push(spSimplex.clone());
+//     ab.perpRightO(direction);
+//     mkPoints.push(mkc.clone());
+//     mkSimplices.push(mkSimplex.clone());
+//     spPoints.pop();
+//     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+//     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+//     spSimplices.push(spSimplex.clone());
 
-    const ac = mkc.point.subO(mka.point);
+//     const ac = mkc.point.subO(mka.point);
 
-    while (ao.cross2D(ac) > 0 && i-- > 0) {
-      mkb.point.copyFrom(mkc.point);
-      mkc.prev();
-      mkc.point.subO(mka.point, ac);
+//     while (ao.cross2D(ac) > 0 && i-- > 0) {
+//       mkb.point.copyFrom(mkc.point);
+//       mkc.prev();
+//       mkc.point.subO(mka.point, ac);
 
-      mkPoints.splice(1, 1);
-      mkPoints.push(mkc.clone());
-      mkSimplices.push(mkSimplex.clone());
-      spPoints.splice(1, 2);
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
-      spSimplices.push(spSimplex.clone());
-    }
+//       mkPoints.splice(1, 1);
+//       mkPoints.push(mkc.clone());
+//       mkSimplices.push(mkSimplex.clone());
+//       spPoints.splice(1, 2);
+//       spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+//       spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+//       spSimplices.push(spSimplex.clone());
+//     }
 
-    const bo = mkb.point.negateO();
-    const bc = mkc.point.subO(mkb.point);
-    const cross = bo.cross2D(bc);
-    containsOrigin = cross >= 0;
-    closestLine = new Segment(mkc.point.clone(), mkb.point.clone());
+//     const bo = mkb.point.negateO();
+//     const bc = mkc.point.subO(mkb.point);
+//     const cross = bo.cross2D(bc);
+//     containsOrigin = cross >= 0;
+//     closestLine = new Segment(mkc.point.clone(), mkb.point.clone());
 
-    mkSimplex.direction = Vector.empty;
+//     mkSimplex.direction = Vector.empty;
 
-    edge1 = mkc.getShapeEdge();
-    pushEdge();
-    edge2 = mkc.getNextShapeEdge();
+//     edge1 = mkc.getShapeEdge();
+//     pushEdge();
+//     edge2 = mkc.getNextShapeEdge();
 
-    if (edge2.shape === edge1.shape) {
-      mkc.next();
+//     if (edge2.shape === edge1.shape) {
+//       mkc.next();
 
-      while (edge2.shape === edge1.shape) {
-        mkc.next();
-        edge2 = mkc.getShapeEdge();
-      }
-    }
+//       while (edge2.shape === edge1.shape) {
+//         mkc.next();
+//         edge2 = mkc.getShapeEdge();
+//       }
+//     }
 
-    pushEdge(edge2);
-  } else { // Walk left (CCW).
-    spPoints.pop();
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
-    spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
-    spSimplices.push(spSimplex.clone());
+//     pushEdge(edge2);
+//   } else { // Walk left (CCW).
+//     spPoints.pop();
+//     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+//     spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+//     spSimplices.push(spSimplex.clone());
 
-    mkc.next();
+//     mkc.next();
 
-    ab.perpLeftO(direction);
-    mkPoints.push(mkc.clone());
-    mkSimplices.push(mkSimplex.clone());
+//     ab.perpLeftO(direction);
+//     mkPoints.push(mkc.clone());
+//     mkSimplices.push(mkSimplex.clone());
 
-    const ac = mkc.point.subO(mka.point);
+//     const ac = mkc.point.subO(mka.point);
 
-    while (ao.cross2D(ac) < 0 && i-- > 0) {
-      spPoints.splice(1, 2);
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
-      spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
-      spSimplices.push(spSimplex.clone());
+//     while (ao.cross2D(ac) < 0 && i-- > 0) {
+//       spPoints.splice(1, 2);
+//       spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldStart));
+//       spPoints.push(new SupportPointImpl(polyd, mkc.getShapeEdge().worldEnd));
+//       spSimplices.push(spSimplex.clone());
 
-      mkb.point.copyFrom(mkc.point);
-      mkc.next();
-      mkc.point.subO(mka.point, ac);
+//       mkb.point.copyFrom(mkc.point);
+//       mkc.next();
+//       mkc.point.subO(mka.point, ac);
 
-      mkPoints.splice(1, 1);
-      mkPoints.push(mkc.clone());
-      mkSimplices.push(mkSimplex.clone());
-    }
+//       mkPoints.splice(1, 1);
+//       mkPoints.push(mkc.clone());
+//       mkSimplices.push(mkSimplex.clone());
+//     }
 
-    const bo = mkb.point.negateO();
-    const bc = mkc.point.subO(mkb.point);
-    const cross = bo.cross2D(bc);
-    containsOrigin = cross <= 0;
-    closestLine = new Segment(mkb.point.clone(), mkc.point.clone());
+//     const bo = mkb.point.negateO();
+//     const bc = mkc.point.subO(mkb.point);
+//     const cross = bo.cross2D(bc);
+//     containsOrigin = cross <= 0;
+//     closestLine = new Segment(mkb.point.clone(), mkc.point.clone());
 
-    mkSimplex.direction = Vector.empty;
-    mkc.prev();
+//     mkSimplex.direction = Vector.empty;
+//     mkc.prev();
 
-    edge1 = mkc.getShapeEdge();
-    pushEdge();
-    edge2 = mkc.getNextShapeEdge();
+//     edge1 = mkc.getShapeEdge();
+//     pushEdge();
+//     edge2 = mkc.getNextShapeEdge();
 
-    if (edge2.shape === edge1.shape) {
-      mkc.next();
+//     if (edge2.shape === edge1.shape) {
+//       mkc.next();
 
-      while (edge2.shape === edge1.shape) {
-        mkc.next();
-        edge2 = mkc.getShapeEdge();
-      }
-    }
+//       while (edge2.shape === edge1.shape) {
+//         mkc.next();
+//         edge2 = mkc.getShapeEdge();
+//       }
+//     }
 
-    pushEdge(edge2);
-  }
+//     pushEdge(edge2);
+//   }
 
-  if (edge1 && edge2 && closestLine) {
-    const closestPoint = closestLine.closestPoint(pos(0, 0));
+//   if (edge1 && edge2 && closestLine) {
+//     const closestPoint = closestLine.closestPoint(pos(0, 0));
 
-    if (closestPoint) {
-      collisionDepth = closestPoint.mag;
-      mkNormal = closestPoint.asDirection().normalize();
-      collisionNormal = mkNormal.clone();
-      contactPoint = edge2.worldStart;
+//     if (closestPoint) {
+//       collisionDepth = closestPoint.mag;
+//       mkNormal = closestPoint.asDirection().normalize();
+//       collisionNormal = mkNormal.clone();
+//       contactPoint = edge2.worldStart;
 
-      const normal1 = edge1.worldEnd.subO(edge1.worldStart).perpRight();
+//       const normal1 = edge1.worldEnd.subO(edge1.worldStart).perpRight();
 
-      if (collisionNormal.dot(normal1) < 0)
-        collisionNormal.negate();
+//       if (collisionNormal.dot(normal1) < 0)
+//         collisionNormal.negate();
 
-      if (!containsOrigin)
-        collisionNormal.negate();
-    }
-  }
+//       if (!containsOrigin)
+//         collisionNormal.negate();
+//     }
+//   }
 
-  i <= 0 && console.log("!!! EXCEEDED MAXIMUM ITERATIONS !!!");
+//   i <= 0 && console.log("!!! EXCEEDED MAXIMUM ITERATIONS !!!");
 
-  if (mkSimplices.length > maxSimplexCount) {
-    maxSimplexCount = mkSimplices.length;
-    console.log(`Max simplices: ${maxSimplexCount}`);
+//   if (mkSimplices.length > maxSimplexCount) {
+//     maxSimplexCount = mkSimplices.length;
+//     console.log(`Max simplices: ${maxSimplexCount}`);
 
-    if (mkSimplices.length > 5) {
-      // dragging = false;
-      // debugger;
-    }
-  }
+//     if (mkSimplices.length > 5) {
+//       // dragging = false;
+//       // debugger;
+//     }
+//   }
 
-  polydBrush = containsOrigin ? "red" : "green";
-  createStateAnim();
-}
+//   polydBrush = containsOrigin ? "red" : "green";
+//   createStateAnim();
+// }
 //*/
 
 function updateMouse(ev: MouseEvent) {
@@ -804,6 +775,11 @@ function handleMouseUp(ev: MouseEvent) {
   dragTarget = null;
 }
 
+function showStateIndex() {
+  elText.value = "" + (stateIndex + 1);
+  return true;
+}
+
 function populateColliders() {
   for (const [colliderName] of colliders) {
     elCollider.appendChild(UiUtils.createOption(colliderName));
@@ -820,48 +796,18 @@ function beginPath(props: ContextProps, view: Viewport) {
 }
 
 function createStateAnim() {
-  if (!pair) return;
+  const count = states.length;
 
-  const anims: Easer[] = [];
-  const simplexAnims: Easer[] = [];
-  const clipAnims: Easer[] = [];
-  simplices.splice(0);
+  if (count === 0) return;
 
-  if (simplexList.length > 0) {
-    for (const list of simplexList) {
-      if (list.length > 0) {
-        let simplex = list[0];
+  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, 20), Ease.linear, v => {
+    if (stepping) return;
 
-        const anim = new ArrayEaser(list, MathEx.clamp(list.length * 1.0, 2, 20), Ease.linear, v => {
-          if (stepping) return;
+    stateIndex = Math.round(v);
+    isDirty = true;
+  });
 
-          simplices.remove(simplex);
-          simplices.push(v);
-          simplex = v;
-          elText.value = "" + (simplices.indexOf(simplex) + 1);
-          isDirty = true;
-        }).onCompleted(() => simplices.splice(0));
-
-        simplexAnims.push(anim);
-      }
-    }
-  }
-
-  if (clipStates.length > 0) {
-    const anim = new ArrayEaser(clipStates, MathEx.clamp(clipStates.length * 2.0, 2, 20), Ease.linear, v => {
-      clipState = v;
-      isDirty = true;
-    }).onCompleted(() => clipState = null);
-
-    clipAnims.push(anim);
-  }
-
-  simplexAnims.length > 0 && anims.push(new ConcurrentEaser(simplexAnims));
-  clipAnims.length > 0 && anims.push(new ConcurrentEaser(clipAnims));
-
-  if (anims.length === 0) return;
-
-  stateAnim = new SequentialEaser([...anims, delay]).repeat(Infinity)
+  stateAnim = new SequentialEaser([anim, delay]).repeat(Infinity)
     .onCompleted(() => {
       if (stepping) return;
 
@@ -870,54 +816,41 @@ function createStateAnim() {
         return;
       }
 
-      // if (pairs.length > 1)
-      // changeShapes();
+      if (pairs.length > 1)
+        changeShapes();
     });
 
   runner.add(stateAnim);
 }
 
-function pushSimplices(values: Simplex[]) {
-  while (simplexList.length < values.length) {
-    simplexList.push([]);
-  }
-
-  values.forEach((s, i) => simplexList[i].push(s));
+function pushSimplices(simplexState: SimplexState) {
+  states.push({ simplexState });
 }
 
-function pushClipState(clip: ClipState) {
-  clip.contact.ensureNormalDirection();
-  clipStates.push(clip);
+function pushClipState(clipState: ClipState) {
+  // clipState.contact.ensureNormalDirection();
+  states.push({ clipState });
 }
 
 function clearStateValues() {
   polyd = null;
   // mkVertices = [];
-  simplexList.splice(0);
-  simplices = [];
-  contact = null;
-  clipStates = [];
-  clipState = null;
+  states.splice(0);
 }
 
 function applyCollider() {
   if (stateAnim)
     runner.remove(stateAnim);
 
-  if (clipAnim)
-    runner.remove(clipAnim);
-
   stateAnim = null;
-  clipAnim = null;
   clearStateValues();
 
   if (!pair) return;
 
   const collider: any = colliders.find(c => c[0] === elCollider.value)![1];
   // mkVertices = Minkowski.createDiff("minkowski", pair.first, pair.second);
-  const simplices1: Simplex[] = [];
-  simplexList.push(simplices1);
   let isColliding = false;
+  let contact: Tristate<Contact> = null;
   // console.clear();
 
   //*
@@ -1085,6 +1018,20 @@ function drawSimplex(simplex: Simplex, view: Viewport) {
   }
 
   simplex.direction.normalizeScaleO(2).render(view, directionOrigin, propsd);
+}
+
+function drawState(state: State, view: Viewport) {
+  state.clipState && drawClipState(state.clipState, view);
+  state.contact && drawContact(state.contact, view);
+
+  if (state.simplexState) {
+    const simplexState = state.simplexState;
+    const normal = simplexState.collisionNormal;
+    const depth = simplexState.collisionDepth || 1;
+    normal && normal.scaleO(depth).render(view, origin, mkNormalProps);
+    simplexState.simplices && simplexState.simplices.forEach(simplex => drawSimplex(simplex, view));
+    simplexState.contact && drawContact(simplexState.contact, view);
+  }
 }
 
 function drawVertices(shape: Shape, props: ContextProps, view: Viewport) {

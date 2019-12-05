@@ -27,6 +27,7 @@ export class Sutherland implements Clipper {
     if (result.length < 2) return result;
 
     let refNorm = referenceEdge.worldNormal.negateO();
+    // referenceEdge.worldNormal.dot(incidentEdge.worldNormal) >= 0 && refNorm.negate();
     // flip && (refNorm = refNorm.negateO());
 
     const distance = refNorm.dot(referenceEdge.worldStart);
@@ -65,6 +66,7 @@ export class Sutherland implements Clipper {
     callback({ contact: contact.clone(), clipPlane });
 
     let refNorm = referenceEdge.worldNormal.negateO();
+    // referenceEdge.worldNormal.dot(incidentEdge.worldNormal) >= 0 && refNorm.negate();
     // flip && (refNorm = refNorm.negateO());
 
     const distance = refNorm.dot(referenceEdge.worldStart);
@@ -88,11 +90,11 @@ export class Sutherland implements Clipper {
     const endDistance = normal.dot(end) - dist;
 
     // Keep points on the plane or in the positive halfspace of the plane.
-    if (startDistance >= 0.0) points.push(new ContactPoint(start, 0));
-    if (endDistance >= 0.0) points.push(new ContactPoint(end, 0));
+    if (startDistance >= 0) points.push(new ContactPoint(start, 0));
+    if (endDistance >= 0) points.push(new ContactPoint(end, 0));
 
     // Clip points on opposing sides of the plane.
-    if (startDistance * endDistance < 0.0) {
+    if (startDistance * endDistance < 0) {
       const e = end.displaceByNegO(start);
       const u = startDistance / (startDistance - endDistance);
       start.displaceByScaledO(e, u, e);

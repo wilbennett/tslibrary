@@ -150,7 +150,7 @@ export class Wcb extends ColliderBase {
       ab.perpLeftO(mkSimplex!.direction);
       mkPoints = mkSimplex!.points;
       mkPoints.push(mkc.clone());
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     const ac = c.subO(a);
@@ -171,7 +171,7 @@ export class Wcb extends ColliderBase {
       if (callback) {
         mkPoints!.splice(1, 1);
         mkPoints!.push(mkc.clone());
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
     }
 
@@ -181,7 +181,9 @@ export class Wcb extends ColliderBase {
 
     if (contact) {
       mkc.prev();
-      return this.populateContact(contact, mkc, containsOrigin);
+      this.populateContact(contact, mkc, containsOrigin);
+      callback && callback({ contact });
+      return contact;
     }
 
     return containsOrigin;
@@ -216,7 +218,7 @@ export class Wcb extends ColliderBase {
       spPoints.pop();
       spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
       spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     const ac = c.subO(a);
@@ -234,7 +236,7 @@ export class Wcb extends ColliderBase {
         spPoints!.splice(1, 2);
         spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
         spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
     }
 
@@ -242,7 +244,13 @@ export class Wcb extends ColliderBase {
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) >= 0;
 
-    return contact ? this.populateContact(contact, mkc, containsOrigin) : containsOrigin;
+    if (contact) {
+      this.populateContact(contact, mkc, containsOrigin);
+      callback && callback({ contact });
+      return contact;
+    }
+
+    return containsOrigin;
   }
 
   protected walkCcw(
@@ -359,7 +367,7 @@ export class Wcb extends ColliderBase {
       direction = mkSimplex!.direction;
       const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
       spPoints!.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     direction.negate();
@@ -374,7 +382,7 @@ export class Wcb extends ColliderBase {
       mkPoints!.push(mkb.clone());
       let mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
-      callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
     }
 
     if (!calcDistance && b.dot(direction) <= 0) return false; // b did not cross origin in direction.
@@ -394,7 +402,7 @@ export class Wcb extends ColliderBase {
         const mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
         spPoints!.shift();
         spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
-        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
       }
     }
 
