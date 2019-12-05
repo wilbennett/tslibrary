@@ -24,3 +24,4 @@ export * from "./minkowski-shape";
 export * from "./null-support-point";
 export * from "./null-minkowski-point";
 export * from "./circle-iterator";
+export * from "./plane-iterator";
