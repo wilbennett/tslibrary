@@ -40,6 +40,8 @@ export class Contact {
   set shapeB(value) { this._shapeB = value; }
   normal: Vector;
   points: ContactPoint[];
+  minkowskiNormal?: Vector;
+  minkowskiDepth?: number;
   protected _flip?: boolean;
   get flip() { return !!this._flip; }
   set flip(value) { this._flip = value; }
@@ -70,6 +72,8 @@ export class Contact {
     this._flip && (this._flip = false);
     this._referenceEdge !== undefined && (this._referenceEdge = undefined);
     this._incidentEdge !== undefined && (this._incidentEdge = undefined);
+    this.minkowskiNormal !== undefined && (this.minkowskiNormal = undefined);
+    this.minkowskiDepth !== undefined && (this.minkowskiDepth = undefined);
     this.points.splice(0);
   }
 
@@ -84,6 +88,8 @@ export class Contact {
     result.points.push(...this.points.map(p => p.clone()));
     this._referenceEdge && (result._referenceEdge = this._referenceEdge.clone());
     this._incidentEdge && (result._incidentEdge = this._incidentEdge.clone());
+    this.minkowskiNormal && (result.minkowskiNormal = this.minkowskiNormal.clone());
+    this.minkowskiDepth && (result.minkowskiDepth = this.minkowskiDepth);
     return result;
   }
 

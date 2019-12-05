@@ -5,8 +5,6 @@ import { Contact } from '../collision';
 export type SimplexState = {
   simplices?: Simplex[];
   contact?: Contact;
-  collisionNormal?: Vector;
-  collisionDepth?: number;
 };
 
 export type SimplexCallback = (state: SimplexState) => void;

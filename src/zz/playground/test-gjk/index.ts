@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Wcb, Wcb2 } from '../../../twod/collision';
 import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex, SimplexState } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
@@ -60,7 +60,7 @@ const origin = pos(0, 0);
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
-const pauseAfterSeconds = 30;
+const pauseAfterSeconds = Infinity;//30;
 let isDirty = true;
 let autoChangeShapes = true;
 // let showStates = true;
@@ -161,13 +161,8 @@ let pair: ShapePair | null = null;
 let polyd: Tristate<Shape> = null;
 let polydBrush = "green";
 // let mkVertices: Tristate<MinkowskiPoint[]> = [];
-// let simplexList: Simplex[][] = [];
-// let simplices: Simplex[] = [];
-// let contact: Tristate<Contact> = null;
-// let clipStates: ClipState[] = [];
-// let clipState: Tristate<ClipState> = null;
-// let clipAnim: Easer | null = null;
 
+const startDelay = new DelayEaser(2);
 const delay = new DelayEaser(2);
 
 // const fps = 60;
@@ -800,14 +795,14 @@ function createStateAnim() {
 
   if (count === 0) return;
 
-  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, 20), Ease.linear, v => {
+  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, 6), Ease.linear, v => {
     if (stepping) return;
 
     stateIndex = Math.round(v);
     isDirty = true;
   });
 
-  stateAnim = new SequentialEaser([anim, delay]).repeat(Infinity)
+  stateAnim = new SequentialEaser([startDelay, new SequentialEaser([anim, delay])])//.repeat(Infinity)])
     .onCompleted(() => {
       if (stepping) return;
 
@@ -872,7 +867,7 @@ function applyCollider() {
   }
   //*/
 
-  //*
+  /*
   if (contact && contact.canClip && contact.isCollision) {
     // cc.incidentEdge = undefined;
     // cc.referenceEdge = undefined;
@@ -890,6 +885,7 @@ function applyCollider() {
   pair.shapeB.usesReferenceShape && (pair.shapeB.referenceShape = pair.shapeA);
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
+  states.length > 0 && (stateIndex = states.length - 1);
   createStateAnim();
   // polyd && temp();
   isDirty = true;
@@ -967,6 +963,8 @@ function drawContact(contact: Contact, view: Viewport) {
   const normal = contact.normal;
   const refEdge = contact.referenceEdge;
   const incEdge = contact.incidentEdge;
+  const mkNormal = contact.minkowskiNormal;
+  const mkDepth = contact.minkowskiDepth || 1;
   refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
   incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
 
@@ -974,6 +972,8 @@ function drawContact(contact: Contact, view: Viewport) {
     beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
     normal.scaleO(cp.depth).render(view, cp.point, propsn);
   });
+
+  mkNormal && mkNormal.scaleO(mkDepth).render(view, origin, mkNormalProps);
 }
 
 function drawSimplex(simplex: Simplex, view: Viewport) {
@@ -1026,9 +1026,6 @@ function drawState(state: State, view: Viewport) {
 
   if (state.simplexState) {
     const simplexState = state.simplexState;
-    const normal = simplexState.collisionNormal;
-    const depth = simplexState.collisionDepth || 1;
-    normal && normal.scaleO(depth).render(view, origin, mkNormalProps);
     simplexState.simplices && simplexState.simplices.forEach(simplex => drawSimplex(simplex, view));
     simplexState.contact && drawContact(simplexState.contact, view);
   }
