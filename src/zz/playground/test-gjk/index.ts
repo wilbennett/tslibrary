@@ -4,11 +4,12 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, ISegment, Segment, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Wcb, Wcb2, Sutherland } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
 import {
   CircleShape,
   Edge,
   MinkowskiDiffIterator,
+  PlaneShape,
   PolygonShape,
   Shape,
   Simplex,
@@ -22,8 +23,6 @@ import { dir, pos, Vector } from '../../../vectors';
 // const { ONE_DEGREE } = MathEx;
 
 // console.clear();
-
-//! BUG: Need to figure out issue with circle and triangle.
 
 const ZERO_DIRECTION = dir(0, 0);
 let maxSimplexCount = 0;
@@ -66,7 +65,7 @@ const refBrush = "teal";
 MathEx.epsilon = 0.0001;
 Vector.tipDrawHeight = 1.0;
 const screenBounds = ctx.bounds;
-// const origin = pos(0, 0);
+const origin = pos(0, 0);
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
@@ -85,7 +84,7 @@ const poly1 = new PolygonShape([pos(4, 5), pos(9, 9), pos(4, 11)]);
 const poly2 = new PolygonShape([pos(7, 3), pos(10, 2), pos(12, 7), pos(5, 7)]);
 const poly3 = new PolygonShape(5, 2, 90 * Math.PI / 180);
 poly3.setPosition(pos(3.0, 3.0));
-const poly4 = new PolygonShape(5, 2, 90 * Math.PI / 180);
+const poly4 = new PolygonShape(5, 2, 0 * Math.PI / 180);
 poly4.setPosition(pos(7.0, 6.0));
 const poly5 = new PolygonShape(20, 2, 0 * Math.PI / 180, false);
 poly5.setPosition(pos(3.0, 3.0));
@@ -106,8 +105,22 @@ const box3 = new PolygonShape([pos(9, 4), pos(13, 3), pos(14, 7), pos(10, 8)]);
 const box4 = new PolygonShape([pos(4, 2), pos(7, 2), pos(7, 4), pos(4, 4)]);
 box4.setPosition(pos(3, 3));
 const box5 = new PolygonShape([pos(8, 4), pos(14, 4), pos(14, 9), pos(8, 9)]);
+// const plane1 = new PlaneShape(pos(0, 2), pos(1, 2));
+const plane1 = new PlaneShape(pos(4, 3), pos(6, 0));
+plane1.setPosition(pos(9.2, 6.2));
 
 const pairs: ShapePair[] = [
+  new ShapePair(plane1, circle2),
+  new ShapePair(plane1, poly6),
+  new ShapePair(plane1, poly3),
+  new ShapePair(plane1, poly4),
+  new ShapePair(plane1, poly2),
+  new ShapePair(plane1, poly1),
+  new ShapePair(plane1, box1),
+  new ShapePair(plane1, box2),
+  new ShapePair(plane1, box3),
+  new ShapePair(plane1, box4),
+  new ShapePair(plane1, box5),
   new ShapePair(circle1, circle2),
   new ShapePair(circle2, circle1),
   new ShapePair(circle3, circle2),
@@ -116,6 +129,8 @@ const pairs: ShapePair[] = [
   new ShapePair(circle1, poly2),
   new ShapePair(circle1, poly4),
   new ShapePair(circle1, poly5),
+  new ShapePair(circle1, box2),
+  new ShapePair(box2, circle1),
   new ShapePair(poly5, poly6),
   new ShapePair(poly5, poly3),
   new ShapePair(poly5, poly4),
@@ -152,17 +167,6 @@ let clipState: Tristate<ClipState> = null;
 let clipAnim: Easer | null = null;
 
 const delay = new DelayEaser(2);
-
-// pairs[0].second.setPosition(pos(2.5, 2.5));
-
-// pairs[0].first.setPosition(pos(2.5, 2.5));
-// pairs[0].first.setPosition(pos(2.5, 5.5));
-// pairs[0].first.setPosition(pos(2.5, 3.5));
-// pairs[0].first.setPosition(pos(1.5, 4.5));
-// pairs[0].first.setPosition(pos(1.5, 0.5));
-// pairs[0].first.setPosition(pos(4.0, 0.5));
-// pairs[0].first.setPosition(pos(5.0, 0.5));
-// pairs[0].first.setPosition(pos(-0.6, 0.5));
 
 // const fps = 60;
 // const secPerFrame = 1 / fps;
@@ -267,15 +271,15 @@ elPrevPair.addEventListener("click", () => {
   pairIndex--;
   pairIndex < 0 && (pairIndex = pairs.length - 1);
 
-  // try {
-  initPair();
-  isDirty = true;
+  try {
+    initPair();
+    isDirty = true;
 
-  if (!loop.active)
-    render();
-  // } catch (e) {
-  //   console.log(e.message);
-  // }
+    if (!loop.active)
+      render();
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 elNextPair.addEventListener("click", () => {
@@ -356,40 +360,49 @@ function render() {
   view.applyTransform();
 
   if (pair) {
-    const { shapeA: first, shapeB: second } = pair;
+    const { shapeA, shapeB } = pair;
     polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
-    drawShape1Vertices(first, view);
-    drawShape2Vertices(second, view);
+    drawShape1Vertices(shapeA, view);
+    drawShape2Vertices(shapeB, view);
     // mkVertices && drawMinkowskiVertices(mkVertices, { lineWidth: 2 }, view);
     mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
     // contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
     // collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
     simplices.forEach(simplex => drawSimplex(simplex, view));
-    second.render(view);
-    first.render(view);
+    shapeB.render(view);
+    shapeA.render(view);
     contact && drawContact(contact, view);
     clipState && contact && drawClipState(clipState, view);
 
-    /*
-    if (first.kind === "circle") {
-      const vertices = Minkowski.getWorldVertices(first);
-      beginPath(first.props, view).strokePoly(vertices, true);
-    }
-
-    if (second.kind === "circle") {
-      const vertices = Minkowski.getWorldVertices(second);
-      beginPath(second.props, view).strokePoly(vertices, true);
+    //*
+    if (shapeA.kind === "plane") {
+      const v1 = shapeA.toWorld(shapeA.getVertex(0));
+      const v2 = shapeA.toWorld(shapeA.getVertex(1));
+      beginPath({ strokeStyle: "red", lineWidth: 2 }, view).strokeRect(Bounds.fromCenter(v1, dir(1, 1)));
+      beginPath({ strokeStyle: "green", lineWidth: 2 }, view).strokeRect(Bounds.fromCenter(v2, dir(1, 1)));
     }
     //*/
 
     /*
-    if (first.kind === "circle" && second.kind === "circle") {
+    if (shapeA.kind === "circle") {
+      const vertices = Minkowski.getWorldVertices(shapeA);
+      beginPath(shapeA.props, view).strokePoly(vertices, true);
+    }
+
+    if (shapeB.kind === "circle") {
+      const vertices = Minkowski.getWorldVertices(shapeB);
+      beginPath(shapeB.props, view).strokePoly(vertices, true);
+    }
+    //*/
+
+    /*
+    if (shapeA.kind === "circle" && shapeB.kind === "circle") {
       const props: ContextProps = { strokeStyle: "purple" };
-      const tpoly1 = new PolygonShape(getCircleSegmentInfo().segmentCount, first.radius);
-      tpoly1.setPosition(first.position);
+      const tpoly1 = new PolygonShape(getCircleSegmentInfo().segmentCount, shapeA.radius);
+      tpoly1.setPosition(shapeA.position);
       tpoly1.props = props;
-      const tpoly2 = new PolygonShape(getCircleSegmentInfo().segmentCount, second.radius);
-      tpoly2.setPosition(second.position);
+      const tpoly2 = new PolygonShape(getCircleSegmentInfo().segmentCount, shapeB.radius);
+      tpoly2.setPosition(shapeB.position);
       tpoly2.props = props;
       const mkPoly = Minkowski.createDiffPoly(tpoly1, tpoly2)!;
       mkPoly.props = props;
@@ -773,7 +786,7 @@ function handleMouseDown(ev: MouseEvent) {
     const shape = shapes[i];
     shape.toLocal(mouse, polyPoint);
 
-    if (!shape.containsPoint(polyPoint)) continue;
+    if (!shape.containsPoint(polyPoint, 0.3)) continue;
 
     shape.position.subO(mouse, dragOffset);
     dragTarget = shape;
@@ -927,7 +940,7 @@ function applyCollider() {
   //*/
 
   //*
-  if (contact && contact.canClip) {
+  if (contact && contact.canClip && contact.isCollision) {
     // cc.incidentEdge = undefined;
     // cc.referenceEdge = undefined;
     const clipper = new Sutherland();
@@ -935,10 +948,13 @@ function applyCollider() {
   }
   //*/
 
+  // contact && contact.ensureNormalDirection();
   // isColliding = !!collider.isColliding(pair);
   // const isColliding = gjk.isCollidingProgress(pair, s => simplices1.push(s));
   // polydBrush = isColliding ? "red" : "green";
   polydBrush = isColliding || contact && contact.isCollision ? "red" : "green";
+  pair.shapeA.usesReferenceShape && (pair.shapeA.referenceShape = pair.shapeB);
+  pair.shapeB.usesReferenceShape && (pair.shapeB.referenceShape = pair.shapeA);
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
   createStateAnim();
@@ -947,7 +963,7 @@ function applyCollider() {
 }
 
 function initPair() {
-  const lineW = 1;
+  const lineW = 2;
   elText.value = "";
   pair = null;
   clearStateValues();
@@ -1043,14 +1059,14 @@ function drawSimplex(simplex: Simplex, view: Viewport) {
   switch (points.length) {
     case 1:
       a = points[0].worldPoint;
-      beginPath(props1, view).fillCircle(a, 0.5).beginPath().withProps(propso).strokeCircle(a, 0.5);
+      beginPath(props1, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
       directionOrigin = a;
       break;
     case 2:
       a = points[1].worldPoint;
       b = points[0].worldPoint;
-      beginPath(props1, view).fillCircle(b, 0.5).beginPath().withProps(propso).strokeCircle(b, 0.5);
-      beginPath(props2, view).fillCircle(a, 0.5).beginPath().withProps(propso).strokeCircle(a, 0.5);
+      beginPath(props2, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
+      beginPath(props1, view).fillCircle(b, 0.6).beginPath().withProps(propso).strokeCircle(b, 0.6);
       a.subO(b).render(view, b, props1);
       directionOrigin = a.addO(b).normalizeW();
       break;
@@ -1058,9 +1074,9 @@ function drawSimplex(simplex: Simplex, view: Viewport) {
       a = points[2].worldPoint;
       b = points[1].worldPoint;
       c = points[0].worldPoint;
+      beginPath(props3, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
+      beginPath(props2, view).fillCircle(b, 0.6).beginPath().withProps(propso).strokeCircle(b, 0.6);
       beginPath(props1, view).fillCircle(c, 0.5).beginPath().withProps(propso).strokeCircle(c, 0.5);
-      beginPath(props2, view).fillCircle(b, 0.5).beginPath().withProps(propso).strokeCircle(b, 0.5);
-      beginPath(props3, view).fillCircle(a, 0.5).beginPath().withProps(propso).strokeCircle(a, 0.5);
       b.subO(c).render(view, c, props1);
       a.subO(b).render(view, b, props2);
       c.subO(a).render(view, a, props3);
