@@ -46,13 +46,13 @@ export class MinkowskiPointImpl extends SupportPointImpl implements MinkowskiPoi
   get pointA() {
     return this.shapeA.kind === "circle"
       ? getCircleVertex(this.shapeA, this.indexA, false, this.circleSegments)
-      : this.shapeA.vertexList.items[this.indexA];
+      : this.shapeA.getVertex(this.indexA);
   }
 
   get pointB() {
     return this.shapeB.kind === "circle"
       ? getCircleVertex(this.shapeB, this.indexB, false, this.circleSegments)
-      : this.shapeB.vertexList.items[this.indexB];
+      : this.shapeB.getVertex(this.indexB);
   }
 
   protected _worldPointA?: Vector;

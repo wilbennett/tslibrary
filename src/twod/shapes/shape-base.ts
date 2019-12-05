@@ -77,6 +77,10 @@ export abstract class ShapeBase implements IShape {
   get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
 
+  getVertex(index: number) { return this.vertexList.items[index]; }
+  getVertices() { return this.vertexList.items; }
+  getEdgeVectors() { return this.edgeVectorList.items; }
+
   setPosition(position: Vector) {
     this.position.copyFrom(position);
     this.dirtyTransform();

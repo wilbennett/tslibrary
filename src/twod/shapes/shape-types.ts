@@ -26,6 +26,9 @@ export interface IShape extends IGeometry {
   hasDynamicAxes: boolean;
   props: ContextProps;
 
+  getVertex(index: number): Vector; // Local;
+  getVertices(): Vector[]; // Local;
+  getEdgeVectors(): Vector[]; // Local;
   getFurthestEdges(worldDirection: Vector): Edge[];
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint; // Local.
   getSupportFromAxis(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
@@ -103,9 +106,11 @@ export interface Edge {
 export interface GeometryIterator {
   index: number;
   readonly vertexCount: number;
+  readonly vertices: Vector[];
   readonly vertex: Vector;
   readonly nextVertex: Vector;
   readonly prevVertex: Vector;
+  readonly edgeVectors: Vector[];
   readonly edge: Edge;
   readonly prevEdge: Edge;
   readonly edgeVector: Vector;

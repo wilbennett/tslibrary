@@ -28,6 +28,7 @@ export class CircleIterator implements GeometryIterator {
     this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
   }
   get vertexCount() { return this.segments.segmentCount; }
+  get vertices(): Vector[] { return []; }
   protected _vertex: Vector;
   get vertex() { return this._vertex; }
   get nextVertex() {
@@ -56,6 +57,7 @@ export class CircleIterator implements GeometryIterator {
 
     return pos(rx + cx, ry + cy);
   }
+  get edgeVectors(): Vector[] { return []; }
   get edge(): Edge {
     if (this._isWorld) {
       return new EdgeImpl(

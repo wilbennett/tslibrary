@@ -11,6 +11,7 @@ import { calcCircleVertices, calcCircleVerticesAndEdges, isTriangleCW } from '..
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { normal, Vector } from '../../vectors';
+import * as Poly from '../geometry/polygon-utils';
 import { CircleSegmentInfo } from '../utils';
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
@@ -153,7 +154,7 @@ function verticesVerticesEdgesV(
   const edgeCountB = edgesB.length;
 
   if (vertexCountA === 0 || vertexCountB === 0 || edgeCountA === 0 || edgeCountB == 0) return undefined;
-  if (vertexCountA !== edgeCountA || vertexCountB !== edgeCountB) return undefined;
+  // if (vertexCountA !== edgeCountA || vertexCountB !== edgeCountB) return undefined;
 
   const count = vertexCountA + vertexCountB;
   result || (result = []);
@@ -169,11 +170,11 @@ function verticesVerticesEdgesV(
 
     if (edgeA.cross2D(edgeB) > 0) { // edgeA is to the right.
       point = point.displaceByO(edgeA);
-      a = (a + 1) % vertexCountA;
+      a = (a + 1) % edgeCountA;
       edgeA = edgesA[a];
     } else {
       point = point.displaceByO(edgeB);
-      b = (b + 1) % vertexCountB;
+      b = (b + 1) % edgeCountB;
       edgeB = edgesB[b];
     }
   }
@@ -322,6 +323,34 @@ export function verticesVertices(...args: any[]): Tristate<Vector[]> | Tristate<
   return verticesVerticesM(...args);
 }
 
+export function verticesHull(
+  verticesA: Vector[],
+  verticesB: Vector[],
+  op: MinkowskiOperation,
+  result?: Vector[]): Tristate<Vector[]> {
+  const vertexCountA = verticesA.length;
+  const vertexCountB = verticesB.length;
+
+  if (vertexCountA === 0 || vertexCountB === 0) return undefined;
+
+  const res: Vector[] = [];
+
+  for (let a = 0; a < vertexCountA; a++) {
+    const pointA = verticesA[a];
+
+    for (let b = 0; b < vertexCountB; b++) {
+      const pointB = verticesB[b];
+      const point = op(pointA, pointB);
+      res.push(point);
+    }
+  }
+
+  result || (result = []);
+  result.push(...Poly.convexHull(res));
+
+  return result;
+}
+
 // TODO: Can create optimized circle versions by walking rotated circle vectors.
 /*/
 function circleCircle(
@@ -457,7 +486,7 @@ export function getWorldVertices(
     return result;
   }
 
-  const result = shape.vertexList.items;
+  const result = shape.getVertices();
 
   return negate
     ? result.map(v => shape.toWorld(v).negate())
@@ -476,7 +505,7 @@ export function getWorldVerticesAndEdges(
     return result;
   }
 
-  const result = [shape.vertexList.items, shape.edgeVectorList.items];
+  const result = [shape.getVertices(), shape.getEdgeVectors()];
 
   return negate
     ? [result[0].map(v => shape.toWorld(v).negate()), result[1].map(v => shape.toWorld(v).negate())]

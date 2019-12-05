@@ -47,6 +47,11 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   radius: number;
   get hasDynamicAxes() { return true; }
 
+  getVertex(index: number) {
+    const iterator = this.getIterator(index, false);
+    return iterator.vertex;
+  }
+
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
   getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
   getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {

@@ -1,14 +1,5 @@
-import {
-  CircleIterator,
-  Edge,
-  EdgeImpl,
-  GeometryIterator,
-  MinkowskiPoint,
-  MinkowskiPointImpl,
-  Shape,
-  ShapeIterator,
-  SupportPoint,
-} from '.';
+import { Edge, EdgeImpl, GeometryIterator, MinkowskiPoint, MinkowskiPointImpl, Shape, SupportPoint } from '.';
+import { Vector } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
@@ -52,6 +43,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     return this._iterator;
   }
   get vertexCount() { return this.iterA.vertexCount + this.iterB.vertexCount; }
+  get vertices(): Vector[] { return []; }
   protected _shape?: Shape;
   get shape() {
     if (!this._shape) {
@@ -86,6 +78,7 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       ? this.worldPoint.displaceByNegO(prevEdgeA)
       : this.worldPoint.displaceByNegO(prevEdgeB);
   }
+  get edgeVectors(): Vector[] { return []; }
   get edge(): Edge {
     // TODO: Need to fix this.
     return new EdgeImpl(this.shape, NaN);
@@ -116,14 +109,11 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     } else {
       if (result instanceof MinkowskiDiffIterator) {
         const { iterA, iterB } = this;
+        this.shapeA.usesReferenceShape && (this.shapeA.referenceShape = this.shapeB);
+        this.shapeB.usesReferenceShape && (this.shapeB.referenceShape = this.shapeA);
 
-        result.iterA = iterA instanceof CircleIterator
-          ? new CircleIterator(iterA.circle, iterA.index, true, iterA.segments)
-          : new ShapeIterator(this.shapeA, iterA.index, true);
-
-        result.iterB = iterB instanceof CircleIterator
-          ? new CircleIterator(iterB.circle, iterB.index, true, iterB.segments)
-          : new ShapeIterator(this.shapeB, iterB.index, true);
+        result.iterA = this.shapeA.getIterator(iterA.index, true, this.circleSegments);
+        result.iterB = this.shapeB.getIterator(iterB.index, true, this.circleSegments);
       }
     }
 
