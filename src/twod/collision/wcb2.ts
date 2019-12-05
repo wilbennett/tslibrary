@@ -68,15 +68,16 @@ export class Wcb2 extends ColliderBase {
     const depth = containsOrigin ? contact.normal.mag : -contact.normal.mag;
     !containsOrigin && contact.normal.negate();
 
-    contact.points.push(new ContactPoint(incidentVertex, depth));
     contact.normal.normalize();
 
-    if (!containsOrigin || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
-      contact.referenceEdge = refLeftEdge;
-      contact.incidentEdge = incLeftEdge;
-      return contact;
-    }
+    // if (!containsOrigin) { // || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
+    //   contact.points.push(new ContactPoint(incLeftEdge.worldStart, depth));
+    //   contact.referenceEdge = refLeftEdge;
+    //   contact.incidentEdge = incLeftEdge;
+    //   return contact;
+    // }
 
+    contact.points.push(new ContactPoint(incidentVertex, depth));
     refLeftEdge.shape === contact.shapeB && contact.normal.negate();
     const incRightEdge = mkbi.iterator.prevEdge;
     let collisionNormal = contact.normal.clone();
@@ -318,6 +319,9 @@ export class Wcb2 extends ColliderBase {
     if (state.unsupported) return undefined;
 
     const { shapeA, shapeB } = shapes;
+
+    if (shapeA.usesReferenceShape && shapeB.usesReferenceShape) return undefined;
+
     let mkSimplex: Simplex | undefined = undefined;
     let spSimplex: Simplex | undefined = undefined;
     let mkPoints: SupportPoint[];
@@ -337,40 +341,78 @@ export class Wcb2 extends ColliderBase {
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
 
+    shapeA.usesReferenceShape && (shapeA.referenceShape = shapeB);
+    shapeB.usesReferenceShape && (shapeB.referenceShape = shapeA);
     let mka = Minkowski.getDiffPoint(shapeA, shapeB, direction);
     mka.adjustDiffPointIfCircle();
-    const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
-    let a = mka.worldPoint;
+    const mkbi = new MinkowskiDiffIterator(mka, this.circleSegments);
+    let b = mka.worldPoint;
 
     if (callback) {
       mkPoints!.push(mka.clone());
       mkSimplex!.direction.copyFrom(direction);
-      spPoints!.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
       callback([mkSimplex!.clone(), spSimplex!.clone()]);
     }
 
-    if (!calcDistance && a.dot(direction) < 0) return false; // a is behind origin in direction.
+    if (!calcDistance && b.dot(direction) < 0) return false; // b is behind origin in direction.
 
-    const prev = mkai.prevVertex;
-    const next = mkai.nextVertex;
-    const distPrev = prev.magSquared;
-    const distNext = next.magSquared;
+    // TODO: Since a and c can be more than one vertex from b, these need to be iterators.
+    //* Only seems to happen with planes so skipping for now.
+    let a = mkbi.prevVertex;
+    let c = mkbi.nextVertex;
 
     if (callback) {
       mkSimplex!.direction.withXY(0, 0);
-      mkPoints!.unshift(new SupportPointImpl(mkai.shape, undefined, prev));
-      mkPoints!.push(new SupportPointImpl(mkai.shape, undefined, next));
-      direction = mkSimplex!.direction;
-      mkai.prev();
-      spPoints!.unshift(new SupportPointImpl(mkai.shape, undefined, mkai.iterator.vertex));
-      mkai.next();
-      spPoints!.push(new SupportPointImpl(mkai.shape, undefined, mkai.iterator.nextVertex));
+      mkPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, a));
+      mkPoints!.push(new SupportPointImpl(mkbi.shape, undefined, c));
+      mkbi.prev();
+      spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
+      mkbi.next();
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
       callback([mkSimplex!.clone(), spSimplex!.clone()]);
     }
 
-    return distNext <= distPrev
-      ? this.walkCcwProgress(prev, mkai, next, mkSimplex, spSimplex, callback, contact)
-      : this.walkCwProgress(prev, mkai, next, mkSimplex, spSimplex, callback, contact);
+    if (a.equals(b)) {
+      mkbi.prev();
+      a = mkbi.prevVertex;
+
+      if (callback) {
+        mkPoints!.shift();
+        spPoints!.shift();
+        mkbi.prev();
+        mkPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, a));
+        spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
+        mkbi.next();
+        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      }
+
+      mkbi.next();
+    }
+
+    if (c.equals(b) || c.equals(a)) {
+      mkbi.next();
+      c = mkbi.nextVertex;
+
+      if (callback) {
+        mkPoints!.pop();
+        spPoints!.pop();
+        mkbi.next();
+        mkPoints!.push(new SupportPointImpl(mkbi.shape, undefined, c));
+        spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
+        mkbi.prev();
+        callback([mkSimplex!.clone(), spSimplex!.clone()]);
+      }
+
+      mkbi.prev();
+    }
+
+    const dista = a.magSquared;
+    const distc = c.magSquared;
+
+    return distc <= dista
+      ? this.walkCcwProgress(a, mkbi, c, mkSimplex, spSimplex, callback, contact)
+      : this.walkCwProgress(a, mkbi, c, mkSimplex, spSimplex, callback, contact);
   }
 
   protected calcCollisionCommon(
