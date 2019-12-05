@@ -1,4 +1,4 @@
-import { ShapePair, Clipper } from '.';
+import { Clipper, ShapePair } from '.';
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -89,12 +89,13 @@ export class Contact {
 
   clipPoints(clipper: Clipper) {
     if (!this.canClip) return;
+    if (!this.isCollision) return;
 
     const referenceEdge = this.referenceEdge;
     const incidentEdge = this.incidentEdge;
 
     if (!referenceEdge || !incidentEdge) return;
-  
+
     clipper.clip(incidentEdge, referenceEdge, this.points);
   }
 
@@ -108,8 +109,13 @@ export class Contact {
 
   ensureNormalDirection() {
     if (!this._referenceEdge) return;
+    if (!this._incidentEdge) return;
+
+    // const refNorm = (this._referenceEdge.normal.dot(this._incidentEdge.normal) <= 0)
+    //   ? this._referenceEdge.normal : this._referenceEdge.normal.negateO();
 
     if (this.normal.dot(this._referenceEdge.normal) < 0)
+      // if (this.normal.dot(refNorm) < 0)
       this.normal.negate();
   }
 
