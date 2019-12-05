@@ -120,6 +120,8 @@ export class EdgeImpl implements Edge {
         this._normal = this._normalDirection.normalizeO();
       else if (this._worldNormal && !this._worldNormal.isEmpty)
         this._normal = this.shape.toLocal(this._worldNormal);
+      else if (this._worldNormalDirection && !this._worldNormalDirection.isEmpty)
+        this._normal = this.shape.toLocal(this._worldNormalDirection.normalizeO());
       else
         this._normal = Vector.empty;
     }
