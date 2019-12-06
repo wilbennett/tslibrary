@@ -8,6 +8,7 @@ import {
   getCircleSegmentInfo,
   lineClosestPoint,
   segmentClosestPoint,
+  segmentSegmentClosestPoints,
   segmentSqrDistToPoint,
 } from '../utils/utils2d';
 import { ContactPoint } from './contact';
@@ -85,9 +86,28 @@ export class Wcb2 extends ColliderBase {
     const incidentStartDot = incidentEdge.worldStart.dot(negativeNormal);
     const incidentEndDot = incidentEdge.worldEnd.dot(negativeNormal);
     // Incident vertex is the one most in the direction of the normal.
-    const incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+    let incidentVertex: Vector;
 
-    contact.normal = normal;
+    if (containsOrigin) {
+      contact.normal = normal;
+      incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+    } else {
+      const referenceClosest = pos(0, 0);
+      const incidentClosest = pos(0, 0);
+
+      depth = segmentSegmentClosestPoints(
+        incidentEdge.worldStart,
+        incidentEdge.worldEnd,
+        referenceEdge.worldStart,
+        referenceEdge.worldEnd,
+        incidentClosest,
+        referenceClosest);
+
+      incidentVertex = incidentClosest;
+      depth = -Math.sqrt(depth);
+      contact.normal = incidentClosest.subO(referenceClosest).normalize();
+    }
+
     contact.points.push(new ContactPoint(incidentVertex, depth));
     contact.referenceEdge = referenceEdge.clone();
     contact.incidentEdge = incidentEdge.clone();
