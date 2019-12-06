@@ -56,6 +56,17 @@ export function isTriangleCCW(a: Vector, b: Vector, c: Vector) {
 //
 // Segment.
 // Christer Ericson - Real Time Collision Detection.
+export function lineClosestPoint(start: Vector, end: Vector, point: Vector, result?: Vector) {
+  result = result || Vector.position(0, 0);
+  const edge = end.subO(start);
+  const t = point.subO(start).dot(edge) / edge.dot(edge);
+
+  return start.addScaledO(edge, t, result);
+}
+
+//
+// Segment.
+// Christer Ericson - Real Time Collision Detection.
 export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, result?: Vector) {
   result = result || Vector.position(0, 0);
   const edge = end.subO(start);
