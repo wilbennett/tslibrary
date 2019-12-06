@@ -191,8 +191,9 @@ export class PlaneIterator implements GeometryIterator {
     const minClosest = plane.toLocal(plane.closestPoint(minSupport.worldPoint)!);
     const maxClosest = plane.toLocal(plane.closestPoint(maxSupport.worldPoint)!);
 
-    minClosest.displaceByScaled(dir, 1.5);
-    maxClosest.displaceByNegScaled(dir, 1.5);
+    // Padding for debugging.
+    // minClosest.displaceByScaled(dir, 1.5);
+    // maxClosest.displaceByNegScaled(dir, 1.5);
 
     this._vertices.push(minClosest, maxClosest);
     this._edgeVectors.push(maxClosest.subO(minClosest), minClosest.subO(maxClosest));
