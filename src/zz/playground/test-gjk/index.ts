@@ -71,6 +71,7 @@ const origin = pos(0, 0);
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
+const maxStateDuration = 10;
 const pauseAfterSeconds = Infinity;//30;
 let isDirty = true;
 let autoChangeShapes = true;
@@ -800,7 +801,7 @@ function createStateAnim() {
 
   if (count === 0) return;
 
-  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, 6), Ease.linear, v => {
+  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, maxStateDuration), Ease.linear, v => {
     if (stepping) return;
 
     stateIndex = Math.round(v);
