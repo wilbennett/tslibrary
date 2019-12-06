@@ -43,6 +43,7 @@ export class Wcb2 extends ColliderBase {
     const incidentLeftEdge = mkbi.getShapeEdge();
     const incidentRightEdge = mkbi.iterator.prevEdge;
 
+    //! HACK: Using lineClosestPoint since walking CW is not 100% accurate.
     const closestPoint = containsOrigin ? lineClosestPoint(a, b, ORIGIN) : segmentClosestPoint(a, b, ORIGIN);
     let normal = closestPoint.asDirectionO();
     let depth = normal.mag;
