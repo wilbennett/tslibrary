@@ -148,7 +148,7 @@ export class Wcb2 extends ColliderBase {
       mkPoints && mkPoints.shift();
     }
 
-    if (contact) {
+    if (callback) {
       spPoints!.splice(0);
       const edge = mkbi.getShapeEdge();
       spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldStart));
