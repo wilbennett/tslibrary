@@ -213,7 +213,7 @@ export class Wcb2 extends ColliderBase {
     if (!contact) return containsOrigin;
 
     this.populateContact(contact, mkbi, containsOrigin);
-    callback && callback({ contact });
+    callback({ contact });
     return contact;
   }
 
@@ -292,15 +292,13 @@ export class Wcb2 extends ColliderBase {
     callback: ColliderCallback,
     contact?: Contact,
     calcDistance: boolean = false): boolean | Contact | undefined | null {
+    const { shapeA, shapeB } = shapes;
     const state = this.getState(shapes);
-    contact && contact.reset();
 
     if (state.unsupported) return undefined;
-
-    const { shapeA, shapeB } = shapes;
-
     if (shapeA.usesReferenceShape && shapeB.usesReferenceShape) return undefined;
 
+    contact && contact.reset();
     const mkSimplex = new Simplex();
     const spSimplex = new Simplex();
     const mkPoints: SupportPoint[] = mkSimplex.points;
@@ -381,37 +379,56 @@ export class Wcb2 extends ColliderBase {
     shapes: ShapePair,
     contact?: Contact,
     calcDistance: boolean = false): boolean | Contact | undefined | null {
+    const { shapeA, shapeB } = shapes;
     const state = this.getState(shapes);
-    contact && contact.reset();
 
     if (state.unsupported) return undefined;
+    if (shapeA.usesReferenceShape && shapeB.usesReferenceShape) return undefined;
 
-    const { shapeA, shapeB } = shapes;
-    let direction: Vector | undefined = undefined;
+    contact && contact.reset();
+    const direction: Vector = dir(0, 0);
 
-    direction = shapeB.position.subO(shapeA.position, direction);
+    shapeB.position.subO(shapeA.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
 
+    shapeA.usesReferenceShape && (shapeA.referenceShape = shapeB);
+    shapeB.usesReferenceShape && (shapeB.referenceShape = shapeA);
     let mka = Minkowski.getDiffPoint(shapeA, shapeB, direction);
     mka.adjustDiffPointIfCircle();
-    const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
+    const mkbi = new MinkowskiDiffIterator(mka, this.circleSegments);
+    let b = mka.worldPoint;
 
-    if (!calcDistance && mka.worldPoint.dot(direction) < 0) return false; // a is behind origin in direction.
+    if (!calcDistance && b.dot(direction) < 0) return false; // b is behind origin in direction.
 
-    const prev = mkai.prevVertex;
-    const next = mkai.nextVertex;
-    const distPrev = prev.magSquared;
-    const distNext = next.magSquared;
+    // TODO: Since a and c can be more than one vertex from b, these need to be iterators.
+    //* Only seems to happen with planes so skipping for now.
+    let a = mkbi.prevVertex;
+    let c = mkbi.nextVertex;
 
-    return distNext <= distPrev
-      ? this.walkCcw(prev, mkai, next, contact)
-      : this.walkCw(prev, mkai, next, contact);
+    if (a.equals(b)) {
+      mkbi.prev();
+      a = mkbi.prevVertex;
+      mkbi.next();
+    }
+
+    if (c.equals(b) || c.equals(a)) {
+      mkbi.next();
+      c = mkbi.nextVertex;
+      mkbi.prev();
+    }
+
+    const dista = a.magSquared;
+    const distc = c.magSquared;
+
+    return distc <= dista
+      ? this.walkCcw(a, mkbi, c, contact)
+      : this.walkCw(a, mkbi, c, contact);
   }
 
   isCollidingProgressCore(shapes: ShapePair, callback: ColliderCallback): boolean | undefined {
-    const result = this.calcCollisionCommonProgress(shapes, callback, undefined, false);
+    const result = this.calcCollisionCommonProgress(shapes, callback);
     return typeof result === "boolean" || result === undefined ? result : undefined;
   }
 
@@ -425,7 +442,7 @@ export class Wcb2 extends ColliderBase {
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    const result = this.calcCollisionCommon(shapes, undefined, false);
+    const result = this.calcCollisionCommon(shapes);
     return typeof result === "boolean" || result === undefined ? result : undefined;
   }
 
