@@ -3,7 +3,7 @@ import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import { MinkowskiDiffIterator, MinkowskiPoint, ORIGIN, Simplex, SupportPoint, SupportPointImpl } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
-import { CircleSegmentInfo, getCircleSegmentInfo, segmentClosestPoint } from '../utils/utils2d';
+import { CircleSegmentInfo, getCircleSegmentInfo, segmentClosestPoint, segmentSqrDistToPoint } from '../utils/utils2d';
 import { ContactPoint } from './contact';
 
 const ZERO_DIRECTION = dir(0, 0);
@@ -67,77 +67,208 @@ export class Wcb extends ColliderBase {
     return contact;
   }
 
+  protected scanCcwProgress(
+    a: Vector,
+    mkbi: MinkowskiDiffIterator,
+    c: Vector,
+    containsOrigin: boolean,
+    mkSimplex?: Simplex,
+    spSimplex?: Simplex,
+    callback?: ColliderCallback,
+    contact?: Contact): boolean | Contact | undefined | null {
+    let mkPoints: SupportPoint[] | null = null;
+    let spPoints: SupportPoint[] | null = null;
+    let b = mkbi.vertex.clone();
+    let distb = b.magSquared;
+    let distc = c.magSquared;
+
+    if (callback) {
+      mkPoints = mkSimplex!.points;
+      spPoints = spSimplex!.points;
+    }
+
+    while (distc < distb) {
+      mkbi.next();
+      a = b;
+      b = c;
+      c = mkbi.nextVertex;
+      distb = distc;
+      distc = c.magSquared;
+
+      if (callback) {
+        mkPoints!.shift();
+        mkPoints!.push(new SupportPointImpl(mkbi.shape, undefined, c));
+        spPoints!.shift();
+        spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
+        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
+      }
+    }
+
+    const abDist = segmentSqrDistToPoint(a, b, ORIGIN);
+    const bcDist = segmentSqrDistToPoint(b, c, ORIGIN);
+
+    if (abDist < bcDist) {
+      mkbi.prev();
+      mkPoints && mkPoints.pop();
+    } else {
+      a = b;
+      b = c;
+      mkPoints && mkPoints.shift();
+    }
+
+    if (callback) {
+      spPoints!.splice(0);
+      const edge = mkbi.getShapeEdge();
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldStart));
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldEnd));
+      callback!({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
+    }
+
+    if (!contact) return containsOrigin;
+
+    this.populateContact(contact, mkbi, containsOrigin);
+    callback && callback({ contact });
+    return contact;
+  }
+
+  protected scanCwProgress(
+    a: Vector,
+    mkbi: MinkowskiDiffIterator,
+    c: Vector,
+    containsOrigin: boolean,
+    mkSimplex?: Simplex,
+    spSimplex?: Simplex,
+    callback?: ColliderCallback,
+    contact?: Contact): boolean | Contact | undefined | null {
+    let mkPoints: SupportPoint[] | null = null;
+    let spPoints: SupportPoint[] | null = null;
+    let b = mkbi.vertex.clone();
+    let dista = a.magSquared;
+    let distb = b.magSquared;
+
+    if (callback) {
+      mkPoints = mkSimplex!.points;
+      spPoints = spSimplex!.points;
+    }
+
+    while (dista < distb) {
+      mkbi.prev();
+      c = b;
+      b = a;
+      a = mkbi.prevVertex;
+      distb = dista;
+      dista = a.magSquared;
+
+      if (callback) {
+        mkPoints!.pop();
+        mkPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, a));
+        spPoints!.pop();
+        mkbi.prev();
+        spPoints!.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
+        mkbi.next();
+        callback!({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
+      }
+    }
+
+    const abDist = segmentSqrDistToPoint(a, b, ORIGIN);
+    const bcDist = segmentSqrDistToPoint(b, c, ORIGIN);
+
+    if (abDist < bcDist) {
+      mkbi.prev();
+      mkPoints && mkPoints.pop();
+    } else {
+      a = b;
+      b = c;
+      mkPoints && mkPoints.shift();
+    }
+
+    if (callback) {
+      spPoints!.splice(0);
+      const edge = mkbi.getShapeEdge();
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldStart));
+      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, edge.worldEnd));
+      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
+    }
+
+    if (!contact) return containsOrigin;
+
+    this.populateContact(contact, mkbi, containsOrigin);
+    callback && callback({ contact });
+    return contact;
+  }
+
+  protected scanToClosestEdgeProgress(
+    mkbi: MinkowskiDiffIterator,
+    contact: Contact,
+    containsOrigin: boolean,
+    mkSimplex: Simplex,
+    spSimplex: Simplex,
+    callback: ColliderCallback) {
+    this.populateContact(contact, mkbi, containsOrigin);
+    callback && callback({ contact });
+    return contact;
+  }
+
   protected walkCcwProgress(
     mka: MinkowskiPoint,
     mkb: MinkowskiPoint,
     mkc: MinkowskiDiffIterator,
     ao: Vector,
-    contact?: Contact,
-    mkSimplex?: Simplex,
-    spSimplex?: Simplex,
-    callback?: ColliderCallback): boolean | Contact | undefined | null {
+    mkSimplex: Simplex,
+    spSimplex: Simplex,
+    callback: ColliderCallback,
+    contact?: Contact): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
-    let mkPoints: SupportPoint[];
-    let spPoints: SupportPoint[];
+    const mkPoints: SupportPoint[] = mkSimplex.points;
+    const spPoints: SupportPoint[] = spSimplex.points;
 
     mkc.init(mkb);
 
-    if (callback) {
-      spPoints = spSimplex!.points;
-      const edge = mkc.getShapeEdge();
-      spPoints.pop();
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
-    }
+    const edge = mkc.getShapeEdge();
+    spPoints.pop();
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
 
     mkc.next();
     let c = mkc.worldPoint;
 
-    if (callback) {
-      const ab = b.subO(a);
-      ab.perpLeftO(mkSimplex!.direction);
-      mkPoints = mkSimplex!.points;
-      mkPoints.push(mkc.clone());
-      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-    }
+    const ab = b.subO(a);
+    ab.perpLeftO(mkSimplex.direction);
+    mkPoints.push(mkc.clone());
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     const ac = c.subO(a);
 
     while (ao.cross2D(ac) < 0 && i-- > 0) {
-      if (callback) {
-        const edge = mkc.getShapeEdge();
-        spPoints!.splice(1, 2);
-        spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-        spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
-      }
+      const edge = mkc.getShapeEdge();
+      spPoints.splice(1, 2);
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
 
       b.copyFrom(c);
       mkc.next();
       c = mkc.worldPoint;
       c.subO(a, ac);
 
-      if (callback) {
-        mkPoints!.splice(1, 1);
-        mkPoints!.push(mkc.clone());
-        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-      }
+      mkPoints.splice(1, 1);
+      mkPoints.push(mkc.clone());
+      callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
     const bo = b.negateO();
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) <= 0;
 
-    if (contact) {
-      // TODO: Need to walk to the edge that's closest to the origin.
-      mkc.prev();
-      this.populateContact(contact, mkc, containsOrigin);
-      callback && callback({ contact });
-      return contact;
-    }
+    if (!contact) return containsOrigin;
 
-    return containsOrigin;
+    // TODO: Need to walk to the edge that's closest to the origin.
+    mkc.prev();
+    return this.scanToClosestEdgeProgress(mkc, contact, containsOrigin, mkSimplex, spSimplex, callback);
+    // this.populateContact(contact, mkc, containsOrigin);
+    // callback && callback({ contact });
+    // return contact;
   }
 
   protected walkCwProgress(
@@ -145,10 +276,10 @@ export class Wcb extends ColliderBase {
     mkb: MinkowskiPoint,
     mkc: MinkowskiDiffIterator,
     ao: Vector,
-    contact?: Contact,
-    mkSimplex?: Simplex,
-    spSimplex?: Simplex,
-    callback?: ColliderCallback): boolean | Contact | undefined | null {
+    mkSimplex: Simplex,
+    spSimplex: Simplex,
+    callback: ColliderCallback,
+    contact?: Contact): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
@@ -195,14 +326,13 @@ export class Wcb extends ColliderBase {
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) >= 0;
 
-    if (contact) {
-      // TODO: Need to walk to the edge that's closest to the origin.
-      this.populateContact(contact, mkc, containsOrigin);
-      callback && callback({ contact });
-      return contact;
-    }
+    if (!contact) return containsOrigin;
 
-    return containsOrigin;
+    // TODO: Need to walk to the edge that's closest to the origin.
+    return this.scanToClosestEdgeProgress(mkc, contact, containsOrigin, mkSimplex, spSimplex, callback);
+    // this.populateContact(contact, mkc, containsOrigin);
+    // callback && callback({ contact });
+    // return contact;
   }
 
   protected walkCcw(
@@ -272,40 +402,32 @@ export class Wcb extends ColliderBase {
 
   protected calcCollisionCommonProgress(
     shapes: ShapePair,
+    callback: ColliderCallback,
     contact?: Contact,
-    calcDistance: boolean = false,
-    callback?: ColliderCallback): boolean | Contact | undefined | null {
+    calcDistance: boolean = false): boolean | Contact | undefined | null {
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
 
     const { shapeA, shapeB } = shapes;
-    let mkSimplex: Simplex | undefined = undefined;
-    let spSimplex: Simplex | undefined = undefined;
-    let mkPoints: SupportPoint[];
-    let spPoints: SupportPoint[];
-    let direction: Vector | undefined = undefined;
-
-    if (callback) {
-      mkSimplex = new Simplex();
-      mkPoints = mkSimplex.points;
-      direction = mkSimplex.direction;
-      spSimplex = new Simplex();
-      spPoints = spSimplex.points;
-    }
+    const mkSimplex = new Simplex();
+    const spSimplex = new Simplex();
+    const mkPoints: SupportPoint[] = mkSimplex.points;
+    const spPoints: SupportPoint[] = spSimplex.points;
+    const direction: Vector = mkSimplex.direction;
 
     if (calcDistance && contact)
       //* This normally gets us furthest from the origin but forces us to get a second support point
       //* when not colliding.
       //* If we have to calc distance, then we have to have a second support point anyway so use this
       //* as it won't require swapping support points.
-      direction = shapeA.position.subO(shapeB.position, direction);
+      shapeA.position.subO(shapeB.position, direction);
     else
       //* This normally gets us closest to the origin and we can early exit without getting another
       //* support point. It requires a swap but only if the shapes are colliding.
       //* Swapping the support points is faster than getting a new support point so use this if
       //* we don't have to calculate distance.
-      direction = shapeB.position.subO(shapeA.position, direction);
+      shapeB.position.subO(shapeA.position, direction);
 
     if (direction.equals(ZERO_DIRECTION))
       direction.withXY(1, 0);
@@ -316,13 +438,10 @@ export class Wcb extends ColliderBase {
     mka.adjustDiffPointIfCircle();
     let a = mka.worldPoint;
 
-    if (callback) {
-      mkPoints!.push(mka.clone());
-      direction = mkSimplex!.direction;
-      const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
-      spPoints!.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
-      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-    }
+    mkPoints.push(mka.clone());
+    const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
+    spPoints.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     direction.negate();
 
@@ -332,12 +451,10 @@ export class Wcb extends ColliderBase {
     mkb.adjustDiffPointIfCircle();
     let b = mkb.worldPoint;
 
-    if (callback) {
-      mkPoints!.push(mkb.clone());
-      let mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
-      spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
-      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-    }
+    mkPoints.push(mkb.clone());
+    let mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
+    spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     if (!calcDistance && b.dot(direction) <= 0) return false; // b did not cross origin in direction.
 
@@ -350,14 +467,12 @@ export class Wcb extends ColliderBase {
       a = mka.worldPoint;
       b = mkb.worldPoint;
 
-      if (callback) {
-        mkPoints!.shift();
-        mkPoints!.push(mkb.clone());
-        const mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
-        spPoints!.shift();
-        spPoints!.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
-        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-      }
+      mkPoints.shift();
+      mkPoints.push(mkb.clone());
+      const mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
+      spPoints.shift();
+      spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
+      callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
     state.mkc || (state.mkc = new MinkowskiDiffIterator(mkb, this.circleSegments));
@@ -365,8 +480,8 @@ export class Wcb extends ColliderBase {
     const ab = b.subO(a);
 
     return ao.cross2D(ab) < 0
-      ? this.walkCcwProgress(mka, mkb, state.mkc, ao, contact, mkSimplex, spSimplex, callback)
-      : this.walkCwProgress(mka, mkb, state.mkc, ao, contact, mkSimplex, spSimplex, callback);
+      ? this.walkCcwProgress(mka, mkb, state.mkc, ao, mkSimplex, spSimplex, callback, contact)
+      : this.walkCwProgress(mka, mkb, state.mkc, ao, mkSimplex, spSimplex, callback, contact);
   }
 
   protected calcCollisionCommon(
@@ -430,7 +545,7 @@ export class Wcb extends ColliderBase {
   }
 
   isCollidingProgressCore(shapes: ShapePair, callback: ColliderCallback): boolean | undefined {
-    const result = this.calcCollisionCommonProgress(shapes, undefined, false, callback);
+    const result = this.calcCollisionCommonProgress(shapes, callback);
     return typeof result === "boolean" || result === undefined ? result : undefined;
   }
 
@@ -439,7 +554,7 @@ export class Wcb extends ColliderBase {
     callback: ColliderCallback,
     contact: Contact,
     calcDistance: boolean): Tristate<Contact> {
-    const result = this.calcCollisionCommonProgress(shapes, contact, calcDistance, callback);
+    const result = this.calcCollisionCommonProgress(shapes, callback, contact, calcDistance);
     return result instanceof Contact || result === undefined || result === null ? result : undefined;
   }
 
