@@ -5,7 +5,6 @@ import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } fro
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import {
-  Clipper,
   ClipState,
   Collider,
   ColliderState,
@@ -112,7 +111,7 @@ const box5 = new PolygonShape([pos(8, 4), pos(14, 4), pos(14, 9), pos(8, 9)]);
 const plane1 = new PlaneShape(pos(4, 3), pos(6, 0));
 plane1.setPosition(pos(9.2, 6.2));
 
-const mkNormalProps: ContextProps = { strokeStyle: "purple", lineWidth: 3 };
+const mkNormalProps: ContextProps = { strokeStyle: "purple", lineWidth: 3, lineDash: [0.2, 0.2] };
 
 const pairs: ShapePair[] = [
   new ShapePair(plane1, circle2),
@@ -874,7 +873,7 @@ function applyCollider() {
   }
   //*/
 
-  //*
+  /*
   if (contact && contact.canClip && contact.isCollision) {
     // contact.incidentEdge = undefined;
     // contact.referenceEdge = undefined;
@@ -952,6 +951,7 @@ function drawClipState(clip: ClipState, view: Viewport) {
   const normal = contact.normal;
   refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
   incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  contact && drawContact(contact, view);
 
   points.forEach(cp => {
     beginPath(propsp, view).strokeRect(Bounds.fromCenter(cp.point, dir(0.8, 0.8)));
