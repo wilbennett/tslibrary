@@ -1,18 +1,42 @@
-import { Clipper, Contact, ContactPoint } from '.';
+import { ClipCallback, Clipper, Contact, ContactPoint } from '.';
 import { Vector } from '../../vectors';
 import { IPlane, Plane } from '../geometry';
 import { Edge } from '../shapes';
 
-export type ClipState = {
-  contact: Contact;
-  clipPlane?: IPlane;
-}
-
-export type ClipProgress = (state: ClipState) => void;
-
 export class Sutherland implements Clipper {
-  // @ts-ignore - unused param.
-  clip(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[] {
+  clip(contact: Contact, callback?: ClipCallback): ContactPoint[] {
+    if (callback)
+      return this.clipProgressCore(contact, callback);
+
+    const referenceEdge = contact.referenceEdge;
+    const incidentEdge = contact.incidentEdge;
+
+    if (!referenceEdge || !incidentEdge) return contact.points;
+
+    return this.clipCore(incidentEdge, referenceEdge, contact.points);
+  }
+
+  protected clipSegment(start: Vector, end: Vector, normal: Vector, dist: number, points: ContactPoint[]) {
+    points.splice(0);
+    const startDistance = normal.dot(start) - dist;
+    const endDistance = normal.dot(end) - dist;
+
+    // Keep points on the plane or in the positive halfspace of the plane.
+    if (startDistance >= 0) points.push(new ContactPoint(start, 0));
+    if (endDistance >= 0) points.push(new ContactPoint(end, 0));
+
+    // Clip points on opposing sides of the plane.
+    if (startDistance * endDistance < 0) {
+      const e = end.displaceByNegO(start);
+      const u = startDistance / (startDistance - endDistance);
+      start.displaceByScaledO(e, u, e);
+      points.push(new ContactPoint(e, 0));
+    }
+
+    return points;
+  }
+
+  protected clipCore(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[] {
     result || (result = []);
 
     const refv = referenceEdge.worldEnd.subO(referenceEdge.worldStart).normalize();
@@ -27,20 +51,21 @@ export class Sutherland implements Clipper {
     if (result.length < 2) return result;
 
     let refNorm = referenceEdge.worldNormal.negateO();
-    // referenceEdge.worldNormal.dot(incidentEdge.worldNormal) >= 0 && refNorm.negate();
     // flip && (refNorm = refNorm.negateO());
 
+    const contactPoint0 = result[0];
+    const contactPoint1 = result[1];
     const distance = refNorm.dot(referenceEdge.worldStart);
-    result[0].depth = refNorm.dot(result[0].point) - distance;
-    result[1].depth = refNorm.dot(result[1].point) - distance;
+    contactPoint0.depth = refNorm.dot(contactPoint0.point) - distance;
+    contactPoint1.depth = refNorm.dot(contactPoint1.point) - distance;
 
-    result[1].depth < 0 && result.pop();
-    result[0].depth < 0 && result.shift();
+    contactPoint1.depth < 0 && result.pop();
+    contactPoint0.depth < 0 && result.shift();
 
     return result;
   }
 
-  clipProgress(contact: Contact, callback: ClipProgress): ContactPoint[] {
+  protected clipProgressCore(contact: Contact, callback: ClipCallback): ContactPoint[] {
     const { referenceEdge, incidentEdge, points } = contact;
     let clipPlane: IPlane;
 
@@ -66,7 +91,6 @@ export class Sutherland implements Clipper {
     callback({ contact: contact.clone(), clipPlane });
 
     let refNorm = referenceEdge.worldNormal.negateO();
-    // referenceEdge.worldNormal.dot(incidentEdge.worldNormal) >= 0 && refNorm.negate();
     // flip && (refNorm = refNorm.negateO());
 
     const distance = refNorm.dot(referenceEdge.worldStart);
@@ -80,26 +104,6 @@ export class Sutherland implements Clipper {
     const cc = contact.clone();
     callback({ contact: cc, clipPlane });
     callback({ contact: cc });
-
-    return points;
-  }
-
-  protected clipSegment(start: Vector, end: Vector, normal: Vector, dist: number, points: ContactPoint[]) {
-    points.splice(0);
-    const startDistance = normal.dot(start) - dist;
-    const endDistance = normal.dot(end) - dist;
-
-    // Keep points on the plane or in the positive halfspace of the plane.
-    if (startDistance >= 0) points.push(new ContactPoint(start, 0));
-    if (endDistance >= 0) points.push(new ContactPoint(end, 0));
-
-    // Clip points on opposing sides of the plane.
-    if (startDistance * endDistance < 0) {
-      const e = end.displaceByNegO(start);
-      const u = startDistance / (startDistance - endDistance);
-      start.displaceByScaledO(e, u, e);
-      points.push(new ContactPoint(e, 0));
-    }
 
     return points;
   }

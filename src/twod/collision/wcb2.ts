@@ -1,7 +1,7 @@
-import { ColliderBase, Contact, ShapePair } from '.';
+import { ColliderBase, ColliderCallback, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
-import { MinkowskiDiffIterator, Simplex, SimplexCallback, SupportPoint, SupportPointImpl } from '../shapes';
+import { MinkowskiDiffIterator, Simplex, SupportPoint, SupportPointImpl } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
 import {
   CircleSegmentInfo,
@@ -31,20 +31,6 @@ export class Wcb2 extends ColliderBase {
   }
 
   circleSegments: CircleSegmentInfo;
-
-  isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
-    const result = this.calcCollisionCommonProgress(shapes, callback, undefined, false);
-    return typeof result === "boolean" || result === undefined ? result : undefined;
-  }
-
-  calcContactProgress(
-    shapes: ShapePair,
-    contact: Contact,
-    calcDistance: boolean = false,
-    callback: SimplexCallback): Tristate<Contact> {
-    const result = this.calcCollisionCommonProgress(shapes, callback, contact, calcDistance);
-    return result instanceof Contact || result === undefined || result === null ? result : undefined;
-  }
 
   protected populateContact(contact: Contact, mkbi: MinkowskiDiffIterator, containsOrigin: boolean) {
     const a = mkbi.vertex.clone();
@@ -120,7 +106,7 @@ export class Wcb2 extends ColliderBase {
     c: Vector,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback,
+    callback?: ColliderCallback,
     contact?: Contact): boolean | Contact | undefined | null {
     let mkPoints: SupportPoint[] | null = null;
     let spPoints: SupportPoint[] | null = null;
@@ -189,7 +175,7 @@ export class Wcb2 extends ColliderBase {
     c: Vector,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback,
+    callback?: ColliderCallback,
     contact?: Contact): boolean | Contact | undefined | null {
     let mkPoints: SupportPoint[] | null = null;
     let spPoints: SupportPoint[] | null = null;
@@ -326,7 +312,7 @@ export class Wcb2 extends ColliderBase {
 
   protected calcCollisionCommonProgress(
     shapes: ShapePair,
-    callback?: SimplexCallback,
+    callback?: ColliderCallback,
     contact?: Contact,
     calcDistance: boolean = false): boolean | Contact | undefined | null {
     const state = this.getState(shapes);
@@ -464,12 +450,26 @@ export class Wcb2 extends ColliderBase {
       : this.walkCw(prev, mkai, next, contact);
   }
 
+  isCollidingProgressCore(shapes: ShapePair, callback: ColliderCallback): boolean | undefined {
+    const result = this.calcCollisionCommonProgress(shapes, callback, undefined, false);
+    return typeof result === "boolean" || result === undefined ? result : undefined;
+  }
+
+  calcContactProgressCore(
+    shapes: ShapePair,
+    callback: ColliderCallback,
+    contact: Contact,
+    calcDistance: boolean): Tristate<Contact> {
+    const result = this.calcCollisionCommonProgress(shapes, callback, contact, calcDistance);
+    return result instanceof Contact || result === undefined || result === null ? result : undefined;
+  }
+
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
     const result = this.calcCollisionCommon(shapes, undefined, false);
     return typeof result === "boolean" || result === undefined ? result : undefined;
   }
 
-  protected calcContactCore(shapes: ShapePair, contact?: Contact, calcDistance?: boolean): Tristate<Contact> {
+  protected calcContactCore(shapes: ShapePair, contact: Contact, calcDistance: boolean): Tristate<Contact> {
     const result = this.calcCollisionCommon(shapes, contact, calcDistance);
     return result instanceof Contact || result === undefined || result === null ? result : undefined;
   }

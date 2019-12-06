@@ -1,13 +1,5 @@
 import { SupportPoint, Winding } from '.';
 import { Vector } from '../../vectors';
-import { Contact } from '../collision';
-
-export type SimplexState = {
-  simplices?: Simplex[];
-  contact?: Contact;
-};
-
-export type SimplexCallback = (state: SimplexState) => void;
 
 export class Simplex {
   points: SupportPoint[] = [];

@@ -1,4 +1,4 @@
-import { Clipper, ShapePair } from '.';
+import { ClipCallback, Clipper, ShapePair } from '.';
 import { ContextProps, Viewport } from '..';
 import { Tristate } from '../../core';
 import { Vector } from '../../vectors';
@@ -93,16 +93,12 @@ export class Contact {
     return result;
   }
 
-  clipPoints(clipper: Clipper) {
+  clipPoints(clipper: Clipper, clipCallback?: ClipCallback) {
     if (!this.canClip) return;
     if (!this.isCollision) return;
+    if (!this.referenceEdge || !this.incidentEdge) return;
 
-    const referenceEdge = this.referenceEdge;
-    const incidentEdge = this.incidentEdge;
-
-    if (!referenceEdge || !incidentEdge) return;
-
-    clipper.clip(incidentEdge, referenceEdge, this.points);
+    return clipper.clip(this, clipCallback);
   }
 
   flipNormal() { this.normal.negate(); }

@@ -1,6 +1,6 @@
-import { ColliderBase, ShapePair } from '.';
+import { ColliderBase, ShapePair, ColliderCallback } from '.';
 import { dir, Vector } from '../../vectors';
-import { MinkowskiShape, Simplex, SimplexCallback } from '../shapes';
+import { MinkowskiShape, Simplex} from '../shapes';
 
 const ZERO_DIRECTION = dir(0, 0);
 
@@ -17,52 +17,12 @@ export class GjkState {
 export class Gjk extends ColliderBase {
   maxIterations = 20;
 
-  isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
-    const state = this.getState(shapes);
-
-    if (state.unsupported) return undefined;
-
-    const shape = state.shape;
-    const simplex = state.simplex;
-    const points = simplex.points;
-    const direction = simplex.direction;
-    simplex.reset();
-    shapes.shapeB.position.subO(shapes.shapeA.position, direction);
-
-    if (direction.equals(ZERO_DIRECTION))
-      direction.withXY(1, 0);
-
-    const support = shape.getSupport(direction);
-
-    if (!support) return undefined;
-
-    points.push(support.clone());
-    callback && callback([simplex.clone()]);
-    direction.negate();
-    let i = this.maxIterations;
-
-    while (i-- > 0) {
-      //! Always return with a 2 simplex for EPA to work. So don't process the first point.
-      const b = points[points.length - 1];
-
-      if (b.worldPoint.dot(direction) > 0)
-        return false; // b is already in front of the origin in the direction.
-
-      shape.getSupport(direction, support);
-      points.push(support.clone());
-      callback && callback([simplex.clone()]);
-
-      if (support.worldPoint.dot(direction) <= 0)
-        return false; // Did not find a point further in the direction.
-
-      if (this.containsOrigin(simplex)) return true;
-    }
-
-    return false;
+  protected isCollidingProgressCore(shapes: ShapePair, callback: ColliderCallback): boolean | undefined {
+    return this.isCollidingCommon(shapes, callback);
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    return this.isCollidingProgress(shapes);
+    return this.isCollidingCommon(shapes);
   }
 
   protected containsOrigin(simplex: Simplex) {
@@ -147,11 +107,54 @@ export class Gjk extends ColliderBase {
     return false;
   }
 
+  isCollidingCommon(shapes: ShapePair, callback?: ColliderCallback): boolean | undefined {
+    const state = this.getState(shapes);
+
+    if (state.unsupported) return undefined;
+
+    const shape = state.shape;
+    const simplex = state.simplex;
+    const points = simplex.points;
+    const direction = simplex.direction;
+    simplex.reset();
+    shapes.shapeB.position.subO(shapes.shapeA.position, direction);
+
+    if (direction.equals(ZERO_DIRECTION))
+      direction.withXY(1, 0);
+
+    const support = shape.getSupport(direction);
+
+    if (!support) return undefined;
+
+    points.push(support.clone());
+    callback && callback({simplices: [simplex.clone()]});
+    direction.negate();
+    let i = this.maxIterations;
+
+    while (i-- > 0) {
+      //! Always return with a 2 simplex for EPA to work. So don't process the first point.
+      const b = points[points.length - 1];
+
+      if (b.worldPoint.dot(direction) > 0)
+        return false; // b is already in front of the origin in the direction.
+
+      shape.getSupport(direction, support);
+      points.push(support.clone());
+      callback && callback({simplices: [simplex.clone()]});
+
+      if (support.worldPoint.dot(direction) <= 0)
+        return false; // Did not find a point further in the direction.
+
+      if (this.containsOrigin(simplex)) return true;
+    }
+
+    return false;
+  }
+
   protected getState(shapes: ShapePair) {
     let state = <GjkState>shapes.customData["gjkState"];
 
     if (!state) {
-      // const { first, second } = shapes;
       state = new GjkState(shapes);
       shapes.customData["gjkState"] = state;
     }

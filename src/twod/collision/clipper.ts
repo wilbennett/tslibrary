@@ -1,6 +1,13 @@
-import { ContactPoint } from '.';
-import { Edge } from '../shapes';
+import { Contact, ContactPoint } from '.';
+import { IPlane } from '..';
+
+export type ClipState = {
+  contact: Contact;
+  clipPlane?: IPlane;
+}
+
+export type ClipCallback = (state: ClipState) => void;
 
 export interface Clipper {
-  clip(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[];
+  clip(contact: Contact, callback?: ClipCallback): ContactPoint[];
 }

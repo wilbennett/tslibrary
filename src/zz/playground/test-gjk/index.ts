@@ -4,8 +4,19 @@ import { MathEx, Tristate } from '../../../core';
 import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
-import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex, SimplexState } from '../../../twod/shapes';
+import {
+  Clipper,
+  ClipState,
+  Collider,
+  ColliderState,
+  Contact,
+  Gjk,
+  ShapePair,
+  Sutherland,
+  Wcb,
+  Wcb2,
+} from '../../../twod/collision';
+import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
@@ -148,7 +159,7 @@ const colliders: [string, Collider][] = [
 
 type State = {
   contact?: Contact;
-  simplexState?: SimplexState;
+  colliderState?: ColliderState;
   clipState?: ClipState;
 };
 
@@ -812,8 +823,8 @@ function createStateAnim() {
   runner.add(stateAnim);
 }
 
-function pushSimplices(simplexState: SimplexState) {
-  states.push({ simplexState });
+function pushColliderState(colliderState: ColliderState) {
+  states.push({ colliderState });
 }
 
 function pushClipState(clipState: ClipState) {
@@ -843,13 +854,14 @@ function applyCollider() {
   // console.clear();
 
   //*
+  collider.clipper = new Sutherland();
   // if (collider instanceof Gjk || collider instanceof Wcb)
   //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
   if (collider instanceof Wcb || collider instanceof Wcb2)
-    contact = collider.calcContactProgress(pair, pair.contact, true, pushSimplices);
+    contact = collider.calcContactProgress(pair, pushColliderState, pushClipState, pair.contact, true);
   else if (collider instanceof Gjk)
-    isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
+    isColliding = !!collider.isColliding(pair, pushColliderState);
   //*/
 
   /*
@@ -863,10 +875,10 @@ function applyCollider() {
 
   //*
   if (contact && contact.canClip && contact.isCollision) {
-    // cc.incidentEdge = undefined;
-    // cc.referenceEdge = undefined;
-    const clipper = new Sutherland();
-    clipper.clipProgress(contact.clone(), pushClipState);
+    // contact.incidentEdge = undefined;
+    // contact.referenceEdge = undefined;
+    const clipper: Clipper = new Sutherland();
+    clipper.clip(contact, pushClipState);
   }
   //*/
 
@@ -1018,10 +1030,10 @@ function drawState(state: State, view: Viewport) {
   state.clipState && drawClipState(state.clipState, view);
   state.contact && drawContact(state.contact, view);
 
-  if (state.simplexState) {
-    const simplexState = state.simplexState;
-    simplexState.simplices && simplexState.simplices.forEach(simplex => drawSimplex(simplex, view));
-    simplexState.contact && drawContact(simplexState.contact, view);
+  if (state.colliderState) {
+    const colliderState = state.colliderState;
+    colliderState.simplices && colliderState.simplices.forEach(simplex => drawSimplex(simplex, view));
+    colliderState.contact && drawContact(colliderState.contact, view);
   }
 }
 

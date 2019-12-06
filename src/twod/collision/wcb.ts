@@ -1,15 +1,7 @@
-import { ColliderBase, Contact, ShapePair } from '.';
+import { ColliderBase, ColliderCallback, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
-import {
-  MinkowskiDiffIterator,
-  MinkowskiPoint,
-  ORIGIN,
-  Simplex,
-  SimplexCallback,
-  SupportPoint,
-  SupportPointImpl,
-} from '../shapes';
+import { MinkowskiDiffIterator, MinkowskiPoint, ORIGIN, Simplex, SupportPoint, SupportPointImpl } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
 import { CircleSegmentInfo, getCircleSegmentInfo, segmentClosestPoint } from '../utils/utils2d';
 import { ContactPoint } from './contact';
@@ -31,20 +23,6 @@ export class Wcb extends ColliderBase {
   }
 
   circleSegments: CircleSegmentInfo;
-
-  isCollidingProgress(shapes: ShapePair, callback?: SimplexCallback): boolean | undefined {
-    const result = this.calcCollisionCommonProgress(shapes, undefined, false, callback);
-    return typeof result === "boolean" || result === undefined ? result : undefined;
-  }
-
-  calcContactProgress(
-    shapes: ShapePair,
-    contact?: Contact,
-    calcDistance: boolean = false,
-    callback?: SimplexCallback): Tristate<Contact> {
-    const result = this.calcCollisionCommonProgress(shapes, contact, calcDistance, callback);
-    return result instanceof Contact || result === undefined || result === null ? result : undefined;
-  }
 
   protected populateContact(contact: Contact, mkc: MinkowskiDiffIterator, containsOrigin: boolean) {
     contact.reset();
@@ -97,7 +75,7 @@ export class Wcb extends ColliderBase {
     contact?: Contact,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback): boolean | Contact | undefined | null {
+    callback?: ColliderCallback): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
@@ -170,7 +148,7 @@ export class Wcb extends ColliderBase {
     contact?: Contact,
     mkSimplex?: Simplex,
     spSimplex?: Simplex,
-    callback?: SimplexCallback): boolean | Contact | undefined | null {
+    callback?: ColliderCallback): boolean | Contact | undefined | null {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
@@ -296,7 +274,7 @@ export class Wcb extends ColliderBase {
     shapes: ShapePair,
     contact?: Contact,
     calcDistance: boolean = false,
-    callback?: SimplexCallback): boolean | Contact | undefined | null {
+    callback?: ColliderCallback): boolean | Contact | undefined | null {
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
@@ -449,6 +427,20 @@ export class Wcb extends ColliderBase {
     return ao.cross2D(ab) < 0
       ? this.walkCcw(mka, mkb, state.mkc, ao, contact)
       : this.walkCw(mka, mkb, state.mkc, ao, contact);
+  }
+
+  isCollidingProgressCore(shapes: ShapePair, callback: ColliderCallback): boolean | undefined {
+    const result = this.calcCollisionCommonProgress(shapes, undefined, false, callback);
+    return typeof result === "boolean" || result === undefined ? result : undefined;
+  }
+
+  calcContactProgressCore(
+    shapes: ShapePair,
+    callback: ColliderCallback,
+    contact: Contact,
+    calcDistance: boolean): Tristate<Contact> {
+    const result = this.calcCollisionCommonProgress(shapes, contact, calcDistance, callback);
+    return result instanceof Contact || result === undefined || result === null ? result : undefined;
   }
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
