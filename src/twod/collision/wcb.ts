@@ -226,10 +226,9 @@ export class Wcb extends ColliderBase {
 
     mkc.init(mkb);
 
-    const edge = mkc.getShapeEdge();
     spPoints.pop();
-    spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-    spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.vertex));
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.nextVertex));
 
     mkc.next();
     let c = mkc.worldPoint;
@@ -242,10 +241,9 @@ export class Wcb extends ColliderBase {
     const ac = c.subO(a);
 
     while (ao.cross2D(ac) < 0 && i-- > 0) {
-      const edge = mkc.getShapeEdge();
       spPoints.splice(1, 2);
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.vertex));
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.nextVertex));
 
       b.copyFrom(c);
       mkc.next();
@@ -283,25 +281,22 @@ export class Wcb extends ColliderBase {
     const a = mka.worldPoint;
     const b = mkb.worldPoint.clone();
     let i = mkc.vertexCount;
-    let mkPoints: SupportPoint[];
-    let spPoints: SupportPoint[];
+    let mkPoints: SupportPoint[] = mkSimplex.points;
+    let spPoints: SupportPoint[] = spSimplex.points;
 
     mkc.init(mkb);
     mkc.prev();
     let c = mkc.worldPoint;
 
-    if (callback) {
-      const ab = b.subO(a);
-      ab.perpRightO(mkSimplex!.direction);
-      mkPoints = mkSimplex!.points;
-      mkPoints.push(mkc.clone());
-      spPoints = spSimplex!.points;
-      const edge = mkc.getShapeEdge();
-      spPoints.pop();
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
-      spPoints.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-      callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-    }
+    const ab = b.subO(a);
+    ab.perpRightO(mkSimplex!.direction);
+    mkPoints = mkSimplex!.points;
+    mkPoints.push(mkc.clone());
+    spPoints = spSimplex!.points;
+    spPoints.pop();
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.vertex));
+    spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.nextVertex));
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     const ac = c.subO(a);
 
@@ -311,15 +306,12 @@ export class Wcb extends ColliderBase {
       c = mkc.worldPoint;
       c.subO(a, ac);
 
-      if (callback) {
-        mkPoints!.splice(1, 1);
-        mkPoints!.push(mkc.clone());
-        const edge = mkc.getShapeEdge();
-        spPoints!.splice(1, 2);
-        spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldEnd));
-        spPoints!.push(new SupportPointImpl(mkc.shape, undefined, edge.worldStart));
-        callback({ simplices: [mkSimplex!.clone(), spSimplex!.clone()] });
-      }
+      mkPoints.splice(1, 1);
+      mkPoints.push(mkc.clone());
+      spPoints.splice(1, 2);
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.vertex));
+      spPoints.push(new SupportPointImpl(mkc.shape, undefined, mkc.iterator.nextVertex));
+      callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
     const bo = b.negateO();
