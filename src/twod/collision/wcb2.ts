@@ -49,7 +49,7 @@ export class Wcb2 extends ColliderBase {
     let depth = normal.mag;
     normal.normalize();
     contact.minkowskiNormal = normal.clone();
-    contact.minkowskiDepth = Math.abs(depth);
+    contact.minkowskiDepth = depth;
     let negativeNormal = normal;
 
     if (!containsOrigin) {
@@ -102,51 +102,43 @@ export class Wcb2 extends ColliderBase {
   }
 
   protected walkCcwProgress(
-    a: Vector,
     mkbi: MinkowskiDiffIterator,
-    c: Vector,
+    bestDistance: number,
     mkSimplex: Simplex,
     spSimplex: Simplex,
     callback: ColliderCallback,
     contact?: Contact): boolean | Contact | undefined | null {
     const mkPoints: SupportPoint[] = mkSimplex.points;
     const spPoints: SupportPoint[] = spSimplex.points;
-    let b = mkbi.vertex.clone();
-    let distb = b.magSquared;
-    let distc = c.magSquared;
+    mkbi.next();
+    let bcDist = segmentSqrDistToPoint(mkbi.vertex, mkbi.nextVertex, ORIGIN);
 
-    while (distc < distb) {
+    mkPoints.shift();
+    mkPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.nextVertex));
+    spPoints.shift();
+    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
+
+    while (bcDist < bestDistance) {
       mkbi.next();
-      a = b;
-      b = c;
-      c = mkbi.nextVertex;
-      distb = distc;
-      distc = c.magSquared;
+      bestDistance = bcDist;
+      bcDist = segmentSqrDistToPoint(mkbi.vertex, mkbi.nextVertex, ORIGIN);
 
       mkPoints.shift();
-      mkPoints.push(new SupportPointImpl(mkbi.shape, undefined, c));
+      mkPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.nextVertex));
       spPoints.shift();
       spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
       callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
-    const abDist = segmentSqrDistToPoint(a, b, ORIGIN);
-    const bcDist = segmentSqrDistToPoint(b, c, ORIGIN);
+    mkbi.prev();
 
-    if (abDist < bcDist) {
-      mkbi.prev();
-      mkPoints.pop();
-    } else {
-      a = b;
-      b = c;
-      mkPoints.shift();
-    }
+    mkPoints.pop();
+    spPoints.pop();
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
-    spPoints.splice(0);
-    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
-    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
-    callback!({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
-
+    const a = mkbi.vertex;
+    const b = mkbi.nextVertex;
     const ao = a.negateO();
     const ab = b.subO(a);
     const containsOrigin = ab.cross2D(ao) >= 0;
@@ -159,53 +151,41 @@ export class Wcb2 extends ColliderBase {
   }
 
   protected walkCwProgress(
-    a: Vector,
     mkbi: MinkowskiDiffIterator,
-    c: Vector,
+    bestDistance: number,
     mkSimplex: Simplex,
     spSimplex: Simplex,
     callback: ColliderCallback,
     contact?: Contact): boolean | Contact | undefined | null {
     const mkPoints: SupportPoint[] = mkSimplex.points;
     const spPoints: SupportPoint[] = spSimplex.points;
-    let b = mkbi.vertex.clone();
-    let dista = a.magSquared;
-    let distb = b.magSquared;
+    mkbi.prev();
+    let abDist = segmentSqrDistToPoint(mkbi.prevVertex, mkbi.vertex, ORIGIN);
 
-    while (dista < distb) {
+    mkPoints.pop();
+    mkPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.prevVertex));
+    spPoints.pop();
+    spPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.prevVertex));
+    callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
+
+    while (abDist <= bestDistance) {
       mkbi.prev();
-      c = b;
-      b = a;
-      a = mkbi.prevVertex;
-      distb = dista;
-      dista = a.magSquared;
+      bestDistance = abDist;
+      abDist = segmentSqrDistToPoint(mkbi.prevVertex, mkbi.vertex, ORIGIN);
 
       mkPoints.pop();
-      mkPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, a));
+      mkPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.prevVertex));
       spPoints.pop();
-      mkbi.prev();
-      spPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
-      mkbi.next();
+      spPoints.unshift(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.prevVertex));
       callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
-    const abDist = segmentSqrDistToPoint(a, b, ORIGIN);
-    const bcDist = segmentSqrDistToPoint(b, c, ORIGIN);
-
-    if (abDist < bcDist) {
-      mkbi.prev();
-      mkPoints.pop();
-    } else {
-      a = b;
-      b = c;
-      mkPoints.shift();
-    }
-
-    spPoints.splice(0);
-    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.vertex));
-    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.iterator.nextVertex));
+    mkPoints.shift();
+    spPoints.shift();
     callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
+    const a = mkbi.vertex;
+    const b = mkbi.nextVertex;
     const ao = a.negateO();
     const ab = b.subO(a);
     const containsOrigin = ab.cross2D(ao) >= 0;
@@ -367,12 +347,12 @@ export class Wcb2 extends ColliderBase {
       mkbi.prev();
     }
 
-    const dista = a.magSquared;
-    const distc = c.magSquared;
+    const abDist = segmentSqrDistToPoint(a, b, ORIGIN);
+    const bcDist = segmentSqrDistToPoint(b, c, ORIGIN);
 
-    return distc <= dista
-      ? this.walkCcwProgress(a, mkbi, c, mkSimplex, spSimplex, callback, contact)
-      : this.walkCwProgress(a, mkbi, c, mkSimplex, spSimplex, callback, contact);
+    return bcDist <= abDist
+      ? this.walkCcwProgress(mkbi, bcDist, mkSimplex, spSimplex, callback, contact)
+      : this.walkCwProgress(mkbi, abDist, mkSimplex, spSimplex, callback, contact);
   }
 
   protected calcCollisionCommon(
