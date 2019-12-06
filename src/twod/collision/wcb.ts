@@ -2,9 +2,9 @@ import { ColliderBase, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import {
-  Edge,
   MinkowskiDiffIterator,
   MinkowskiPoint,
+  ORIGIN,
   Simplex,
   SimplexCallback,
   SupportPoint,
@@ -46,74 +46,46 @@ export class Wcb extends ColliderBase {
     return result instanceof Contact || result === undefined || result === null ? result : undefined;
   }
 
-  protected getBestEdge(direction: Vector, leftEdge: Edge, rightEdge: Edge) {
-    const v0 = rightEdge.worldStart;
-    const v = rightEdge.worldEnd;
-    const v1 = leftEdge.worldEnd;
-
-    const left = v.subO(v1).normalize();
-    const right = v.subO(v0).normalize();
-
-    if (right.dot(direction) <= left.dot(direction))
-      return rightEdge; // Right edge is most perpendicular to direction.
-
-    return leftEdge;
-  }
-
   protected populateContact(contact: Contact, mkc: MinkowskiDiffIterator, containsOrigin: boolean) {
     contact.reset();
-    const refLeftEdge = mkc.getShapeEdge();
-    const refRightEdge = mkc.iterator.prevEdge;
+    const a = mkc.vertex.clone();
+    const b = mkc.nextVertex.clone();
+    const referenceEdge = mkc.getShapeEdge();
 
-    while (mkc.shape === refLeftEdge.shape)
+    while (mkc.shape === referenceEdge.shape)
       mkc.next();
 
-    let incLeftEdge = mkc.getShapeEdge();
-    let incidentVertex = incLeftEdge.worldStart;
+    let incidentLeftEdge = mkc.getShapeEdge();
+    const incidentRightEdge = mkc.iterator.prevEdge;
+    // let incidentVertex = incidentLeftEdge.worldStart;
 
-    const closestPoint = segmentClosestPoint(refLeftEdge.worldStart, refLeftEdge.worldEnd, incidentVertex);
-    closestPoint.subO(incidentVertex, contact.normal);
-    const depth = containsOrigin ? contact.normal.mag : -contact.normal.mag;
-    !containsOrigin && contact.normal.negate();
-
-    contact.points.push(new ContactPoint(incidentVertex, depth));
+    const closestPoint = segmentClosestPoint(a, b, ORIGIN);
+    closestPoint.asDirectionO(contact.normal);
+    let depth = contact.normal.mag;
+    contact.minkowskiNormal = contact.normal.normalizeO();
+    contact.minkowskiDepth = Math.abs(depth);
     contact.normal.normalize();
 
-    if (!containsOrigin || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
-      contact.referenceEdge = refLeftEdge.clone();
-      contact.incidentEdge = incLeftEdge.clone();
-      return contact;
-    }
-
-    refLeftEdge.shape === contact.shapeB && contact.normal.negate();
-    const incRightEdge = mkc.iterator.prevEdge;
-    let collisionNormal = contact.normal.clone();
-    let referenceEdge: Edge;
-    let incidentEdge: Edge;
-
-    if (refLeftEdge.shape === contact.shapeA) {
-      referenceEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
-      incidentEdge = this.getBestEdge(collisionNormal.negateO(), incLeftEdge, incRightEdge);
-    } else { // Always start with reference on shapeA.
-      referenceEdge = this.getBestEdge(collisionNormal, incLeftEdge, incRightEdge);
-      incidentEdge = this.getBestEdge(collisionNormal.negateO(), refLeftEdge, refRightEdge);
-    }
-
-    const refVector = referenceEdge.worldEnd.subO(referenceEdge.worldStart);
-    const incVector = incidentEdge.worldEnd.subO(incidentEdge.worldStart);
-
-    const refDotNormal = Math.abs(refVector.dot(collisionNormal));
-    const incDotNormal = Math.abs(incVector.dot(collisionNormal));
-
-    if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
-      contact.referenceEdge = referenceEdge.clone();
-      contact.incidentEdge = incidentEdge.clone();
+    if (!containsOrigin) {
+      depth = -depth;
+      referenceEdge.shape === contact.shapeA && contact.normal.negate();
     } else {
-      contact.referenceEdge = incidentEdge.clone();
-      contact.incidentEdge = referenceEdge.clone();
-      contact.flip = true;
+      referenceEdge.shape !== contact.shapeA && contact.normal.negate();
     }
 
+    const negativeNormal = contact.normal.negateO();
+    const incidentLeftDot = incidentLeftEdge.normalDirection.dot(negativeNormal);
+    const incidentRightDot = incidentRightEdge.normalDirection.dot(negativeNormal);
+    // Incident edge is the one most in the direction of the normal.
+    const incidentEdge = incidentLeftDot > incidentRightDot ? incidentLeftEdge : incidentRightEdge;
+    const incidentStartDot = incidentEdge.worldStart.dot(negativeNormal);
+    const incidentEndDot = incidentEdge.worldEnd.dot(negativeNormal);
+    // Incident vertex is the one most in the direction of the normal.
+    const incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+
+    contact.points.push(new ContactPoint(incidentVertex, depth));
+    contact.referenceEdge = referenceEdge.clone();
+    contact.incidentEdge = incidentEdge.clone();
     return contact;
   }
 
@@ -180,6 +152,7 @@ export class Wcb extends ColliderBase {
     const containsOrigin = bo.cross2D(bc) <= 0;
 
     if (contact) {
+      // TODO: Need to walk to the edge that's closest to the origin.
       mkc.prev();
       this.populateContact(contact, mkc, containsOrigin);
       callback && callback({ contact });
@@ -245,6 +218,7 @@ export class Wcb extends ColliderBase {
     const containsOrigin = bo.cross2D(bc) >= 0;
 
     if (contact) {
+      // TODO: Need to walk to the edge that's closest to the origin.
       this.populateContact(contact, mkc, containsOrigin);
       callback && callback({ contact });
       return contact;
@@ -280,6 +254,7 @@ export class Wcb extends ColliderBase {
     const containsOrigin = bo.cross2D(bc) <= 0;
 
     if (contact) {
+      // TODO: Need to walk to the edge that's closest to the origin.
       mkc.prev();
       return this.populateContact(contact, mkc, containsOrigin);
     }
@@ -313,6 +288,7 @@ export class Wcb extends ColliderBase {
     const bc = c.subO(b);
     const containsOrigin = bo.cross2D(bc) >= 0;
 
+    // TODO: Need to walk to the edge that's closest to the origin.
     return contact ? this.populateContact(contact, mkc, containsOrigin) : containsOrigin;
   }
 

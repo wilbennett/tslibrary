@@ -4,7 +4,7 @@ import { MathEx, Tristate } from '../../../core';
 import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
-import { ClipState, Collider, Contact, Gjk, ShapePair, Wcb, Wcb2 } from '../../../twod/collision';
+import { ClipState, Collider, Contact, Gjk, ShapePair, Sutherland, Wcb, Wcb2 } from '../../../twod/collision';
 import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex, SimplexState } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
@@ -330,14 +330,8 @@ function render() {
     drawShape1Vertices(shapeA, view);
     drawShape2Vertices(shapeB, view);
     // mkVertices && drawMinkowskiVertices(mkVertices, { lineWidth: 2 }, view);
-    // mkNormal && mkNormal.scaleO(collisionDepth).render(view, undefined, { strokeStyle: "purple", lineWidth: 3 });
-    // contactPoint && contactPoint.render(view, undefined, { fillStyle: "purple", lineWidth: 3 });
-    // collisionNormal && contactPoint && collisionNormal.scaleO(collisionDepth).render(view, contactPoint, { strokeStyle: "purple", lineWidth: 3 });
-    // simplices.forEach(simplex => drawSimplex(simplex, view));
     shapeB.render(view);
     shapeA.render(view);
-    // contact && drawContact(contact, view);
-    // clipState && contact && drawClipState(clipState, view);
     stateIndex >= 0 && showStateIndex() && drawState(states[stateIndex], view);
 
     //*
@@ -867,7 +861,7 @@ function applyCollider() {
   }
   //*/
 
-  /*
+  //*
   if (contact && contact.canClip && contact.isCollision) {
     // cc.incidentEdge = undefined;
     // cc.referenceEdge = undefined;

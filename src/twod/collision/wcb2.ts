@@ -1,9 +1,15 @@
 import { ColliderBase, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
-import { Edge, MinkowskiDiffIterator, Simplex, SimplexCallback, SupportPoint, SupportPointImpl } from '../shapes';
+import { MinkowskiDiffIterator, Simplex, SimplexCallback, SupportPoint, SupportPointImpl } from '../shapes';
 import * as Minkowski from '../shapes/minkowski';
-import { CircleSegmentInfo, getCircleSegmentInfo, segmentClosestPoint, segmentSqrDistToPoint } from '../utils/utils2d';
+import {
+  CircleSegmentInfo,
+  getCircleSegmentInfo,
+  lineClosestPoint,
+  segmentClosestPoint,
+  segmentSqrDistToPoint,
+} from '../utils/utils2d';
 import { ContactPoint } from './contact';
 
 const ZERO_DIRECTION = dir(0, 0);
@@ -39,74 +45,52 @@ export class Wcb2 extends ColliderBase {
     return result instanceof Contact || result === undefined || result === null ? result : undefined;
   }
 
-  protected getBestEdge(direction: Vector, leftEdge: Edge, rightEdge: Edge) {
-    const v0 = rightEdge.worldStart;
-    const v = rightEdge.worldEnd;
-    const v1 = leftEdge.worldEnd;
-
-    const left = v.subO(v1).normalize();
-    const right = v.subO(v0).normalize();
-
-    if (right.dot(direction) <= left.dot(direction))
-      return rightEdge; // Right edge is most perpendicular to direction.
-
-    return leftEdge;
-  }
-
   protected populateContact(contact: Contact, mkbi: MinkowskiDiffIterator, containsOrigin: boolean) {
-    const refLeftEdge = mkbi.getShapeEdge();
-    const refRightEdge = mkbi.iterator.prevEdge;
+    const a = mkbi.vertex.clone();
+    const b = mkbi.nextVertex.clone();
+    const referenceEdge = mkbi.getShapeEdge();
 
-    while (mkbi.shape === refLeftEdge.shape)
+    while (mkbi.shape === referenceEdge.shape)
       mkbi.next();
 
-    let incLeftEdge = mkbi.getShapeEdge();
-    let incidentVertex = incLeftEdge.worldStart;
+    const incidentLeftEdge = mkbi.getShapeEdge();
+    const incidentRightEdge = mkbi.iterator.prevEdge;
 
-    const closestPoint = segmentClosestPoint(refLeftEdge.worldStart, refLeftEdge.worldEnd, incidentVertex);
-    closestPoint.subO(incidentVertex, contact.normal);
-    const depth = containsOrigin ? contact.normal.mag : -contact.normal.mag;
-    !containsOrigin && contact.normal.negate();
+    const closestPoint = containsOrigin ? lineClosestPoint(a, b, ORIGIN) : segmentClosestPoint(a, b, ORIGIN);
+    let normal = closestPoint.asDirectionO();
+    let depth = normal.mag;
+    normal.normalize();
+    contact.minkowskiNormal = normal.clone();
+    contact.minkowskiDepth = Math.abs(depth);
+    let negativeNormal = normal;
 
-    contact.normal.normalize();
+    if (!containsOrigin) {
+      depth = -depth;
 
-    // if (!containsOrigin) { // || contact.shapeA.vertexList.length < 2 || contact.shapeB.vertexList.length < 2) {
-    //   contact.points.push(new ContactPoint(incLeftEdge.worldStart, depth));
-    //   contact.referenceEdge = refLeftEdge;
-    //   contact.incidentEdge = incLeftEdge;
-    //   return contact;
-    // }
-
-    contact.points.push(new ContactPoint(incidentVertex, depth));
-    refLeftEdge.shape === contact.shapeB && contact.normal.negate();
-    const incRightEdge = mkbi.iterator.prevEdge;
-    let collisionNormal = contact.normal.clone();
-    let referenceEdge: Edge;
-    let incidentEdge: Edge;
-
-    if (refLeftEdge.shape === contact.shapeA) {
-      referenceEdge = this.getBestEdge(collisionNormal, refLeftEdge, refRightEdge);
-      incidentEdge = this.getBestEdge(collisionNormal.negateO(), incLeftEdge, incRightEdge);
-    } else { // Always start with reference on shapeA.
-      referenceEdge = this.getBestEdge(collisionNormal, incLeftEdge, incRightEdge);
-      incidentEdge = this.getBestEdge(collisionNormal.negateO(), refLeftEdge, refRightEdge);
-    }
-
-    const refVector = referenceEdge.worldEnd.subO(referenceEdge.worldStart);
-    const incVector = incidentEdge.worldEnd.subO(incidentEdge.worldStart);
-
-    const refDotNormal = Math.abs(refVector.dot(collisionNormal));
-    const incDotNormal = Math.abs(incVector.dot(collisionNormal));
-
-    if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
-      contact.referenceEdge = referenceEdge;
-      contact.incidentEdge = incidentEdge;
+      if (referenceEdge.shape === contact.shapeA)
+        normal = normal.negateO();
+      else
+        negativeNormal = normal.negateO();
     } else {
-      contact.referenceEdge = incidentEdge;
-      contact.incidentEdge = referenceEdge;
-      contact.flip = true;
+      if (referenceEdge.shape !== contact.shapeA)
+        normal = normal.negateO();
+      else
+        negativeNormal = normal.negateO();
     }
 
+    const incidentLeftDot = incidentLeftEdge.normalDirection.dot(negativeNormal);
+    const incidentRightDot = incidentRightEdge.normalDirection.dot(negativeNormal);
+    // Incident edge is the one most in the direction of the normal.
+    const incidentEdge = incidentLeftDot > incidentRightDot ? incidentLeftEdge : incidentRightEdge;
+    const incidentStartDot = incidentEdge.worldStart.dot(negativeNormal);
+    const incidentEndDot = incidentEdge.worldEnd.dot(negativeNormal);
+    // Incident vertex is the one most in the direction of the normal.
+    const incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+
+    contact.normal = normal;
+    contact.points.push(new ContactPoint(incidentVertex, depth));
+    contact.referenceEdge = referenceEdge.clone();
+    contact.incidentEdge = incidentEdge.clone();
     return contact;
   }
 
