@@ -102,61 +102,68 @@ export function segmentSqrDistToPoint(start: Vector, end: Vector, point: Vector)
 //
 // Segment.
 // Christer Ericson - Real Time Collision Detection.
-export function segmentSegmentClosestPoints(p1: Vector, q1: Vector, p2: Vector, q2: Vector, c1: Vector, c2: Vector) {
-  const d1 = q1.subO(p1); // Direction vector of segment S1
-  const d2 = q2.subO(p2); // Direction vector of segment S2
-  const r = p1.subO(p2);
-  const a = d1.dot(d1); // Squared length of segment S1, always nonnegative
-  const e = d2.dot(d2); // Squared length of segment S2, always nonnegative
-  const f = d2.dot(r);
+// Computes closest points on two segments and returns the squared distance between them.
+export function segmentSegmentClosestPoints(
+  segment1Start: Vector,
+  segment1End: Vector,
+  segment2Start: Vector,
+  segment2End: Vector,
+  segment1Closest: Vector,
+  segment2Closest: Vector) {
+  const segment1Vector = segment1End.subO(segment1Start); // Direction vector of segment S1
+  const segment2Vector = segment2End.subO(segment2Start); // Direction vector of segment S2
+  const r = segment1Start.subO(segment2Start);
+  const segment1SqrLen = segment1Vector.dot(segment1Vector); // Squared length of segment S1, always nonnegative
+  const segment2SqrLen = segment2Vector.dot(segment2Vector); // Squared length of segment S2, always nonnegative
+  const f = segment2Vector.dot(r);
 
   // Check if either or both segments degenerate into points
-  if (a <= EPSILON && e <= EPSILON) { // Both segments degenerate into points
-    c1.copyFrom(p1);
-    c2.copyFrom(p2);
-    return c1.subO(c2).dot(c1.subO(c2));
+  if (segment1SqrLen <= EPSILON && segment2SqrLen <= EPSILON) { // Both segments degenerate into points
+    segment1Closest.copyFrom(segment1Start);
+    segment2Closest.copyFrom(segment2Start);
+    return segment1Closest.subO(segment2Closest).dot(segment1Closest.subO(segment2Closest));
   }
 
-  let s: number;
-  let t: number;
+  let segment1Scale: number;
+  let segment2Scale: number;
 
-  if (a <= EPSILON) { // First segment degenerates into a point
-    s = 0;
-    t = f / e; // s = 0 => t = (b*s + f) / e = f / e
-    t = clamp(t, 0, 1);
+  if (segment1SqrLen <= EPSILON) { // First segment degenerates into a point
+    segment1Scale = 0;
+    segment2Scale = f / segment2SqrLen; // s = 0 => t = (b*s + f) / e = f / e
+    segment2Scale = clamp(segment2Scale, 0, 1);
   } else {
-    const c = d1.dot(r);
+    const c = segment1Vector.dot(r);
 
-    if (e <= EPSILON) { // Second segment degenerates into a point
-      t = 0;
-      s = clamp(-c / a, 0, 1); // t = 0 => s = (b*t - c) / a = -c / a
+    if (segment2SqrLen <= EPSILON) { // Second segment degenerates into a point
+      segment2Scale = 0;
+      segment1Scale = clamp(-c / segment1SqrLen, 0, 1); // t = 0 => s = (b*t - c) / a = -c / a
     } else { // The general nondegenerate case starts here
-      const b = d1.dot(d2);
-      const denom = a * e - b * b; // Always nonnegative
+      const b = segment1Vector.dot(segment2Vector);
+      const denom = segment1SqrLen * segment2SqrLen - b * b; // Always nonnegative
       // If segments not parallel, compute closest point on L1 to L2 and
       // clamp to segment S1. Else pick arbitrary s (here 0)
       if (denom !== 0) {
-        s = clamp((b * f - c * e) / denom, 0, 1);
+        segment1Scale = clamp((b * f - c * segment2SqrLen) / denom, 0, 1);
       } else
-        s = 0;
+        segment1Scale = 0;
       // Compute point on L2 closest to S1(s) using
       // t = Dot((P1 + D1*s) - P2,D2) / Dot(D2,D2) = (b*s + f) / e
-      t = (b * s + f) / e;
+      segment2Scale = (b * segment1Scale + f) / segment2SqrLen;
       // If t in [0,1] done. Else clamp t, recompute s for the new value
       // of t using s = Dot((P2 + D2*t) - P1,D1) / Dot(D1,D1)= (t*b - c) / a
       // and clamp s to [0, 1]
-      if (t < 0) {
-        t = 0;
-        s = clamp(-c / a, 0, 1);
-      } else if (t > 1) {
-        t = 1;
-        s = clamp((b - c) / a, 0, 1);
+      if (segment2Scale < 0) {
+        segment2Scale = 0;
+        segment1Scale = clamp(-c / segment1SqrLen, 0, 1);
+      } else if (segment2Scale > 1) {
+        segment2Scale = 1;
+        segment1Scale = clamp((b - c) / segment1SqrLen, 0, 1);
       }
     }
   }
 
-  p1.displaceByScaledO(d1, s, c1);
-  p2.displaceByScaledO(d2, t, c2);
-  return c1.subO(c2).dot(c1.subO(c2));
+  segment1Start.displaceByScaledO(segment1Vector, segment1Scale, segment1Closest);
+  segment2Start.displaceByScaledO(segment2Vector, segment2Scale, segment2Closest);
+  return segment1Closest.subO(segment2Closest).dot(segment1Closest.subO(segment2Closest));
 }
 
