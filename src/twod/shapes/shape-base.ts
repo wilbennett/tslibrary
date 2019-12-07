@@ -39,6 +39,28 @@ export abstract class ShapeBase implements IShape {
   get position() { return Vector.empty; }
   // @ts-ignore - unused param.
   set position(value) { }
+  get velocity() {
+    let maxVelocity = dir(0, 0);
+    let maxSpeed = -Infinity;
+    const integrators = this.integrators;
+    const count = integrators.length;
+
+    for (let i = 0; i < count; i++) {
+      const integrator = integrators[i];
+      const speed = integrator.velocity.magSquared;
+
+      if (speed > maxSpeed) {
+        maxVelocity = integrator.velocity;
+        maxSpeed = speed;
+      }
+    }
+
+    return maxVelocity;
+  }
+  set velocity(value) {
+    this.integrators.forEach(integrator => integrator.velocity = value);
+  }
+
   get center() { return this._isWorld ? this.position : ORIGIN; }
   get angle() {
     const integrators = this.integrators;
@@ -57,7 +79,7 @@ export abstract class ShapeBase implements IShape {
   protected _isTransformDirty = true;
   protected _transform: MatrixValues;
   get transform() {
-    if (this._isTransformDirty) {
+    if (this._isTransformDirty || this.integrators.some(integrator => integrator.isDirty)) {
       this.calcTransform(this._transform, this._transformInverse);
       this.cleanTransform();
     }
@@ -66,7 +88,7 @@ export abstract class ShapeBase implements IShape {
   }
   protected _transformInverse: MatrixValues;
   get transformInverse() {
-    if (this._isTransformDirty) {
+    if (this._isTransformDirty || this.integrators.some(integrator => integrator.isDirty)) {
       this.calcTransform(this._transform, this._transformInverse);
       this.cleanTransform();
     }
@@ -391,18 +413,19 @@ export abstract class ShapeBase implements IShape {
 
   protected calcTransform(transform: MatrixValues, transformInverse: MatrixValues) {
     const matrix = this.matrix;
+    const position = this.position;
 
     if (this._isWorld) {
       matrix
         .setToIdentity()
-        .translate(this.position)
+        .translate(position)
         .rotate2D(this.angle)
-        .translate(this.position.negateO());
+        .translate(position.negateO());
     } else {
       matrix
         .setToIdentity()
         .setRotation2D(this.angle)
-        .setTranslation(this.position);
+        .setTranslation(position);
     }
 
     matrix.getValues(transform);

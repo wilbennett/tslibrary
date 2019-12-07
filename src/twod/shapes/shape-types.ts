@@ -24,6 +24,9 @@ export interface IShape extends IGeometry {
   referenceShape?: Shape;
   usesReferenceShape: boolean; // e.g. plane can use another shape to determine vertices/edges.
   hasDynamicAxes: boolean;
+
+  velocity: Vector;
+
   props: ContextProps;
 
   getVertex(index: number): Vector; // Local;
