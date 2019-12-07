@@ -5,6 +5,8 @@ export * from "./collider";
 export * from "./clipper";
 export * from "./broad-phase";
 export * from "./narrow-phase";
+export * from "./simple-broad-phase";
+export * from "./simple-narrow-phase";
 export * from "./collider-base";
 export * from "./simple-collider";
 export * from "./sat-projection";
