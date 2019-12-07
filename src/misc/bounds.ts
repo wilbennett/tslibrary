@@ -101,6 +101,10 @@ export class Bounds {
   get centerX() { return this.center.x; }
   get centerY() { return this.center.y; }
 
+  clone() {
+    return new Bounds("centerhalf", this.center.clone(), this.halfSize.clone(), this.direction);
+  }
+
   toString() { return `(${this.min}, ${this.max})`; }
 
   withDirection(direction: BoundsDirection): Bounds {
