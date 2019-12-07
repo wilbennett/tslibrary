@@ -1,4 +1,5 @@
 export * from "./shape-pair";
+export * from "./shape-pair-manager";
 export * from "./contact";
 export * from "./collider";
 export * from "./clipper";

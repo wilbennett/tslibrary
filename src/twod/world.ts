@@ -1,7 +1,7 @@
 import { CanvasContext, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
-import { ShapePair } from './collision';
+import { ShapePairManager } from './collision';
 import { Integrator } from './integrators';
 import { Shape } from './shapes';
 
@@ -11,7 +11,7 @@ export class World {
   }
 
   protected _shapes: Shape[] = [];
-  protected _pairs: ShapePair[] = [];
+  protected _pairManager = new ShapePairManager();
   protected _integrators: Integrator[] = [];
 
   readonly bounds: Bounds;
@@ -19,32 +19,25 @@ export class World {
 
   clear() {
     this._shapes.splice(0);
-    this._pairs.splice(0);
+    this._pairManager.clear();
     this._integrators.splice(0);
   }
 
   add(shape: Shape) {
-    this._shapes.forEach(existing => this._pairs.push(new ShapePair(shape, existing)));
     this._shapes.push(shape);
+    this._pairManager.addShape(shape, this._shapes);
     this._integrators.push(...shape.integrators);
   }
 
   remove(shape: Shape) {
     this._shapes.remove(shape);
+    this._pairManager.removeShape(shape);
     shape.integrators.forEach(integrator => this._integrators.remove(integrator));
-    const pairs = this._pairs;
-
-    for (let i = this._pairs.length - 1; i >= 0; i--) {
-      const pair = pairs[i];
-
-      if (pair.shapeA === shape || pair.shapeB === shape)
-        pairs.remove(pair);
-    }
   }
 
   createView(ctx: CanvasContext, viewBounds?: Bounds, screenBounds?: Bounds) {
-    viewBounds || (viewBounds = this.bounds);
-    screenBounds || (screenBounds = ctx.bounds);
+    viewBounds || (viewBounds = this.bounds.clone());
+    screenBounds || (screenBounds = ctx.bounds.clone());
     return new Viewport(ctx, screenBounds, viewBounds, this.bounds);
   }
 
@@ -57,8 +50,8 @@ export class World {
   }
 
   // @ts-ignore - unused param.
-  render(timestep: TimeStep, now: DOMHighResTimeStamp, viewport?: Viewport) {
-    const view = viewport || this.view;
+  render(timestep: TimeStep, now: DOMHighResTimeStamp) {
+    const view = this.view;
 
     if (!view) return;
 
