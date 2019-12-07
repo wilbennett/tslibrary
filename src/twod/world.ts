@@ -1,7 +1,7 @@
 import { CanvasContext, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
-import { ShapePairManager } from './collision';
+import { BroadPhase, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
 import { Integrator } from './integrators';
 import { Shape } from './shapes';
 
@@ -16,6 +16,10 @@ export class World {
 
   readonly bounds: Bounds;
   view?: Viewport;
+  broadPhase?: BroadPhase;
+  narrowPhase?: NarrowPhase;
+  collidingPairs: ShapePair[] = [];
+  contacts: Contact[] = [];
 
   clear() {
     this._shapes.splice(0);
@@ -24,8 +28,8 @@ export class World {
   }
 
   add(shape: Shape) {
-    this._shapes.push(shape);
     this._pairManager.addShape(shape, this._shapes);
+    this._shapes.push(shape);
     this._integrators.push(...shape.integrators);
   }
 
@@ -46,6 +50,17 @@ export class World {
   }
 
   update(timestep: TimeStep, now: DOMHighResTimeStamp) {
+    this.collidingPairs = [];
+    this.contacts = [];
+    const broadPhase = this.broadPhase;
+    const narrowPhase = this.narrowPhase;
+
+    this.collidingPairs = broadPhase
+      ? broadPhase.execute(this._shapes, this._pairManager)
+      : this._pairManager.pairs;
+
+    narrowPhase && (this.contacts = narrowPhase.execute(this.collidingPairs));
+
     this._integrators.forEach(integrator => integrator.integrate(now, timestep));
   }
 

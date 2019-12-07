@@ -3,8 +3,8 @@ import { WebColors } from '../../../colors';
 import { MathEx, TimeStep } from '../../../core';
 import { EaseRunner } from '../../../easing';
 import { Bounds } from '../../../misc';
-import { Brush, CanvasContext, Graph, World } from '../../../twod';
-import { Collider, Wcb, Wcb2 } from '../../../twod/collision';
+import { Brush, CanvasContext, ContextProps, Graph, World } from '../../../twod';
+import { Collider, SimpleBroadPhase, SimpleNarrowPhase, Wcb, Wcb2 } from '../../../twod/collision';
 import { AABBShape, CircleShape, Shape } from '../../../twod/shapes';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
@@ -79,6 +79,9 @@ ball.props = { fillStyle: colors[0] };
 ceiling.props = { fillStyle: colors[7] };
 floor.props = { fillStyle: colors[7] };
 
+const normalProps: ContextProps = { strokeStyle: "transparent", lineWidth: 1, lineDash: [] };
+const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash: [0.4, 0.1] };
+
 const shapeSets: Shape[][] = [
   [ceiling, floor, ball],
 ]
@@ -112,6 +115,7 @@ const runner = new EaseRunner(loop);
 populateColliders();
 drawGraph();
 changeShapes();
+applyCollider();
 loop.start();
 runner.start();
 
@@ -169,6 +173,13 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
 
   ctx.beginPath().clearRect(ctx.bounds);
   applyTransform();
+
+  setNormalShapeProps();
+
+  world.collidingPairs.forEach(pair => {
+    setCollideShapeProps(pair.shapeA);
+    setCollideShapeProps(pair.shapeB);
+  });
 
   world.render(timestep, now);
 
@@ -275,13 +286,25 @@ function populateColliders() {
   }
 }
 
+function setNormalShapeProps() {
+  shapeSet.forEach(shape => Object.assign(shape.props, normalProps));
+}
+
+function setCollideShapeProps(shape: Shape) {
+  Object.assign(shape.props, collideProps);
+}
+
 function changeShapes() {
   world.clear();
   shapeSet = shapeSets[shapeSetIndex];
   shapeSet.forEach(shape => world.add(shape));
 }
 
-function applyCollider() { }
+function applyCollider() {
+  const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
+  world.broadPhase = new SimpleBroadPhase(collider);
+  world.narrowPhase = new SimpleNarrowPhase(collider);
+}
 
 /*
 function drawContact(contact: Contact, view: Viewport) {
