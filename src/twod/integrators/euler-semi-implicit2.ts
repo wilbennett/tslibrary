@@ -5,6 +5,7 @@ import { Vector } from '../../vectors';
 export class EulerSemiImplicit2 extends IntegratorBase {
   private _velocity = Vector.direction(0, 0);
   get velocity() { return this._velocity; }
+  set velocity(value) { this._velocity.withXY(value.x, value.y); }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
     this._velocity.add(impulse.scaleO(this.massInfo.massInverse));

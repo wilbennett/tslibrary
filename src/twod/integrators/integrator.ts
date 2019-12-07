@@ -17,6 +17,8 @@ export class Integrator {
   // @ts-ignore - unused param.
   set position(value) { }
   get velocity() { return Vector.empty; }
+  // @ts-ignore - unused param.
+  set velocity(value) { }
   get acceleration() { return Vector.empty; }
   get angle() { return 0; }
   // @ts-ignore - unused param.
