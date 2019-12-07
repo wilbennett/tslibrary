@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>World Test</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div>
+    <label>Pause: <input id="pause" type="checkbox" /></label>
+    <label>Stepping: <input id="stepping" type="checkbox" checked /></label>
+    <label>Change Shapes: <input id="changeshapes" type="checkbox" checked /></label>
+    <input id="prevshapes" type="button" value="&lt;&lt;" />
+    <input id="step" type="button" value="Step" />
+    <input id="nextshapes" type="button" value="&gt;&gt;" />
+    <select id="collider"></select>
+  </div>
+  <div>
+    <canvas id="canvasb"></canvas>
+    <canvas id="canvas"></canvas>
+  </div>
+  <footer>
+    <script src="./index.ts"></script>
+  </footer>
+</body>
+
+</html>
