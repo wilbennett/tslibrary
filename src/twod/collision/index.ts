@@ -3,6 +3,8 @@ export * from "./shape-pair-manager";
 export * from "./contact";
 export * from "./collider";
 export * from "./clipper";
+export * from "./broad-phase";
+export * from "./narrow-phase";
 export * from "./collider-base";
 export * from "./simple-collider";
 export * from "./sat-projection";
