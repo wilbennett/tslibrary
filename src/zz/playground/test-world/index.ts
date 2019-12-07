@@ -3,8 +3,8 @@ import { WebColors } from '../../../colors';
 import { MathEx, TimeStep } from '../../../core';
 import { EaseRunner } from '../../../easing';
 import { Bounds } from '../../../misc';
-import { Brush, CanvasContext, ContextProps, Graph, World } from '../../../twod';
-import { Collider, SimpleBroadPhase, SimpleNarrowPhase, Wcb, Wcb2 } from '../../../twod/collision';
+import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
+import { Collider, Contact, SimpleBroadPhase, SimpleNarrowPhase, Wcb, Wcb2 } from '../../../twod/collision';
 import { AABBShape, CircleShape, Shape } from '../../../twod/shapes';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
@@ -73,6 +73,7 @@ const floor = new AABBShape(dir(10, 2.0));
 floor.setPosition(pos(2.5, -3.0));
 const ball = new CircleShape(2.5);
 ball.setPosition(pos(2.5, 7.5));
+// ball.setPosition(pos(2.5, -0.5));
 ball.velocity = dir(0, -1);
 
 ball.props = { fillStyle: colors[0] };
@@ -182,6 +183,11 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   });
 
   world.render(timestep, now);
+
+  const view = world.view!;
+  view.applyTransform();
+  world.contacts.forEach(contact => drawContact(contact, view));
+  view.restoreTransform();
 
   restoreTransform();
   lastRenderTime = now;
@@ -306,12 +312,11 @@ function applyCollider() {
   world.narrowPhase = new SimpleNarrowPhase(collider);
 }
 
-/*
 function drawContact(contact: Contact, view: Viewport) {
-  const propsc: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 2, lineDash: [] };
-  const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
-  const propsi: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [0.2, 0.2] };
-  const propsn: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [] };
+  const propsc: ContextProps = { strokeStyle: "greenyellow", fillStyle: "greenyellow", lineWidth: 2, lineDash: [] };
+  const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 4, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [0.2, 0.2] };
+  const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [] };
 
   const normal = contact.normal;
   const refEdge = contact.referenceEdge;
@@ -324,9 +329,7 @@ function drawContact(contact: Contact, view: Viewport) {
     normal.scaleO(cp.depth).render(view, cp.point, propsn);
   });
 }
-//*/
 
-/*
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 }
@@ -335,4 +338,3 @@ function beginPath(props: ContextProps, view: Viewport) {
   view.ctx.beginPath().withGlobalAlpha(1).withProps(props).withLineWidth(getLineWidth(props, view));
   return view.ctx;
 }
-//*/
