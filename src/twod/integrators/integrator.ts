@@ -1,7 +1,7 @@
 import { DEFAULT_MATERIAL, MassInfo, TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 
-export type IntegratorConstructor = typeof Integrator;
+export type IntegratorClass = typeof Integrator;
 export type ForcesApplier = (now: number, position: Vector, velocity: Vector) => void;
 
 export class Integrator {

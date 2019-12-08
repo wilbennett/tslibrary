@@ -1,5 +1,5 @@
 import { createPolyData, ITriangleShape, PolygonShapeBase } from '.';
-import { IntegratorConstructor, populatePolyData } from '..';
+import { IntegratorClass, populatePolyData } from '..';
 import { Vector, VectorClass } from '../../vectors';
 
 export class TriangleShape extends PolygonShapeBase implements ITriangleShape {
@@ -9,11 +9,11 @@ export class TriangleShape extends PolygonShapeBase implements ITriangleShape {
     radius: number,
     startAngle?: number,
     regular?: boolean,
-    integratorType?: IntegratorConstructor,
+    integratorType?: IntegratorClass,
     vectorClass?: VectorClass);
   constructor(
     vertices: Vector[],
-    integratorType?: IntegratorConstructor,
+    integratorType?: IntegratorClass,
     vectorClass?: VectorClass);
   constructor(
     param1: number | Vector[],

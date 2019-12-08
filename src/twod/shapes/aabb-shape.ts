@@ -1,5 +1,5 @@
 import { createPolyData, IAABBShape, PolygonShapeBase } from '.';
-import { ContextProps, IntegratorConstructor, populatePolyEdgeNormals, Viewport } from '..';
+import { ContextProps, IntegratorClass, populatePolyEdgeNormals, Viewport } from '..';
 import { Vector, VectorClass } from '../../vectors';
 
 export class AABBShape extends PolygonShapeBase implements IAABBShape {
@@ -7,7 +7,7 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
 
   constructor(
     halfSize: Vector,
-    integratorType?: IntegratorConstructor,
+    integratorType?: IntegratorClass,
     vectorClass?: VectorClass) {
     super(createPolyData(4, vectorClass), halfSize.maxElement, undefined, integratorType);
 

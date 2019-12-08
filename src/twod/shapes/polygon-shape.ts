@@ -2,7 +2,7 @@ import { IPolygonShape, PolygonShapeBase, ShapeBase } from '.';
 import {
   calcPolyCenterArea,
   calcPolyRadius,
-  IntegratorConstructor,
+  IntegratorClass,
   normalizePolyCenter,
   populatePolyData,
   populatePolyEdgeNormals,
@@ -27,12 +27,12 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
     radius: number,
     startAngle?: number,
     regular?: boolean,
-    integratorType?: IntegratorConstructor,
+    integratorType?: IntegratorClass,
     vectorClass?: VectorClass);
   constructor(
     vertices: Vector[],
     isWorld?: boolean,
-    integratorType?: IntegratorConstructor,
+    integratorType?: IntegratorClass,
     vectorClass?: VectorClass);
   constructor(
     param1: number | Vector[],
@@ -46,7 +46,7 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
       const radius: number = param2;
       const startAngle: number | undefined = param3;
       const regular: boolean | undefined = param4;
-      const integratorType: IntegratorConstructor | undefined = param5;
+      const integratorType: IntegratorClass | undefined = param5;
       const vectorClass: VectorClass = param6 || ShapeBase.vectorClass;
       super(createPolyData(vertexCount, vectorClass), radius, undefined, integratorType);
 
@@ -54,7 +54,7 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
     } else {
       const inputVertices: Vector[] = param1;
       const isWorld: boolean = param2;
-      const integratorType: IntegratorConstructor | undefined = param3;
+      const integratorType: IntegratorClass | undefined = param3;
       const vectorClass: VectorClass = param4 || ShapeBase.vectorClass;
 
       const vertexCount = inputVertices.length;
