@@ -53,6 +53,8 @@ export class Contact {
     this._negativeNormal.negateO(this._normal);
     this._isNormalAtoB = undefined;
   }
+  get normalAB() { return this.isNormalAtoB ? this._normal : this._negativeNormal; }
+  get negativeNormalAB() { return this.isNormalAtoB ? this._negativeNormal : this._normal; }
   points: ContactPoint[];
   minkowskiNormal?: Vector;
   minkowskiDepth?: number;
