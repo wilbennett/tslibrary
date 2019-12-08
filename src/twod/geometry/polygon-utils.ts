@@ -40,8 +40,10 @@ export function convexHull(vertices: Vector[]) {
   return lower.concat(upper);
 }
 
-export function calcPolyArea(vertexList: VectorCollection) {
-  const vertices = vertexList.items;
+export function calcPolyArea(vertexList: Vector[]): number;
+export function calcPolyArea(vertexList: VectorCollection): number;
+export function calcPolyArea(vertexList: Vector[] | VectorCollection) {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
 
   let area = 0;
@@ -58,11 +60,15 @@ export function calcPolyArea(vertexList: VectorCollection) {
   return area;
 }
 
-export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vector, number]) {
-  const vertices = vertexList.items;
+export function calcPolyCenterAreaInertia(vertexList: Vector[], result?: [Vector, number, number]): [Vector, number, number];
+export function calcPolyCenterAreaInertia(vertexList: VectorCollection, result?: [Vector, number, number]): [Vector, number, number];
+export function calcPolyCenterAreaInertia(vertexList: Vector[] | VectorCollection, result?: [Vector, number, number]) {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
 
+  const oneThird = 1 / 3;
   let area = 0;
+  let inertia = 0;
   let sum = Vector.direction(0, 0);
   let temp = Vector.create(0, 0);
 
@@ -73,18 +79,25 @@ export function calcPolyCenterArea(vertexList: VectorCollection, result?: [Vecto
 
     area += cross;
     sum = sum.add(vertex1.displaceByO(vertex2, temp).scale(cross));
+
+    const x = vertex1.x * vertex1.x + vertex2.x * vertex1.x + vertex2.x * vertex2.x;
+    const y = vertex1.y * vertex1.y + vertex2.y * vertex1.y + vertex2.y * vertex2.y;
+    inertia += (0.25 * oneThird * cross) * (x + y);
   }
 
   area *= 0.5;
 
-  result = result || [Vector.position(0, 0), 0];
+  result = result || [Vector.position(0, 0), 0, 0];
   sum.scale(1 / (6 * area)).withWO(1, result[0]);
   result[1] = area;
+  result[2] = inertia;
   return result;
 }
 
-export function calcPolyRadius(vertexList: VectorCollection, center: Vector) {
-  const vertices = vertexList.items;
+export function calcPolyRadius(vertexList: Vector[], center: Vector): number;
+export function calcPolyRadius(vertexList: VectorCollection, center: Vector): number;
+export function calcPolyRadius(vertexList: Vector[] | VectorCollection, center: Vector) {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
 
   const vertex = Vector.create();
@@ -102,8 +115,10 @@ export function calcPolyRadius(vertexList: VectorCollection, center: Vector) {
   return Math.sqrt(radiusSquared);
 }
 
-export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
-  const vertices = vertexList.items;
+export function offsetPoly(vertexList: Vector[], offset: Vector): void;
+export function offsetPoly(vertexList: VectorCollection, offset: Vector): void;
+export function offsetPoly(vertexList: Vector[] | VectorCollection, offset: Vector) {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
   const amt = offset.withWO(0);
 
@@ -112,15 +127,20 @@ export function offsetPoly(vertexList: VectorCollection, offset: Vector) {
   }
 }
 
-export function movePoly(vertexList: VectorCollection, currentCenter: Vector, newCenter: Vector) {
+export function movePoly(vertexList: Vector[], currentCenter: Vector, newCenter: Vector): void;
+export function movePoly(vertexList: VectorCollection, currentCenter: Vector, newCenter: Vector): void;
+export function movePoly(vertexList: Vector[] | VectorCollection, currentCenter: Vector, newCenter: Vector) {
+  // @ts-ignore - no matching overload.
   offsetPoly(vertexList, newCenter.subO(currentCenter));
 }
 
-export function normalizePolyCenter(vertexList: VectorCollection, radiusCenterArea?: [number, Vector, number]) {
-  const vertices = vertexList.items;
+export function normalizePolyCenter(vertexList: Vector[], radiusCenterAreaInertia?: [number, Vector, number, number]): [number, Vector, number, number];
+export function normalizePolyCenter(vertexList: VectorCollection, radiusCenterAreaInertia?: [number, Vector, number, number]): [number, Vector, number, number];
+export function normalizePolyCenter(vertexList: Vector[] | VectorCollection, radiusCenterAreaInertia?: [number, Vector, number, number]) {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
 
-  const [center, area] = calcPolyCenterArea(vertexList);
+  const [center, area, inertia] = calcPolyCenterAreaInertia(vertices);
   let maxRadius = 0;
 
   for (let i = 0; i < vertexCount; i++) {
@@ -132,15 +152,18 @@ export function normalizePolyCenter(vertexList: VectorCollection, radiusCenterAr
     }
   }
 
-  radiusCenterArea || (radiusCenterArea = [0, Vector.create(), 0]);
-  radiusCenterArea[0] = Math.sqrt(maxRadius);
-  radiusCenterArea[1] = center;
-  radiusCenterArea[2] = area;
-  return radiusCenterArea;
+  radiusCenterAreaInertia || (radiusCenterAreaInertia = [0, Vector.create(), 0, 0]);
+  radiusCenterAreaInertia[0] = Math.sqrt(maxRadius);
+  radiusCenterAreaInertia[1] = center;
+  radiusCenterAreaInertia[2] = area;
+  radiusCenterAreaInertia[3] = inertia;
+  return radiusCenterAreaInertia;
 }
 
-export function generateRegularPoly(vertexList: VectorCollection, radius: number, startAngle: number = 0) {
-  const vertices = vertexList.items;
+export function generateRegularPoly(vertexList: Vector[], radius: number, startAngle?: number): Vector[];
+export function generateRegularPoly(vertexList: VectorCollection, radius: number, startAngle?: number): Vector[];
+export function generateRegularPoly(vertexList: Vector[] | VectorCollection, radius: number, startAngle: number = 0): Vector[] {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
   const step = 360 * ONE_DEGREE / vertexCount;
   const vector = Vector2D.fromRadians(startAngle, radius, 1); // TODO: Make dimension agnostic.
@@ -150,11 +173,13 @@ export function generateRegularPoly(vertexList: VectorCollection, radius: number
     vector.rotate(step);
   }
 
-  return calcPolyArea(vertexList);
+  return vertices;
 }
 
-export function generateIrregularPoly(vertexList: VectorCollection, radius: number, startAngle: number = 0) {
-  const vertices = vertexList.items;
+export function generateIrregularPoly(vertexList: Vector[], radius: number, startAngle?: number): Vector[];
+export function generateIrregularPoly(vertexList: VectorCollection, radius: number, startAngle?: number): Vector[];
+export function generateIrregularPoly(vertexList: Vector[] | VectorCollection, radius: number, startAngle: number = 0): Vector[] {
+  const vertices = Array.isArray(vertexList) ? vertexList : vertexList.items;
   const vertexCount = vertices.length;
 
   const minAngle = 5;
@@ -178,19 +203,23 @@ export function generateIrregularPoly(vertexList: VectorCollection, radius: numb
     index++;
   }
 
-  const [maxRadius, , area] = normalizePolyCenter(vertexList);
+  const [maxRadius] = normalizePolyCenter(vertices);
   const scale = radius / maxRadius;
 
   for (i = 0; i < vertexCount; i++) {
     vertices[i].scale(scale);
   }
 
-  return area;
+  return vertices;
 }
 
-export function generatePoly(vertexList: VectorCollection, radius: number, startAngle: number = 0, regular: boolean = true) {
+export function generatePoly(vertexList: Vector[], radius: number, startAngle?: number, regular?: boolean): Vector[];
+export function generatePoly(vertexList: VectorCollection, radius: number, startAngle?: number, regular?: boolean): Vector[];
+export function generatePoly(vertexList: Vector[] | VectorCollection, radius: number, startAngle: number = 0, regular: boolean = true): Vector[] {
   return regular
+    // @ts-ignore - no matching overload.
     ? generateRegularPoly(vertexList, radius, startAngle)
+    // @ts-ignore - no matching overload.
     : generateIrregularPoly(vertexList, radius, startAngle);
 }
 
@@ -215,7 +244,6 @@ export function populatePolyData(
   startAngle: number = 0,
   regular: boolean = true) {
   const vertexList = groups.get("vertex");
-  const area = generatePoly(vertexList, radius, startAngle, regular);
+  generatePoly(vertexList, radius, startAngle, regular);
   populatePolyEdgeNormals(groups);
-  return area;
 }

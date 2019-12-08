@@ -10,10 +10,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     point1: Vector,
     point2: Vector,
     isWorld?: boolean) {
-    super();
-
-    if (isWorld)
-      this._isWorld = true;
+    super(0, isWorld);
 
     const ab = point2.subO(point1);
     const axb = point1.cross2D(point2);

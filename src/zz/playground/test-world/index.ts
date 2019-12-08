@@ -1,6 +1,6 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
-import { MassInfo, Material, MathEx, TimeStep } from '../../../core';
+import { Material, MathEx, TimeStep } from '../../../core';
 import { EaseRunner } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
@@ -76,7 +76,7 @@ const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
 const gview = graph.getViewport(ctx);
 world.createDefaultView(ctx, gview.viewBounds.clone());
 
-const bouncyMaterial: Material = {
+const bouncy: Material = {
   name: "ball",
   restitution: 0.7,
   density: 0.6,
@@ -84,7 +84,7 @@ const bouncyMaterial: Material = {
   kineticFriction: 0.3
 };
 
-const superBouncyMaterial: Material = {
+const superBouncy: Material = {
   name: "ball",
   restitution: 0.9,
   density: 0.6,
@@ -92,7 +92,7 @@ const superBouncyMaterial: Material = {
   kineticFriction: 0.3
 };
 
-const woodMaterial: Material = {
+const wood: Material = {
   name: "ball",
   restitution: 0.4,
   density: 0.6,
@@ -100,7 +100,7 @@ const woodMaterial: Material = {
   kineticFriction: 0.3
 };
 
-const plasticMaterial: Material = {
+const plastic: Material = {
   name: "ball",
   restitution: 0.4,
   density: 0.6,
@@ -108,26 +108,18 @@ const plasticMaterial: Material = {
   kineticFriction: 0.3
 };
 
-const ball = new CircleShape(2.5);
+const ball = new CircleShape(2.5, bouncy);
 ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
 // ball.velocity = dir(0, -1);
 ball.velocity = dir(0, -0.9);
-ball.massInfo = new MassInfo(10, 10);
-ball.material = bouncyMaterial;
-const ball2 = new CircleShape(2.5);
+const ball2 = new CircleShape(2.5, superBouncy);
 ball2.setPosition(pos(2.5, 7.5));
 ball2.velocity = dir(0, -0.9);
-ball2.massInfo = new MassInfo(10, 10);
-ball2.material = superBouncyMaterial;
-const ball3 = new CircleShape(2.5);
+const ball3 = new CircleShape(2.5, plastic);
 ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.9);
-ball3.massInfo = new MassInfo(10, 10);
-ball3.material = plasticMaterial;
-const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)]);
-triangle.massInfo = new MassInfo(20, 20);
-triangle.material = woodMaterial;
+const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], wood);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 
 ball.props = { fillStyle: colors[0] };

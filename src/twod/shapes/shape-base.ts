@@ -22,7 +22,7 @@ import {
   IntegratorClass,
   Viewport,
 } from '..';
-import { MathEx, Tristate } from '../../core';
+import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
@@ -30,10 +30,32 @@ import { CircleSegmentInfo } from '../utils';
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
 export const ORIGIN = Vector.position(0, 0);
+export type InertiaCalc = (mass: number) => number;
 
 export abstract class ShapeBase implements IShape {
-  constructor(integratorType?: IntegratorClass) {
-    integratorType && (this._integrator = new integratorType());
+  constructor(
+    area: number,
+    isWorld: boolean = false,
+    material?: Material,
+    massInfo?: MassInfo,
+    integratorType?: IntegratorClass,
+    calcInertia: InertiaCalc = m => m) {
+    integratorType || (integratorType = EulerSemiImplicit);
+    material || (material = DEFAULT_MATERIAL);
+
+    this._area = area;
+    this._calcInertia = calcInertia;
+    this._integratorType = integratorType;
+    this._integrator = new integratorType();
+    this._integrator.material = material;
+
+    if (massInfo)
+      this._integrator.massInfo = massInfo;
+    else
+      this.updateMassInfo();
+
+    if (isWorld)
+      this._isWorld = isWorld;
 
     const matrix = this.matrix;
     this._transform = matrix.createValues();
@@ -44,11 +66,33 @@ export abstract class ShapeBase implements IShape {
   protected _supportLookup?: [Vector, SupportPoint][] | null;
 
   protected get matrix() { return Matrix2D.instance; /* TODO: Make dimension agnostic. */ }
+  protected _calcInertia: InertiaCalc;
+  protected _area: number;
+  protected get area() { return this._area; }
+  protected set area(value) { this._area = value; }
   protected _isWorld?: boolean = false;
   get isWorld() { return !!this._isWorld; }
-  protected _integrator?: Integrator;
-  get integrator() { return this._integrator || (this._integrator = new EulerSemiImplicit()); }
-  set integrator(value) { this._integrator = value; }
+  protected _integratorType: IntegratorClass;
+  get integratorType() { return this._integratorType; }
+  set integratorType(value) {
+    this._integratorType = value;
+    this.integrator = new value();
+  }
+  protected _integrator: Integrator;
+  get integrator() { return this._integrator; }
+  set integrator(value) {
+    const position = this.position;
+    const angle = this.angle;
+    const material = this.material;
+    const massInfo = this.massInfo;
+
+    this._integrator = value;
+
+    this._integrator.position = position;
+    this._integrator.angle = angle;
+    this._integrator.material = material;
+    this._integrator.massInfo = massInfo;
+  }
   get position() { return this.integrator.position; }
   set position(value) {
     this.integrator.position = value;
@@ -62,7 +106,10 @@ export abstract class ShapeBase implements IShape {
   get massInfo() { return this.integrator.massInfo; }
   set massInfo(value) { this.integrator.massInfo = value; }
   get material() { return this.integrator.material; }
-  set material(value) { this.integrator.material = value; }
+  set material(value) {
+    this.integrator.material = value;
+    this.updateMassInfo();
+  }
   protected _data?: VectorGroups;
   get data(): VectorGroups { return this._data || (this._data = new VectorGroups()); }
   get vertexList() { return this.data.get("vertex"); }
@@ -349,6 +396,18 @@ export abstract class ShapeBase implements IShape {
 
     this.renderCore(viewport, props);
     ctx.popTransform();
+  }
+
+  protected updateMassInfo() {
+    const mass = this._area * this._integrator.material.density;
+
+    if (mass === 0) {
+      this._integrator.massInfo = MassInfo.empty;
+      return;
+    }
+
+    const inertia = this._calcInertia(mass);
+    this._integrator.massInfo = new MassInfo(mass, inertia);
   }
 
   protected calcSupport(direction: Vector, ignoreIndex: number = -1): SupportPoint | null {

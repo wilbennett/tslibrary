@@ -11,7 +11,7 @@ import {
   SupportPointImpl,
 } from '.';
 import { ContextProps, IntegratorClass, Viewport } from '..';
-import { Tristate } from '../../core';
+import { MassInfo, Material, Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import { calcCircleIndex } from '../geometry';
 import { CircleSegmentInfo } from '../utils';
@@ -21,12 +21,11 @@ export class CircleShape extends ShapeBase implements ICircleShape {
 
   constructor(
     radius: number,
+    material?: Material,
     isWorld?: boolean,
+    massInfo?: MassInfo,
     integratorType?: IntegratorClass) {
-    super(integratorType);
-
-    if (isWorld)
-      this._isWorld = true;
+    super(Math.PI * radius * radius, isWorld, material, massInfo, integratorType, m => m * radius * radius);
 
     this.radius = radius;
   }

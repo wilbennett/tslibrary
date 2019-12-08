@@ -622,7 +622,7 @@ export function createPoly(
       ? first.position.displaceByO(second.position)
       : first.position.displaceByNegO(second.position);
 
-    const circle = new CircleShape(radius, true);
+    const circle = new CircleShape(radius, undefined, true);
     circle.setPosition(position);
     return circle;
   }
@@ -631,7 +631,7 @@ export function createPoly(
     ? createSum("vector", first, second, circleSegments)
     : createDiff("vector", first, second, circleSegments);
 
-  const poly = vertices && new PolygonShape(vertices, true);
+  const poly = vertices && new PolygonShape(vertices, undefined, true);
   return poly;
 }
 

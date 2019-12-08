@@ -1,25 +1,26 @@
-import { createPolyData, IAABBShape, PolygonShapeBase } from '.';
-import { ContextProps, IntegratorClass, populatePolyEdgeNormals, Viewport } from '..';
+import { IAABBShape, PolygonShapeBase } from '.';
+import { ContextProps, IntegratorClass, Viewport } from '..';
+import { MassInfo, Material } from '../../core';
 import { Vector, VectorClass } from '../../vectors';
 
 export class AABBShape extends PolygonShapeBase implements IAABBShape {
-  kind: "aabb" = "aabb";
+  kind: "aabb";
 
   constructor(
     halfSize: Vector,
+    isWorld: boolean = false,
+    material?: Material,
+    massInfo?: MassInfo,
     integratorType?: IntegratorClass,
     vectorClass?: VectorClass) {
-    super(createPolyData(4, vectorClass), halfSize.maxElement, undefined, integratorType);
+
+    const hs = halfSize.asPositionO();
+    const vertices = [hs.withNegYO(), hs, hs.withNegXO(), hs.negateO()];
+
+    super(vertices, isWorld, material, massInfo, vectorClass, integratorType);
 
     this.halfSize = halfSize;
-    const vertices = this.vertexList.items;
-    const hs = halfSize.asPositionO();
-    hs.withNegYO(vertices[0]);
-    hs.copyTo(vertices[1]);
-    hs.withNegXO(vertices[2]);
-    hs.negateO(vertices[3]);
-
-    populatePolyEdgeNormals(this.data);
+    this.kind = "aabb";
   }
 
   readonly halfSize: Vector;
