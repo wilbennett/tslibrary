@@ -1,7 +1,7 @@
 import { CanvasContext, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
-import { BroadPhase, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
+import { BroadPhase, CollisionResolver, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
 import { Shape } from './shapes';
 
 export class World {
@@ -16,6 +16,7 @@ export class World {
   view?: Viewport;
   broadPhase?: BroadPhase;
   narrowPhase?: NarrowPhase;
+  collisionResolver?: CollisionResolver;
   collidingPairs: ShapePair[] = [];
   contacts: Contact[] = [];
 
@@ -25,6 +26,8 @@ export class World {
   }
 
   add(shape: Shape) {
+    if (this._shapes.includes(shape)) return;
+
     this._pairManager.addShape(shape, this._shapes);
     this._shapes.push(shape);
   }
@@ -45,17 +48,32 @@ export class World {
   }
 
   update(timestep: TimeStep, now: DOMHighResTimeStamp) {
-    this.collidingPairs = [];
-    this.contacts = [];
     const broadPhase = this.broadPhase;
     const narrowPhase = this.narrowPhase;
+    const collisionResolver = this.collisionResolver;
+    const relaxationCount = Math.max(collisionResolver ? collisionResolver.relaxationCount : 1, 1);
+    const lastIndex = relaxationCount - 1;
+    let collidingPairs: ShapePair[] = [];
+    let contacts: Contact[] = [];
 
-    this.collidingPairs = broadPhase
-      ? broadPhase.execute(this._shapes, this._pairManager)
-      : this._pairManager.pairs;
+    for (let i = 0; i < relaxationCount; i++) {
+      const isLastIteration = i === lastIndex;
 
-    narrowPhase && (this.contacts = narrowPhase.execute(this.collidingPairs));
+      collidingPairs = broadPhase
+        ? broadPhase.execute(this._shapes, this._pairManager)
+        : this._pairManager.pairs;
 
+      if (collidingPairs.length === 0) break;
+
+      narrowPhase && (contacts = narrowPhase.execute(collidingPairs));
+
+      if (contacts.length === 0) break;
+
+      collisionResolver && contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+    }
+
+    this.collidingPairs = collidingPairs;
+    this.contacts = contacts;
     this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
   }
 

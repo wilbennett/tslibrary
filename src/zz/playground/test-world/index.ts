@@ -1,11 +1,19 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
-import { MathEx, TimeStep } from '../../../core';
+import { MassInfo, Material, MathEx, TimeStep } from '../../../core';
 import { EaseRunner } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
-import { Collider, Contact, SimpleBroadPhase, SimpleNarrowPhase, Wcb, Wcb2 } from '../../../twod/collision';
-import { AABBShape, CircleShape, Shape } from '../../../twod/shapes';
+import {
+  Collider,
+  Contact,
+  ProjectionResolver,
+  SimpleBroadPhase,
+  SimpleNarrowPhase,
+  Wcb,
+  Wcb2,
+} from '../../../twod/collision';
+import { CircleShape, createWalls, Shape } from '../../../twod/shapes';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -57,6 +65,7 @@ let angle = 0;
 // const duration = 5;
 const pauseAfterSeconds = Infinity;//30;
 let autoChangeShapes = true;
+let drawCollision = false;
 setCircleSegmentCount(30);
 setCircleSegmentCount(360);
 setCircleSegmentCount(20);
@@ -67,24 +76,34 @@ const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
 const gview = graph.getViewport(ctx);
 world.createDefaultView(ctx, gview.viewBounds.clone());
 
-const ceiling = new AABBShape(dir(10, 2.0));
-ceiling.setPosition(pos(2.5, 13.0));
-const floor = new AABBShape(dir(10, 2.0));
-floor.setPosition(pos(2.5, -3.0));
+const ballMaterial: Material = {
+  name: "ball",
+  restitution: 0.7,
+  density: 0.6,
+  staticFriction: 0.5,
+  kineticFriction: 0.3
+};
+
 const ball = new CircleShape(2.5);
 ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
-ball.velocity = dir(0, -1);
+// ball.velocity = dir(0, -1);
+ball.velocity = dir(0, -0.9);
+ball.massInfo = new MassInfo(10, 10);
+ball.material = ballMaterial;
+const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 
 ball.props = { fillStyle: colors[0] };
-ceiling.props = { fillStyle: colors[7] };
-floor.props = { fillStyle: colors[7] };
+leftWall.props = { fillStyle: colors[7] };
+bottomWall.props = { fillStyle: colors[7] };
+rightWall.props = { fillStyle: colors[7] };
+topWall.props = { fillStyle: colors[7] };
 
 const normalProps: ContextProps = { strokeStyle: "transparent", lineWidth: 1, lineDash: [] };
 const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash: [0.4, 0.1] };
 
 const shapeSets: Shape[][] = [
-  [ceiling, floor, ball],
+  [leftWall, bottomWall, rightWall, topWall, ball],
 ]
 
 const colliders: [string, Collider][] = [
@@ -165,7 +184,7 @@ canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
 
 function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
-  world.update(timestep, now);
+  !dragging && world.update(timestep, now);
 }
 
 function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
@@ -177,7 +196,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
 
   setNormalShapeProps();
 
-  world.collidingPairs.forEach(pair => {
+  drawCollision && world.collidingPairs.forEach(pair => {
     setCollideShapeProps(pair.shapeA);
     setCollideShapeProps(pair.shapeB);
   });
@@ -310,6 +329,7 @@ function applyCollider() {
   const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
   world.broadPhase = new SimpleBroadPhase(collider);
   world.narrowPhase = new SimpleNarrowPhase(collider);
+  world.collisionResolver = new ProjectionResolver();
 }
 
 function drawContact(contact: Contact, view: Viewport) {
