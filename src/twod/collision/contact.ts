@@ -28,7 +28,8 @@ export class Contact {
   constructor(public shapes: ShapePair) {
     this._shapeA = shapes.shapeA;
     this._shapeB = shapes.shapeB;
-    this.normal = Vector.direction(0, 0);
+    this._normal = Vector.direction(0, 0);
+    this._negativeNormal = Vector.direction(0, 0);
     this.points = [];
   }
 
@@ -38,13 +39,32 @@ export class Contact {
   protected _shapeB: Shape;
   get shapeB(): Shape { return this._shapeB; }
   set shapeB(value) { this._shapeB = value; }
-  normal: Vector;
+  protected _normal: Vector;
+  get normal() { return this._normal; }
+  set normal(value) {
+    this._normal.withXY(value.x, value.y);
+    this._normal.negateO(this._negativeNormal);
+    this._isNormalAtoB = undefined;
+  }
+  protected _negativeNormal: Vector;
+  get negativeNormal() { return this._negativeNormal; }
+  set negativeNormal(value) {
+    this._negativeNormal.withXY(value.x, value.y);
+    this._negativeNormal.negateO(this._normal);
+    this._isNormalAtoB = undefined;
+  }
   points: ContactPoint[];
   minkowskiNormal?: Vector;
   minkowskiDepth?: number;
-  protected _flip?: boolean;
-  get flip() { return !!this._flip; }
-  set flip(value) { this._flip = value; }
+  protected _isNormalAtoB?: boolean;
+  get isNormalAtoB() {
+    if (this._isNormalAtoB === undefined) {
+      const ab = this.shapeB.position.subO(this.shapeA.position);
+      this._isNormalAtoB = ab.dot(this._normal) >= 0;
+    }
+
+    return this._isNormalAtoB;
+  }
   get isCollision() { return this.points.length > 0 && this.points.some(p => p.isPenetrating); }
   protected _referenceEdge: Tristate<Edge>;
   get referenceEdge() {
@@ -68,8 +88,9 @@ export class Contact {
   set props(value) { this._props = value; }
 
   reset() {
-    this.normal.withXY(0, 0);
-    this._flip && (this._flip = false);
+    this._normal.withXY(0, 0);
+    this._negativeNormal.withXY(0, 0);
+    this._isNormalAtoB && (this._isNormalAtoB = false);
     this._referenceEdge !== undefined && (this._referenceEdge = undefined);
     this._incidentEdge !== undefined && (this._incidentEdge = undefined);
     this.minkowskiNormal !== undefined && (this.minkowskiNormal = undefined);
@@ -83,7 +104,8 @@ export class Contact {
     result.shapes = this.shapes;
     result.shapeA = this.shapeA;
     result.shapeB = this.shapeB;
-    result.normal.copyFrom(this.normal);
+    result._normal.copyFrom(this._normal);
+    result._negativeNormal.copyFrom(this._negativeNormal);
     result.points.splice(0);
     result.points.push(...this.points.map(p => p.clone()));
     this._referenceEdge && (result._referenceEdge = this._referenceEdge.clone());
@@ -101,25 +123,7 @@ export class Contact {
     return clipper.clip(this, clipCallback);
   }
 
-  flipNormal() { this.normal.negate(); }
-
-  swapShapes() {
-    const temp = this.shapeA;
-    this.shapeA = this.shapeB;
-    this.shapeB = temp;
-  }
-
-  ensureNormalDirection() {
-    if (!this._referenceEdge) return;
-    if (!this._incidentEdge) return;
-
-    // const refNorm = (this._referenceEdge.normal.dot(this._incidentEdge.normal) <= 0)
-    //   ? this._referenceEdge.normal : this._referenceEdge.normal.negateO();
-
-    if (this.normal.dot(this._referenceEdge.normal) < 0)
-      // if (this.normal.dot(refNorm) < 0)
-      this.normal.negate();
-  }
+  flipNormal() { this._normal.negate(); }
 
   render(view: Viewport) {
     const props = this.props;
@@ -127,7 +131,7 @@ export class Contact {
 
     this.points.forEach(cp => {
       cp.point.render(view, undefined, props);
-      this.normal.scaleO(cp.depth, temp).render(view, cp.point, props);
+      this._normal.scaleO(cp.depth, temp).render(view, cp.point, props);
     });
   }
 
@@ -165,8 +169,7 @@ export class Contact {
     if (this.shapeA.vertexList.items.length < 2 || this.shapeB.vertexList.items.length < 2)
       return this.markEdgesNull();
 
-    const normal = this.normal;
-    this.flip = false;
+    const normal = this._normal;
     let refEdge: Edge | null;
     let incEdge: Edge | null;
 
@@ -184,10 +187,11 @@ export class Contact {
     if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
       this._referenceEdge = refEdge;
       this._incidentEdge = incEdge;
+      this._isNormalAtoB = true;
     } else {
       this._referenceEdge = incEdge;
       this._incidentEdge = refEdge;
-      this.flip = true;
+      this._isNormalAtoB = false;
     }
   }
 }
