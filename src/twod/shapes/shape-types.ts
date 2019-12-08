@@ -14,7 +14,7 @@ export enum Winding {
 
 export interface IShape extends IGeometry {
   isWorld: boolean;
-  readonly integrators: Integrator[];
+  readonly integrator: Integrator;
   angle: number;
   readonly data: VectorGroups;
   vertexList: VectorCollection;

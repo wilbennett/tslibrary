@@ -10,7 +10,7 @@ import {
   SupportPoint,
   SupportPointImpl,
 } from '.';
-import { ContextProps, EulerSemiImplicit, Integrator, IntegratorClass, Viewport } from '..';
+import { ContextProps, IntegratorClass, Viewport } from '..';
 import { Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
 import { calcCircleIndex } from '../geometry';
@@ -22,28 +22,15 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   constructor(
     radius: number,
     isWorld?: boolean,
-    integratorType: IntegratorClass = EulerSemiImplicit) {
-    super();
+    integratorType?: IntegratorClass) {
+    super(integratorType);
 
     if (isWorld)
       this._isWorld = true;
 
     this.radius = radius;
-
-    this._integratorType = integratorType;
-    this._integrator = new integratorType();
-    this._integrators = [this._integrator];
   }
 
-  protected _integratorType: IntegratorClass;
-  protected _integrator: Integrator;
-  protected _integrators: Integrator[];
-  get integrators() { return this._integrators; }
-  get position() { return this._integrator.position; }
-  set position(value) {
-    this._integrator.position = value;
-    this.dirtyTransform();
-  }
   radius: number;
   get hasDynamicAxes() { return true; }
 

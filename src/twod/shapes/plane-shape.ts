@@ -19,14 +19,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     const axb = point1.cross2D(point2);
     this.normal = axb >= 0 ? ab.perpLeft().normalize() : ab.perpRight().normalize();
     this.distance = this.normal.dot(point1);
-    this._position = this.normal.scaleO(this.distance).asPosition();
-  }
-
-  protected _position: Vector;
-  get position() { return this._position; }
-  set position(value) {
-    this._position = value;
-    this.setPosition(value);
+    this.position = this.normal.scaleO(this.distance).asPosition();
   }
 
   readonly normal: Vector;
@@ -60,9 +53,9 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
   }
 
   setPosition(position: Vector) {
+    super.setPosition(position);
     this.distance = position.dot(this.normal);
-    this._position = this.normal.scaleO(this.distance).asPosition();
-    this.dirtyTransform();
+    this.normal.scaleO(this.distance, this.position).asPosition();
   }
 
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint {

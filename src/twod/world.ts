@@ -2,7 +2,6 @@ import { CanvasContext, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
 import { BroadPhase, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
-import { Integrator } from './integrators';
 import { Shape } from './shapes';
 
 export class World {
@@ -12,7 +11,6 @@ export class World {
 
   protected _shapes: Shape[] = [];
   protected _pairManager = new ShapePairManager();
-  protected _integrators: Integrator[] = [];
 
   readonly bounds: Bounds;
   view?: Viewport;
@@ -24,19 +22,16 @@ export class World {
   clear() {
     this._shapes.splice(0);
     this._pairManager.clear();
-    this._integrators.splice(0);
   }
 
   add(shape: Shape) {
     this._pairManager.addShape(shape, this._shapes);
     this._shapes.push(shape);
-    this._integrators.push(...shape.integrators);
   }
 
   remove(shape: Shape) {
     this._shapes.remove(shape);
     this._pairManager.removeShape(shape);
-    shape.integrators.forEach(integrator => this._integrators.remove(integrator));
   }
 
   createView(ctx: CanvasContext, viewBounds?: Bounds, screenBounds?: Bounds) {
@@ -61,7 +56,7 @@ export class World {
 
     narrowPhase && (this.contacts = narrowPhase.execute(this.collidingPairs));
 
-    this._integrators.forEach(integrator => integrator.integrate(now, timestep));
+    this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
   }
 
   // @ts-ignore - unused param.

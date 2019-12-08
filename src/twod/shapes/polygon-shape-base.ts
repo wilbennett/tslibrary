@@ -1,5 +1,5 @@
 import { IPolygonShapeBase, ShapeBase } from '.';
-import { ContextProps, EulerSemiImplicit, Integrator, IntegratorClass, Viewport } from '..';
+import { ContextProps, IntegratorClass, Viewport } from '..';
 import { Vector, VectorGroups } from '../../vectors';
 import { movePoly, normalizePolyCenter } from '../geometry';
 
@@ -9,8 +9,8 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
     radius?: number,
     // @ts-ignore - unused param.
     area?: number,
-    integratorType: IntegratorClass = EulerSemiImplicit) {
-    super();
+    integratorType?: IntegratorClass) {
+    super(integratorType);
 
     this._data = data;
 
@@ -19,22 +19,8 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
     }
 
     this.radius = radius;
-
-    this._integratorType = integratorType;
-    this._integrator = new integratorType();
-    this._integrators = [this._integrator];
   }
 
-  protected _integratorType: IntegratorClass;
-  protected _integrator: Integrator;
-  protected _integrators: Integrator[];
-  get integrators() { return this._integrators; }
-  get position() { return this._integrator.position; }
-  set position(value) {
-    this.setPosition(value);
-    this._integrator.position = value;
-    this.dirtyTransform();
-  }
   readonly radius: number;
 
   setPosition(position: Vector) {

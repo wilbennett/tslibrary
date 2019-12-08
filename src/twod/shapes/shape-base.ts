@@ -12,8 +12,17 @@ import {
   SupportPoint,
   SupportPointImpl,
 } from '.';
-import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
-import { DEFAULT_MATERIAL, MassInfo, MathEx, Tristate } from '../../core';
+import {
+  calcIntersectPoint,
+  closestPoint,
+  ContextProps,
+  EulerSemiImplicit,
+  Geometry,
+  Integrator,
+  IntegratorClass,
+  Viewport,
+} from '..';
+import { MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
@@ -23,7 +32,9 @@ export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
 export const ORIGIN = Vector.position(0, 0);
 
 export abstract class ShapeBase implements IShape {
-  constructor() {
+  constructor(integratorType?: IntegratorClass) {
+    integratorType && (this._integrator = new integratorType());
+
     const matrix = this.matrix;
     this._transform = matrix.createValues();
     this._transformInverse = matrix.createValues();
@@ -35,42 +46,23 @@ export abstract class ShapeBase implements IShape {
   protected get matrix() { return Matrix2D.instance; /* TODO: Make dimension agnostic. */ }
   protected _isWorld?: boolean = false;
   get isWorld() { return !!this._isWorld; }
-  get integrators(): Integrator[] { return []; }
-  get position() { return Vector.empty; }
-  // @ts-ignore - unused param.
-  set position(value) { }
-  get velocity() {
-    let maxVelocity = dir(0, 0);
-    let maxSpeed = -Infinity;
-    const integrators = this.integrators;
-    const count = integrators.length;
-
-    for (let i = 0; i < count; i++) {
-      const integrator = integrators[i];
-      const speed = integrator.velocity.magSquared;
-
-      if (speed > maxSpeed) {
-        maxVelocity = integrator.velocity;
-        maxSpeed = speed;
-      }
-    }
-
-    return maxVelocity;
+  protected _integrator?: Integrator;
+  get integrator() { return this._integrator || (this._integrator = new EulerSemiImplicit()); }
+  set integrator(value) { this._integrator = value; }
+  get position() { return this.integrator.position; }
+  set position(value) {
+    this.integrator.position = value;
+    this.setPosition(value);
   }
-  set velocity(value) {
-    this.integrators.forEach(integrator => integrator.velocity = value);
-  }
-
+  get velocity() { return this.integrator.velocity; }
+  set velocity(value) { this.integrator.velocity = value; }
   get center() { return this._isWorld ? this.position : ORIGIN; }
-  get angle() {
-    const integrators = this.integrators;
-    return integrators.length > 0 ? integrators[0].angle : 0;
-  }
+  get angle() { return this.integrator.angle; }
   set angle(value) { this.setAngle(value); }
-  get massInfo() { return this.integrators.length > 0 ? this.integrators[0].massInfo : MassInfo.empty; }
-  set massInfo(value) { this.integrators.forEach(integrator => integrator.massInfo = value); }
-  get material() { return this.integrators.length > 0 ? this.integrators[0].material : DEFAULT_MATERIAL; }
-  set material(value) { this.integrators.forEach(integrator => integrator.material = value); }
+  get massInfo() { return this.integrator.massInfo; }
+  set massInfo(value) { this.integrator.massInfo = value; }
+  get material() { return this.integrator.material; }
+  set material(value) { this.integrator.material = value; }
   protected _data?: VectorGroups;
   get data(): VectorGroups { return this._data || (this._data = new VectorGroups()); }
   get vertexList() { return this.data.get("vertex"); }
@@ -83,7 +75,7 @@ export abstract class ShapeBase implements IShape {
   protected _isTransformDirty = true;
   protected _transform: MatrixValues;
   get transform() {
-    if (this._isTransformDirty || this.integrators.some(integrator => integrator.isDirty)) {
+    if (this._isTransformDirty || this.integrator.isDirty) {
       this.calcTransform(this._transform, this._transformInverse);
       this.cleanTransform();
     }
@@ -92,7 +84,7 @@ export abstract class ShapeBase implements IShape {
   }
   protected _transformInverse: MatrixValues;
   get transformInverse() {
-    if (this._isTransformDirty || this.integrators.some(integrator => integrator.isDirty)) {
+    if (this._isTransformDirty || this.integrator.isDirty) {
       this.calcTransform(this._transform, this._transformInverse);
       this.cleanTransform();
     }
@@ -113,7 +105,7 @@ export abstract class ShapeBase implements IShape {
   }
 
   protected setAngle(radians: number) {
-    this.integrators.forEach(integrator => integrator.angle = radians);
+    this.integrator.angle = radians;
     this.dirtyTransform();
   }
 
