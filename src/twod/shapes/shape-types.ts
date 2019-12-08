@@ -1,6 +1,6 @@
 import { Projection, ShapeAxis, SupportPoint } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
-import { Tristate } from '../../core';
+import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 import { CircleSegmentInfo } from '../utils';
@@ -26,6 +26,8 @@ export interface IShape extends IGeometry {
   hasDynamicAxes: boolean;
 
   velocity: Vector;
+  massInfo: MassInfo;
+  material: Material;
 
   props: ContextProps;
 

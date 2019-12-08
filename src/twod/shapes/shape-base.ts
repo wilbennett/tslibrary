@@ -13,7 +13,7 @@ import {
   SupportPointImpl,
 } from '.';
 import { calcIntersectPoint, closestPoint, ContextProps, Geometry, Integrator, Viewport } from '..';
-import { MathEx, Tristate } from '../../core';
+import { DEFAULT_MATERIAL, MassInfo, MathEx, Tristate } from '../../core';
 import { Matrix2D, MatrixValues } from '../../matrix';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
@@ -67,6 +67,10 @@ export abstract class ShapeBase implements IShape {
     return integrators.length > 0 ? integrators[0].angle : 0;
   }
   set angle(value) { this.setAngle(value); }
+  get massInfo() { return this.integrators.length > 0 ? this.integrators[0].massInfo : MassInfo.empty; }
+  set massInfo(value) { this.integrators.forEach(integrator => integrator.massInfo = value); }
+  get material() { return this.integrators.length > 0 ? this.integrators[0].material : DEFAULT_MATERIAL; }
+  set material(value) { this.integrators.forEach(integrator => integrator.material = value); }
   protected _data?: VectorGroups;
   get data(): VectorGroups { return this._data || (this._data = new VectorGroups()); }
   get vertexList() { return this.data.get("vertex"); }
