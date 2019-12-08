@@ -13,7 +13,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { CircleShape, createWalls, Shape } from '../../../twod/shapes';
+import { CircleShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -76,9 +76,33 @@ const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
 const gview = graph.getViewport(ctx);
 world.createDefaultView(ctx, gview.viewBounds.clone());
 
-const ballMaterial: Material = {
+const bouncyMaterial: Material = {
   name: "ball",
   restitution: 0.7,
+  density: 0.6,
+  staticFriction: 0.5,
+  kineticFriction: 0.3
+};
+
+const superBouncyMaterial: Material = {
+  name: "ball",
+  restitution: 0.9,
+  density: 0.6,
+  staticFriction: 0.5,
+  kineticFriction: 0.3
+};
+
+const woodMaterial: Material = {
+  name: "ball",
+  restitution: 0.4,
+  density: 0.6,
+  staticFriction: 0.5,
+  kineticFriction: 0.3
+};
+
+const plasticMaterial: Material = {
+  name: "ball",
+  restitution: 0.4,
   density: 0.6,
   staticFriction: 0.5,
   kineticFriction: 0.3
@@ -90,10 +114,26 @@ ball.setPosition(pos(2.5, 7.5));
 // ball.velocity = dir(0, -1);
 ball.velocity = dir(0, -0.9);
 ball.massInfo = new MassInfo(10, 10);
-ball.material = ballMaterial;
+ball.material = bouncyMaterial;
+const ball2 = new CircleShape(2.5);
+ball2.setPosition(pos(2.5, 7.5));
+ball2.velocity = dir(0, -0.9);
+ball2.massInfo = new MassInfo(10, 10);
+ball2.material = superBouncyMaterial;
+const ball3 = new CircleShape(2.5);
+ball3.setPosition(pos(2.5, 7.5));
+ball3.velocity = dir(0, -0.9);
+ball3.massInfo = new MassInfo(10, 10);
+ball3.material = plasticMaterial;
+const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)]);
+triangle.massInfo = new MassInfo(20, 20);
+triangle.material = woodMaterial;
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 
 ball.props = { fillStyle: colors[0] };
+ball2.props = { fillStyle: colors[0] };
+ball3.props = { fillStyle: colors[0] };
+triangle.props = { fillStyle: colors[1] };
 leftWall.props = { fillStyle: colors[7] };
 bottomWall.props = { fillStyle: colors[7] };
 rightWall.props = { fillStyle: colors[7] };
@@ -104,6 +144,8 @@ const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash
 
 const shapeSets: Shape[][] = [
   [leftWall, bottomWall, rightWall, topWall, ball],
+  [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
+  [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
 ]
 
 const colliders: [string, Collider][] = [
