@@ -24,6 +24,8 @@ export class Integrator {
   // @ts-ignore - unused param.
   set angle(value) { }
   get angularVelocity() { return 0; }
+  // @ts-ignore - unused param.
+  set angularVelocity(value) { }
   get angularAcceleration() { return 0; }
   get applyForces(): ForcesApplier { return () => { }; }
   // @ts-ignore - unused param.
@@ -31,6 +33,16 @@ export class Integrator {
 
   dirty() { }
   clean() { }
+
+  assignTo(other: Integrator) {
+    other.position = this.position;
+    other.angle = this.angle;
+    other.velocity = this.velocity;
+    other.angularVelocity = this.angularVelocity;
+    other.material = this.material;
+    other.massInfo = this.massInfo;
+  }
+
   // @ts-ignore - unused param.
   applyForce(force: Vector) { }
   // @ts-ignore - unused param.

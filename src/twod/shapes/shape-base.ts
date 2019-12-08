@@ -81,17 +81,8 @@ export abstract class ShapeBase implements IShape {
   protected _integrator: Integrator;
   get integrator() { return this._integrator; }
   set integrator(value) {
-    const position = this.position;
-    const angle = this.angle;
-    const material = this.material;
-    const massInfo = this.massInfo;
-
+    this._integrator.assignTo(value);
     this._integrator = value;
-
-    this._integrator.position = position;
-    this._integrator.angle = angle;
-    this._integrator.material = material;
-    this._integrator.massInfo = massInfo;
   }
   get position() { return this.integrator.position; }
   set position(value) {
