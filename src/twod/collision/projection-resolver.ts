@@ -14,9 +14,7 @@ export class ProjectionResolver extends CollisionResolverBase {
 
     if (maxDepth === 0) return;
 
-    const ab = shapeB.position.subO(shapeA.position);
-    const normal = ab.dot(contact.normal) < 0 ? contact.normal.negateO() : contact.normal;
-
+    const normal = contact.normalAB;
     this.positionCorrection(shapeA, shapeB, invMassA, invMassB, maxDepth, normal);
 
     if (!isLastIteration) return;
