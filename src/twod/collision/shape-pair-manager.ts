@@ -22,6 +22,7 @@ export class ShapePairManager {
   }
 
   addShape(shape: Shape, existingShapes: Shape[]) {
+    const inverseMass = shape.massInfo.massInverse;
     const pairs = this.pairs;
     const pairsByShape = this.pairsByShape;
     const pairsByPairs = this.pairsByPair;
@@ -35,6 +36,9 @@ export class ShapePairManager {
       const existing = existingShapes[existingIndex];
       const pairsForExisting = this.getPairs(existing);
       const existingPairsMap = pairsByPairs.get(existing);
+
+      if (inverseMass === 0 && existing.massInfo.massInverse === 0) continue;
+
       const newPair = new ShapePair(shape, existing);
       pairs.push(newPair);
       pairsForShape.push(newPair);
