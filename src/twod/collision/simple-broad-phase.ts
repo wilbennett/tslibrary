@@ -9,7 +9,7 @@ export class SimpleBroadPhase implements BroadPhase {
   collider: Collider;
 
   // @ts-ignore - unused param.
-  execute(shapes: Shape[], pairManager: ShapePairManager) {
+  execute(shapes: Set<Shape>, pairManager: ShapePairManager) {
     const pairs = pairManager.pairs;
     const collider = this.collider;
     return pairs.filter(pair => collider.isColliding(pair));

@@ -9,7 +9,7 @@ export class World {
     this.bounds = bounds;
   }
 
-  protected _shapes: Shape[] = [];
+  protected _shapes = new Set<Shape>();
   protected _pairManager = new ShapePairManager();
 
   readonly bounds: Bounds;
@@ -21,19 +21,19 @@ export class World {
   contacts: Contact[] = [];
 
   clear() {
-    this._shapes.splice(0);
+    this._shapes.clear();
     this._pairManager.clear();
   }
 
   add(shape: Shape) {
-    if (this._shapes.includes(shape)) return;
+    if (this._shapes.has(shape)) return;
 
     this._pairManager.addShape(shape, this._shapes);
-    this._shapes.push(shape);
+    this._shapes.add(shape);
   }
 
   remove(shape: Shape) {
-    this._shapes.remove(shape);
+    this._shapes.delete(shape);
     this._pairManager.removeShape(shape);
   }
 

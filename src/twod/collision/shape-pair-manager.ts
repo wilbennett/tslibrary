@@ -21,19 +21,17 @@ export class ShapePairManager {
     return mapB && mapB.get(shapeB);
   }
 
-  addShape(shape: Shape, existingShapes: Shape[]) {
+  addShape(shape: Shape, existingShapes: Set<Shape>) {
     const inverseMass = shape.massInfo.massInverse;
     const pairs = this.pairs;
     const pairsByShape = this.pairsByShape;
     const pairsByPairs = this.pairsByPair;
-    const shapeCount = existingShapes.length;
     const pairsForShape: ShapePair[] = [];
     const pairsMap = new Map<Shape, ShapePair>();
     pairsByPairs.set(shape, pairsMap);
     pairsByShape.set(shape, pairsForShape);
 
-    for (let existingIndex = 0; existingIndex < shapeCount; existingIndex++) {
-      const existing = existingShapes[existingIndex];
+    for (const existing of existingShapes) {
       const pairsForExisting = this.getPairs(existing);
       const existingPairsMap = pairsByPairs.get(existing);
 

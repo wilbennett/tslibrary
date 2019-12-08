@@ -5,5 +5,5 @@ import { Shape } from '../shapes';
 export interface BroadPhase {
   collider: Collider;
 
-  execute(shapes: Shape[], pairManager: ShapePairManager): ShapePair[];
+  execute(shapes: Set<Shape>, pairManager: ShapePairManager): ShapePair[];
 }
