@@ -2,6 +2,7 @@ export * from "./shape-pair";
 export * from "./shape-pair-manager";
 export * from "./contact";
 export * from "./collider";
+export * from "./collision-resolver";
 export * from "./clipper";
 export * from "./broad-phase";
 export * from "./narrow-phase";
