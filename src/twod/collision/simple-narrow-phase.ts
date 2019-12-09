@@ -12,6 +12,6 @@ export class SimpleNarrowPhase implements NarrowPhase {
 
     return <Contact[]>pairs
       .map(pair => collider.calcContact(pair, undefined, true))
-      .filter(contact => contact !== undefined && contact !== null);
+      .filter(contact => contact !== undefined && contact !== null && contact.isCollision);
   }
 }
