@@ -379,6 +379,9 @@ function handleMouseDown(ev: MouseEvent) {
 
   for (let i = 0; i < shapeSet.length; i++) {
     const shape = shapeSet[i];
+
+    if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
+
     shape.toLocal(mouse, shapePoint);
 
     if (!shape.containsPoint(shapePoint, 0.3)) continue;
