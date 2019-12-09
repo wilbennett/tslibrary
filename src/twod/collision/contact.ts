@@ -122,7 +122,16 @@ export class Contact {
     if (!this.isCollision) return;
     if (!this.referenceEdge || !this.incidentEdge) return;
 
-    return clipper.clip(this, clipCallback);
+    clipper.clip(this, clipCallback);
+    const points = this.points;
+
+    if (points.length > 1 && points[0].depth < points[1].depth) { // Always put the deeper point first.
+      const temp = points[0];
+      points[0] = points[1];
+      points[1] = temp;
+    }
+
+    return this.points;
   }
 
   flipNormal() { this._normal.negate(); }
