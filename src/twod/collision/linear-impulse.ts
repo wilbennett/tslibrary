@@ -11,13 +11,10 @@ export class LinearImpulse extends CollisionResolverBase {
     const { shapeA, shapeB } = contact;
     const invMassA = shapeA.massInfo.massInverse;
     const invMassB = shapeB.massInfo.massInverse;
-
-    let maxDepth = contact.points.reduce((prev, cp) => cp.depth > prev ? cp.depth : prev, 0);
-
-    if (maxDepth === 0) return;
+    const contactPoint = contact.points[0];
 
     const normal = contact.normalAB;
-    this.correctPositions(shapeA, shapeB, invMassA, invMassB, maxDepth, normal);
+    this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
 
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;
