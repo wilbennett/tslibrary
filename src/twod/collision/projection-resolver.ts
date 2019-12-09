@@ -12,15 +12,13 @@ export class ProjectionResolver extends CollisionResolverBase {
     const { shapeA, shapeB } = contact;
     const invMassA = shapeA.massInfo.massInverse;
     const invMassB = shapeB.massInfo.massInverse;
+    const contactPoint = contact.points[0]; // Contact keeps deepest point first.
 
     // if (invMassA === 0 && invMassB === 0) return; //* Immovable pairs screened out in pair manager.
-
-    let maxDepth = contact.points.reduce((prev, cp) => cp.depth > prev ? cp.depth : prev, 0);
-
-    if (maxDepth === 0) return;
+    // if (contactPoint.depth <= 0) return; //* Screened out by narrow phase.
 
     const normal = contact.normalAB;
-    this.correctPositions(shapeA, shapeB, invMassA, invMassB, maxDepth, normal);
+    this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
 
     if (!isLastIteration) return;
 
