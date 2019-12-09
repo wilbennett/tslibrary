@@ -8,8 +8,8 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
 
   constructor(
     halfSize: Vector,
-    isWorld: boolean = false,
     material?: Material,
+    isWorld: boolean = false,
     massInfo?: MassInfo,
     integratorType?: IntegratorClass,
     vectorClass?: VectorClass) {
