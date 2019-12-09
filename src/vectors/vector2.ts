@@ -255,7 +255,7 @@ export class Vector2 extends Vector {
 
     result || (result = this.newVector());
     const magInv = 1 / this.mag;
-    return result.set(x * magInv * scale, y * magInv * scale, 0, w);
+    return isFinite(magInv) ? result.set(x * magInv * scale, y * magInv * scale, 0, w) : result.set(0, 0, w);
   }
 
   multO(other: Vector, result?: Vector): Vector;
@@ -313,7 +313,7 @@ export class Vector2 extends Vector {
 
     result || (result = this.newVector());
     const magInv = 1 / this.mag;
-    return result.set(x * magInv, y * magInv, 0, w);
+    return isFinite(magInv) ? result.set(x * magInv, y * magInv, 0, w) : result.set(0, 0, w);
   }
 
   perpLeftO(result?: Vector) {

@@ -444,7 +444,10 @@ export abstract class Vector {
 
     result || (result = this.newVector());
     const magInv = 1 / this.mag;
-    return result.set(x * magInv * scale, y * magInv * scale, z * magInv * scale, w);
+
+    return isFinite(magInv)
+      ? result.set(x * magInv * scale, y * magInv * scale, z * magInv * scale, w)
+      : result.set(0, 0, 0, w);
   }
   normalizeScale(scale: number) { return this.normalizeScaleO(scale, this); }
 
@@ -525,7 +528,7 @@ export abstract class Vector {
 
     result || (result = this.newVector());
     const magInv = 1 / this.mag;
-    return result.set(x * magInv, y * magInv, z * magInv, w);
+    return isFinite(magInv) ? result.set(x * magInv, y * magInv, z * magInv, w) : result.set(0, 0, 0, w);
   }
   normalize() { return this.normalizeO(this); }
 
