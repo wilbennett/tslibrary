@@ -4,7 +4,13 @@ import { dir } from '../../vectors';
 const ZERO_DIRECTION = dir(0, 0);
 
 export class LinearImpulse extends CollisionResolverBase {
-  relaxationCount = 1;
+  constructor() {
+    super();
+
+    this.positionalCorrection = true;
+    this.positionalCorrectionRate = 0.8;
+    this.relaxationCount = 1;
+  }
 
   // @ts-ignore - unused param.
   resolve(contact: Contact, isLastIteration: boolean) {
@@ -19,9 +25,20 @@ export class LinearImpulse extends CollisionResolverBase {
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;
 
+    //*
+    const ra = contactPoint.point.subO(integratorA.position);
+    const rb = contactPoint.point.subO(integratorB.position);
+    const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
+    const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
+    const va = integratorA.velocity.addO(vOffsetA);
+    const vb = integratorB.velocity.addO(vOffsetB);
+    const relativeVelocity = vb.subO(va);
+    /*/
     const v1 = integratorA.velocity;
     const v2 = integratorB.velocity;
     const relativeVelocity = v2.subO(v1);
+    //*/
+
     const relVelocityInNormal = relativeVelocity.dot(normal);
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
