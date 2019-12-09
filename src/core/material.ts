@@ -1,9 +1,9 @@
 export type Material = {
   readonly name: string;
-  readonly restitution: number;
-  readonly density: number;
-  readonly staticFriction: number;
-  readonly kineticFriction: number;
+  restitution: number;
+  density: number;
+  staticFriction: number;
+  kineticFriction: number;
 };
 
 export const DEFAULT_MATERIAL: Material = Object.freeze({
