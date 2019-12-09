@@ -27,6 +27,8 @@ export class Impulse extends CollisionResolverBase {
 
     const ra = contactPoint.point.subO(integratorA.position);
     const rb = contactPoint.point.subO(integratorB.position);
+    // const vOffsetA = ra.scaleO(integratorA.angularVelocity).perpLeft();
+    // const vOffsetB = rb.scaleO(integratorB.angularVelocity).perpLeft();
     const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
     const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
     const va = integratorA.velocity.addO(vOffsetA);
