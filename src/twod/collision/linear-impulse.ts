@@ -18,29 +18,17 @@ export class LinearImpulse extends CollisionResolverBase {
     const invMassA = shapeA.massInfo.massInverse;
     const invMassB = shapeB.massInfo.massInverse;
     const contactPoint = contact.points[0];
-
-    const normal = contact.normalAB;
-    !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
-
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;
+    const normal = contact.normalAB;
 
-    //*
-    const ra = contactPoint.point.subO(integratorA.position);
-    const rb = contactPoint.point.subO(integratorB.position);
-    const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
-    const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
-    const va = integratorA.velocity.addO(vOffsetA);
-    const vb = integratorB.velocity.addO(vOffsetB);
+    !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
+
+    const va = integratorA.velocity;
+    const vb = integratorB.velocity;
     const relativeVelocity = vb.subO(va);
-    contactPoint.relativeVelocity = relativeVelocity;
-    /*/
-    const v1 = integratorA.velocity;
-    const v2 = integratorB.velocity;
-    const relativeVelocity = v2.subO(v1);
-    //*/
-
     const relVelocityInNormal = relativeVelocity.dot(normal);
+    contactPoint.relativeVelocity = relativeVelocity;
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
