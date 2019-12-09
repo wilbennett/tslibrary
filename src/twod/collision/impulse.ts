@@ -18,7 +18,7 @@ export class Impulse extends CollisionResolverBase {
     const invMassA = shapeA.massInfo.massInverse;
     const invMassB = shapeB.massInfo.massInverse;
     const contactPoint0 = contact.points[0];
-    const contactPointCount = 1;//contact.points.length;
+    const contactPointCount = contact.points.length;
     const normal = contact.normalAB;
 
     !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint0.depth, normal);
@@ -49,7 +49,7 @@ export class Impulse extends CollisionResolverBase {
 
       const totalInverseMass = inverseMass + raCrossN * raCrossN * inertiaA + rbCrossN * rbCrossN * inertiaB;
       const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
-      const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass;// / contactPointCount;
+      const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass / contactPointCount;
       const impulse = normal.scaleO(impulseMagnitude);
       // console.log(`velocities: ${integratorA.velocity}, ${integratorB.velocity}`);
       // console.log(`normal: ${normal}`);
