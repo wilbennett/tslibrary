@@ -13,6 +13,7 @@ import {
   ProjectionResolver,
   SimpleBroadPhase,
   SimpleNarrowPhase,
+  Sutherland,
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
@@ -146,7 +147,7 @@ const ball3 = new AABBShape(dir(2.5, 2.5), plastic);
 ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], wood);
-triangle.velocity = dir(0, -0.2);
+// triangle.velocity = dir(0, -0.2);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -181,6 +182,10 @@ const collisionResolvers: [string, CollisionResolver][] = [
   ["Linear", new LinearImpulse()],
   ["Projection", new ProjectionResolver()],
 ];
+
+const clipper = new Sutherland();
+
+colliders.forEach(entry => entry[1].clipper = clipper);
 
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;
