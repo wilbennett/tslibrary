@@ -18,3 +18,4 @@ export * from "./wcb2";
 export * from "./sutherland";
 export * from "./collision-resolver-base";
 export * from "./projection-resolver";
+export * from "./linear-impulse";

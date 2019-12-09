@@ -7,6 +7,7 @@ import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../.
 import {
   Collider,
   Contact,
+  LinearImpulse,
   ProjectionResolver,
   SimpleBroadPhase,
   SimpleNarrowPhase,
@@ -131,14 +132,14 @@ bottomWall.props = { fillStyle: colors[7] };
 rightWall.props = { fillStyle: colors[7] };
 topWall.props = { fillStyle: colors[7] };
 
-const normalProps: ContextProps = { strokeStyle: "transparent", lineWidth: 1, lineDash: [] };
+const normalProps: ContextProps = { strokeStyle: "black", lineWidth: 1, lineDash: [] };
 const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash: [0.4, 0.1] };
 
 const shapeSets: Shape[][] = [
   [leftWall, bottomWall, rightWall, topWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
-]
+];
 
 const colliders: [string, Collider][] = [
   ["WCB2", new Wcb2()],
@@ -364,6 +365,7 @@ function applyCollider() {
   world.broadPhase = new SimpleBroadPhase(collider);
   world.narrowPhase = new SimpleNarrowPhase(collider);
   world.collisionResolver = new ProjectionResolver();
+  world.collisionResolver = new LinearImpulse();
 }
 
 function drawContact(contact: Contact, view: Viewport) {
