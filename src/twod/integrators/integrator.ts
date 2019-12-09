@@ -1,5 +1,6 @@
 import { DEFAULT_MATERIAL, MassInfo, TimeStep } from '../../core';
 import { Vector } from '../../vectors';
+import { ForceSource } from '../forces';
 
 export type IntegratorClass = typeof Integrator;
 export type ForcesApplier = (now: number, position: Vector, velocity: Vector) => void;
@@ -27,9 +28,12 @@ export class Integrator {
   // @ts-ignore - unused param.
   set angularVelocity(value) { }
   get angularAcceleration() { return 0; }
-  get applyForces(): ForcesApplier { return () => { }; }
+  get worldForces(): ForceSource[] { return []; }
   // @ts-ignore - unused param.
-  set applyForces(value) { }
+  set worldForces(value) { }
+  get localForces(): ForceSource[] { return []; }
+  // @ts-ignore - unused param.
+  set localForces(value) { }
 
   dirty() { }
   clean() { }

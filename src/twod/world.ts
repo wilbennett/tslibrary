@@ -3,10 +3,14 @@ import { TimeStep } from '../core';
 import { Bounds } from '../misc';
 import { BroadPhase, CollisionResolver, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
 import { Shape } from './shapes';
+import { ForceSource, Gravity } from './forces';
 
 export class World {
   constructor(bounds: Bounds) {
     this.bounds = bounds;
+    this.forces = [];
+
+    this.forces.push(new Gravity());
   }
 
   protected _shapes = new Set<Shape>();
@@ -14,6 +18,7 @@ export class World {
 
   readonly bounds: Bounds;
   view?: Viewport;
+  readonly forces: ForceSource[];
   broadPhase?: BroadPhase;
   narrowPhase?: NarrowPhase;
   collisionResolver?: CollisionResolver;
@@ -30,11 +35,13 @@ export class World {
 
     this._pairManager.addShape(shape, this._shapes);
     this._shapes.add(shape);
+    shape.integrator.worldForces = this.forces;
   }
 
   remove(shape: Shape) {
     this._shapes.delete(shape);
     this._pairManager.removeShape(shape);
+    shape.integrator.worldForces = [];
   }
 
   createView(ctx: CanvasContext, viewBounds?: Bounds, screenBounds?: Bounds) {

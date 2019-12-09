@@ -1,6 +1,7 @@
-import { ForcesApplier, Integrator } from '.';
+import { Integrator } from '.';
 import { DEFAULT_MATERIAL, MassInfo } from '../../core';
 import { Vector } from '../../vectors';
+import { ForceSource } from '../forces';
 
 export class IntegratorBase extends Integrator {
   get isNull() { return false; }
@@ -35,9 +36,12 @@ export class IntegratorBase extends Integrator {
   set angularVelocity(value) { this._angularVelocity = value; }
   protected _angularAcceleration = 0;
   get angularAcceleration() { return this._angularAcceleration; }
-  protected _applyForces: ForcesApplier = () => { };
-  get applyForces(): ForcesApplier { return this._applyForces; }
-  set applyForces(value) { this._applyForces = value; }
+  protected _worldForces: ForceSource[] = [];
+  get worldForces() { return this._worldForces; }
+  set worldForces(value) { this._worldForces = value; }
+  protected _localForces: ForceSource[] = [];
+  get localForces() { return this._localForces; }
+  set localForces(value) { this._localForces = value; }
 
   dirty() { this._isDirty = true; }
   clean() { this._isDirty = false; }
@@ -51,6 +55,8 @@ export class IntegratorBase extends Integrator {
   protected updateForces(now: number, position: Vector, velocity: Vector) {
     this._force.set(0, 0, 0, 0);
     this._torque = 0;
-    this.applyForces(now, position, velocity);
+
+    this.worldForces.forEach(force => force.process(this, now, position, velocity));
+    this.localForces.forEach(force => force.process(this, now, position, velocity));
   }
 }

@@ -9,7 +9,7 @@ export class Impulse extends CollisionResolverBase {
 
     this.positionalCorrection = true;
     this.positionalCorrectionRate = 0.8;
-    this.relaxationCount = 1;
+    this.relaxationCount = 2;
   }
 
   // @ts-ignore - unused param.
