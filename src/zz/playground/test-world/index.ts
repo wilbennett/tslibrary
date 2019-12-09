@@ -439,12 +439,12 @@ function drawContact(contact: Contact, view: Viewport) {
   const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 4, lineDash: [] };
   const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [0.2, 0.2] };
   const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [] };
+  const propsnab: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [0.2, 0.2] };
   const propsrv: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 4, lineDash: [] };
 
-  const { shapeA, shapeB } = contact;
-  const integratorA = shapeA.integrator;
-  const integratorB = shapeB.integrator;
+  const scaling = 4;
   const normal = contact.normal;
+  const normalAB = contact.normalAB;
   const refEdge = contact.referenceEdge;
   const incEdge = contact.incidentEdge;
   refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
@@ -453,16 +453,11 @@ function drawContact(contact: Contact, view: Viewport) {
   contact.points.forEach(cp => {
     beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
     // normal.scaleO(cp.depth).render(view, cp.point, propsn);
-    normal.scaleO(4).render(view, cp.point, propsn);
+    normal.scaleO(cp.depth).scaleO(scaling).render(view, cp.point, propsn);
+    normalAB.scaleO(scaling).render(view, cp.point, propsnab);
 
-    const ra = cp.point.subO(integratorA.position);
-    const rb = cp.point.subO(integratorB.position);
-    const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
-    const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
-    const va = integratorA.velocity.addO(vOffsetA);
-    const vb = integratorB.velocity.addO(vOffsetB);
-    const relativeVelocity = vb.subO(va);
-    relativeVelocity.scaleO(10).render(view, cp.point, propsrv);
+    const relativeVelocity = cp.relativeVelocity;
+    relativeVelocity && relativeVelocity.scaleO(scaling).render(view, cp.point, propsrv);
   });
 }
 

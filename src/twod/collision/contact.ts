@@ -10,6 +10,7 @@ export class ContactPoint {
     public depth: number) {
   }
 
+  relativeVelocity?: Vector;
   get isPenetrating() { return this.depth > 0; }
 
   clone(result?: ContactPoint): ContactPoint {
@@ -17,6 +18,7 @@ export class ContactPoint {
 
     result.point = this.point;
     result.depth = this.depth;
+    result.relativeVelocity = this.relativeVelocity;
     return result;
   }
 

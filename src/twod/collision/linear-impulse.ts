@@ -33,6 +33,7 @@ export class LinearImpulse extends CollisionResolverBase {
     const va = integratorA.velocity.addO(vOffsetA);
     const vb = integratorB.velocity.addO(vOffsetB);
     const relativeVelocity = vb.subO(va);
+    contactPoint.relativeVelocity = relativeVelocity;
     /*/
     const v1 = integratorA.velocity;
     const v2 = integratorB.velocity;

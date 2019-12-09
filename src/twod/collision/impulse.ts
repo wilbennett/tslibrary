@@ -33,6 +33,7 @@ export class Impulse extends CollisionResolverBase {
     const vb = integratorB.velocity.addO(vOffsetB);
     const relativeVelocity = vb.subO(va);
     const relVelocityInNormal = relativeVelocity.dot(normal);
+    contactPoint.relativeVelocity = relativeVelocity;
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
