@@ -140,7 +140,7 @@ ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
 // ball.velocity = dir(0, -1);
 ball.velocity = dir(0, -0.2);
-const ball2 = new AABBShape(dir(2.5, 2.5), superBouncy);
+const ball2 = new AABBShape(dir(5.5, 0.2), superBouncy);
 ball2.setPosition(pos(2.5, 7.5));
 ball2.velocity = dir(0, -0.2);
 const ball3 = new AABBShape(dir(2.5, 2.5), plastic);
