@@ -20,7 +20,7 @@ export class Impulse extends CollisionResolverBase {
     const contactPoint = contact.points[0];
     const normal = contact.normalAB;
 
-    this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
+    !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
 
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;

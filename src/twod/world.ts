@@ -75,6 +75,9 @@ export class World {
     this.collidingPairs = collidingPairs;
     this.contacts = contacts;
     this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
+
+    if (collisionResolver && collisionResolver.globalPositionalCorrection)
+      contacts.forEach(contact => collisionResolver.updatePositions(contact));
   }
 
   // @ts-ignore - unused param.

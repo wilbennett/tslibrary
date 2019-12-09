@@ -18,7 +18,7 @@ export class ProjectionResolver extends CollisionResolverBase {
     // if (contactPoint.depth <= 0) return; //* Screened out by narrow phase.
 
     const normal = contact.normalAB;
-    this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
+    !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
 
     if (!isLastIteration) return;
 
