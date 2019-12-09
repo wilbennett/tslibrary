@@ -6,7 +6,9 @@ import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
 import {
   Collider,
+  CollisionResolver,
   Contact,
+  Impulse,
   LinearImpulse,
   ProjectionResolver,
   SimpleBroadPhase,
@@ -14,7 +16,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { CircleShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
+import { AABBShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -42,6 +44,7 @@ const elPrevShapes = UiUtils.getInputElement("prevshapes");
 const elStep = UiUtils.getInputElement("step");
 const elNextShapes = UiUtils.getInputElement("nextshapes");
 const elCollider = UiUtils.getSelectElement("collider");
+const elCollideResolve = UiUtils.getSelectElement("collideresolve");
 
 ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
@@ -77,51 +80,78 @@ const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
 const gview = graph.getViewport(ctx);
 world.createDefaultView(ctx, gview.viewBounds.clone());
 
-const bouncy: Material = {
-  name: "ball",
-  restitution: 0.7,
-  density: 0.6,
-  staticFriction: 0.5,
-  kineticFriction: 0.3
+const materials: { [index: string]: Material } = {
+  default: {
+    name: "default",
+    restitution: 0.2,
+    density: 0,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  bouncy: {
+    name: "bouncy",
+    restitution: 0.7,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  superBouncy: {
+    name: "super bouncy",
+    restitution: 0.9,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  wood: {
+    name: "wood",
+    restitution: 0.4,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  plastic: {
+    name: "plastic",
+    restitution: 0.4,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
 };
 
-const superBouncy: Material = {
-  name: "ball",
-  restitution: 0.9,
-  density: 0.6,
-  staticFriction: 0.5,
-  kineticFriction: 0.3
-};
+const defaultMaterial = materials.default;
+const bouncy = materials.bouncy;
+const superBouncy = materials.superBouncy;
+const plastic = materials.plastic;
+const wood = materials.wood;
 
-const wood: Material = {
-  name: "ball",
-  restitution: 0.4,
-  density: 0.6,
-  staticFriction: 0.5,
-  kineticFriction: 0.3
-};
+for (const name in materials) { materials[name].restitution = 1; }
+for (const name in materials) { materials[name].staticFriction = 0; }
+for (const name in materials) { materials[name].kineticFriction = 0; }
 
-const plastic: Material = {
-  name: "ball",
-  restitution: 0.4,
-  density: 0.6,
-  staticFriction: 0.5,
-  kineticFriction: 0.3
-};
-
-const ball = new CircleShape(2.5, bouncy);
+// TODO: Something weird happening with rotated circles and collision detection. Need to investigate.
+// const ball = new CircleShape(2.5, bouncy);
+const ball = new AABBShape(dir(2.5, 2.5), bouncy);
 ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
 // ball.velocity = dir(0, -1);
-ball.velocity = dir(0, -0.9);
-const ball2 = new CircleShape(2.5, superBouncy);
+ball.velocity = dir(0, -0.2);
+const ball2 = new AABBShape(dir(2.5, 2.5), superBouncy);
 ball2.setPosition(pos(2.5, 7.5));
-ball2.velocity = dir(0, -0.9);
-const ball3 = new CircleShape(2.5, plastic);
+ball2.velocity = dir(0, -0.2);
+const ball3 = new AABBShape(dir(2.5, 2.5), plastic);
 ball3.setPosition(pos(2.5, 7.5));
-ball3.velocity = dir(0, -0.9);
+ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], wood);
+triangle.velocity = dir(0, -0.2);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
+leftWall.material = defaultMaterial;
+bottomWall.material = defaultMaterial;
+rightWall.material = defaultMaterial;
+topWall.material = defaultMaterial;
 
 ball.props = { fillStyle: colors[0] };
 ball2.props = { fillStyle: colors[0] };
@@ -146,6 +176,12 @@ const colliders: [string, Collider][] = [
   ["WCB", new Wcb()],
 ];
 
+const collisionResolvers: [string, CollisionResolver][] = [
+  ["Impulse", new Impulse()],
+  ["Linear", new LinearImpulse()],
+  ["Projection", new ProjectionResolver()],
+];
+
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;
 let stepping = elStepping.checked;
@@ -168,9 +204,11 @@ const loop = new AnimationLoop(update, render);
 const runner = new EaseRunner(loop);
 
 populateColliders();
+populateCollisionResolvers();
 drawGraph();
 changeShapes();
 applyCollider();
+applyCollisionResolver();
 loop.start();
 runner.start();
 
@@ -213,6 +251,10 @@ elCollider.addEventListener("change", () => {
   applyCollider();
 });
 
+elCollideResolve.addEventListener("change", () => {
+  applyCollisionResolver();
+});
+
 elStepping.addEventListener("change", () => stepping = elStepping.checked);
 canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
@@ -240,8 +282,18 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
 
   const view = world.view!;
   view.applyTransform();
+
+  const propsv: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [] };
+
+  shapeSet.forEach(shape => {
+    shape.velocity.scaleO(5).render(view, shape.position, propsv);
+  });
+
   world.contacts.forEach(contact => drawContact(contact, view));
   view.restoreTransform();
+
+  // ball.angle += 1 * ONE_DEGREE;
+  // triangle.angle += 1 * ONE_DEGREE;
 
   restoreTransform();
   lastRenderTime = now;
@@ -346,6 +398,12 @@ function populateColliders() {
   }
 }
 
+function populateCollisionResolvers() {
+  for (const [resolverName] of collisionResolvers) {
+    elCollideResolve.appendChild(UiUtils.createOption(resolverName));
+  }
+}
+
 function setNormalShapeProps() {
   shapeSet.forEach(shape => Object.assign(shape.props, normalProps));
 }
@@ -360,12 +418,15 @@ function changeShapes() {
   shapeSet.forEach(shape => world.add(shape));
 }
 
+function applyCollisionResolver() {
+  const resolver: CollisionResolver = collisionResolvers.find(c => c[0] === elCollideResolve.value)![1];
+  world.collisionResolver = resolver;
+}
+
 function applyCollider() {
   const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
   world.broadPhase = new SimpleBroadPhase(collider);
   world.narrowPhase = new SimpleNarrowPhase(collider);
-  world.collisionResolver = new ProjectionResolver();
-  world.collisionResolver = new LinearImpulse();
 }
 
 function drawContact(contact: Contact, view: Viewport) {
@@ -374,6 +435,7 @@ function drawContact(contact: Contact, view: Viewport) {
   const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [0.2, 0.2] };
   const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [] };
 
+  const { shapeA, shapeB } = contact;
   const normal = contact.normal;
   const refEdge = contact.referenceEdge;
   const incEdge = contact.incidentEdge;
@@ -382,8 +444,22 @@ function drawContact(contact: Contact, view: Viewport) {
 
   contact.points.forEach(cp => {
     beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
-    normal.scaleO(cp.depth).render(view, cp.point, propsn);
+    // normal.scaleO(cp.depth).render(view, cp.point, propsn);
+    normal.scaleO(4).render(view, cp.point, propsn);
   });
+
+  const propsrv: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 4, lineDash: [] };
+  const integratorA = shapeA.integrator;
+  const integratorB = shapeB.integrator;
+  const contactPoint = contact.points[0];
+  const ra = contactPoint.point.subO(integratorA.position);
+  const rb = contactPoint.point.subO(integratorB.position);
+  const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
+  const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
+  const va = integratorA.velocity.addO(vOffsetA);
+  const vb = integratorB.velocity.addO(vOffsetB);
+  const relativeVelocity = vb.subO(va);
+  relativeVelocity.scaleO(10).render(view, contactPoint.point, propsrv);
 }
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {

@@ -19,3 +19,4 @@ export * from "./sutherland";
 export * from "./collision-resolver-base";
 export * from "./projection-resolver";
 export * from "./linear-impulse";
+export * from "./impulse";
