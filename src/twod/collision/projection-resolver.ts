@@ -1,7 +1,12 @@
 import { CollisionResolverBase, Contact } from '.';
 
 export class ProjectionResolver extends CollisionResolverBase {
-  relaxationCount = 2;
+  constructor() {
+    super();
+
+    this.positionalCorrection = true;
+    this.relaxationCount = 2;
+  }
 
   resolve(contact: Contact, isLastIteration: boolean) {
     const { shapeA, shapeB } = contact;
@@ -15,7 +20,7 @@ export class ProjectionResolver extends CollisionResolverBase {
     if (maxDepth === 0) return;
 
     const normal = contact.normalAB;
-    this.positionCorrection(shapeA, shapeB, invMassA, invMassB, maxDepth, normal);
+    this.correctPositions(shapeA, shapeB, invMassA, invMassB, maxDepth, normal);
 
     if (!isLastIteration) return;
 
