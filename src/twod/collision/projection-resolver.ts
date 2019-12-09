@@ -22,7 +22,7 @@ export class ProjectionResolver extends CollisionResolverBase {
 
     if (!isLastIteration) return;
 
-    const restitution = (shapeA.material.restitution + shapeB.material.restitution) * 0.5;
+    const restitution = contact.shapes.restitution;
     shapeA.velocity.reflectViaNormal(normal).scale(restitution);
     shapeB.velocity.reflectViaNormal(normal).scale(restitution);
   }

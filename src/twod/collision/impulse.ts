@@ -37,15 +37,12 @@ export class Impulse extends CollisionResolverBase {
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
-    const restitution = (shapeA.material.restitution + shapeB.material.restitution) * 0.5;
-    const staticFriction = (shapeA.material.staticFriction + shapeB.material.staticFriction) * 0.5;
-
+    const { inverseMass, restitution, staticFriction } = contact.shapes;
     const inertiaA = integratorA.massInfo.inertiaInverse;
     const inertiaB = integratorB.massInfo.inertiaInverse;
     const raCrossN = ra.cross2D(normal);
     const rbCrossN = rb.cross2D(normal);
 
-    const inverseMass = invMassA + invMassB;
     const totalInverseMass = inverseMass + raCrossN * raCrossN * inertiaA + rbCrossN * rbCrossN * inertiaB;
     const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
     const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass;
@@ -84,7 +81,7 @@ export class Impulse extends CollisionResolverBase {
     const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
     /*/
     // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
-    const kineticFriction = (shapeA.material.kineticFriction + shapeB.material.kineticFriction) * 0.5;
+    const kineticFriction = contact.shapes.kineticFriction;
     // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent;
     const relTangentMagnitudeToRemove = -relVelocityInTangent;
     let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT;

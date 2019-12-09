@@ -44,12 +44,9 @@ export class LinearImpulse extends CollisionResolverBase {
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
-    const totalInverseMass = invMassA + invMassB;
-    const restitution = (shapeA.material.restitution + shapeB.material.restitution) * 0.5;
-    const staticFriction = (shapeA.material.staticFriction + shapeB.material.staticFriction) * 0.5;
-
+    const { inverseMass, restitution, staticFriction } = contact.shapes;
     const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
-    const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass;
+    const impulseMagnitude = relVelMagnitudeToRemove / inverseMass;
     const impulse = normal.scaleO(impulseMagnitude);
     // const impulseA = impulse.scaleO(-invMassA);
     // const impulseB = impulse.scale(invMassB);
@@ -65,7 +62,7 @@ export class LinearImpulse extends CollisionResolverBase {
     //*
     // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent * staticFriction;
     const relTangentMagnitudeToRemove = -relVelocityInTangent * staticFriction;
-    let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMass;
+    let tangentImpulseMagnitude = relTangentMagnitudeToRemove / inverseMass;
 
     if (tangentImpulseMagnitude > impulseMagnitude)
       tangentImpulseMagnitude = impulseMagnitude; // Friction should be less than force in normal direction.
@@ -73,7 +70,7 @@ export class LinearImpulse extends CollisionResolverBase {
     const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
     /*/
     // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
-    const kineticFriction = (shapeA.material.kineticFriction + shapeB.material.kineticFriction) * 0.5;
+    const kineticFriction = contact.shapes.kineticFriction;
     // const relTangentMagnitudeToRemove = -relVelocityInTangent;
     const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent;
     let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMass;
