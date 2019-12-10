@@ -129,7 +129,7 @@ const superBouncy = materials.superBouncy;
 const plastic = materials.plastic;
 const wood = materials.wood;
 
-// for (const name in materials) { materials[name].restitution = 1; }
+for (const name in materials) { materials[name].restitution = 1; }
 for (const name in materials) { materials[name].staticFriction = 0; }
 for (const name in materials) { materials[name].kineticFriction = 0; }
 
@@ -143,8 +143,8 @@ ball.setPosition(pos(2.5, 7.5));
 const ball2 = new AABBShape(dir(5.5, 0.2), superBouncy);
 ball2.setPosition(pos(2.5, 7.5));
 ball2.velocity = dir(0, -0.2);
-// const ball3 = new AABBShape(dir(2.5, 2.5), plastic);
-const ball3 = new CircleShape(2.5, plastic);
+const ball3 = new AABBShape(dir(2.5, 2.5), plastic);
+// const ball3 = new CircleShape(2.5, plastic);
 ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], wood);
@@ -429,6 +429,7 @@ function changeShapes() {
 
 function applyCollisionResolver() {
   const resolver: CollisionResolver = collisionResolvers.find(c => c[0] === elCollideResolve.value)![1];
+  resolver.globalPositionalCorrection = true;
   world.collisionResolver = resolver;
 }
 

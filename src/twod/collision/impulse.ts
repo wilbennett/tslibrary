@@ -1,5 +1,5 @@
 import { CollisionResolverBase, Contact } from '.';
-import { dir } from '../../vectors';
+import { dir, Vector } from '../../vectors';
 
 // const ZERO_DIRECTION = dir(0, 0);
 
@@ -44,11 +44,12 @@ export class Impulse extends CollisionResolverBase {
 
       if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
+      const e = relativeVelocity.magSquared >= integratorA.restingSpeedCuttoffSquared ? restitution : 0;
       const raCrossN = ra.cross2D(normal);
       const rbCrossN = rb.cross2D(normal);
 
       const totalInverseMass = inverseMass + raCrossN * raCrossN * inertiaA + rbCrossN * rbCrossN * inertiaB;
-      const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
+      const relVelMagnitudeToRemove = -(1 + e) * relVelocityInNormal;
       const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass / contactPointCount;
       const impulse = normal.scaleO(impulseMagnitude);
       // console.log(`velocities: ${integratorA.velocity}, ${integratorB.velocity}`);
@@ -74,7 +75,7 @@ export class Impulse extends CollisionResolverBase {
       const rbCrossT = rb.cross2D(tangent);
       const totalInverseMassT = inverseMass + raCrossT * raCrossT * inertiaA + rbCrossT * rbCrossT * inertiaB;
 
-      //*
+      /*
       // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent * staticFriction;
       const relTangentMagnitudeToRemove = -relVelocityInTangent * staticFriction;
       let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT / contactPointCount;
@@ -90,7 +91,7 @@ export class Impulse extends CollisionResolverBase {
       const relTangentMagnitudeToRemove = -relVelocityInTangent;
       let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT / contactPointCount;
       let tangentImpulse: Vector;
-  
+
       if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * staticFriction)
         tangentImpulse = tangent.scale(tangentImpulseMagnitude * staticFriction);
       else {

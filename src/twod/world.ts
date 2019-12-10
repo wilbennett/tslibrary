@@ -1,23 +1,43 @@
 import { CanvasContext, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
+import { dir } from '../vectors';
 import { BroadPhase, CollisionResolver, Contact, NarrowPhase, ShapePair, ShapePairManager } from './collision';
-import { Shape } from './shapes';
 import { ForceSource, Gravity } from './forces';
+import { Shape } from './shapes';
 
 export class World {
   constructor(bounds: Bounds) {
     this.bounds = bounds;
     this.forces = [];
 
-    this.forces.push(new Gravity());
+    this.gravityConst = 9.8;
   }
 
   protected _shapes = new Set<Shape>();
   protected _pairManager = new ShapePairManager();
+  protected _gravity!: Gravity;
 
   readonly bounds: Bounds;
   view?: Viewport;
+  private _gravityConst!: number;
+  get gravityConst() { return this._gravityConst; }
+  set gravityConst(value) {
+    this._gravityConst = value;
+
+    this.forces.remove(this._gravity);
+    const gravityAcceleration = dir(0, -this._gravityConst);
+    this._gravity = new Gravity(gravityAcceleration);
+    this.forces.push(this._gravity);
+
+    this.restingSpeedCutoff = gravityAcceleration.scaleO(TimeStep.DT_60_FPS.dt).mag * 0.3;
+  }
+  private _restingSpeedCutoff!: number;
+  get restingSpeedCutoff() { return this._restingSpeedCutoff; }
+  set restingSpeedCutoff(value) {
+    this._restingSpeedCutoff = value;
+    this._shapes.forEach(shape => shape.integrator.restingSpeedCuttoff = value);
+  }
   readonly forces: ForceSource[];
   broadPhase?: BroadPhase;
   narrowPhase?: NarrowPhase;
@@ -36,6 +56,7 @@ export class World {
     this._pairManager.addShape(shape, this._shapes);
     this._shapes.add(shape);
     shape.integrator.worldForces = this.forces;
+    shape.integrator.restingSpeedCuttoff = this._restingSpeedCutoff;
   }
 
   remove(shape: Shape) {

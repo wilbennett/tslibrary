@@ -42,6 +42,9 @@ export class IntegratorBase extends Integrator {
   protected _localForces: ForceSource[] = [];
   get localForces() { return this._localForces; }
   set localForces(value) { this._localForces = value; }
+  protected _restingSpeedCuttoff: number = 0;
+  get restingSpeedCuttoff() { return this._restingSpeedCuttoff; }
+  set restingSpeedCuttoff(value) { this._restingSpeedCuttoff = value; }
 
   dirty() { this._isDirty = true; }
   clean() { this._isDirty = false; }

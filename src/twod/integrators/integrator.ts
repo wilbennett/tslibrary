@@ -34,6 +34,10 @@ export class Integrator {
   get localForces(): ForceSource[] { return []; }
   // @ts-ignore - unused param.
   set localForces(value) { }
+  get restingSpeedCuttoff() { return 0; }
+  // @ts-ignore - unused param.
+  set restingSpeedCuttoff(value) { }
+  get restingSpeedCuttoffSquared() { return this.restingSpeedCuttoff * this.restingSpeedCuttoff; }
 
   dirty() { }
   clean() { }
