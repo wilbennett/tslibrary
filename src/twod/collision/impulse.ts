@@ -1,5 +1,5 @@
 import { CollisionResolverBase, Contact } from '.';
-import { dir, Vector } from '../../vectors';
+import { dir } from '../../vectors';
 
 // const ZERO_DIRECTION = dir(0, 0);
 
@@ -74,30 +74,25 @@ export class Impulse extends CollisionResolverBase {
       const raCrossT = ra.cross2D(tangent);
       const rbCrossT = rb.cross2D(tangent);
       const totalInverseMassT = inverseMass + raCrossT * raCrossT * inertiaA + rbCrossT * rbCrossT * inertiaB;
-
-      /*
-      // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent * staticFriction;
-      const relTangentMagnitudeToRemove = -relVelocityInTangent * staticFriction;
+      const relTangentMagnitudeToRemove = -relVelocityInTangent;
       let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT / contactPointCount;
 
-      if (tangentImpulseMagnitude > impulseMagnitude)
+      /*
+      if (tangentImpulseMagnitude * staticFriction < impulseMagnitude)
+        tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
+      else
         tangentImpulseMagnitude = impulseMagnitude; // Friction should be less than force in normal direction.
-
-      const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
       /*/
       // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
       const kineticFriction = contact.shapes.kineticFriction;
-      // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent;
-      const relTangentMagnitudeToRemove = -relVelocityInTangent;
-      let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT / contactPointCount;
-      let tangentImpulse: Vector;
 
       if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * staticFriction)
-        tangentImpulse = tangent.scale(tangentImpulseMagnitude * staticFriction);
-      else {
-        tangentImpulse = tangent.scale(-impulseMagnitude * kineticFriction);
-      }
+        tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
+      else
+        tangentImpulseMagnitude = -impulseMagnitude * kineticFriction;
       //*/
+
+      const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
 
       // integratorB.applyImpulse(tangentImpulse, ZERO_DIRECTION);
       // integratorA.applyImpulse(tangentImpulse.negate(), ZERO_DIRECTION);
