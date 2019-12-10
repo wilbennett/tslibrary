@@ -33,7 +33,8 @@ export class LinearImpulse extends CollisionResolverBase {
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
     const { inverseMass, restitution, staticFriction } = contact.shapes;
-    const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
+    const e = relativeVelocity.magSquared >= integratorA.restingSpeedCuttoffSquared ? restitution : 0;
+    const relVelMagnitudeToRemove = -(1 + e) * relVelocityInNormal;
     const impulseMagnitude = relVelMagnitudeToRemove / inverseMass;
     const impulse = normal.scaleO(impulseMagnitude);
     // const impulseA = impulse.scaleO(-invMassA);
@@ -46,30 +47,26 @@ export class LinearImpulse extends CollisionResolverBase {
 
     const tangent = relativeVelocity.subO(normal.scaleO(relVelocityInNormal)).normalize().negate();
     const relVelocityInTangent = relativeVelocity.dot(tangent);
-
-    //*
-    // const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent * staticFriction;
-    const relTangentMagnitudeToRemove = -relVelocityInTangent * staticFriction;
+    const relTangentMagnitudeToRemove = -relVelocityInTangent;
     let tangentImpulseMagnitude = relTangentMagnitudeToRemove / inverseMass;
 
-    if (tangentImpulseMagnitude > impulseMagnitude)
+    //*
+    if (tangentImpulseMagnitude * staticFriction < impulseMagnitude)
+      tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
+    else
       tangentImpulseMagnitude = impulseMagnitude; // Friction should be less than force in normal direction.
-
-    const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
     /*/
     // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
     const kineticFriction = contact.shapes.kineticFriction;
-    // const relTangentMagnitudeToRemove = -relVelocityInTangent;
-    const relTangentMagnitudeToRemove = -(1 + restitution) * relVelocityInTangent;
-    let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMass;
-    let tangentImpulse: Vector;
 
     if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * staticFriction)
-      tangentImpulse = tangent.scale(tangentImpulseMagnitude * staticFriction);
+      tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
     else {
-      tangentImpulse = tangent.scale(-impulseMagnitude * kineticFriction);
+      tangentImpulseMagnitude = -impulseMagnitude * kineticFriction;
     }
     //*/
+
+    const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
 
     // const tangentImpulseA = tangentImpulse.scaleO(-invMassA);
     // const tangentImpulseB = tangentImpulse.scale(invMassB);
