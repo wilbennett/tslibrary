@@ -66,7 +66,6 @@ export class SupportPointImpl implements SupportPoint {
 
     if (this._worldDirection)
       this._worldDirection = undefined;
-
   }
 
   clone(result?: SupportPoint): SupportPoint {
@@ -74,6 +73,9 @@ export class SupportPointImpl implements SupportPoint {
     result.point = this.point.clone();
     result.index = this.index;
     result.distance = this.distance;
+    result.worldPoint = Vector.empty;
+    result.direction = Vector.empty;
+    result.worldDirection = Vector.empty;
 
     if (this._worldPoint)
       result.worldPoint = this._worldPoint.clone();
