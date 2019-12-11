@@ -1,4 +1,5 @@
 import { CollisionResolverBase, Contact } from '.';
+import { MathEx } from '../../core';
 import { dir } from '../../vectors';
 
 // const ZERO_DIRECTION = dir(0, 0);
@@ -76,20 +77,26 @@ export class Impulse extends CollisionResolverBase {
       const totalInverseMassT = inverseMass + raCrossT * raCrossT * inertiaA + rbCrossT * rbCrossT * inertiaB;
       const relTangentMagnitudeToRemove = -relVelocityInTangent;
       let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT / contactPointCount;
+      let friction = staticFriction;
+
+      if (MathEx.isEqualTo(0, tangentImpulseMagnitude)) return;
 
       /*
-      if (tangentImpulseMagnitude * staticFriction < impulseMagnitude)
-        tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
+      if (tangentImpulseMagnitude * friction < impulseMagnitude)
+        tangentImpulseMagnitude = tangentImpulseMagnitude * friction;
       else
-        tangentImpulseMagnitude = impulseMagnitude; // Friction should be less than force in normal direction.
+        tangentImpulseMagnitude = -impulseMagnitude * friction; // Friction should be less than force in normal direction.
       /*/
       // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
       const kineticFriction = contact.shapes.kineticFriction;
 
       if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * staticFriction)
-        tangentImpulseMagnitude = tangentImpulseMagnitude * staticFriction;
+        friction = kineticFriction;
+
+      if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * friction)
+        tangentImpulseMagnitude = tangentImpulseMagnitude * friction;
       else
-        tangentImpulseMagnitude = -impulseMagnitude * kineticFriction;
+        tangentImpulseMagnitude = -impulseMagnitude * friction;
       //*/
 
       const tangentImpulse = tangent.scale(tangentImpulseMagnitude);
