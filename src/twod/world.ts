@@ -30,7 +30,7 @@ export class World {
     this._gravity = new Gravity(gravityAcceleration);
     this.forces.push(this._gravity);
 
-    this.restingSpeedCutoff = gravityAcceleration.scaleO(TimeStep.DT_60_FPS.dt).mag * 0.3;
+    this.restingSpeedCutoff = gravityAcceleration.scaleO(TimeStep.DT_60_FPS.dt).mag;
   }
   private _restingSpeedCutoff!: number;
   get restingSpeedCutoff() { return this._restingSpeedCutoff; }
