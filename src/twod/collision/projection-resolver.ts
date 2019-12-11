@@ -8,6 +8,16 @@ export class ProjectionResolver extends CollisionResolverBase {
     this.relaxationCount = 2;
   }
 
+  initialize(contact: Contact) {
+    const { shapeA, shapeB } = contact;
+    const integratorA = shapeA.integrator;
+    const va = shapeA.integrator.velocity;
+    const vb = shapeB.integrator.velocity;
+    const relativeVelocity = vb.subO(va);
+
+    contact.isResting = relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared;
+  }
+
   resolve(contact: Contact, isLastIteration: boolean) {
     const { shapeA, shapeB } = contact;
     const invMassA = shapeA.massInfo.massInverse;
@@ -22,7 +32,7 @@ export class ProjectionResolver extends CollisionResolverBase {
 
     if (!isLastIteration) return;
 
-    const restitution = contact.shapes.restitution;
+    const restitution = contact.isResting ? 0 : contact.shapes.restitution;
     shapeA.velocity.reflectViaNormal(normal).scale(restitution);
     shapeB.velocity.reflectViaNormal(normal).scale(restitution);
   }
