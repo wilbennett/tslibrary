@@ -8,11 +8,15 @@ export class EulerSemiImplicit extends IntegratorBase {
   set velocity(value) { this._velocity.withXY(value.x, value.y); }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
+    if (this.massInfo.massInverse === 0) return;
+
     this._velocity.add(impulse.scaleO(this.massInfo.massInverse));
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
   integrate(now: number, step: TimeStep) {
+    if (this.massInfo.massInverse === 0) return;
+
     const dt = step.dt;
     this.updateForces(now, this.position, this.velocity);
 
