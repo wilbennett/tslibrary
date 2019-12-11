@@ -189,7 +189,7 @@ export class Contact {
     if (this.shapeA.vertexList.items.length < 2 || this.shapeB.vertexList.items.length < 2)
       return this.markEdgesNull();
 
-    const normal = this._normal;
+    const normal = this.normalAB;
     let refEdge: Edge | null;
     let incEdge: Edge | null;
 
@@ -207,11 +207,9 @@ export class Contact {
     if (refDotNormal <= incDotNormal) { // Reference is most perpendicular to the normal.
       this._referenceEdge = refEdge;
       this._incidentEdge = incEdge;
-      this._isNormalAtoB = true;
     } else {
       this._referenceEdge = incEdge;
       this._incidentEdge = refEdge;
-      this._isNormalAtoB = false;
     }
   }
 }
