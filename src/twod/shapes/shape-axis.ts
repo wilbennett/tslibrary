@@ -61,6 +61,11 @@ export class ShapeAxis {
     this._worldPoint = undefined;
   }
 
+  clearWorldData() {
+    this._worldNormal = undefined;
+    this._worldPoint = undefined;
+  }
+
   toWorldWithShape(otherShape: Shape, negateNormal: boolean = false, result?: ShapeAxis) {
     const shape = this.shape;
 
