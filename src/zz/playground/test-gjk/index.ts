@@ -10,6 +10,7 @@ import {
   ColliderState,
   Contact,
   Gjk,
+  SATSupport,
   ShapePair,
   Sutherland,
   Wcb,
@@ -155,6 +156,7 @@ const colliders: [string, Collider][] = [
   ["WCB2", new Wcb2()],
   ["WCB", new Wcb()],
   ["GJK", new Gjk()],
+  ["SAT SUP", new SATSupport()],
 ];
 
 type State = {
@@ -847,7 +849,7 @@ function applyCollider() {
 
   if (!pair) return;
 
-  const collider: any = colliders.find(c => c[0] === elCollider.value)![1];
+  const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
   // mkVertices = Minkowski.createDiff("minkowski", pair.first, pair.second);
   let isColliding = false;
   let contact: Tristate<Contact> = null;
@@ -858,10 +860,14 @@ function applyCollider() {
   // if (collider instanceof Gjk || collider instanceof Wcb)
   //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
-  if (collider instanceof Wcb || collider instanceof Wcb2)
-    contact = collider.calcContactProgress(pair, pushColliderState, pushClipState, pair.contact, true);
-  else if (collider instanceof Gjk)
+  if (collider instanceof Gjk)
     isColliding = !!collider.isColliding(pair, pushColliderState);
+  else if (collider instanceof SATSupport) {
+    contact = collider.calcContact(pair, pair.contact, true);
+    contact && pushColliderState({ contact });
+  } else {
+    contact = collider.calcContactProgress(pair, pushColliderState, pushClipState, pair.contact, true);
+  }
   //*/
 
   /*
@@ -891,7 +897,7 @@ function applyCollider() {
   pair.shapeB.usesReferenceShape && (pair.shapeB.referenceShape = pair.shapeA);
   polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
   polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
-  states.length > 0 && (stateIndex = states.length - 1);
+  stateIndex = states.length - 1;
   createStateAnim();
   // polyd && temp();
   isDirty = true;
@@ -954,7 +960,7 @@ function drawClipState(clip: ClipState, view: Viewport) {
   contact && drawContact(contact, view);
 
   points.forEach(cp => {
-    beginPath(propsp, view).strokeRect(Bounds.fromCenter(cp.point, dir(0.8, 0.8)));
+    beginPath(propsp, view).strokeRect(Bounds.fromCenter(cp.point.clone(), dir(0.8, 0.8)));
     normal && normal.scaleO(cp.depth).render(view, cp.point, propsc);
   });
 
@@ -976,7 +982,7 @@ function drawContact(contact: Contact, view: Viewport) {
   incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
 
   contact.points.forEach(cp => {
-    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
+    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point.clone(), dir(0.5, 0.5)));
     normal.scaleO(cp.depth).render(view, cp.point, propsn);
   });
 
