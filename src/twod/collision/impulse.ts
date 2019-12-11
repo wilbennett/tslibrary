@@ -10,7 +10,7 @@ export class Impulse extends CollisionResolverBase {
 
     this.positionalCorrection = true;
     this.positionalCorrectionRate = 0.8;
-    this.relaxationCount = 2;
+    this.relaxationCount = 10;
   }
 
   initialize(contact: Contact) {

@@ -84,22 +84,22 @@ export class World {
     let collidingPairs: ShapePair[] = [];
     let contacts: Contact[] = [];
 
-    for (let i = 0; i < relaxationCount; i++) {
-      const isLastIteration = i === lastIndex;
-
+    if (narrowPhase && collisionResolver) {
       collidingPairs = broadPhase
         ? broadPhase.execute(this._shapes, this._pairManager)
         : this._pairManager.pairs;
 
-      if (collidingPairs.length === 0) break;
+      if (collidingPairs.length !== 0) {
+        contacts = narrowPhase.execute(collidingPairs);
 
-      narrowPhase && (contacts = narrowPhase.execute(collidingPairs));
+        if (contacts.length !== 0) {
+          contacts.forEach(contact => collisionResolver.initialize(contact));
 
-      if (contacts.length === 0) break;
-
-      if (collisionResolver) {
-        contacts.forEach(contact => collisionResolver.initialize(contact));
-        contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+          for (let i = 0; i < relaxationCount; i++) {
+            const isLastIteration = i === lastIndex;
+            contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+          }
+        }
       }
     }
 
