@@ -97,7 +97,10 @@ export class World {
 
       if (contacts.length === 0) break;
 
-      collisionResolver && contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+      if (collisionResolver) {
+        contacts.forEach(contact => collisionResolver.initialize(contact));
+        contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+      }
     }
 
     this.collidingPairs = collidingPairs;

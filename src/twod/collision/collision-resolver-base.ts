@@ -12,6 +12,8 @@ export abstract class CollisionResolverBase implements CollisionResolver {
   get globalPositionalCorrection() { return !!this._globalPositionalCorrection; }
   set globalPositionalCorrection(value) { this._globalPositionalCorrection = value; }
 
+  // @ts-ignore - unused param.
+  initialize(contact: Contact) { }
   abstract resolve(contact: Contact, isLastIteration: boolean): void;
 
   updatePositions(contact: Contact) {

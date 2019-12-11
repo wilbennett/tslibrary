@@ -87,6 +87,7 @@ export class Contact {
   }
   set incidentEdge(value) { this._incidentEdge = value; }
   get canClip() { return this.shapeA.kind !== "circle" && this.shapeB.kind !== "circle"; }
+  isResting?: boolean;
   protected _props?: ContextProps;
   get props() { return this._props || { strokeStyle: "blue", fillStyle: "blue" }; }
   set props(value) { this._props = value; }
@@ -95,6 +96,7 @@ export class Contact {
     this._normal.withXY(0, 0);
     this._negativeNormal.withXY(0, 0);
     this._isNormalAtoB && (this._isNormalAtoB = false);
+    this.isResting && (this.isResting = undefined);
     this._referenceEdge !== undefined && (this._referenceEdge = undefined);
     this._incidentEdge !== undefined && (this._incidentEdge = undefined);
     this.minkowskiNormal !== undefined && (this.minkowskiNormal = undefined);
@@ -110,12 +112,17 @@ export class Contact {
     result.shapeB = this.shapeB;
     result._normal.copyFrom(this._normal);
     result._negativeNormal.copyFrom(this._negativeNormal);
+    result._isNormalAtoB = this._isNormalAtoB;
+    result.isResting = this.isResting;
     result.points.splice(0);
     result.points.push(...this.points.map(p => p.clone()));
+    result._referenceEdge = undefined;
+    result._incidentEdge = undefined;
+    result.minkowskiNormal = undefined;
     this._referenceEdge && (result._referenceEdge = this._referenceEdge.clone());
     this._incidentEdge && (result._incidentEdge = this._incidentEdge.clone());
     this.minkowskiNormal && (result.minkowskiNormal = this.minkowskiNormal.clone());
-    this.minkowskiDepth && (result.minkowskiDepth = this.minkowskiDepth);
+    result.minkowskiDepth = this.minkowskiDepth;
     return result;
   }
 

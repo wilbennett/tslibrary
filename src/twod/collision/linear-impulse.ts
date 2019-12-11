@@ -12,6 +12,16 @@ export class LinearImpulse extends CollisionResolverBase {
     this.relaxationCount = 1;
   }
 
+  initialize(contact: Contact) {
+    const { shapeA, shapeB } = contact;
+    const integratorA = shapeA.integrator;
+    const va = shapeA.integrator.velocity;
+    const vb = shapeB.integrator.velocity;
+    const relativeVelocity = vb.subO(va);
+
+    contact.isResting = relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared;
+  }
+
   // @ts-ignore - unused param.
   resolve(contact: Contact, isLastIteration: boolean) {
     const { shapeA, shapeB } = contact;
@@ -32,9 +42,9 @@ export class LinearImpulse extends CollisionResolverBase {
 
     if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
-    const { inverseMass, restitution, staticFriction } = contact.shapes;
-    const e = relativeVelocity.magSquared >= integratorA.restingSpeedCuttoffSquared ? restitution : 0;
-    const relVelMagnitudeToRemove = -(1 + e) * relVelocityInNormal;
+    const { inverseMass, staticFriction } = contact.shapes;
+    const restitution = contact.isResting ? 0 : contact.shapes.restitution;
+    const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
     const impulseMagnitude = relVelMagnitudeToRemove / inverseMass;
     const impulse = normal.scaleO(impulseMagnitude);
     // const impulseA = impulse.scaleO(-invMassA);

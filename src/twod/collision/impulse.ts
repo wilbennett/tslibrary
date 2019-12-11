@@ -13,6 +13,24 @@ export class Impulse extends CollisionResolverBase {
     this.relaxationCount = 2;
   }
 
+  initialize(contact: Contact) {
+    const { shapeA, shapeB } = contact;
+    const integratorA = shapeA.integrator;
+    const integratorB = shapeB.integrator;
+
+    for (const contactPoint of contact.points) {
+      const ra = contactPoint.point.subO(integratorA.position);
+      const rb = contactPoint.point.subO(integratorB.position);
+      const vOffsetA = dir(-1 * integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
+      const vOffsetB = dir(-1 * integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
+      const va = integratorA.velocity.addO(vOffsetA);
+      const vb = integratorB.velocity.addO(vOffsetB);
+      const relativeVelocity = vb.subO(va);
+
+      contact.isResting = relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared;
+    }
+  }
+
   // @ts-ignore - unused param.
   resolve(contact: Contact, isLastIteration: boolean) {
     const { shapeA, shapeB } = contact;
@@ -26,7 +44,8 @@ export class Impulse extends CollisionResolverBase {
 
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;
-    const { inverseMass, restitution, staticFriction } = contact.shapes;
+    const { inverseMass, staticFriction } = contact.shapes;
+    const restitution = contact.isResting ? 0 : contact.shapes.restitution;
     const inertiaA = integratorA.massInfo.inertiaInverse;
     const inertiaB = integratorB.massInfo.inertiaInverse;
 
@@ -45,12 +64,11 @@ export class Impulse extends CollisionResolverBase {
 
       if (relVelocityInNormal > 0) return; // Shapes are moving apart.
 
-      const e = relativeVelocity.magSquared >= integratorA.restingSpeedCuttoffSquared ? restitution : 0;
       const raCrossN = ra.cross2D(normal);
       const rbCrossN = rb.cross2D(normal);
 
       const totalInverseMass = inverseMass + raCrossN * raCrossN * inertiaA + rbCrossN * rbCrossN * inertiaB;
-      const relVelMagnitudeToRemove = -(1 + e) * relVelocityInNormal;
+      const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
       const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass / contactPointCount;
       const impulse = normal.scaleO(impulseMagnitude);
       // console.log(`velocities: ${integratorA.velocity}, ${integratorB.velocity}`);
