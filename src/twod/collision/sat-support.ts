@@ -1,6 +1,6 @@
 import { Collider, ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { Tristate } from '../../core';
-import { Shape, ShapeAxis, SupportPointImpl } from '../shapes';
+import { Shape, ShapeAxis, SupportPoint, SupportPointImpl } from '../shapes';
 
 export class SATSupportState {
   protected _axes?: ShapeAxis[];
@@ -61,8 +61,7 @@ export class SATSupport extends ColliderBase {
 
     if (count === 0) return undefined;
 
-    let support = new SupportPointImpl(first);
-    const bestSupport = new SupportPointImpl(first);
+    let bestSupport: SupportPoint;
     let bestAxis = axes[0];
     let bestDistance = Infinity;
     let index = state.startIndex;
@@ -70,11 +69,11 @@ export class SATSupport extends ColliderBase {
     for (let i = 0; i < count; i++) {
       const axis = axes[index];
 
-      const success = axis.shape === first
-        ? second.getSupportFromAxis(axis.toWorldWithShape(second, true), support)
-        : first.getSupportFromAxis(axis.toWorldWithShape(first, true), support);
+      const support = axis.shape === first
+        ? second.getSupportFromAxis(axis.toWorldWithShape(second, true))
+        : first.getSupportFromAxis(axis.toWorldWithShape(first, true));
 
-      if (!success) return undefined;
+      if (!support) return undefined;
 
       if (support.distance < 0) { // Separating axis.
         state.startIndex = index;
@@ -83,23 +82,18 @@ export class SATSupport extends ColliderBase {
 
       if (support.distance < bestDistance) {
         bestDistance = support.distance;
-        support.clone(bestSupport);
+        bestSupport = support;
         bestAxis = axis;
       }
 
       index = (index + 1) % count;
     }
 
+    if (!isFinite(bestDistance)) return undefined;
+
     result.reset();
-
-    if (bestAxis.shape === second) {
-      result.normal = bestAxis.worldNormal;
-      result.points.push(new ContactPoint(bestSupport.worldPoint, bestDistance));
-    } else {
-      result.normal = bestAxis.worldNormal.negateO();
-      result.points.push(new ContactPoint(bestAxis.worldPoint, bestDistance));
-    }
-
+    result.normal = bestAxis.worldNormal;
+    result.points.push(new ContactPoint(bestSupport!.worldPoint, bestDistance));
     return result;
   }
 
@@ -133,6 +127,7 @@ export class SATSupport extends ColliderBase {
     if (second.hasDynamicAxes)
       result.push(...second.getDynamicAxes(first));
 
+    result.forEach(axis => axis.clearWorldData());
     return result;
   }
 }
