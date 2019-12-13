@@ -17,6 +17,7 @@ export class Manifold {
   }
 
   penetration: number = 0;
+  penetrations: number[] = [];
   normal: Vec2 = new Vec2(0, 0);
   contacts: Vec2[] = [];
   e: number = 0;
@@ -128,7 +129,9 @@ export class Manifold {
   positionalCorrection() {
     const k_slop = 0.05; // Penetration allowance
     const percent = 0.4; // Penetration percentage to correct
-    const penetration = Math.max(this.penetration - k_slop, 0);
+    let penetration = this.penetrations[0];
+    this.penetrations.length > 1 && (penetration = Math.max(penetration, this.penetrations[1]));
+    penetration = Math.max(penetration - k_slop, 0);
     const correction = this.normal.scaleO((penetration / (this.A.im + this.B.im)) * percent);
     this.A.position.sub(correction.scaleO(this.A.im));
     this.B.position.add(correction.scaleO(this.B.im));

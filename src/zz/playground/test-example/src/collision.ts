@@ -11,6 +11,7 @@ export class Collision {
     const A = <ICircle>a.shape;
     const B = <ICircle>b.shape;
     m.contacts = [];
+    m.penetrations = [];
 
     const normal = b.position.subO(a.position); // Calculate translational vector, which is normal
 
@@ -23,10 +24,12 @@ export class Collision {
 
     if (distance === 0) {
       m.penetration = A.radius;
+      m.penetrations.push(m.penetration);
       m.normal = new Vec2(1, 0);
       m.contacts.push(a.position.clone());
     } else {
       m.penetration = radius - distance;
+      m.penetrations.push(m.penetration);
       m.normal = normal.div(distance); // Faster than using Normalized since we already performed sqrt
       m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
     }
@@ -36,6 +39,7 @@ export class Collision {
     const A = <ICircle>a.shape;
     const B = <PolygonShape>b.shape;
     m.contacts = [];
+    m.penetrations = [];
 
     // Transform circle center to Polygon model space
     let center = a.position.clone();
@@ -67,6 +71,7 @@ export class Collision {
       m.normal = B.u.multVec(B.normals[faceNormal]).negate();
       m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
       m.penetration = A.radius;
+      m.penetrations.push(m.penetration);
       return;
     }
 
@@ -74,6 +79,7 @@ export class Collision {
     const dot1 = Dot(center.subO(v1), v2.subO(v1));
     const dot2 = Dot(center.subO(v2), v1.subO(v2));
     m.penetration = A.radius - separation;
+    m.penetrations.push(m.penetration);
 
     if (dot1 <= 0) { // Closest to v1
       if (DistSqr(center, v1) > A.radius * A.radius) return;
@@ -113,6 +119,7 @@ export class Collision {
     const A = <PolygonShape>a.shape;
     const B = <PolygonShape>b.shape;
     m.contacts = [];
+    m.penetrations = [];
 
     // Check for a separating axis with A's face planes
     let [faceA, penetrationA] = findAxisLeastPenetration(A, B);
@@ -186,6 +193,7 @@ export class Collision {
     if (separation <= 0) {
       m.contacts.push(incidentFace[0]);
       m.penetration = -separation;
+      m.penetrations.push(m.penetration);
       ++cp;
     } else
       m.penetration = 0;
@@ -195,6 +203,7 @@ export class Collision {
     if (separation <= 0) {
       m.contacts.push(incidentFace[1]);
       m.penetration += -separation;
+      m.penetrations.push(m.penetration);
       ++cp;
       m.penetration /= cp; // Average penetration
     }
