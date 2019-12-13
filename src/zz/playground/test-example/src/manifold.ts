@@ -79,7 +79,7 @@ export class Manifold {
       const ra = contacts[i].subO(this.A.position);
       const rb = contacts[i].subO(this.B.position);
 
-      const rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
+      let rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
         this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
 
       const contactVel = Dot(rv, normal); // Relative velocity along the normal
@@ -93,20 +93,21 @@ export class Manifold {
       // Calculate impulse scalar
       let j = -(1.0 + this.e) * contactVel;
       j /= invMassSum;
-      j /= contactCount;
 
       const impulse = normal.scaleO(j);
       this.A.applyImpulse(impulse.negate(), ra);
       this.B.applyImpulse(impulse, rb);
 
       // Friction impulse
+      rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
+        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
 
       // j tangent magnitude
       let jt = -Dot(rv, t);
       jt /= invMassSum;
-      jt /= contactCount;
 
       if (MathEx.isEqualTo(jt, 0)) return; // Don't apply tiny friction impulses
 
