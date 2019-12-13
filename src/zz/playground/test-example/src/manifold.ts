@@ -109,7 +109,7 @@ export class Manifold {
       let jt = -Dot(rv, t);
       jt /= invMassSum;
 
-      if (MathEx.isEqualTo(jt, 0)) return; // Don't apply tiny friction impulses
+      if (MathEx.isEqualTo(jt, 0)) continue; // Don't apply tiny friction impulses
 
       // Coulumb's law
       let friction = this.sf;
