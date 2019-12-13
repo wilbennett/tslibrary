@@ -45,8 +45,8 @@ export class Manifold {
 
   initialize() {
     this.e = (this.A.restitution + this.B.restitution) * 0.5;
-    this.sf = Math.sqrt(this.A.staticFriction * this.B.staticFriction);
-    this.df = Math.sqrt(this.A.dynamicFriction * this.B.dynamicFriction);
+    this.sf = (this.A.staticFriction + this.B.staticFriction) * 0.5;
+    this.df = (this.A.dynamicFriction + this.B.dynamicFriction) * 0.5;
 
     for (let i = 0; i < this.contacts.length; ++i) {
       const ra = this.contacts[i].subO(this.A.position);
