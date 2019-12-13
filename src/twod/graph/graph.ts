@@ -1,6 +1,7 @@
 import { Series, SeriesFunction } from '.';
 import { Brush, CanvasContext, Viewport } from '..';
 import { Bounds } from '../../misc';
+import { dir, pos, Vector } from '../../vectors';
 import { PlotMode } from './series';
 
 export class Graph {
@@ -11,7 +12,8 @@ export class Graph {
     this.bounds = bounds;
     this._gridSize = gridSize;
 
-    this._viewBounds = Bounds.fromCenter(0, 0, 1, 1, "up");
+    this._viewCenter = pos(0, 0);
+    this._viewBounds = Bounds.fromCenter(this._viewCenter, dir(1, 1), "up");
   }
 
   readonly bounds: Bounds;
@@ -31,6 +33,12 @@ export class Graph {
   set gridSize(value) {
     this._gridSize = value;
     this.reset();
+  }
+  protected _viewCenter: Vector;
+  get viewCenter() { return this._viewCenter; }
+  set viewCenter(value) {
+    this._viewCenter.withXY(value.x, value.y);
+    this._viewport = undefined;
   }
 
   protected readonly _seriesList: Series[] = [];
@@ -58,7 +66,7 @@ export class Graph {
     if (viewport.ctx !== ctx)
       viewport.ctx = ctx;
 
-    viewport.worldBounds.withSize(viewport.viewBounds.size);
+    viewport.worldBounds.withSize(viewport.viewBounds.size.scaleO(10));
     this._viewport = viewport;
     return viewport;
   }
@@ -69,7 +77,7 @@ export class Graph {
     ctx.beginPath().withFillStyle(this.background).fillRect(this.bounds);
 
     viewport.applyTransform();
-    const viewBounds = this._viewBounds;
+    const viewBounds = viewport.viewBounds;
     const left = viewBounds.left;
     const right = viewBounds.right;
     const top = viewBounds.top;
@@ -150,7 +158,7 @@ export class Graph {
 
   protected createViewport(ctx: CanvasContext) {
     const gridScale = 1 / this.gridSize;
-    this._viewBounds.withSize(this.bounds.size.scaleO(gridScale));
-    return new Viewport(ctx, this.bounds, this._viewBounds);
+    const viewBounds = Bounds.fromCenter(this._viewCenter, this.bounds.size.scaleO(gridScale));
+    return new Viewport(ctx, this.bounds, viewBounds);
   }
 }
