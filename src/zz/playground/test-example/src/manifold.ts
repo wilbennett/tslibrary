@@ -44,7 +44,7 @@ export class Manifold {
   }
 
   initialize() {
-    this.e = Math.min(this.A.restitution, this.B.restitution);
+    this.e = (this.A.restitution + this.B.restitution) * 0.5;
     this.sf = Math.sqrt(this.A.staticFriction * this.B.staticFriction);
     this.df = Math.sqrt(this.A.dynamicFriction * this.B.dynamicFriction);
 
