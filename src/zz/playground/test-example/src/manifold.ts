@@ -112,12 +112,12 @@ export class Manifold {
       if (MathEx.isEqualTo(jt, 0)) return; // Don't apply tiny friction impulses
 
       // Coulumb's law
-      let tangentImpulse: Vec2;
-
-      if (Math.abs(jt) < j * this.sf)
-        tangentImpulse = t.scaleO(jt);
-      else
-        tangentImpulse = t.scaleO(-j * this.df);
+      let friction = this.sf;
+      Math.abs(jt) >= j * friction && (friction = this.df);
+      let maxTangentMagnitude = j * friction;
+      let tangentMagnitude = jt * friction;
+      tangentMagnitude = MathEx.clamp(tangentMagnitude, -maxTangentMagnitude, maxTangentMagnitude);
+      const tangentImpulse = t.scaleO(tangentMagnitude);
 
       // Apply friction impulse
       this.A.applyImpulse(tangentImpulse.negate(), ra);
