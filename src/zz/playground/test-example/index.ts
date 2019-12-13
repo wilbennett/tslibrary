@@ -140,11 +140,9 @@ function handleMouseDown(ev: MouseEvent) {
 
   switch (ev.button) {
     case 0:
-      const count = MathEx.randomInt(3, 64);
-
-      /*
-      const hw = 4;
-      const hh = 4;
+      //*
+      const hw = 2;
+      const hh = 2;
       const vertices = [
         new Vec2(-hw, -hh),
         new Vec2(hw, -hh),
@@ -152,6 +150,7 @@ function handleMouseDown(ev: MouseEvent) {
         new Vec2(-hw, hh),
       ];
       /*/
+      const count = MathEx.randomInt(3, 64);
       const vertices = new Array<Vec2>(count);
       const e = MathEx.random(5, 10);
 
@@ -164,8 +163,9 @@ function handleMouseDown(ev: MouseEvent) {
       poly.set(vertices);
       const b = scene.add(poly, mouse.x, mouse.y);
       b.setOrient(MathEx.random(-Math.PI, Math.PI));
-      // b.SetOrient(0);
-      b.restitution = 0.2;
+      b.setOrient(0 * Math.PI / 180);
+      b.restitution = 1;
+      // b.restitution = 0.4;
       b.dynamicFriction = 0.2;
       b.staticFriction - 0.4;
       render();
@@ -174,7 +174,9 @@ function handleMouseDown(ev: MouseEvent) {
       break;
     case 2:
       const c = new Circle(MathEx.random(1, 3));
-      scene.add(c, mouse.x, mouse.y);
+      const body = scene.add(c, mouse.x, mouse.y);
+      body.restitution = 1;
+      // body.restitution = 0.6;
       render();
       break;
   }
@@ -187,14 +189,22 @@ function addStaticCircle(x: number, y: number) {
   b.brush = "purple";
 }
 
-function resetScene() {
-  scene.clear();
-  addStaticCircle(40, 40);
-
+function addStaticRect(hw: number, hh: number, x: number, y: number) {
   const poly = new PolygonShape();
-  poly.setBox(30, 1);
-  const b = scene.add(poly, 40, 55);
+  poly.setBox(hw, hh);
+  const b = scene.add(poly, x, y);
   b.setStatic();
   b.setOrient(0);
   b.brush = "purple";
+  b.restitution = 1;
+  // b.restitution = 0.0;
+}
+
+function resetScene() {
+  scene.clear();
+  // addStaticCircle(40, 40);
+  addStaticRect(30, 1, 40, 55);
+  addStaticRect(1, 26, 11, 28);
+  addStaticRect(1, 26, 69, 28);
+  addStaticRect(25, 1, 40, 0);
 }
