@@ -1,0 +1,14 @@
+#canvas, #canvasb {
+  position: fixed;
+  top: 30px;
+  left: 0px;
+  background: none;
+}
+
+#canvasb {
+  background: black;
+}
+
+#text {
+  width: 40px;
+}
