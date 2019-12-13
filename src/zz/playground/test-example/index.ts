@@ -202,9 +202,9 @@ function addStaticRect(hw: number, hh: number, x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  // addStaticCircle(40, 40);
-  addStaticRect(30, 1, 40, 55);
-  addStaticRect(1, 26, 11, 28);
-  addStaticRect(1, 26, 69, 28);
-  addStaticRect(25, 1, 40, 0);
+  addStaticCircle(40, 40);
+  addStaticRect(100, 100, 40, 155);
+  addStaticRect(100, 100, -95, 28);
+  addStaticRect(100, 100, 165, 28);
+  addStaticRect(100, 100, 40, -98);
 }
