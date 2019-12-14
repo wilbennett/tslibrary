@@ -1,15 +1,18 @@
-import { Body, IBody, IEMath, Manifold } from '.';
+import { Body, Gaul, IBody, IEMath, Manifold } from '.';
 import { Viewport } from '../../../../twod';
+import { Collider } from '../../../../twod/collision';
 import { Shape } from '../../../../twod/shapes';
 
 const { gravity } = IEMath;
 
 export class Scene {
   constructor(public dt: number, public iterations: number) {
+    this.collider = new Gaul();
   }
 
   bodies: IBody[] = [];
   contacts: Manifold[] = [];
+  collider: Collider;
 
   integrateForces(b: IBody, dt: number) {
     if (b.im === 0) return;
@@ -44,7 +47,7 @@ export class Scene {
 
         if (A.im == 0 && B.im == 0) continue;
 
-        const m = new Manifold(A, B);
+        const m = new Manifold(A, B, this.collider);
         m.solve();
 
         if (m.isCollision)

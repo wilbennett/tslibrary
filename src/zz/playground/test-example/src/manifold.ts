@@ -1,8 +1,8 @@
-import { Collision, IBody } from '.';
+import { IBody } from '.';
 import { WebColors } from '../../../../colors';
 import { MathEx } from '../../../../core';
 import { Viewport } from '../../../../twod';
-import { Contact, ShapePair } from '../../../../twod/collision';
+import { Collider, Contact, ShapePair } from '../../../../twod/collision';
 import { Vector } from '../../../../vectors';
 import { IEMath } from './iemath';
 
@@ -14,7 +14,7 @@ function Cross(v1: Vector, v2: Vector) { return v1.cross2D(v2); }
 function Sqr(n: number) { return n * n; }
 
 export class Manifold {
-  constructor(A: IBody, B: IBody) {
+  constructor(A: IBody, B: IBody, public collider: Collider) {
     const pair = new ShapePair(A.shape, B.shape);
     this.contact = pair.contact;
   }
@@ -22,24 +22,7 @@ export class Manifold {
   contact: Contact;
   get isCollision() { return this.contact.isCollision; }
 
-  solve() {
-    const { shapeA, shapeB } = this.contact;
-
-    switch (shapeA.kind) {
-      case "circle":
-        switch (shapeB.kind) {
-          case "circle": return Collision.circleToCircle(this.contact);
-          case "polygon": return Collision.circleToPolygon(this.contact);
-        }
-        break;
-      case "polygon":
-        switch (shapeB.kind) {
-          case "circle": return Collision.polygonToCircle(this.contact);
-          case "polygon": return Collision.polygonToPolygon(this.contact);
-        }
-        break;
-    }
-  }
+  solve() { this.collider.calcContact(this.contact.shapes, this.contact); }
 
   initialize() {
     const contact = this.contact;

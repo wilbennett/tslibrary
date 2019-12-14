@@ -1,6 +1,6 @@
 import { IEMath } from '.';
-import { MathEx } from '../../../../core';
-import { Contact, ContactPoint } from '../../../../twod/collision';
+import { MathEx, Tristate } from '../../../../core';
+import { ColliderBase, Contact, ContactPoint, ShapePair } from '../../../../twod/collision';
 import { ICircleShape, IPolygonShape } from '../../../../twod/shapes';
 import { dir, Vector } from '../../../../vectors';
 
@@ -8,6 +8,33 @@ function Dot(v1: Vector, v2: Vector) { return v1.dot(v2); }
 function DistSqr(v1: Vector, v2: Vector) { return v1.distanceSquared(v2); }
 
 function assert(condition: boolean) { if (!condition) throw new Error("UNEXPECTED CONDITION"); }
+
+export class Gaul extends ColliderBase {
+  // @ts-ignore - unused param.
+  protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
+    const { shapeA, shapeB } = result;
+
+    switch (shapeA.kind) {
+      case "circle":
+        switch (shapeB.kind) {
+          case "circle": Collision.circleToCircle(result); break;
+          case "polygon": Collision.circleToPolygon(result); break;
+          default: break;
+        }
+        break;
+      case "polygon":
+        switch (shapeB.kind) {
+          case "circle": Collision.polygonToCircle(result); break;
+          case "polygon": Collision.polygonToPolygon(result); break;
+          default: break;
+        }
+        break;
+      default: break;
+    }
+
+    return result;
+  }
+}
 
 export class Collision {
   static circleToCircle(contact: Contact) {
