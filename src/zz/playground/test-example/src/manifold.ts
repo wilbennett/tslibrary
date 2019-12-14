@@ -112,9 +112,13 @@ export class Manifold {
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
 
+      const raCrossT = Cross(ra, normal);
+      const rbCrossT = Cross(rb, normal);
+      const invMassSumT = this.A.im + this.B.im + Sqr(raCrossT) * this.A.iI + Sqr(rbCrossT) * this.B.iI;
+
       // j tangent magnitude
       let jt = -Dot(rv, t);
-      jt /= invMassSum;
+      jt /= invMassSumT;
 
       if (MathEx.isEqualTo(jt, 0)) continue; // Don't apply tiny friction impulses
 
