@@ -3,8 +3,8 @@ import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
 import { Brush, CanvasContext, Graph } from '../../../twod';
 import { UiUtils } from '../../../utils';
-import { pos } from '../../../vectors';
-import { Circle, PolygonShape, Scene, Vec2 } from './src';
+import { pos, Vector, dir } from '../../../vectors';
+import { Circle, PolygonShape, Scene } from './src';
 
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
@@ -27,7 +27,7 @@ ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
 const screenBounds = ctx.bounds;
-const origin = new Vec2(0, 0);
+const origin = pos(0, 0);
 const gridSize = 8;
 let angle = 0;
 const pauseAfterSeconds = 30;
@@ -139,18 +139,18 @@ function handleMouseDown(ev: MouseEvent) {
       const hw = 2;
       const hh = 2;
       const vertices = [
-        new Vec2(-hw, -hh),
-        new Vec2(hw, -hh),
-        new Vec2(hw, hh),
-        new Vec2(-hw, hh),
+        pos(-hw, -hh),
+        pos(hw, -hh),
+        pos(hw, hh),
+        pos(-hw, hh),
       ];
       /*/
       const count = MathEx.randomInt(3, 64);
-      const vertices = new Array<Vec2>(count);
+      const vertices = new Array<Vector>(count);
       const e = MathEx.random(5, 10);
 
       for (let i = 0; i < count; i++) {
-        vertices[i] = new Vec2(MathEx.random(-e, e), MathEx.random(-e, e));
+        vertices[i] = pos(MathEx.random(-e, e), MathEx.random(-e, e));
       }
       //*/
 
@@ -178,7 +178,7 @@ function handleMouseDown(ev: MouseEvent) {
   }
 }
 
-function createAABB(halfSize: Vec2, position: Vec2, brush?: Brush) {
+function createAABB(halfSize: Vector, position: Vector, brush?: Brush) {
   const poly = new PolygonShape();
   poly.setBox(halfSize.x, halfSize.y);
   const b = scene.add(poly, position.x, position.y);
@@ -188,12 +188,12 @@ function createAABB(halfSize: Vec2, position: Vec2, brush?: Brush) {
   brush && (b.brush = brush);
 }
 
-function createWalls(position: Vec2, size: Vec2, wallThickness: number) {
+function createWalls(position: Vector, size: Vector, wallThickness: number) {
   const halfSize = size.scaleO(0.5);
   const halfWallThickness = wallThickness * 0.5;
-  const offset = new Vec2(halfSize.x + halfWallThickness, 0);
+  const offset = dir(halfSize.x + halfWallThickness, 0);
 
-  let halfWallSize = new Vec2(halfWallThickness, halfSize.y);
+  let halfWallSize = dir(halfWallThickness, halfSize.y);
   let wpos = position.addO(offset);
   createAABB(halfWallSize, wpos, "blue"); // Right wall.
 
@@ -201,7 +201,7 @@ function createWalls(position: Vec2, size: Vec2, wallThickness: number) {
   createAABB(halfWallSize, wpos, "red"); // Left wall.
 
   offset.set(0, halfSize.y + halfWallThickness);
-  halfWallSize = new Vec2(halfSize.x + wallThickness, halfWallThickness);
+  halfWallSize = dir(halfSize.x + wallThickness, halfWallThickness);
   wpos = position.addO(offset);
   createAABB(halfWallSize, wpos, "orange"); // Top wall.
 
@@ -220,5 +220,5 @@ function addStaticCircle(x: number, y: number) {
 function resetScene() {
   scene.clear();
   addStaticCircle(0, -10);
-  createWalls(origin, new Vec2(60, 60), 5);
+  createWalls(origin, dir(60, 60), 5);
 }

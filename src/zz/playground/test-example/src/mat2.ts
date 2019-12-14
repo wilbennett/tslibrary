@@ -1,4 +1,4 @@
-import { Vec2 } from '.';
+import { dir, Vector } from '../../../../vectors';
 
 export class Mat2 {
   constructor(radians: number);
@@ -30,10 +30,10 @@ export class Mat2 {
   }
 
   abs() { const v = this.v; return new Mat2(Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[2]), Math.abs(v[3])); }
-  axisX() { return new Vec2(this.m00, this.m10); }
-  axisY() { return new Vec2(this.m01, this.m11); }
+  axisX() { return dir(this.m00, this.m10); }
+  axisY() { return dir(this.m01, this.m11); }
   transpose() { return new Mat2(this.m00, this.m10, this.m01, this.m11); }
-  multVec(v: Vec2) { return new Vec2(this.m00 * v.x + this.m01 * v.y, this.m10 * v.x + this.m11 * v.y); }
+  multVec(v: Vector) { return v.withXYO(this.m00 * v.x + this.m01 * v.y, this.m10 * v.x + this.m11 * v.y); }
 
   mult(rhs: Mat2) {
     return new Mat2(

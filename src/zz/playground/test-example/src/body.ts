@@ -1,17 +1,18 @@
-import { IBody, IEMath, Shape, Vec2 } from '.';
+import { IBody, IEMath, Shape } from '.';
 import { MathEx } from '../../../../core';
 import { Brush } from '../../../../twod';
+import { dir, pos, Vector } from '../../../../vectors';
 
 export class Body implements IBody {
   constructor(shape: Shape, x: number, y: number) {
     this.shape = shape.clone();
     this.shape.body = this;
-    this.position = new Vec2(x, y);
-    this.velocity = new Vec2(0, 0);
+    this.position = pos(x, y);
+    this.velocity = dir(0, 0);
     this.angularVelocity = 0;
     this.torque = 0;
     this.orient = MathEx.random(-Math.PI, Math.PI);
-    this.force = new Vec2(0, 0);
+    this.force = dir(0, 0);
     this.staticFriction = 0.5;
     this.dynamicFriction = 0.3;
     this.restitution = 0.2;
@@ -19,12 +20,12 @@ export class Body implements IBody {
     this.brush = IEMath.randomBrush();
   }
 
-  position: Vec2;
-  velocity: Vec2;
+  position: Vector;
+  velocity: Vector;
   angularVelocity: number;
   torque: number;
   orient: number;
-  force: Vec2;
+  force: Vector;
   I: number = 0;
   iI: number = 0;
   m: number = 0;
@@ -36,11 +37,11 @@ export class Body implements IBody {
   shape: Shape;
   brush: Brush;
 
-  applyForce(f: Vec2): void { this.force.add(f); }
+  applyForce(f: Vector): void { this.force.add(f); }
 
-  applyImpulse(impulse: Vec2, contactVector: Vec2): void {
+  applyImpulse(impulse: Vector, contactVector: Vector): void {
     this.velocity.add(impulse.scaleO(this.im));
-    this.angularVelocity += this.iI * contactVector.cross(impulse);
+    this.angularVelocity += this.iI * contactVector.cross2D(impulse);
   }
 
   setStatic(): void {
