@@ -140,7 +140,7 @@ function handleMouseDown(ev: MouseEvent) {
 
   switch (ev.button) {
     case 0:
-      //*
+      /*
       const hw = 2;
       const hh = 2;
       const vertices = [
@@ -165,7 +165,7 @@ function handleMouseDown(ev: MouseEvent) {
       b.setOrient(MathEx.random(-Math.PI, Math.PI));
       b.setOrient(0 * Math.PI / 180);
       b.restitution = 1;
-      // b.restitution = 0.6;
+      b.restitution = 0.6;
       b.dynamicFriction = 0.2;
       b.staticFriction - 0.3;
       render();
@@ -176,8 +176,8 @@ function handleMouseDown(ev: MouseEvent) {
       const c = new Circle(MathEx.random(1, 3));
       const body = scene.add(c, mouse.x, mouse.y);
       body.restitution = 1;
-      // body.restitution = 0.8;
-      body.staticFriction - 0.3;
+      body.restitution = 0.6;
+      body.staticFriction - 0.5;
       render();
       break;
   }
@@ -199,8 +199,8 @@ function addStaticRect(hw: number, hh: number, x: number, y: number) {
   b.setOrient(0);
   b.brush = "purple";
   b.restitution = 1;
-  // b.restitution = 0.2;
-  b.staticFriction - 0.3;
+  b.restitution = 0.2;
+  b.staticFriction - 0.5;
 }
 
 function resetScene() {
