@@ -1,10 +1,11 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
-import { MathEx } from '../../../core';
+import { Material, MathEx } from '../../../core';
 import { CanvasContext, Graph } from '../../../twod';
+import { CircleShape, PolygonShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { pos, Vector } from '../../../vectors';
-import { Circle, PolygonShape, Scene } from './src';
+import { Scene } from './src';
 
 //! BUG: Circles sometimes spin out of control.
 //! BUG: Larger objects falling on smaller objects cause explosion.
@@ -138,6 +139,15 @@ function updateMouse(ev: MouseEvent) {
 function handleMouseDown(ev: MouseEvent) {
   updateMouse(ev);
 
+  let mat: Material = {
+    name: "temp",
+    density: 1,
+    //  restitution: 1,
+    restitution: 0.6,
+    kineticFriction: 0.2,
+    staticFriction: 0.3,
+  };
+
   switch (ev.button) {
     case 0:
       /*
@@ -150,57 +160,71 @@ function handleMouseDown(ev: MouseEvent) {
         pos(-hw, hh),
       ];
       /*/
-      const count = MathEx.randomInt(3, 64);
-      const vertices = new Array<Vector>(count);
+      const count = MathEx.randomInt(3, 10);
+      // const vertices = new Array<Vector>(count);
       const e = MathEx.random(5, 10);
 
-      for (let i = 0; i < count; i++) {
-        vertices[i] = pos(MathEx.random(-e, e), MathEx.random(-e, e));
-      }
+      // for (let i = 0; i < count; i++) {
+      //   vertices[i] = pos(MathEx.random(-e, e), MathEx.random(-e, e));
+      // }
+
+      const poly = new PolygonShape(count, e, 0, false, mat);
       //*/
 
-      const poly = new PolygonShape();
-      poly.set(vertices);
       const b = scene.add(poly, mouse.x, mouse.y);
       b.setOrient(MathEx.random(-Math.PI, Math.PI));
       b.setOrient(0 * Math.PI / 180);
-      b.restitution = 1;
-      b.restitution = 0.6;
-      b.dynamicFriction = 0.2;
-      b.staticFriction - 0.3;
       render();
       break;
     case 1:
       break;
     case 2:
-      const c = new Circle(MathEx.random(1, 3));
-      const body = scene.add(c, mouse.x, mouse.y);
-      body.restitution = 1;
-      body.restitution = 0.6;
-      body.staticFriction - 0.5;
+      const c = new CircleShape(MathEx.random(1, 3), mat);
+      scene.add(c, mouse.x, mouse.y);
       render();
       break;
   }
 }
 
 function addStaticCircle(x: number, y: number) {
-  const c = new Circle(5);
+  let mat: Material = {
+    name: "temp",
+    density: 1,
+    restitution: 0.2,
+    kineticFriction: 0.2,
+    staticFriction: 0.3,
+  };
+
+  const c = new CircleShape(5, mat);
   let b = scene.add(c, x, y);
   b.setStatic();
   b.brush = "purple";
-  b.restitution = 0.2;
+}
+
+function getBox(hw: number, hh: number) {
+  return [
+    pos(-hw, -hh),
+    pos(hw, -hh),
+    pos(hw, hh),
+    pos(-hw, hh),
+  ];
 }
 
 function addStaticRect(hw: number, hh: number, x: number, y: number) {
-  const poly = new PolygonShape();
-  poly.setBox(hw, hh);
+  let mat: Material = {
+    name: "temp",
+    density: 1,
+    //  restitution: 1,
+    restitution: 0.2,
+    kineticFriction: 0.2,
+    staticFriction: 0.3,
+  };
+
+  const poly = new PolygonShape(getBox(hw, hh), mat);
   const b = scene.add(poly, x, y);
   b.setStatic();
   b.setOrient(0);
   b.brush = "purple";
-  b.restitution = 1;
-  b.restitution = 0.2;
-  b.staticFriction - 0.5;
 }
 
 function resetScene() {

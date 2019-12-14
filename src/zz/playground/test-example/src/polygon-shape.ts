@@ -1,3 +1,6 @@
+export {}
+
+/*
 import { Body, IBody, IPolygonShape, Mat2, Shape } from '.';
 import { MathEx } from '../../../../core';
 import { Viewport } from '../../../../twod';
@@ -209,3 +212,4 @@ export class PolygonShape implements IPolygonShape {
     return bestVertex;
   }
 }
+//*/

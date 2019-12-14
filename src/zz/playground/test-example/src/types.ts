@@ -1,5 +1,5 @@
-import { Mat2 } from '.';
-import { Brush, Viewport } from '../../../../twod';
+import { Brush } from '../../../../twod';
+import { Shape } from '../../../../twod/shapes';
 import { Vector } from '../../../../vectors';
 
 export interface IBody {
@@ -30,6 +30,7 @@ export interface IBody {
   setOrient(radians: number): void;
 }
 
+/*
 export interface IShape {
   body: IBody;
   radius: number;
@@ -51,3 +52,4 @@ export interface IPolygonShape extends IShape {
 }
 
 export type Shape = ICircle | IPolygonShape;
+//*/

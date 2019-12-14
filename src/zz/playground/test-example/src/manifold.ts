@@ -33,13 +33,13 @@ export class Manifold {
       case "circle":
         switch (b.shape.kind) {
           case "circle": return Collision.circleToCircle(this, a, b);
-          case "poly": return Collision.circleToPolygon(this, a, b);
+          case "polygon": return Collision.circleToPolygon(this, a, b);
         }
         break;
-      case "poly":
+      case "polygon":
         switch (b.shape.kind) {
           case "circle": return Collision.polygonToCircle(this, a, b);
-          case "poly": return Collision.polygonToPolygon(this, a, b);
+          case "polygon": return Collision.polygonToPolygon(this, a, b);
         }
         break;
     }
@@ -113,9 +113,13 @@ export class Manifold {
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
 
+      const raCrossT = Cross(ra, normal);
+      const rbCrossT = Cross(rb, normal);
+      const invMassSumT = this.A.im + this.B.im + Sqr(raCrossT) * this.A.iI + Sqr(rbCrossT) * this.B.iI;
+
       // j tangent magnitude
       let jt = -Dot(rv, t);
-      jt /= invMassSum;
+      jt /= invMassSumT;
 
       if (MathEx.isEqualTo(jt, 0)) continue; // Don't apply tiny friction impulses
 

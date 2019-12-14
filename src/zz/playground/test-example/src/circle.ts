@@ -1,3 +1,6 @@
+export {}
+
+/*
 import { Body, IBody, ICircle, Mat2, Shape } from '.';
 import { Viewport } from '../../../../twod';
 
@@ -52,3 +55,4 @@ export class Circle implements ICircle {
       .restore();
   }
 }
+//*/

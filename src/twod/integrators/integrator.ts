@@ -20,6 +20,9 @@ export class Integrator {
   get velocity() { return Vector.empty; }
   // @ts-ignore - unused param.
   set velocity(value) { }
+  get force() { return Vector.empty; }
+  // @ts-ignore - unused param.
+  set force(value) { }
   get acceleration() { return Vector.empty; }
   get angle() { return 0; }
   // @ts-ignore - unused param.
@@ -27,6 +30,9 @@ export class Integrator {
   get angularVelocity() { return 0; }
   // @ts-ignore - unused param.
   set angularVelocity(value) { }
+  get torque() { return 0; }
+  // @ts-ignore - unused param.
+  set torque(value) { }
   get angularAcceleration() { return 0; }
   get worldForces(): ForceSource[] { return []; }
   // @ts-ignore - unused param.

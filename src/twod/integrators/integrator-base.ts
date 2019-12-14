@@ -50,7 +50,11 @@ export class IntegratorBase extends Integrator {
   clean() { this._isDirty = false; }
 
   protected _force = Vector.direction(0, 0);
+  get force() { return this._force; }
+  set force(value) { this._force = value; }
   protected _torque = 0;
+  get torque() { return this._torque; }
+  set torque(value) { this._torque = value; }
 
   applyForce(force: Vector) { this._force.add(force); }
   applyTorque(radians: number) { this._torque += radians; }

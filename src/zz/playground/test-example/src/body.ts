@@ -1,38 +1,40 @@
-import { IBody, IEMath, Shape } from '.';
-import { MathEx } from '../../../../core';
+import { IBody, IEMath } from '.';
+import { MassInfo, MathEx } from '../../../../core';
 import { Brush } from '../../../../twod';
-import { dir, pos, Vector } from '../../../../vectors';
+import { Shape } from '../../../../twod/shapes';
+import { pos, Vector } from '../../../../vectors';
 
 export class Body implements IBody {
   constructor(shape: Shape, x: number, y: number) {
-    this.shape = shape.clone();
-    this.shape.body = this;
-    this.position = pos(x, y);
-    this.velocity = dir(0, 0);
-    this.angularVelocity = 0;
-    this.torque = 0;
+    this.shape = shape;
+    this.shape.setPosition(pos(x, y));
     this.orient = MathEx.random(-Math.PI, Math.PI);
-    this.force = dir(0, 0);
-    this.staticFriction = 0.5;
-    this.dynamicFriction = 0.3;
-    this.restitution = 0.2;
-    this.shape.initialize();
     this.brush = IEMath.randomBrush();
+
+    this.shape.props = { strokeStyle: this.brush, lineWidth: 2 };
   }
 
-  position: Vector;
-  velocity: Vector;
-  angularVelocity: number;
-  torque: number;
-  orient: number;
-  force: Vector;
-  I: number = 0;
-  iI: number = 0;
-  m: number = 0;
-  im: number = 0;
-  staticFriction: number;
-  dynamicFriction: number;
-  restitution: number;
+  get position() { return this.shape.position; }
+  set position(value) { this.shape.position = value; }
+  get velocity() { return this.shape.velocity; }
+  set velocity(value) { this.shape.velocity = value; }
+  get angularVelocity() { return this.shape.integrator.angularVelocity; }
+  set angularVelocity(value) { this.shape.integrator.angularVelocity = value; }
+  get torque() { return this.shape.integrator.torque; }
+  set torque(value) { this.shape.integrator.torque = value; }
+  get orient() { return this.shape.angle; }
+  set orient(value) { this.shape.angle = value; }
+  get force() { return this.shape.integrator.force; }
+  set force(value) { this.shape.integrator.force = value; }
+  get I() { return this.shape.massInfo.inertia; }
+  set I(value) { this.shape.massInfo = new MassInfo(this.shape.massInfo.mass, value); }
+  get m() { return this.shape.massInfo.mass; }
+  set m(value) { this.shape.massInfo = new MassInfo(value, this.shape.massInfo.inertia); }
+  get iI() { return this.shape.massInfo.inertiaInverse; }
+  get im() { return this.shape.massInfo.massInverse; }
+  get staticFriction() { return this.shape.material.staticFriction; }
+  get dynamicFriction() { return this.shape.material.kineticFriction; }
+  get restitution() { return this.shape.material.restitution; }
 
   shape: Shape;
   brush: Brush;
@@ -44,15 +46,6 @@ export class Body implements IBody {
     this.angularVelocity += this.iI * contactVector.cross2D(impulse);
   }
 
-  setStatic(): void {
-    this.I = 0;
-    this.iI = 0;
-    this.m = 0;
-    this.im = 0;
-  }
-
-  setOrient(radians: number): void {
-    this.orient = radians;
-    this.shape.setOrient(radians);
-  }
+  setStatic(): void { this.shape.massInfo = MassInfo.empty; }
+  setOrient(radians: number): void { this.orient = radians; }
 }

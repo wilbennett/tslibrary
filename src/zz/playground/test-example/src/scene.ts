@@ -1,5 +1,6 @@
-import { Body, IBody, IEMath, Manifold, Shape } from '.';
+import { Body, IBody, IEMath, Manifold } from '.';
 import { Viewport } from '../../../../twod';
+import { Shape } from '../../../../twod/shapes';
 
 const { gravity } = IEMath;
 
@@ -83,7 +84,7 @@ export class Scene {
   }
 
   render(view: Viewport) {
-    this.bodies.forEach(body => body.shape.draw(view));
+    this.bodies.forEach(body => body.shape.render(view));
     this.contacts.forEach(contact => contact.draw(view));
   }
 
