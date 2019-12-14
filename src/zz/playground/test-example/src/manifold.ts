@@ -91,8 +91,14 @@ export class Manifold {
       const rbCrossN = Cross(rb, normal);
       const invMassSum = this.A.im + this.B.im + Sqr(raCrossN) * this.A.iI + Sqr(rbCrossN) * this.B.iI;
 
+      let velocityBias = 0;
+
+      if (contactVel < -1)
+        velocityBias = -this.e * contactVel;
+
       // Calculate impulse scalar
-      let j = -(1.0 + this.e) * contactVel;
+      // let j = -(1.0 + this.e) * contactVel;
+      let j = -(contactVel - velocityBias);
       j /= invMassSum;
 
       const impulse = normal.scaleO(j);
