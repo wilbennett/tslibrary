@@ -2,7 +2,8 @@ import { Collision, IBody } from '.';
 import { WebColors } from '../../../../colors';
 import { MathEx } from '../../../../core';
 import { Viewport } from '../../../../twod';
-import { dir, Vector } from '../../../../vectors';
+import { Contact, ShapePair } from '../../../../twod/collision';
+import { Vector } from '../../../../vectors';
 import { IEMath } from './iemath';
 
 const { gravity, dt } = IEMath;
@@ -13,76 +14,83 @@ function Cross(v1: Vector, v2: Vector) { return v1.cross2D(v2); }
 function Sqr(n: number) { return n * n; }
 
 export class Manifold {
-  constructor(public A: IBody, public B: IBody) {
-
+  constructor(A: IBody, B: IBody) {
+    const pair = new ShapePair(A.shape, B.shape);
+    this.contact = pair.contact;
   }
 
-  penetration: number = 0;
-  penetrations: number[] = [];
-  normal: Vector = dir(0, 0);
-  contacts: Vector[] = [];
-  e: number = 0;
-  df: number = 0;
-  sf: number = 0;
+  contact: Contact;
+  get isCollision() { return this.contact.isCollision; }
 
   solve() {
-    const a = this.A;
-    const b = this.B;
+    const { shapeA, shapeB } = this.contact;
 
-    switch (a.shape.kind) {
+    switch (shapeA.kind) {
       case "circle":
-        switch (b.shape.kind) {
-          case "circle": return Collision.circleToCircle(this, a, b);
-          case "polygon": return Collision.circleToPolygon(this, a, b);
+        switch (shapeB.kind) {
+          case "circle": return Collision.circleToCircle(this.contact);
+          case "polygon": return Collision.circleToPolygon(this.contact);
         }
         break;
       case "polygon":
-        switch (b.shape.kind) {
-          case "circle": return Collision.polygonToCircle(this, a, b);
-          case "polygon": return Collision.polygonToPolygon(this, a, b);
+        switch (shapeB.kind) {
+          case "circle": return Collision.polygonToCircle(this.contact);
+          case "polygon": return Collision.polygonToPolygon(this.contact);
         }
         break;
     }
   }
 
   initialize() {
-    this.e = (this.A.restitution + this.B.restitution) * 0.5;
-    this.sf = (this.A.staticFriction + this.B.staticFriction) * 0.5;
-    this.df = (this.A.dynamicFriction + this.B.dynamicFriction) * 0.5;
+    const contact = this.contact;
+    const { shapeA, shapeB } = contact;
+    const angularVelocityA = shapeA.integrator.angularVelocity;
+    const angularVelocityB = shapeB.integrator.angularVelocity;
+    const contactPoints = contact.points;
 
-    for (let i = 0; i < this.contacts.length; ++i) {
-      const ra = this.contacts[i].subO(this.A.position);
-      const rb = this.contacts[i].subO(this.B.position);
+    for (let i = 0; i < contactPoints.length; ++i) {
+      const contactPoint = contactPoints[i].point;
+      const ra = contactPoint.subO(shapeA.position);
+      const rb = contactPoint.subO(shapeB.position);
 
-      const rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
+      const rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
+        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
 
       // Determine if we should perform a resting collision or not
       // The idea is if the only thing moving this object is gravity,
       // then the collision should be performed without any restitution
       if (rv.magSquared < gravity.scaleO(dt).magSquared + MathEx.epsilon)
-        this.e = 0;
+        contact.isResting = true;
     }
   }
 
   applyImpulse() {
+    const contact = this.contact;
+    const im = contact.shapes.inverseMass;
+
     // Early out and positional correct if both objects have infinite mass
-    if (MathEx.isEqualTo(this.A.im + this.B.im, 0)) {
+    if (MathEx.isEqualTo(im, 0)) {
       this.infiniteMassCorrection();
       return;
     }
 
-    const contacts = this.contacts;
-    const contactCount = contacts.length;
-    const normal = this.normal;
+    const { shapeA, shapeB } = contact;
+    const angularVelocityA = shapeA.integrator.angularVelocity;
+    const angularVelocityB = shapeB.integrator.angularVelocity;
+    const contactPoints = contact.points;
+    const contactCount = contactPoints.length;
+    const normal = contact.normalAB;
+    const restitution = contact.isResting ? 0 : contact.shapes.restitution;
+    const iIA = shapeA.massInfo.inertiaInverse;
+    const iIB = shapeB.massInfo.inertiaInverse;
 
     for (let i = 0; i < contactCount; ++i) {
       // Calculate radii from COM to contact
-      const ra = contacts[i].subO(this.A.position);
-      const rb = contacts[i].subO(this.B.position);
+      const ra = contactPoints[i].point.subO(shapeA.position);
+      const rb = contactPoints[i].point.subO(shapeB.position);
 
-      let rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
+      let rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
+        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
 
       const contactVel = Dot(rv, normal); // Relative velocity along the normal
 
@@ -90,32 +98,32 @@ export class Manifold {
 
       const raCrossN = Cross(ra, normal);
       const rbCrossN = Cross(rb, normal);
-      const invMassSum = this.A.im + this.B.im + Sqr(raCrossN) * this.A.iI + Sqr(rbCrossN) * this.B.iI;
+      const invMassSum = im + Sqr(raCrossN) * iIA + Sqr(rbCrossN) * iIB;
 
       let velocityBias = 0;
 
       if (contactVel < -1)
-        velocityBias = -this.e * contactVel;
+        velocityBias = -restitution * contactVel;
 
       // Calculate impulse scalar
-      // let j = -(1.0 + this.e) * contactVel;
+      // let j = -(1.0 + restitution) * contactVel;
       let j = -(contactVel - velocityBias);
       j /= invMassSum;
 
       const impulse = normal.scaleO(j);
-      this.A.applyImpulse(impulse.negateO(), ra);
-      this.B.applyImpulse(impulse, rb);
+      shapeA.integrator.applyImpulse(impulse.negateO(), ra);
+      shapeB.integrator.applyImpulse(impulse, rb);
 
       // Friction impulse
-      rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
+      rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
+        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
 
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
 
       const raCrossT = Cross(ra, normal);
       const rbCrossT = Cross(rb, normal);
-      const invMassSumT = this.A.im + this.B.im + Sqr(raCrossT) * this.A.iI + Sqr(rbCrossT) * this.B.iI;
+      const invMassSumT = im + Sqr(raCrossT) * iIA + Sqr(rbCrossT) * iIB;
 
       // j tangent magnitude
       let jt = -Dot(rv, t);
@@ -124,33 +132,39 @@ export class Manifold {
       if (MathEx.isEqualTo(jt, 0)) continue; // Don't apply tiny friction impulses
 
       // Coulumb's law
-      let friction = this.sf;
-      Math.abs(jt) >= j * friction && (friction = this.df);
+      let friction = contact.shapes.staticFriction;
+      Math.abs(jt) >= j * friction && (friction = contact.shapes.kineticFriction);
       let maxTangentMagnitude = j * friction;
       let tangentMagnitude = jt * friction;
       tangentMagnitude = MathEx.clamp(tangentMagnitude, -maxTangentMagnitude, maxTangentMagnitude);
       const tangentImpulse = t.scaleO(tangentMagnitude);
 
       // Apply friction impulse
-      this.A.applyImpulse(tangentImpulse.negateO(), ra);
-      this.B.applyImpulse(tangentImpulse, rb);
+      shapeA.integrator.applyImpulse(tangentImpulse.negateO(), ra);
+      shapeB.integrator.applyImpulse(tangentImpulse, rb);
     }
   }
 
   positionalCorrection() {
     const k_slop = 0.05; // Penetration allowance
     const percent = 0.4; // Penetration percentage to correct
-    let penetration = this.penetrations[0];
-    this.penetrations.length > 1 && (penetration = Math.max(penetration, this.penetrations[1]));
+
+    const contact = this.contact;
+    const { shapeA, shapeB } = contact;
+    const contactPoints = contact.points;
+    const im = contact.shapes.inverseMass;
+
+    let penetration = contactPoints[0].depth;
+    contactPoints.length > 1 && (penetration = Math.max(penetration, contactPoints[1].depth));
     penetration = Math.max(penetration - k_slop, 0);
-    const correction = this.normal.scaleO((penetration / (this.A.im + this.B.im)) * percent);
-    this.A.position.displaceByNeg(correction.scaleO(this.A.im));
-    this.B.position.displaceBy(correction.scaleO(this.B.im));
+    const correction = contact.normalAB.scaleO((penetration / im) * percent);
+    shapeA.position.displaceByNeg(correction.scaleO(shapeA.massInfo.massInverse));
+    shapeB.position.displaceBy(correction.scaleO(shapeB.massInfo.massInverse));
   }
 
   infiniteMassCorrection() {
-    this.A.velocity.set(0, 0);
-    this.B.velocity.set(0, 0);
+    this.contact.shapeA.velocity.set(0, 0);
+    this.contact.shapeB.velocity.set(0, 0);
   }
 
   draw(view: Viewport) {
@@ -160,14 +174,14 @@ export class Manifold {
 
     ctx.save();
 
-    for (const cp of this.contacts) {
-      const n = this.normal.scaleO(0.75);
-      const cpEnd = cp.addO(n);
+    for (const cp of this.contact.points) {
+      const n = this.contact.normal.scaleO(0.75);
+      const cpEnd = cp.point.addO(n);
 
       ctx.beginPath()
         .withLineWidth(lineWidth)
         .withStrokeStyle(WebColors.yellow)
-        .moveTo(cp.x, cp.y)
+        .moveTo(cp.point.x, cp.point.y)
         .lineTo(cpEnd.x, cpEnd.y)
         .stroke();
     }

@@ -47,7 +47,7 @@ export class Scene {
         const m = new Manifold(A, B);
         m.solve();
 
-        if (m.contacts.length > 0)
+        if (m.isCollision)
           contacts.push(m);
       }
     }

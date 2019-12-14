@@ -1,5 +1,6 @@
-import { IBody, IEMath, Manifold } from '.';
+import { IEMath } from '.';
 import { MathEx } from '../../../../core';
+import { Contact, ContactPoint } from '../../../../twod/collision';
 import { ICircleShape, IPolygonShape } from '../../../../twod/shapes';
 import { dir, Vector } from '../../../../vectors';
 
@@ -9,13 +10,13 @@ function DistSqr(v1: Vector, v2: Vector) { return v1.distanceSquared(v2); }
 function assert(condition: boolean) { if (!condition) throw new Error("UNEXPECTED CONDITION"); }
 
 export class Collision {
-  static circleToCircle(m: Manifold, a: IBody, b: IBody) {
-    const A = <ICircleShape>a.shape;
-    const B = <ICircleShape>b.shape;
-    m.contacts = [];
-    m.penetrations = [];
+  static circleToCircle(contact: Contact) {
+    contact.reset();
+    const A = <ICircleShape>contact.shapeA;
+    const B = <ICircleShape>contact.shapeB;
+    const contactPoints = contact.points;
 
-    const normal = b.position.subO(a.position); // Calculate translational vector, which is normal
+    let normal = B.position.subO(A.position); // Calculate translational vector, which is normal
 
     const dist_sqr = normal.magSquared;
     const radius = A.radius + B.radius;
@@ -25,28 +26,25 @@ export class Collision {
     const distance = Math.sqrt(dist_sqr);
 
     if (distance === 0) {
-      m.penetration = A.radius;
-      m.penetrations.push(m.penetration);
-      m.normal = dir(1, 0);
-      m.contacts.push(a.position.clone());
+      contact.normal = dir(1, 0);
+      contactPoints.push(new ContactPoint(A.position.clone(), A.radius));
     } else {
-      m.penetration = radius - distance;
-      m.penetrations.push(m.penetration);
-      m.normal = normal.div(distance); // Faster than using Normalized since we already performed sqrt
-      m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
+      normal.div(distance); // Faster than using Normalized since we already performed sqrt
+      contact.normal = normal;
+      contactPoints.push(new ContactPoint(normal.scaleO(A.radius).addO(A.position), radius - distance));
     }
   }
 
-  static circleToPolygon(m: Manifold, a: IBody, b: IBody) {
-    const A = <ICircleShape>a.shape;
-    const B = <IPolygonShape>b.shape;
+  static circleToPolygon(contact: Contact, flipShapes: boolean = false) {
+    contact.reset();
+    const A = flipShapes ? <ICircleShape>contact.shapeB : <ICircleShape>contact.shapeA;
+    const B = flipShapes ? <IPolygonShape>contact.shapeA : <IPolygonShape>contact.shapeB;
     const verticesB = B.vertexList.items;
     const normalsB = B.normalList.items;
-    m.contacts = [];
-    m.penetrations = [];
+    const contactPoints = contact.points;
 
     // Transform circle center to Polygon model space
-    let center = a.position.clone();
+    let center = A.position.clone();
     center = B.toLocal(center);// B.u.transpose().multVec(center.displaceByNegO(b.position));
 
     // Find edge with minimum penetration
@@ -72,18 +70,16 @@ export class Collision {
 
     // Check to see if center is within polygon
     if (separation < MathEx.epsilon) {
-      m.normal = B.toWorld(normalsB[faceNormal]).negate();// B.u.multVec(normalsB[faceNormal]).negateO();
-      m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
-      m.penetration = A.radius;
-      m.penetrations.push(m.penetration);
+      const normal = B.toWorld(normalsB[faceNormal]).negate();// B.u.multVec(normalsB[faceNormal]).negateO();
+      contact.normal = normal;
+      contactPoints.push(new ContactPoint(normal.scaleO(A.radius).addO(A.position), A.radius));
       return;
     }
 
     // Determine which voronoi region of the edge center of circle lies within
     const dot1 = Dot(center.subO(v1), v2.subO(v1));
     const dot2 = Dot(center.subO(v2), v1.subO(v2));
-    m.penetration = A.radius - separation;
-    m.penetrations.push(m.penetration);
+    const penetration = A.radius - separation;
 
     if (dot1 <= 0) { // Closest to v1
       if (DistSqr(center, v1) > A.radius * A.radius) return;
@@ -91,39 +87,39 @@ export class Collision {
       let n = v1.subO(center);
       n = B.toWorld(n);// B.u.multVec(n);
       n.normalize();
-      m.normal = n;
+      contact.normal = n;
       v1 = B.toWorld(v1);// B.u.multVec(v1).displaceByO(b.position);
-      m.contacts.push(v1);
+      contactPoints.push(new ContactPoint(v1, penetration));
     } else if (dot2 <= 0) { // Closest to v2
       if (DistSqr(center, v2) > A.radius * A.radius) return;
 
       let n = v2.subO(center);
       v2 = B.toWorld(v2);// B.u.multVec(v2).displaceByO(b.position);
-      m.contacts.push(v2);
+      contactPoints.push(new ContactPoint(v2, penetration));
       n = B.toWorld(n);// B.u.multVec(n);
       n.normalize();
-      m.normal = n;
+      contact.normal = n;
     } else { // Closest to face
       let n = normalsB[faceNormal].clone();
 
       if (Dot(center.subO(v1), n) > A.radius) return;
 
       n = B.toWorld(n);// B.u.multVec(n);
-      m.normal = n.negateO();
-      m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
+      contact.normal = n.negate();
+      contactPoints.push(new ContactPoint(n.scaleO(A.radius).addO(A.position), penetration));
     }
   }
 
-  static polygonToCircle(m: Manifold, a: IBody, b: IBody) {
-    this.circleToPolygon(m, b, a);
-    m.normal = m.normal.negateO();
+  static polygonToCircle(contact: Contact) {
+    this.circleToPolygon(contact, true);
+    contact.normal = contact.normal.negateO();
   }
 
-  static polygonToPolygon(m: Manifold, a: IBody, b: IBody) {
-    const A = <IPolygonShape>a.shape;
-    const B = <IPolygonShape>b.shape;
-    m.contacts = [];
-    m.penetrations = [];
+  static polygonToPolygon(contact: Contact) {
+    contact.reset();
+    const A = <IPolygonShape>contact.shapeA;
+    const B = <IPolygonShape>contact.shapeB;
+    const contactPoints = contact.points;
 
     // Check for a separating axis with A's face planes
     let [faceA, penetrationA] = findAxisLeastPenetration(A, B);
@@ -189,28 +185,19 @@ export class Collision {
       return; // Due to floating point error, possible to not have required points
 
     // Flip
-    m.normal = flip ? refFaceNormal.negateO() : refFaceNormal;
+    contact.normal = flip ? refFaceNormal.negateO() : refFaceNormal;
 
     // Keep points behind reference face
-    let cp = 0; // clipped points behind reference face
     let separation = Dot(refFaceNormal, incidentFace[0]) - refC;
 
     if (separation <= 0) {
-      m.contacts.push(incidentFace[0]);
-      m.penetration = -separation;
-      m.penetrations.push(m.penetration);
-      ++cp;
-    } else
-      m.penetration = 0;
+      contactPoints.push(new ContactPoint(incidentFace[0], -separation));
+    }
 
     separation = Dot(refFaceNormal, incidentFace[1]) - refC;
 
     if (separation <= 0) {
-      m.contacts.push(incidentFace[1]);
-      m.penetration += -separation;
-      m.penetrations.push(m.penetration);
-      ++cp;
-      m.penetration /= cp; // Average penetration
+      contactPoints.push(new ContactPoint(incidentFace[1], -separation));
     }
   }
 }
