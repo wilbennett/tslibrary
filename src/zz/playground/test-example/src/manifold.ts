@@ -1,14 +1,15 @@
-import { Collision, IBody, Vec2 } from '.';
+import { Collision, IBody } from '.';
 import { WebColors } from '../../../../colors';
 import { MathEx } from '../../../../core';
 import { Viewport } from '../../../../twod';
+import { dir, Vector } from '../../../../vectors';
 import { IEMath } from './iemath';
 
 const { gravity, dt } = IEMath;
 
-function sCross(s: number, v: Vec2) { return v.sCross(s); }
-function Dot(v1: Vec2, v2: Vec2) { return v1.dot(v2); }
-function Cross(v1: Vec2, v2: Vec2) { return v1.cross(v2); }
+function sCross(s: number, v: Vector) { return v.perpLeftO().scale(s); }
+function Dot(v1: Vector, v2: Vector) { return v1.dot(v2); }
+function Cross(v1: Vector, v2: Vector) { return v1.cross2D(v2); }
 function Sqr(n: number) { return n * n; }
 
 export class Manifold {
@@ -18,8 +19,8 @@ export class Manifold {
 
   penetration: number = 0;
   penetrations: number[] = [];
-  normal: Vec2 = new Vec2(0, 0);
-  contacts: Vec2[] = [];
+  normal: Vector = dir(0, 0);
+  contacts: Vector[] = [];
   e: number = 0;
   df: number = 0;
   sf: number = 0;
@@ -53,13 +54,13 @@ export class Manifold {
       const ra = this.contacts[i].subO(this.A.position);
       const rb = this.contacts[i].subO(this.B.position);
 
-      const rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      const rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
+        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
 
       // Determine if we should perform a resting collision or not
       // The idea is if the only thing moving this object is gravity,
       // then the collision should be performed without any restitution
-      if (rv.lenSqr < gravity.scaleO(dt).lenSqr + MathEx.epsilon)
+      if (rv.magSquared < gravity.scaleO(dt).magSquared + MathEx.epsilon)
         this.e = 0;
     }
   }
@@ -80,8 +81,8 @@ export class Manifold {
       const ra = contacts[i].subO(this.A.position);
       const rb = contacts[i].subO(this.B.position);
 
-      let rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      let rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
+        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
 
       const contactVel = Dot(rv, normal); // Relative velocity along the normal
 
@@ -102,12 +103,12 @@ export class Manifold {
       j /= invMassSum;
 
       const impulse = normal.scaleO(j);
-      this.A.applyImpulse(impulse.negate(), ra);
+      this.A.applyImpulse(impulse.negateO(), ra);
       this.B.applyImpulse(impulse, rb);
 
       // Friction impulse
-      rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      rv = this.B.velocity.displaceByO(sCross(this.B.angularVelocity, rb)).subO(
+        this.A.velocity.displaceByNegO(sCross(this.A.angularVelocity, ra)));
 
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
@@ -127,7 +128,7 @@ export class Manifold {
       const tangentImpulse = t.scaleO(tangentMagnitude);
 
       // Apply friction impulse
-      this.A.applyImpulse(tangentImpulse.negate(), ra);
+      this.A.applyImpulse(tangentImpulse.negateO(), ra);
       this.B.applyImpulse(tangentImpulse, rb);
     }
   }
@@ -139,8 +140,8 @@ export class Manifold {
     this.penetrations.length > 1 && (penetration = Math.max(penetration, this.penetrations[1]));
     penetration = Math.max(penetration - k_slop, 0);
     const correction = this.normal.scaleO((penetration / (this.A.im + this.B.im)) * percent);
-    this.A.position.sub(correction.scaleO(this.A.im));
-    this.B.position.add(correction.scaleO(this.B.im));
+    this.A.position.displaceByNeg(correction.scaleO(this.A.im));
+    this.B.position.displaceBy(correction.scaleO(this.B.im));
   }
 
   infiniteMassCorrection() {

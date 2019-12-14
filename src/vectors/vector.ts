@@ -151,7 +151,7 @@ export abstract class Vector {
   }
 
   // TODO: Allow copying cached properties.
-  set(x: number, y: number, z: number, w: number = 0) {
+  set(x: number, y: number, z: number = 0, w: number = 0) {
     this.x = x;
     this.y = y;
     this.z = z;

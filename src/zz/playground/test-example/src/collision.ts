@@ -1,8 +1,9 @@
-import { IBody, ICircle, IEMath, Manifold, PolygonShape, Vec2 } from '.';
+import { IBody, ICircle, IEMath, Manifold, PolygonShape } from '.';
 import { MathEx } from '../../../../core';
+import { dir, Vector } from '../../../../vectors';
 
-function Dot(v1: Vec2, v2: Vec2) { return v1.dot(v2); }
-function DistSqr(v1: Vec2, v2: Vec2) { return v1.distSqr(v2); }
+function Dot(v1: Vector, v2: Vector) { return v1.dot(v2); }
+function DistSqr(v1: Vector, v2: Vector) { return v1.distanceSquared(v2); }
 
 function assert(condition: boolean) { if (!condition) throw new Error("UNEXPECTED CONDITION"); }
 
@@ -15,7 +16,7 @@ export class Collision {
 
     const normal = b.position.subO(a.position); // Calculate translational vector, which is normal
 
-    const dist_sqr = normal.lenSqr;
+    const dist_sqr = normal.magSquared;
     const radius = A.radius + B.radius;
 
     if (dist_sqr >= radius * radius) return; // Not in contact
@@ -25,7 +26,7 @@ export class Collision {
     if (distance === 0) {
       m.penetration = A.radius;
       m.penetrations.push(m.penetration);
-      m.normal = new Vec2(1, 0);
+      m.normal = dir(1, 0);
       m.contacts.push(a.position.clone());
     } else {
       m.penetration = radius - distance;
@@ -43,7 +44,7 @@ export class Collision {
 
     // Transform circle center to Polygon model space
     let center = a.position.clone();
-    center = B.u.transpose().multVec(center.subO(b.position));
+    center = B.u.transpose().multVec(center.displaceByNegO(b.position));
 
     // Find edge with minimum penetration
     // Exact concept as using support points in Polygon vs Polygon
@@ -51,7 +52,7 @@ export class Collision {
     let faceNormal = 0;
 
     for (let i = 0; i < B.vertices.length; ++i) {
-      const s = Dot(B.normals[i], center.subO(B.vertices[i]));
+      const s = Dot(B.normals[i], center.displaceByNegO(B.vertices[i]));
 
       if (s > A.radius) return;
 
@@ -68,7 +69,7 @@ export class Collision {
 
     // Check to see if center is within polygon
     if (separation < MathEx.epsilon) {
-      m.normal = B.u.multVec(B.normals[faceNormal]).negate();
+      m.normal = B.u.multVec(B.normals[faceNormal]).negateO();
       m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
       m.penetration = A.radius;
       m.penetrations.push(m.penetration);
@@ -88,13 +89,13 @@ export class Collision {
       n = B.u.multVec(n);
       n.normalize();
       m.normal = n;
-      v1 = B.u.multVec(v1).addO(b.position);
+      v1 = B.u.multVec(v1).displaceByO(b.position);
       m.contacts.push(v1);
     } else if (dot2 <= 0) { // Closest to v2
       if (DistSqr(center, v2) > A.radius * A.radius) return;
 
       let n = v2.subO(center);
-      v2 = B.u.multVec(v2).addO(b.position);
+      v2 = B.u.multVec(v2).displaceByO(b.position);
       m.contacts.push(v2);
       n = B.u.multVec(n);
       n.normalize();
@@ -105,14 +106,14 @@ export class Collision {
       if (Dot(center.subO(v1), n) > A.radius) return;
 
       n = B.u.multVec(n);
-      m.normal = n.negate();
+      m.normal = n.negateO();
       m.contacts.push(m.normal.scaleO(A.radius).addO(a.position));
     }
   }
 
   static polygonToCircle(m: Manifold, a: IBody, b: IBody) {
     this.circleToPolygon(m, b, a);
-    m.normal = m.normal.negate();
+    m.normal = m.normal.negateO();
   }
 
   static polygonToPolygon(m: Manifold, a: IBody, b: IBody) {
@@ -151,7 +152,7 @@ export class Collision {
     }
 
     // World space incident face
-    const incidentFace: Vec2[] = new Array<Vec2>(2);
+    const incidentFace: Vector[] = new Array<Vector>(2);
     findIncidentFace(incidentFace, RefPoly, IncPoly, referenceIndex);
 
     // Setup reference face vertices
@@ -160,15 +161,15 @@ export class Collision {
     let v2 = RefPoly.vertices[referenceIndex].clone();
 
     // Transform vertices to world space
-    v1 = RefPoly.u.multVec(v1).addO(RefPoly.body.position);
-    v2 = RefPoly.u.multVec(v2).addO(RefPoly.body.position);
+    v1 = RefPoly.u.multVec(v1).displaceByO(RefPoly.body.position);
+    v2 = RefPoly.u.multVec(v2).displaceByO(RefPoly.body.position);
 
     // Calculate reference face side normal in world space
     const sidePlaneNormal = v2.subO(v1);
     sidePlaneNormal.normalize();
 
     // Orthogonalize
-    const refFaceNormal = new Vec2(sidePlaneNormal.y, -sidePlaneNormal.x);
+    const refFaceNormal = dir(sidePlaneNormal.y, -sidePlaneNormal.x);
 
     // ax + by = c
     // c is distance from origin
@@ -177,14 +178,14 @@ export class Collision {
     const posSide = Dot(sidePlaneNormal, v2);
 
     // Clip incident face to reference face side planes
-    if (clip(sidePlaneNormal.negate(), negSide, incidentFace) < 2)
+    if (clip(sidePlaneNormal.negateO(), negSide, incidentFace) < 2)
       return; // Due to floating point error, possible to not have required points
 
     if (clip(sidePlaneNormal, posSide, incidentFace) < 2)
       return; // Due to floating point error, possible to not have required points
 
     // Flip
-    m.normal = flip ? refFaceNormal.negate() : refFaceNormal;
+    m.normal = flip ? refFaceNormal.negateO() : refFaceNormal;
 
     // Keep points behind reference face
     let cp = 0; // clipped points behind reference face
@@ -224,12 +225,12 @@ function findAxisLeastPenetration(A: PolygonShape, B: PolygonShape) {
     n = buT.multVec(nw);
 
     // Retrieve support point from B along -n
-    const s = B.getSupport(n.negate());
+    const s = B.getSupport(n.negateO());
 
     // Retrieve vertex on face from A, transform into B's model space
     let v = A.vertices[i].clone();
-    v = A.u.multVec(v).addO(A.body.position);
-    v.sub(B.body.position);
+    v = A.u.multVec(v).displaceByO(A.body.position);
+    v.displaceByNeg(B.body.position);
     v = buT.multVec(v);
 
     // Compute penetration distance (in B's model space)
@@ -244,7 +245,7 @@ function findAxisLeastPenetration(A: PolygonShape, B: PolygonShape) {
   return [bestIndex, bestDistance];
 }
 
-function findIncidentFace(v: Vec2[], RefPoly: PolygonShape, IncPoly: PolygonShape, referenceIndex: number) {
+function findIncidentFace(v: Vector[], RefPoly: PolygonShape, IncPoly: PolygonShape, referenceIndex: number) {
   let referenceNormal = RefPoly.normals[referenceIndex].clone();
 
   // Calculate normal in incident's frame of reference
@@ -265,12 +266,12 @@ function findIncidentFace(v: Vec2[], RefPoly: PolygonShape, IncPoly: PolygonShap
   }
 
   // Assign face vertices for incidentFace
-  v[0] = IncPoly.u.multVec(IncPoly.vertices[incidentFace]).addO(IncPoly.body.position);
+  v[0] = IncPoly.u.multVec(IncPoly.vertices[incidentFace]).displaceByO(IncPoly.body.position);
   incidentFace = incidentFace + 1 >= IncPoly.vertices.length ? 0 : incidentFace + 1;
-  v[1] = IncPoly.u.multVec(IncPoly.vertices[incidentFace]).addO(IncPoly.body.position);
+  v[1] = IncPoly.u.multVec(IncPoly.vertices[incidentFace]).displaceByO(IncPoly.body.position);
 }
 
-function clip(n: Vec2, c: number, face: Vec2[]) {
+function clip(n: Vector, c: number, face: Vector[]) {
   let sp = 0;
   const out = [face[0], face[1]];
 
@@ -287,7 +288,7 @@ function clip(n: Vec2, c: number, face: Vec2[]) {
   if (d1 * d2 < 0) { // less than to ignore -0.0
     // Push interesection point
     const alpha = d1 / (d1 - d2);
-    out[sp] = face[0].addO(face[1].subO(face[0]).scaleO(alpha));
+    out[sp] = face[0].displaceByO(face[1].displaceByNegO(face[0]).scaleO(alpha));
     ++sp;
   }
 

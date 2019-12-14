@@ -1,3 +1,6 @@
+export { }
+
+/*
 import { MathEx } from '../../../../core';
 
 export class Vec2 {
@@ -61,3 +64,4 @@ export class Vec2 {
   sCross(s: number) { return new Vec2(-s * this.y, s * this.x); }
   cross(v: Vec2) { return this.x * v.y - this.y * v.x; }
 }
+//*/

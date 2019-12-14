@@ -1,7 +1,7 @@
-import { Body, IBody, IPolygonShape, Mat2, Shape, Vec2 } from '.';
+import { Body, IBody, IPolygonShape, Mat2, Shape } from '.';
 import { MathEx } from '../../../../core';
 import { Viewport } from '../../../../twod';
-import { pos } from '../../../../vectors';
+import { dir, pos, Vector } from '../../../../vectors';
 
 const MaxPolyVertexCount = 64;
 
@@ -17,14 +17,14 @@ export class PolygonShape implements IPolygonShape {
   set body(value) { this._body = value; }
   radius: number;
   u: Mat2;
-  vertices: Vec2[] = [];
-  normals: Vec2[] = [];
+  vertices: Vector[] = [];
+  normals: Vector[] = [];
 
   clone(): Shape {
     const poly = new PolygonShape();
     poly.u = new Mat2(this.u.m00, this.u.m01, this.u.m10, this.u.m11);
-    poly.vertices = this.vertices.map(v => new Vec2(v.x, v.y));
-    poly.normals = this.normals.map(v => new Vec2(v.x, v.y));
+    poly.vertices = this.vertices.map(v => pos(v.x, v.y));
+    poly.normals = this.normals.map(v => dir(v.x, v.y));
     return poly;
   }
 
@@ -36,7 +36,7 @@ export class PolygonShape implements IPolygonShape {
     const vertexCount = vertices.length;
 
     // Calculate centroid and moment of interia
-    let c = new Vec2(0, 0); // centroid
+    let c = dir(0, 0); // centroid
     let area = 0;
     let I = 0;
     const k_inv3 = 1 / 3;
@@ -46,12 +46,12 @@ export class PolygonShape implements IPolygonShape {
       const i2 = i1 + 1 < vertexCount ? i1 + 1 : 0;
       const p2 = vertices[i2].clone();
 
-      const D = p1.cross(p2);
+      const D = p1.cross2D(p2);
       const triangleArea = 0.5 * D;
 
       area += triangleArea;
 
-      c.add(p1.addO(p2).scaleO(triangleArea * k_inv3));
+      c.displaceBy(p1.displaceByO(p2).scaleO(triangleArea * k_inv3));
 
       const intx2 = p1.x * p1.x + p2.x * p1.x + p2.x * p2.x;
       const inty2 = p1.y * p1.y + p2.y * p1.y + p2.y * p2.y;
@@ -73,21 +73,21 @@ export class PolygonShape implements IPolygonShape {
 
   setBox(hw: number, hh: number) {
     this.vertices = [
-      new Vec2(-hw, -hh),
-      new Vec2(hw, -hh),
-      new Vec2(hw, hh),
-      new Vec2(-hw, hh),
+      pos(-hw, -hh),
+      pos(hw, -hh),
+      pos(hw, hh),
+      pos(-hw, hh),
     ];
 
     this.normals = [
-      new Vec2(0, -1),
-      new Vec2(1, 0),
-      new Vec2(0, 1),
-      new Vec2(-1, 0),
+      dir(0, -1),
+      dir(1, 0),
+      dir(0, 1),
+      dir(-1, 0),
     ];
   }
 
-  set(inputVertices: Vec2[]) {
+  set(inputVertices: Vector[]) {
     const count = Math.min(inputVertices.length, MaxPolyVertexCount);
 
     // Find the right most point on the hull
@@ -132,14 +132,14 @@ export class PolygonShape implements IPolygonShape {
         // See : http://www.oocities.org/pcgpe/math2d.html
         const e1 = inputVertices[nextHullIndex].subO(inputVertices[hull[outCount]]);
         const e2 = inputVertices[i].subO(inputVertices[hull[outCount]]);
-        const c = e1.cross(e2);
+        const c = e1.cross2D(e2);
 
         if (c < 0)
           nextHullIndex = i;
 
         // Cross product is zero then e vectors are on same line
         // therefore we want to record vertex farthest along that line
-        if (c == 0 && e2.lenSqr > e1.lenSqr)
+        if (c == 0 && e2.magSquared > e1.magSquared)
           nextHullIndex = i;
       }
 
@@ -152,8 +152,8 @@ export class PolygonShape implements IPolygonShape {
       }
     }
 
-    const vertices = new Array<Vec2>(vertexCount);
-    const normals = new Array<Vec2>(vertexCount);
+    const vertices = new Array<Vector>(vertexCount);
+    const normals = new Array<Vector>(vertexCount);
     this.vertices = vertices;
     this.normals = normals;
 
@@ -164,9 +164,9 @@ export class PolygonShape implements IPolygonShape {
       const i2 = i1 + 1 < vertexCount ? i1 + 1 : 0;
       const face = vertices[i2].subO(vertices[i1]);
 
-      if (!(face.lenSqr > MathEx.epsilon * MathEx.epsilon)) throw new Error("zero length edge.");
+      if (!(face.magSquared > MathEx.epsilon * MathEx.epsilon)) throw new Error("zero length edge.");
 
-      normals[i1] = new Vec2(face.y, -face.x);
+      normals[i1] = dir(face.y, -face.x);
       normals[i1].normalize();
     }
   }
@@ -190,7 +190,7 @@ export class PolygonShape implements IPolygonShape {
       .restore();
   }
 
-  getSupport(dir: Vec2) {
+  getSupport(dir: Vector) {
     const vertices = this.vertices;
     const count = vertices.length;
     let bestProjection = -Infinity;

@@ -4,7 +4,7 @@ import { MathEx } from '../../../core';
 import { CanvasContext, Graph } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { pos, Vector } from '../../../vectors';
-import { Circle, PolygonShape, Scene, Vec2 } from './src';
+import { Circle, PolygonShape, Scene } from './src';
 
 //! BUG: Circles sometimes spin out of control.
 //! BUG: Larger objects falling on smaller objects cause explosion.
@@ -144,18 +144,18 @@ function handleMouseDown(ev: MouseEvent) {
       const hw = 2;
       const hh = 2;
       const vertices = [
-        new Vec2(-hw, -hh),
-        new Vec2(hw, -hh),
-        new Vec2(hw, hh),
-        new Vec2(-hw, hh),
+        pos(-hw, -hh),
+        pos(hw, -hh),
+        pos(hw, hh),
+        pos(-hw, hh),
       ];
       /*/
       const count = MathEx.randomInt(3, 64);
-      const vertices = new Array<Vec2>(count);
+      const vertices = new Array<Vector>(count);
       const e = MathEx.random(5, 10);
 
       for (let i = 0; i < count; i++) {
-        vertices[i] = new Vec2(MathEx.random(-e, e), MathEx.random(-e, e));
+        vertices[i] = pos(MathEx.random(-e, e), MathEx.random(-e, e));
       }
       //*/
 

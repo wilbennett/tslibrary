@@ -1,15 +1,16 @@
-import { Mat2, Vec2 } from '.';
+import { Mat2 } from '.';
 import { Brush, Viewport } from '../../../../twod';
+import { Vector } from '../../../../vectors';
 
 export interface IBody {
-  position: Vec2;
-  velocity: Vec2;
+  position: Vector;
+  velocity: Vector;
 
   angularVelocity: number;
   torque: number;
   orient: number;
 
-  force: Vec2;
+  force: Vector;
 
   I: number;
   iI: number;
@@ -23,8 +24,8 @@ export interface IBody {
   shape: Shape;
   brush: Brush;
 
-  applyForce(f: Vec2): void;
-  applyImpulse(impulse: Vec2, contactVector: Vec2): void;
+  applyForce(f: Vector): void;
+  applyImpulse(impulse: Vector, contactVector: Vector): void;
   setStatic(): void;
   setOrient(radians: number): void;
 }
