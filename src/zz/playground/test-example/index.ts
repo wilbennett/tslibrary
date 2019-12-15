@@ -1,11 +1,12 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Material, MathEx } from '../../../core';
-import { CanvasContext, Graph } from '../../../twod';
-import { CircleShape, PolygonShape } from '../../../twod/shapes';
+import { Brush, CanvasContext, Graph } from '../../../twod';
+import { Collider, SATProjection, SATSupport, Sutherland, Wcb2 } from '../../../twod/collision';
+import { CircleShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
-import { pos, Vector } from '../../../vectors';
-import { Scene } from './src';
+import { dir, pos, Vector } from '../../../vectors';
+import { Gaul, Scene } from './src';
 
 //! BUG: Circles sometimes spin out of control.
 //! BUG: Larger objects falling on smaller objects cause explosion.
@@ -35,12 +36,24 @@ const screenBounds = ctx.bounds;
 const gridSize = 8;
 let angle = 0;
 const pauseAfterSeconds = Infinity;//30;
+const isYup = false;
 
 const graph = new Graph(ctx.bounds, gridSize);
-graph.viewCenter = pos(35, -35);
+// graph.viewCenter = pos(35, -35);
 graph.background = "black";
 graph.lineBrush = "rgba(70, 70, 70)";
+const clipper = new Sutherland();
+let collider: Collider;
+collider = new SATProjection();
+collider = new SATSupport();
+collider = new Wcb2();
+collider.clipper = clipper;
+collider = new Gaul();
 const scene = new Scene(1 / 60, 10);
+scene.collider = collider;
+
+// const [leftWall, bottomWall, rightWall, topWall] = createWalls(pos(0, 0), dir(60, 60), 100);
+const [leftWall, bottomWall, rightWall, topWall] = createWalls(pos(0, 0), dir(60, 60), 100);
 
 let frame = -1;
 const loop = new AnimationLoop(update, render);
@@ -120,7 +133,7 @@ function render() {
 
   const view = graph.getViewport(ctx);
   view.applyTransform();
-  ctx.scale(1, -1);
+  !isYup && ctx.scale(1, -1);
 
   scene.render(view);
 
@@ -133,7 +146,7 @@ function updateMouse(ev: MouseEvent) {
   const rect = canvas.getBoundingClientRect();
   mouse.withXY(ev.clientX - rect.left, ev.clientY - rect.top);
   view.toWorld(mouse, true, mouse);
-  mouse.withNegY();
+  !isYup && mouse.withNegY();
 }
 
 function handleMouseDown(ev: MouseEvent) {
@@ -150,8 +163,8 @@ function handleMouseDown(ev: MouseEvent) {
 
   switch (ev.button) {
     case 0:
-      /*
-      const hw = 2;
+      //*
+      const hw = 5;
       const hh = 2;
       const vertices = [
         pos(-hw, -hh),
@@ -159,6 +172,8 @@ function handleMouseDown(ev: MouseEvent) {
         pos(hw, hh),
         pos(-hw, hh),
       ];
+
+      const poly = new PolygonShape(vertices, mat);
       /*/
       const count = MathEx.randomInt(3, 10);
       // const vertices = new Array<Vector>(count);
@@ -227,11 +242,33 @@ function addStaticRect(hw: number, hh: number, x: number, y: number) {
   b.brush = "purple";
 }
 
+function addWall(wall: Shape, brush?: Brush) {
+  let mat: Material = {
+    name: "temp",
+    density: 1,
+    //  restitution: 1,
+    restitution: 0.2,
+    kineticFriction: 0.2,
+    staticFriction: 0.3,
+  };
+
+  wall.material = mat;
+  const poly = new PolygonShape(wall.vertexList.items);
+  const b = scene.add(poly, wall.position.x, wall.position.y);
+  b.setStatic();
+  b.setOrient(0);
+  brush && (poly.props = { strokeStyle: brush, lineWidth: 2 });
+}
+
 function resetScene() {
   scene.clear();
-  addStaticCircle(40, 40);
-  addStaticRect(100, 100, 40, 155);
-  addStaticRect(100, 100, -95, 28);
-  addStaticRect(100, 100, 165, 28);
-  addStaticRect(100, 100, 40, -98);
+  // addStaticCircle(40, 40);
+  // addStaticRect(100, 100, 40, 155);
+  // addStaticRect(100, 100, -95, 28);
+  // addStaticRect(100, 100, 165, 28);
+  // addStaticRect(100, 100, 40, -98);
+  addWall(leftWall, "red");
+  addWall(rightWall, "blue");
+  addWall(bottomWall, "green");
+  addWall(topWall, "orange");
 }
