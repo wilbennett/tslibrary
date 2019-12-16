@@ -10,7 +10,7 @@ export class Impulse extends CollisionResolverBase {
 
     this.positionalCorrection = true;
     this.positionalCorrectionRate = 0.8;
-    this.relaxationCount = 1;
+    this.relaxationCount = 10;
   }
 
   initialize(contact: Contact) {
@@ -24,9 +24,8 @@ export class Impulse extends CollisionResolverBase {
       const rb = contactPoint.point.subO(integratorB.position);
       const vOffsetA = dir(-integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
       const vOffsetB = dir(-integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
-      const va = integratorA.velocity.subO(vOffsetA);
       const vb = integratorB.velocity.addO(vOffsetB);
-      const relativeVelocity = vb.subO(va);
+      const relativeVelocity = vb.subO(integratorA.velocity).subO(vOffsetA);
 
       if (relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared)
         contact.isResting = true;
@@ -38,7 +37,6 @@ export class Impulse extends CollisionResolverBase {
     const { shapeA, shapeB } = contact;
     const invMassA = shapeA.massInfo.massInverse;
     const invMassB = shapeB.massInfo.massInverse;
-    const contactPointCount = contact.points.length;
     const normal = contact.normalAB;
 
     if (!this.globalPositionalCorrection)
@@ -54,13 +52,12 @@ export class Impulse extends CollisionResolverBase {
     for (const contactPoint of contact.points) {
       const ra = contactPoint.point.subO(integratorA.position);
       const rb = contactPoint.point.subO(integratorB.position);
-      // const vOffsetA = ra.scaleO(integratorA.angularVelocity).perpLeft();
-      // const vOffsetB = rb.scaleO(integratorB.angularVelocity).perpLeft();
-      const vOffsetA = dir(-integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
-      const vOffsetB = dir(-integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
-      const va = integratorA.velocity.subO(vOffsetA);
+      const vOffsetA = ra.scaleO(integratorA.angularVelocity).perpLeft();
+      const vOffsetB = rb.scaleO(integratorB.angularVelocity).perpLeft();
+      // const vOffsetA = dir(-integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
+      // const vOffsetB = dir(-integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
       const vb = integratorB.velocity.addO(vOffsetB);
-      const relativeVelocity = vb.subO(va);
+      const relativeVelocity = vb.subO(integratorA.velocity).subO(vOffsetA);
       const relVelocityInNormal = relativeVelocity.dot(normal);
       contactPoint.relativeVelocity = relativeVelocity;
 
@@ -71,7 +68,7 @@ export class Impulse extends CollisionResolverBase {
 
       const totalInverseMass = inverseMass + raCrossN * raCrossN * inertiaA + rbCrossN * rbCrossN * inertiaB;
       const relVelMagnitudeToRemove = -(1 + restitution) * relVelocityInNormal;
-      const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass / contactPointCount;
+      const impulseMagnitude = relVelMagnitudeToRemove / totalInverseMass;
       const impulse = normal.scaleO(impulseMagnitude);
       // console.log(`velocities: ${integratorA.velocity}, ${integratorB.velocity}`);
       // console.log(`normal: ${normal}`);
@@ -90,14 +87,21 @@ export class Impulse extends CollisionResolverBase {
       // console.log(`velocities: ${integratorA.velocity}, ${integratorB.velocity}`);
       // console.log(``);
 
-      const tangent = relativeVelocity.subO(normal.scaleO(relVelocityInNormal)).normalize();//.negate();
-      const relVelocityInTangent = relativeVelocity.dot(tangent);
+      // const vOffsetTA = dir(-integratorA.angularVelocity * ra.y, integratorA.angularVelocity * ra.x);
+      // const vOffsetTB = dir(-integratorB.angularVelocity * rb.y, integratorB.angularVelocity * rb.x);
+      const vOffsetTA = ra.scaleO(integratorA.angularVelocity).perpLeft();
+      const vOffsetTB = rb.scaleO(integratorB.angularVelocity).perpLeft();
+      const vbT = integratorB.velocity.addO(vOffsetTB);
+      const relativeVelocityT = vbT.subO(integratorA.velocity).subO(vOffsetTA);
 
-      // const raCrossT = ra.cross2D(tangent);
-      // const rbCrossT = rb.cross2D(tangent);
-      // const totalInverseMassT = inverseMass + raCrossT * raCrossT * inertiaA + rbCrossT * rbCrossT * inertiaB;
+      const tangent = relativeVelocityT.subO(normal.scaleO(relVelocityInNormal)).normalize();//.negate();
+      const relVelocityInTangent = relativeVelocityT.dot(tangent);
+
+      const raCrossT = ra.cross2D(tangent);
+      const rbCrossT = rb.cross2D(tangent);
+      const totalInverseMassT = inverseMass + raCrossT * raCrossT * inertiaA + rbCrossT * rbCrossT * inertiaB;
       const relTangentMagnitudeToRemove = -relVelocityInTangent;
-      let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMass / contactPointCount;
+      let tangentImpulseMagnitude = relTangentMagnitudeToRemove / totalInverseMassT;
       let friction = staticFriction;
 
       if (MathEx.isEqualTo(0, tangentImpulseMagnitude)) return;
@@ -111,13 +115,12 @@ export class Impulse extends CollisionResolverBase {
       // TODO: Investigate switching between static and kinetic friction. This doesn't look right.
       const kineticFriction = contact.shapes.kineticFriction;
 
-      if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * staticFriction)
+      if (Math.abs(tangentImpulseMagnitude) > impulseMagnitude * staticFriction)
         friction = kineticFriction;
 
-      if (Math.abs(tangentImpulseMagnitude) < impulseMagnitude * friction)
-        tangentImpulseMagnitude = tangentImpulseMagnitude * friction;
-      else
-        tangentImpulseMagnitude = -impulseMagnitude * friction;
+      const maxTangentMagnitude = impulseMagnitude * friction;
+      tangentImpulseMagnitude = tangentImpulseMagnitude * friction;
+      tangentImpulseMagnitude = MathEx.clamp(tangentImpulseMagnitude, -maxTangentMagnitude, maxTangentMagnitude);
       //*/
 
       const tangentImpulse = tangent.scale(tangentImpulseMagnitude);

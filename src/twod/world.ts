@@ -84,6 +84,8 @@ export class World {
     let collidingPairs: ShapePair[] = [];
     let contacts: Contact[] = [];
 
+    this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
+
     if (narrowPhase && collisionResolver) {
       collidingPairs = broadPhase
         ? broadPhase.execute(this._shapes, this._pairManager)
@@ -105,7 +107,7 @@ export class World {
 
     this.collidingPairs = collidingPairs;
     this.contacts = contacts;
-    this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
+    // this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
 
     if (collisionResolver && collisionResolver.globalPositionalCorrection)
       contacts.forEach(contact => collisionResolver.updatePositions(contact));

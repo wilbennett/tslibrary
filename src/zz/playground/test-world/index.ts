@@ -270,6 +270,7 @@ elStepping.addEventListener("change", () => stepping = elStepping.checked);
 canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
 canvas.addEventListener("mouseup", handleMouseUp);
+canvas.addEventListener("contextmenu", ev => ev.preventDefault());
 
 function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   !dragging && world.update(timestep, now);
@@ -378,9 +379,19 @@ function handleMouseMove(ev: MouseEvent) {
 
 function handleMouseDown(ev: MouseEvent) {
   if (dragging) return;
-  if (ev.button !== 0) return;
+  // if (ev.button !== 0) return;
 
   updateMouse(ev);
+
+  if (ev.button === 2) {
+    const shape = new PolygonShape(MathEx.randomInt(3, 8), 3, 0, false, bouncy);
+    shape.setPosition(mouse);
+    shapeSet.push(shape);
+    world.add(shape);
+    return;
+  }
+
+  if (ev.button !== 0) return;
 
   for (let i = 0; i < shapeSet.length; i++) {
     const shape = shapeSet[i];
