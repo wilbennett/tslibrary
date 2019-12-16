@@ -8,9 +8,6 @@ import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 import { Gaul, Scene } from './src';
 
-//! BUG: Circles sometimes spin out of control.
-//! BUG: Larger objects falling on smaller objects cause explosion.
-
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
 canvasb.width = gridExtent;
