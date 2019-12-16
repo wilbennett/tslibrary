@@ -44,8 +44,8 @@ export class Manifold {
   initialize() {
     const contact = this.contact;
     const { shapeA, shapeB } = contact;
-    const angularVelocityA = shapeA.integrator.angularVelocity;
-    const angularVelocityB = shapeB.integrator.angularVelocity;
+    const integratorA = shapeA.integrator;
+    const integratorB = shapeB.integrator;
     const contactPoints = contact.points;
 
     for (let i = 0; i < contactPoints.length; ++i) {
@@ -53,8 +53,10 @@ export class Manifold {
       const ra = contactPoint.subO(shapeA.position);
       const rb = contactPoint.subO(shapeB.position);
 
-      const rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
-        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
+      const rv = integratorB.velocity
+        .addO(sCross(integratorB.angularVelocity, rb))
+        .subO(integratorA.velocity)
+        .subO(sCross(integratorA.angularVelocity, ra));
 
       // Determine if we should perform a resting collision or not
       // The idea is if the only thing moving this object is gravity,
@@ -75,8 +77,8 @@ export class Manifold {
     }
 
     const { shapeA, shapeB } = contact;
-    const angularVelocityA = shapeA.integrator.angularVelocity;
-    const angularVelocityB = shapeB.integrator.angularVelocity;
+    const integratorA = shapeA.integrator;
+    const integratorB = shapeB.integrator;
     const contactPoints = contact.points;
     const contactCount = contactPoints.length;
     const normal = contact.normalAB;
@@ -89,8 +91,10 @@ export class Manifold {
       const ra = contactPoints[i].point.subO(shapeA.position);
       const rb = contactPoints[i].point.subO(shapeB.position);
 
-      let rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
-        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
+      let rv = integratorB.velocity
+        .addO(sCross(integratorB.angularVelocity, rb))
+        .subO(integratorA.velocity)
+        .subO(sCross(integratorA.angularVelocity, ra));
 
       const contactVel = Dot(rv, normal); // Relative velocity along the normal
 
@@ -115,8 +119,10 @@ export class Manifold {
       shapeB.integrator.applyImpulse(impulse, rb);
 
       // Friction impulse
-      rv = shapeB.velocity.displaceByO(sCross(angularVelocityB, rb)).subO(
-        shapeA.velocity.displaceByNegO(sCross(angularVelocityA, ra)));
+      rv = integratorB.velocity
+        .addO(sCross(integratorB.angularVelocity, rb))
+        .subO(integratorA.velocity)
+        .subO(sCross(integratorA.angularVelocity, ra));
 
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
