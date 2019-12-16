@@ -116,7 +116,6 @@ function render() {
 
   const view = graph.getViewport(ctx);
   view.applyTransform();
-  ctx.scale(1, -1);
 
   scene.render(view);
 
@@ -129,7 +128,6 @@ function updateMouse(ev: MouseEvent) {
   const rect = canvas.getBoundingClientRect();
   mouse.withXY(ev.clientX - rect.left, ev.clientY - rect.top);
   view.toWorld(mouse, true, mouse);
-  mouse.withNegY();
 }
 
 function handleMouseDown(ev: MouseEvent) {
@@ -221,6 +219,6 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  addStaticCircle(0, 10);
+  addStaticCircle(0, -10);
   createWalls(origin, new Vec2(60, 60), 5);
 }
