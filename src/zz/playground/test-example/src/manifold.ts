@@ -53,8 +53,10 @@ export class Manifold {
       const ra = this.contacts[i].subO(this.A.position);
       const rb = this.contacts[i].subO(this.B.position);
 
-      const rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      const rv = this.B.velocity
+        .addO(sCross(this.B.angularVelocity, rb))
+        .subO(this.A.velocity)
+        .subO(sCross(this.A.angularVelocity, ra));
 
       // Determine if we should perform a resting collision or not
       // The idea is if the only thing moving this object is gravity,
@@ -80,8 +82,10 @@ export class Manifold {
       const ra = contacts[i].subO(this.A.position);
       const rb = contacts[i].subO(this.B.position);
 
-      let rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      let rv = this.B.velocity
+        .addO(sCross(this.B.angularVelocity, rb))
+        .subO(this.A.velocity)
+        .subO(sCross(this.A.angularVelocity, ra));
 
       const contactVel = Dot(rv, normal); // Relative velocity along the normal
 
@@ -106,8 +110,10 @@ export class Manifold {
       this.B.applyImpulse(impulse, rb);
 
       // Friction impulse
-      rv = this.B.velocity.addO(sCross(this.B.angularVelocity, rb)).subO(
-        this.A.velocity.subO(sCross(this.A.angularVelocity, ra)));
+      rv = this.B.velocity
+        .addO(sCross(this.B.angularVelocity, rb))
+        .subO(this.A.velocity)
+        .subO(sCross(this.A.angularVelocity, ra));
 
       const t = rv.subO(normal.scaleO(Dot(rv, normal)));
       t.normalize();
