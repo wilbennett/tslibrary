@@ -1,7 +1,7 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
-import { CanvasContext, Graph, Brush } from '../../../twod';
+import { Brush, CanvasContext, Graph } from '../../../twod';
 import { UiUtils } from '../../../utils';
 import { pos } from '../../../vectors';
 import { Circle, PolygonShape, Scene, Vec2 } from './src';
@@ -27,13 +27,13 @@ ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
 const screenBounds = ctx.bounds;
-// const origin = new Vec2(0, 0);
+const origin = new Vec2(0, 0);
 const gridSize = 8;
 let angle = 0;
 const pauseAfterSeconds = 30;
 
 const graph = new Graph(ctx.bounds, gridSize);
-graph.viewCenter = pos(35, -35);
+// graph.viewCenter = pos(35, -35);
 graph.background = "black";
 graph.lineBrush = "rgba(70, 70, 70)";
 const scene = new Scene(1 / 60, 10);
@@ -221,6 +221,6 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  addStaticCircle(35, 40);
-  createWalls(new Vec2(35, 35), new Vec2(60, 60), 5);
+  addStaticCircle(0, 10);
+  createWalls(origin, new Vec2(60, 60), 5);
 }
