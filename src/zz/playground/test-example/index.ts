@@ -1,13 +1,10 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { MathEx } from '../../../core';
-import { CanvasContext, Graph } from '../../../twod';
+import { CanvasContext, Graph, Brush } from '../../../twod';
 import { UiUtils } from '../../../utils';
-import { pos, Vector } from '../../../vectors';
+import { pos } from '../../../vectors';
 import { Circle, PolygonShape, Scene, Vec2 } from './src';
-
-//! BUG: Circles sometimes spin out of control.
-//! BUG: Larger objects falling on smaller objects cause explosion.
 
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
@@ -29,11 +26,11 @@ ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
-Vector.tipDrawHeight = 1.0;
 const screenBounds = ctx.bounds;
+// const origin = new Vec2(0, 0);
 const gridSize = 8;
 let angle = 0;
-const pauseAfterSeconds = Infinity;//30;
+const pauseAfterSeconds = 30;
 
 const graph = new Graph(ctx.bounds, gridSize);
 graph.viewCenter = pos(35, -35);
@@ -183,6 +180,37 @@ function handleMouseDown(ev: MouseEvent) {
   }
 }
 
+function createAABB(halfSize: Vec2, position: Vec2, brush?: Brush) {
+  const poly = new PolygonShape();
+  poly.setBox(halfSize.x, halfSize.y);
+  const b = scene.add(poly, position.x, position.y);
+  b.setOrient(0);
+  b.setStatic();
+  b.restitution = 0.2;
+  brush && (b.brush = brush);
+}
+
+function createWalls(position: Vec2, size: Vec2, wallThickness: number) {
+  const halfSize = size.scaleO(0.5);
+  const halfWallThickness = wallThickness * 0.5;
+  const offset = new Vec2(halfSize.x + halfWallThickness, 0);
+
+  let halfWallSize = new Vec2(halfWallThickness, halfSize.y);
+  let wpos = position.addO(offset);
+  createAABB(halfWallSize, wpos, "blue"); // Right wall.
+
+  wpos = position.addO(offset.negate());
+  createAABB(halfWallSize, wpos, "red"); // Left wall.
+
+  offset.set(0, halfSize.y + halfWallThickness);
+  halfWallSize = new Vec2(halfSize.x + wallThickness, halfWallThickness);
+  wpos = position.addO(offset);
+  createAABB(halfWallSize, wpos, "orange"); // Top wall.
+
+  wpos = position.addO(offset.negate());
+  createAABB(halfWallSize, wpos, "green"); // Bottom wall.
+}
+
 function addStaticCircle(x: number, y: number) {
   const c = new Circle(5);
   let b = scene.add(c, x, y);
@@ -191,23 +219,8 @@ function addStaticCircle(x: number, y: number) {
   b.restitution = 0.2;
 }
 
-function addStaticRect(hw: number, hh: number, x: number, y: number) {
-  const poly = new PolygonShape();
-  poly.setBox(hw, hh);
-  const b = scene.add(poly, x, y);
-  b.setStatic();
-  b.setOrient(0);
-  b.brush = "purple";
-  b.restitution = 1;
-  b.restitution = 0.2;
-  b.staticFriction - 0.5;
-}
-
 function resetScene() {
   scene.clear();
-  addStaticCircle(40, 40);
-  addStaticRect(100, 100, 40, 155);
-  addStaticRect(100, 100, -95, 28);
-  addStaticRect(100, 100, 165, 28);
-  addStaticRect(100, 100, 40, -98);
+  addStaticCircle(35, 40);
+  createWalls(new Vec2(35, 35), new Vec2(60, 60), 5);
 }
