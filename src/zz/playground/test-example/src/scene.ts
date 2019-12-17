@@ -26,11 +26,17 @@ export class Scene {
     this.integrateForces(b, dt);
   }
 
-  step() {
+  integrate(b: IBody, dt: number) {
+    if (b.im === 0) return;
+
+    this.integrateForces(b, dt);
+    this.integrateVelocity(b, dt);
+  }
+
+  broadPhase() {
     const contacts = this.contacts;
     const bodies = this.bodies;
     const bodyCount = bodies.length;
-    const dt = this.dt;
 
     // Generate new collision info
     contacts.splice(0);
@@ -51,28 +57,55 @@ export class Scene {
       }
     }
 
+    // Initialize collision
+    this.initializeCollisions(contacts);
+  }
+
+  integrateAll(bodies: IBody[], dt: number) {
+    const bodyCount = bodies.length;
+
+    for (let i = 0; i < bodyCount; ++i)
+      this.integrate(bodies[i], dt);
+  }
+
+  initializeCollisions(contacts: Manifold[]) {
     const contactCount = contacts.length;
 
-    // Integrate forces
-    for (let i = 0; i < bodyCount; ++i)
-      this.integrateForces(bodies[i], dt);
-
-    // Initialize collision
     for (let i = 0; i < contactCount; ++i)
       contacts[i].initialize();
+  }
+
+  solveCollisions(contacts: Manifold[]) {
+    const contactCount = contacts.length;
+
+    for (let i = 0; i < contactCount; ++i)
+      contacts[i].applyImpulse();
+  }
+
+  positionalCorrection(contacts: Manifold[]) {
+    const contactCount = contacts.length;
+
+    for (let i = 0; i < contactCount; ++i)
+      contacts[i].positionalCorrection();
+  }
+
+  step() {
+    const contacts = this.contacts;
+    const bodies = this.bodies;
+    const bodyCount = bodies.length;
+    const dt = this.dt;
+
+    // Integrate
+    this.integrateAll(bodies, dt);
+    // Generate new collision info
+    this.broadPhase();
 
     // Solve collisions
     for (let j = 0; j < this.iterations; ++j)
-      for (let i = 0; i < contactCount; ++i)
-        contacts[i].applyImpulse();
-
-    // Integrate velocities
-    for (let i = 0; i < bodyCount; ++i)
-      this.integrateVelocity(bodies[i], dt);
+      this.solveCollisions(contacts);
 
     // Correct positions
-    for (let i = 0; i < contactCount; ++i)
-      contacts[i].positionalCorrection();
+    this.positionalCorrection(contacts);
 
     // Clear all forces
     for (let i = 0; i < bodyCount; ++i) {
