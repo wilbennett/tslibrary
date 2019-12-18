@@ -3,7 +3,7 @@ import { WebColors } from '../../../colors';
 import { Material, MathEx } from '../../../core';
 import { Brush, CanvasContext, Graph } from '../../../twod';
 import { Collider, SATProjection, SATSupport, Sutherland, Wcb2 } from '../../../twod/collision';
-import { CircleShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
+import { CircleShape, PolygonShape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 import { Gaul, Scene } from './src';
@@ -28,12 +28,11 @@ ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
-Vector.tipDrawHeight = 1.0;
 const screenBounds = ctx.bounds;
+const origin = pos(0, 0);
 const gridSize = 8;
 let angle = 0;
-const pauseAfterSeconds = Infinity;//30;
-const isYup = false;
+const pauseAfterSeconds = 30;
 
 const graph = new Graph(ctx.bounds, gridSize);
 // graph.viewCenter = pos(35, -35);
@@ -48,9 +47,6 @@ collider.clipper = clipper;
 collider = new Gaul();
 const scene = new Scene(1 / 60, 10);
 scene.collider = collider;
-
-// const [leftWall, bottomWall, rightWall, topWall] = createWalls(pos(0, 0), dir(60, 60), 100);
-const [leftWall, bottomWall, rightWall, topWall] = createWalls(pos(0, 0), dir(60, 60), 100);
 
 let frame = -1;
 const loop = new AnimationLoop(update, render);
@@ -130,7 +126,6 @@ function render() {
 
   const view = graph.getViewport(ctx);
   view.applyTransform();
-  !isYup && ctx.scale(1, -1);
 
   scene.render(view);
 
@@ -143,7 +138,6 @@ function updateMouse(ev: MouseEvent) {
   const rect = canvas.getBoundingClientRect();
   mouse.withXY(ev.clientX - rect.left, ev.clientY - rect.top);
   view.toWorld(mouse, true, mouse);
-  !isYup && mouse.withNegY();
 }
 
 function handleMouseDown(ev: MouseEvent) {
@@ -198,74 +192,54 @@ function handleMouseDown(ev: MouseEvent) {
   }
 }
 
-function addStaticCircle(x: number, y: number) {
-  let mat: Material = {
-    name: "temp",
-    density: 1,
-    restitution: 0.2,
-    kineticFriction: 0.2,
-    staticFriction: 0.3,
-  };
+function createAABB(halfSize: Vector, position: Vector, brush?: Brush) {
+  const hw = halfSize.x;
+  const hh = halfSize.y;
 
-  const c = new CircleShape(5, mat);
-  let b = scene.add(c, x, y);
-  b.setStatic();
-  b.brush = "purple";
-}
-
-function getBox(hw: number, hh: number) {
-  return [
+  const vertices = [
     pos(-hw, -hh),
     pos(hw, -hh),
     pos(hw, hh),
     pos(-hw, hh),
   ];
-}
 
-function addStaticRect(hw: number, hh: number, x: number, y: number) {
-  let mat: Material = {
-    name: "temp",
-    density: 1,
-    //  restitution: 1,
-    restitution: 0.2,
-    kineticFriction: 0.2,
-    staticFriction: 0.3,
-  };
-
-  const poly = new PolygonShape(getBox(hw, hh), mat);
-  const b = scene.add(poly, x, y);
-  b.setStatic();
+  const poly = new PolygonShape(vertices);
+  const b = scene.add(poly, position.x, position.y);
   b.setOrient(0);
-  b.brush = "purple";
-}
-
-function addWall(wall: Shape, brush?: Brush) {
-  let mat: Material = {
-    name: "temp",
-    density: 1,
-    //  restitution: 1,
-    restitution: 0.2,
-    kineticFriction: 0.2,
-    staticFriction: 0.3,
-  };
-
-  wall.material = mat;
-  const poly = new PolygonShape(wall.vertexList.items);
-  const b = scene.add(poly, wall.position.x, wall.position.y);
   b.setStatic();
-  b.setOrient(0);
   brush && (poly.props = { strokeStyle: brush, lineWidth: 2 });
+}
+
+function createWalls(position: Vector, size: Vector, wallThickness: number) {
+  const halfSize = size.scaleO(0.5);
+  const halfWallThickness = wallThickness * 0.5;
+  const offset = dir(halfSize.x + halfWallThickness, 0);
+
+  let halfWallSize = dir(halfWallThickness, halfSize.y);
+  let wpos = position.addO(offset);
+  createAABB(halfWallSize, wpos, "blue"); // Right wall.
+
+  wpos = position.addO(offset.negate());
+  createAABB(halfWallSize, wpos, "red"); // Left wall.
+
+  offset.set(0, halfSize.y + halfWallThickness);
+  halfWallSize = dir(halfSize.x + wallThickness, halfWallThickness);
+  wpos = position.addO(offset);
+  createAABB(halfWallSize, wpos, "orange"); // Top wall.
+
+  wpos = position.addO(offset.negate());
+  createAABB(halfWallSize, wpos, "green"); // Bottom wall.
+}
+
+function addStaticCircle(x: number, y: number) {
+  const c = new CircleShape(5);
+  let b = scene.add(c, x, y);
+  b.setStatic();
+  b.brush = "purple";
 }
 
 function resetScene() {
   scene.clear();
-  // addStaticCircle(40, 40);
-  // addStaticRect(100, 100, 40, 155);
-  // addStaticRect(100, 100, -95, 28);
-  // addStaticRect(100, 100, 165, 28);
-  // addStaticRect(100, 100, 40, -98);
-  addWall(leftWall, "red");
-  addWall(rightWall, "blue");
-  addWall(bottomWall, "green");
-  addWall(topWall, "orange");
+  addStaticCircle(0, -10);
+  createWalls(origin, dir(60, 60), 5);
 }

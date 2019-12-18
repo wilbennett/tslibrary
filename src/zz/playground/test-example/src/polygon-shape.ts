@@ -1,4 +1,4 @@
-export {}
+export { }
 
 /*
 import { Body, IBody, IPolygonShape, Mat2, Shape } from '.';
