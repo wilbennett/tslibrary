@@ -14,7 +14,7 @@ const colors: Brush[] = [
 
 export class IEMath {
   static readonly gravityScale = 5;
-  static readonly gravity = dir(0, 10 * IEMath.gravityScale);
+  static readonly gravity = dir(0, -10 * IEMath.gravityScale);
   static readonly dt = 1 / 60;
 
   static sqr(n: number) { return n * n; }
