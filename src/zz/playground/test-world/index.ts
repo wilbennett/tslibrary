@@ -125,9 +125,9 @@ const materials: { [index: string]: Material } = {
 
 const defaultMaterial = materials.default;
 const bouncy = materials.bouncy;
-const superBouncy = materials.superBouncy;
+// const superBouncy = materials.superBouncy;
 const plastic = materials.plastic;
-const wood = materials.wood;
+// const wood = materials.wood;
 
 // for (const name in materials) { materials[name].restitution = 1; }
 // for (const name in materials) { materials[name].staticFriction = 0; }
