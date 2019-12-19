@@ -23,6 +23,7 @@ const elPause = UiUtils.getInputElement("pause");
 const elStepping = UiUtils.getInputElement("stepping");
 const elStep = UiUtils.getInputElement("step");
 const elClear = UiUtils.getInputElement("clear");
+const elCollider = UiUtils.getSelectElement("collider");
 
 ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
@@ -35,22 +36,23 @@ let angle = 0;
 const pauseAfterSeconds = 30;
 
 const graph = new Graph(ctx.bounds, gridSize);
-// graph.viewCenter = pos(35, -35);
 graph.background = "black";
 graph.lineBrush = "rgba(70, 70, 70)";
 const clipper = new Sutherland();
-let collider: Collider;
-collider = new SATProjection();
-collider = new SATSupport();
-collider = new Wcb2();
-collider.clipper = clipper;
-collider = new Gaul();
 const scene = new Scene(1 / 60, 10);
-scene.collider = collider;
+
+const colliders: [string, Collider][] = [
+  ["SAT SUP", new SATSupport()],
+  ["Gaul", new Gaul()],
+  ["WCB2", new Wcb2()],
+  ["SAT PROJ", new SATProjection()],
+];
 
 let frame = -1;
 const loop = new AnimationLoop(update, render);
 
+populateColliders();
+applyCollider();
 drawGraph();
 resetScene();
 loop.start();
@@ -74,6 +76,13 @@ elStep.addEventListener("click", () => {
 
   if (!loop.active)
     loop.start();
+});
+
+elCollider.addEventListener("change", () => {
+  applyCollider();
+
+  if (!loop.active)
+    render();
 });
 
 elStepping.addEventListener("change", () => stepping = elStepping.checked);
@@ -154,7 +163,7 @@ function handleMouseDown(ev: MouseEvent) {
 
   switch (ev.button) {
     case 0:
-      //*
+      /*
       const hw = 5;
       const hh = 2;
       const vertices = [
@@ -192,6 +201,20 @@ function handleMouseDown(ev: MouseEvent) {
   }
 }
 
+function populateColliders() {
+  for (const [colliderName, collider] of colliders) {
+    elCollider.appendChild(UiUtils.createOption(colliderName));
+
+    if (!(collider instanceof Gaul))
+      collider.clipper = clipper;
+  }
+}
+
+function applyCollider() {
+  const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
+  scene.collider = collider;
+}
+
 function createAABB(halfSize: Vector, position: Vector, brush?: Brush) {
   const hw = halfSize.x;
   const hh = halfSize.y;
@@ -214,19 +237,22 @@ function createWalls(position: Vector, size: Vector, wallThickness: number) {
   const halfSize = size.scaleO(0.5);
   const halfWallThickness = wallThickness * 0.5;
   const offset = dir(halfSize.x + halfWallThickness, 0);
-
-  let halfWallSize = dir(halfWallThickness, halfSize.y);
-  let wpos = position.addO(offset);
-  createAABB(halfWallSize, wpos, "blue"); // Right wall.
-
-  wpos = position.addO(offset.negate());
-  createAABB(halfWallSize, wpos, "red"); // Left wall.
-
+  let halfWallSize: Vector;
+  let wpos: Vector;
+  /*
+    halfWallSize = dir(halfWallThickness, halfSize.y);
+    wpos = position.addO(offset);
+    createAABB(halfWallSize, wpos, "blue"); // Right wall.
+  
+    wpos = position.addO(offset.negate());
+    createAABB(halfWallSize, wpos, "red"); // Left wall.
+  //*/
   offset.set(0, halfSize.y + halfWallThickness);
   halfWallSize = dir(halfSize.x + wallThickness, halfWallThickness);
+  /*
   wpos = position.addO(offset);
   createAABB(halfWallSize, wpos, "orange"); // Top wall.
-
+//*/
   wpos = position.addO(offset.negate());
   createAABB(halfWallSize, wpos, "green"); // Bottom wall.
 }
@@ -240,6 +266,6 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  addStaticCircle(0, -10);
+  // addStaticCircle(0, -10);
   createWalls(origin, dir(60, 60), 5);
 }
