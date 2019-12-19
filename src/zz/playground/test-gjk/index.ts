@@ -21,6 +21,7 @@ import * as Minkowski from '../../../twod/shapes/minkowski';
 import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
+import { Gaul } from '../test-example/src';
 
 // const { ONE_DEGREE } = MathEx;
 
@@ -153,10 +154,11 @@ const pairs: ShapePair[] = [
 ]
 
 const colliders: [string, Collider][] = [
+  ["SAT SUP", new SATSupport()],
+  ["Gaul", new Gaul()],
   ["WCB2", new Wcb2()],
   ["WCB", new Wcb()],
   ["GJK", new Gjk()],
-  ["SAT SUP", new SATSupport()],
 ];
 
 type State = {
@@ -856,13 +858,14 @@ function applyCollider() {
   // console.clear();
 
   //*
-  collider.clipper = new Sutherland();
+  if (!(collider instanceof Gaul))
+    collider.clipper = new Sutherland();
   // if (collider instanceof Gjk || collider instanceof Wcb)
   //   isColliding = !!collider.isCollidingProgress(pair, pushSimplices);
 
   if (collider instanceof Gjk)
     isColliding = !!collider.isColliding(pair, pushColliderState);
-  else if (collider instanceof SATSupport) {
+  else if (collider instanceof SATSupport || collider instanceof Gaul) {
     contact = collider.calcContact(pair, pair.contact, true);
     contact && pushColliderState({ contact });
   } else {
