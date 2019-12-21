@@ -1,6 +1,5 @@
-import { MinkowskiPoint, Shape, SupportPoint, SupportPointImpl } from '.';
+import { getCircleVertex, MinkowskiPoint, Shape, SupportPoint, SupportPointImpl } from '.';
 import { Vector } from '../../vectors';
-import { getCircleVertex } from '../geometry';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
 const ZERO_DIRECTION = Vector.direction(0, 0);
