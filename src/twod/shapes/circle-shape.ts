@@ -38,21 +38,10 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     return iterator.vertex;
   }
 
-  getSupport(direction: Vector, result?: SupportPoint): SupportPoint;
-  getSupport(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
-  getSupport(param1: Vector | ShapeAxis, result?: SupportPoint): SupportPoint {
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
     result || (result = new SupportPointImpl(this));
 
-    let direction: Vector;
-    let axisPoint: Vector;
-
-    if (param1 instanceof Vector) {
-      direction = param1;
-      axisPoint = Vector.empty;
-    } else {
-      direction = param1.normal;
-      axisPoint = param1.point;
-    }
+    direction = direction.rotateO(-this.angle);
 
     if (direction.magSquared !== 1)
       direction = direction.normalizeO();
@@ -63,7 +52,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     result.shape = this;
     result.point = point;
     result.index = calcCircleIndex(direction.radians);
-    result.distance = !axisPoint.isEmpty ? point.subO(axisPoint).dot(direction) : point.dot(direction);
+    result.distance = point.dot(direction);
     return result;
   }
 
