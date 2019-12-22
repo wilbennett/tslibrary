@@ -1,8 +1,8 @@
-import { Edge, GeometryIterator, ICircleShape } from '.';
-import { pos, Vector } from '../../vectors';
-import { getCircleVertex } from '../geometry';
+import { Edge, GeometryIterator, ICircleShape, SupportPoint } from '.';
+import { Vector } from '../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 import { EdgeImpl } from './edge-impl';
+import { calcCircleSupport, calcCircleVerticesAndEdges } from './shape-utils';
 
 export class CircleIterator implements GeometryIterator {
   constructor(readonly circle: ICircleShape, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
@@ -10,13 +10,15 @@ export class CircleIterator implements GeometryIterator {
     this._center = isWorld ? circle.position : circle.center;
     this.segments = segments || getCircleSegmentInfo();
 
-    this._vertex = getCircleVertex(circle, index, isWorld, this.segments);
+    // this._vertex = getCircleVertex(circle, index, isWorld, this.segments);
+    // this._vertices = calcCircleVertices(circle, false, this.segments);
+    [this._vertices, this._edgeVectors] = calcCircleVerticesAndEdges(circle, false, this.segments);
 
     if (isWorld)
-      this._isWorld = isWorld;
+      this.isWorld = isWorld;
   }
 
-  protected _isWorld?: boolean;
+  protected isWorld?: boolean;
   protected _center: Vector;
   readonly segments: CircleSegmentInfo;
   protected _index: number;
@@ -25,13 +27,30 @@ export class CircleIterator implements GeometryIterator {
     // if (this._index === value) return; //! Need to recalc vertex in case center/position has changed.
 
     this._index = value;
-    this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
+    // this._vertex.copyFrom(getCircleVertex(this.circle, value, this._isWorld, this.segments));
   }
   get vertexCount() { return this.segments.segmentCount; }
-  get vertices(): Vector[] { return []; }
-  protected _vertex: Vector;
-  get vertex() { return this._vertex; }
+  protected _vertices: Vector[];
+  get vertices(): Vector[] {
+    return this.isWorld
+      ? this._vertices.map(v => this.circle.toWorld(v))
+      : this._vertices;
+  }
+  // protected _vertex: Vector;
+  get vertex() {
+    return this.isWorld
+      ? this.circle.toWorld(this._vertices[this._index])
+      : this._vertices[this._index];
+  }
+  // get vertex() { return this._vertex; }
   get nextVertex() {
+    //*
+    const index = (this._index + 1) % this.vertexCount;
+
+    return this.isWorld
+      ? this.circle.toWorld(this._vertices[index])
+      : this._vertices[index];
+    /*/
     const current = this._vertex;
     const cx = this._center.x;
     const cy = this._center.y;
@@ -43,8 +62,16 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * sin + y * cos;
 
     return pos(rx + cx, ry + cy);
+    //*/
   }
   get prevVertex() {
+    //*
+    const index = this._index > 0 ? this._index - 1 : this.vertexCount - 1;
+
+    return this.isWorld
+      ? this.circle.toWorld(this._vertices[index])
+      : this._vertices[index];
+    /*/
     const current = this._vertex;
     const cx = this._center.x;
     const cy = this._center.y;
@@ -56,10 +83,16 @@ export class CircleIterator implements GeometryIterator {
     let ry = x * nsin + y * ncos;
 
     return pos(rx + cx, ry + cy);
+    //*/
   }
-  get edgeVectors(): Vector[] { return []; }
+  protected readonly _edgeVectors: Vector[];
+  get edgeVectors(): Vector[] {
+    return this.isWorld
+      ? this._edgeVectors.map(e => this.circle.toWorld(e))
+      : this._edgeVectors;
+  }
   get edge(): Edge {
-    if (this._isWorld) {
+    if (this.isWorld) {
       return new EdgeImpl(
         this.circle,
         this.index,
@@ -91,7 +124,7 @@ export class CircleIterator implements GeometryIterator {
     const prevVertex = this.prevVertex;
     const normalDirection = vertex.subO(prevVertex).perpRight();
 
-    if (this._isWorld) {
+    if (this.isWorld) {
       return new EdgeImpl(
         this.circle,
         index,
@@ -117,12 +150,25 @@ export class CircleIterator implements GeometryIterator {
       normalDirection,
       undefined);
   }
-  get edgeVector() { return this.nextVertex.subO(this.vertex); }
-  get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
+  get edgeVector() {
+    return this.isWorld
+      ? this.circle.toWorld(this._edgeVectors[this._index])
+      : this._edgeVectors[this._index];
+  }
+  get prevEdgeVector() {
+    const index = this._index > 0 ? this._index - 1 : this.vertexCount - 1;
+
+    return this.isWorld
+      ? this.circle.toWorld(this._edgeVectors[index])
+      : this._edgeVectors[index];
+  }
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
   next() {
+    //*/
+    this._index = (this._index + 1) % this.segments.segmentCount;
+    /*/
     const current = this._vertex;
     const cx = this._center.x;
     const cy = this._center.y;
@@ -136,9 +182,13 @@ export class CircleIterator implements GeometryIterator {
     this._vertex.withXY(rx + cx, ry + cy);
     this._index = (this._index + 1) % this.segments.segmentCount;
     return this._vertex;
+    //*/
   }
 
   prev() {
+    //*
+    this._index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
+    /*/
     const current = this._vertex;
     const cx = this._center.x;
     const cy = this._center.y;
@@ -152,5 +202,10 @@ export class CircleIterator implements GeometryIterator {
     this._vertex.withXY(rx + cx, ry + cy);
     this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this._vertex;
+    //*/
+  }
+
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
+    return calcCircleSupport(this.circle, direction, this.segments, result);
   }
 }

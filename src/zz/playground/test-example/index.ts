@@ -1,11 +1,33 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Material, MathEx } from '../../../core';
-import { Brush, CanvasContext, Graph } from '../../../twod';
-import { Collider, SATProjection, SATSupport, Sutherland, Wcb2 } from '../../../twod/collision';
-import { CircleShape, PolygonShape } from '../../../twod/shapes';
+import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } from '../../../easing';
+import { Bounds } from '../../../misc';
+import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
+import {
+  ClipState,
+  Collider,
+  ColliderState,
+  Contact,
+  SATProjection,
+  SATSupport,
+  ShapePair,
+  Sutherland,
+  Wcb2,
+} from '../../../twod/collision';
+import {
+  CircleShape,
+  getDiffPoint,
+  PolygonShape,
+  Shape,
+  ShapeAxis,
+  Simplex,
+  UniqueShapeAxesList,
+} from '../../../twod/shapes';
+import * as Minkowski from '../../../twod/shapes/minkowski';
+import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
-import { dir, pos, Vector } from '../../../vectors';
+import { dir, normal, pos, Vector } from '../../../vectors';
 import { Gaul, Scene } from './src';
 
 const gridExtent = 600;
@@ -29,6 +51,7 @@ ctx.fillStyle = WebColors.whitesmoke;
 ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
+setCircleSegmentCount(20);
 const screenBounds = ctx.bounds;
 const origin = pos(0, 0);
 const gridSize = 8;
@@ -42,20 +65,86 @@ const clipper = new Sutherland();
 const scene = new Scene(1 / 60, 10);
 
 const colliders: [string, Collider][] = [
-  ["SAT SUP", new SATSupport()],
-  ["Gaul", new Gaul()],
   ["WCB2", new Wcb2()],
+  ["Gaul", new Gaul()],
+  ["SAT SUP", new SATSupport()],
   ["SAT PROJ", new SATProjection()],
 ];
 
+type State = {
+  contact?: Contact;
+  colliderState?: ColliderState;
+  clipState?: ClipState;
+};
+
+let stateIndex = -1;
+let states: State[] = [];
+let stateAnim: Easer | null = null;
+const startDelay = new DelayEaser(2);
+const delay = new DelayEaser(2);
+
 let frame = -1;
 const loop = new AnimationLoop(update, render);
+const runner = new EaseRunner();
 
 populateColliders();
 applyCollider();
 drawGraph();
 resetScene();
 loop.start();
+runner.start();
+
+const c1 = new CircleShape(3);
+const cp1 = new PolygonShape(8, 3, 0, true);
+const hw = 5;
+const hh = 2;
+const vertices = [
+  pos(-hw, -hh),
+  pos(hw, -hh),
+  pos(hw, hh),
+  pos(-hw, hh),
+];
+const p1 = new PolygonShape(vertices);
+cp1.props = { strokeStyle: "red", lineWidth: 2 };
+c1.props = { strokeStyle: "orange", lineWidth: 2 };
+p1.props = { strokeStyle: "magenta", lineWidth: 2 };
+p1.setPosition(pos(15, 10));
+c1.setPosition(pos(15, 17));
+cp1.setPosition(c1.position);
+c1.angle = 210 * Math.PI / 180;
+p1.angle = 0 * Math.PI / 180;
+cp1.angle = c1.angle;
+const m1 = Minkowski.createDiffPoly(c1, p1)!;
+const m2 = Minkowski.createDiffPoly(cp1, p1)!;
+// const m1 = Minkowski.createDiffPoly(p1, c1)!;
+m1.props = { strokeStyle: "green", lineWidth: 3 };
+m2.props = { strokeStyle: "red", lineWidth: 3 };
+ctx.beginPath().clearRect(ctx.bounds);
+applyTransform();
+const view = graph.getViewport(ctx);
+view.applyTransform();
+
+let cvertices = c1.getIterator(0, true).vertices;
+beginPath(c1.props, view)
+  .strokePoly(cvertices, true)
+  .beginPath()
+  .moveTo(c1.position).lineTo(cvertices[0]).stroke();
+// c1.render(view);
+cp1.render(view);
+p1.render(view);
+m1.render(view);
+m2.render(view);
+const start = getDiffPoint(c1, p1, normal(1, 0));
+const start2 = getDiffPoint(cp1, p1, normal(1, 0));
+beginPath(c1.props, view).strokeCircle(start.worldPoint, 1);
+beginPath(cp1.props, view).strokeCircle(start2.worldPoint, 1);
+beginPath(cp1.props, view).strokeCircle(start2.worldPointA, 1);
+beginPath(c1.props, view).strokeCircle(start.worldPointA, 1);
+beginPath(p1.props, view).strokeCircle(start.worldPointB, 1);
+beginPath(c1.props, view).strokeCircle(p1.toWorld(p1.vertexList.items[0]), 1);
+
+view.restoreTransform();
+restoreTransform();
 
 let stepping = false;
 const mouse = pos(0, 0);
@@ -115,8 +204,52 @@ function restoreTransform() {
   ctx.restore();
 }
 
+function createStateAnim() {
+  const count = states.length;
+
+  if (count === 0) return;
+
+  const anim = new NumberEaser(0, count - 1, MathEx.clamp(count * 1.0, 2, 10), Ease.linear, v => {
+    // if (stepping) return;
+
+    stateIndex = Math.round(v);
+    !loop.active && render();
+  });
+
+  stateAnim = new SequentialEaser([startDelay, new SequentialEaser([anim, delay])]).repeat(Infinity);
+  runner.add(stateAnim);
+}
+
+function pushColliderState(colliderState: ColliderState) {
+  states.push({ colliderState });
+}
+
+function pushClipState(clipState: ClipState) {
+  // clipState.contact.ensureNormalDirection();
+  states.push({ clipState });
+}
+
 function update() {
   scene.step();
+
+  if (stateAnim)
+    runner.remove(stateAnim);
+
+  stateAnim = null;
+  states.splice(0);
+  stateIndex = -1;
+
+  const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
+
+  if (collider && collider instanceof Wcb2 && scene.bodies.length === 2) {
+    const bodies = scene.bodies;
+    const shapeA = bodies[0].shape;
+    const shapeB = bodies[1].shape;
+    const pair = new ShapePair(shapeA, shapeB);
+    collider.calcContactProgress(pair, pushColliderState, pushClipState, pair.contact, false);
+    stateIndex = states.length - 1;
+    createStateAnim();
+  }
 }
 
 function render() {
@@ -137,6 +270,35 @@ function render() {
   view.applyTransform();
 
   scene.render(view);
+
+  stateIndex >= 0 && drawState(states[stateIndex], view);
+
+  const contacts = scene.contacts;
+  const contact = contacts.length > 0 && contacts[0].contact;
+
+  /*
+  if (contacts.length === 1 && contact) {
+    const pair = contact.shapes;
+    drawSat(pair, view);
+    drawContact(contact, view);
+  }
+  //*/
+
+  if (scene.bodies.length === 2) {
+    const bodies = scene.bodies;
+    const shapeA = bodies[0].shape;
+    const shapeB = bodies[1].shape;
+    const pair = new ShapePair(shapeA, shapeB);
+    shapeA.render(view);
+    shapeB.render(view);
+
+    // contact && drawContact(contact, view);
+
+    const polydBrush = contact ? "red" : "green";
+    const polyd = Minkowski.createDiffPoly(pair.shapeA, pair.shapeB);
+    polyd && (polyd.props = { strokeStyle: polydBrush, lineWidth: 3 });
+    polyd && (polyd.props.strokeStyle = polydBrush) && polyd.render(view);
+  }
 
   view.restoreTransform();
   restoreTransform();
@@ -195,7 +357,9 @@ function handleMouseDown(ev: MouseEvent) {
       break;
     case 2:
       const c = new CircleShape(MathEx.random(1, 3), mat);
-      scene.add(c, mouse.x, mouse.y);
+      // const c = new CircleShape(3, mat);
+      const b2 = scene.add(c, mouse.x, mouse.y);
+      b2.setOrient(110 * Math.PI / 180);
       render();
       break;
   }
@@ -266,6 +430,188 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  // addStaticCircle(0, -10);
+  addStaticCircle(0, -10);
   createWalls(origin, dir(60, 60), 5);
+  // createWalls(origin, dir(20, 20), 5);
+}
+
+function beginPath(props: ContextProps, viewport: Viewport) {
+  ctx.beginPath().withGlobalAlpha(1).withProps(props).withLineWidth(getLineWidth(props, viewport));
+  return ctx;
+}
+
+function getLineWidth(props: ContextProps, viewport: Viewport) {
+  return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
+}
+
+function drawShapeProjection(shape: Shape, axis: ShapeAxis, axisLine: Line, view: Viewport, offset: number = 0) {
+  const projection = shape.projectOn(axis.worldNormal);
+
+  if (!projection) return;
+
+  const minPoint = projection.minPoint;
+  const maxPoint = projection.maxPoint;
+
+  const ofs = axis.worldNormal.perpLeftO().scale(offset);
+  const minClosest = axisLine.closestPoint(minPoint).displaceBy(ofs);
+  const maxClosest = axisLine.closestPoint(maxPoint).displaceBy(ofs);
+
+  const ctx = view.ctx;
+  const props: ContextProps = {};
+  Object.assign(props, shape.props);
+
+  props.lineDash = [];
+  props.lineWidth = 3;
+  beginPath(props, view);
+  ctx.line(minClosest, maxClosest).stroke();
+
+  props.lineDash = [0.2, 0.2];
+  props.globalAlpha = 0.2;
+  beginPath(props, view);
+  ctx.line(minPoint, minClosest).stroke();
+  ctx.line(maxPoint, maxClosest).stroke();
+}
+
+function drawProjection(pair: ShapePair, axis: ShapeAxis, axisLine: Line, view: Viewport) {
+  const { shapeA: first, shapeB: second } = pair;
+  drawShapeProjection(first, axis, axisLine, view, 0.5);
+  drawShapeProjection(second, axis, axisLine, view);
+}
+
+function createAxisLine(axis: ShapeAxis, radius: number) {
+  const props: ContextProps = { strokeStyle: "black", lineDash: [0.5, 0.5], lineWidth: 2, globalAlpha: 0.5 };
+  const origin = Vector.position(0, 0);
+  const dir = axis.worldNormal.perpRightO().scale(radius);
+  const line = new Line(origin, origin.displaceByO(axis.worldNormal));
+  line.setPosition(dir.asPosition());
+  line.props = props;
+  return line;
+}
+
+function drawSat(shapes: ShapePair, view: Viewport) {
+  const { shapeA: first, shapeB: second } = shapes;
+  const axesList = new UniqueShapeAxesList(true);
+
+  axesList.addAxes([
+    ...first.getAxes(),
+    ...second.getAxes(),
+    ...first.getDynamicAxes(second),
+    ...second.getDynamicAxes(first),
+  ]);
+
+  const axes = axesList.items;
+  // console.log(`axes count: ${axes.length}`);
+  // console.log(`axes: ${axes.map(a => a.worldNormal.toString())}`);
+  const radius = view.viewBounds.halfSize.x * 0.8;
+  const axesLines = axes.map(a => createAxisLine(a, radius));
+
+  // const ctx = view.ctx;
+  // const props: ContextProps = { strokeStyle: "black", lineDash: [0.2, 0.2] };
+  // beginPath(props, view);
+  // ctx.strokeCircle(0, 0, radius);
+  axesLines.forEach(a => a.render(view));
+  axes.forEach((a, i) => drawProjection(shapes, a, axesLines[i], view));
+}
+
+function drawContact(contact: Contact, view: Viewport) {
+  const propsc: ContextProps = { strokeStyle: WebColors.yellow, fillStyle: WebColors.yellow, lineWidth: 2, lineDash: [] };
+  const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "orange", fillStyle: "orange", lineWidth: 4, lineDash: [0.2, 0.2] };
+  const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [] };
+
+  const normal = contact.normal;
+  const refEdge = contact.referenceEdge;
+  const incEdge = contact.incidentEdge;
+  // const mkNormal = contact.minkowskiNormal;
+  // const mkDepth = contact.minkowskiDepth || 1;
+  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+
+  contact.points.forEach(cp => {
+    // beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point.clone(), dir(0.5, 0.5)));
+    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point.clone(), dir(1, 1)));
+    normal.scaleO(cp.depth).render(view, cp.point, propsn);
+  });
+
+  // mkNormal && mkNormal.scaleO(mkDepth).render(view, origin, mkNormalProps);
+}
+
+function drawClipState(clip: ClipState, view: Viewport) {
+  const propsr: ContextProps = { strokeStyle: "purple", fillStyle: "purple", lineWidth: 4, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "black", fillStyle: "black", lineWidth: 4, lineDash: [0.2, 0.2] };
+  const propsp: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 3, lineDash: [] };
+  const propsn: ContextProps = { strokeStyle: WebColors.blueviolet, fillStyle: WebColors.blueviolet, lineWidth: 4, lineDash: [] };
+  const propsc: ContextProps = { strokeStyle: WebColors.gray, fillStyle: WebColors.gray, lineWidth: 4, lineDash: [] };
+
+  const contact = clip.contact;
+  const plane = clip.clipPlane;
+  const refEdge = contact.referenceEdge;
+  const incEdge = contact.incidentEdge;
+  const points = contact.points;
+  const normal = contact.normal;
+  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  contact && drawContact(contact, view);
+
+  points.forEach(cp => {
+    beginPath(propsp, view).strokeRect(Bounds.fromCenter(cp.point.clone(), dir(0.8, 0.8)));
+    normal && normal.scaleO(cp.depth).render(view, cp.point, propsc);
+  });
+
+  plane && (plane.props = propsn) && plane.render(view);
+}
+
+function drawSimplex(simplex: Simplex, view: Viewport) {
+  const props1: ContextProps = { strokeStyle: "red", fillStyle: "red", lineWidth: 2, lineDash: [0.1, 0.1] };
+  const props2: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 2, lineDash: [0.1, 0.1] };
+  const props3: ContextProps = { strokeStyle: "blue", fillStyle: "blue", lineWidth: 2, lineDash: [0.1, 0.1] };
+  const propsd: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 3, lineDash: [] };
+  const propso: ContextProps = { strokeStyle: "black", lineWidth: 1, lineDash: [] };
+  propso.lineWidth = view.calcLineWidth(propso.lineWidth || 1);
+  const points = simplex.points;
+  let directionOrigin: Vector = pos(0, 0);
+  let a: Vector;
+  let b: Vector;
+  let c: Vector;
+
+  switch (points.length) {
+    case 1:
+      a = points[0].worldPoint;
+      beginPath(props1, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
+      directionOrigin = a;
+      break;
+    case 2:
+      a = points[1].worldPoint;
+      b = points[0].worldPoint;
+      beginPath(props2, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
+      beginPath(props1, view).fillCircle(b, 0.6).beginPath().withProps(propso).strokeCircle(b, 0.6);
+      a.subO(b).render(view, b, props1);
+      directionOrigin = a.addO(b).normalizeW();
+      break;
+    case 3:
+      a = points[2].worldPoint;
+      b = points[1].worldPoint;
+      c = points[0].worldPoint;
+      beginPath(props3, view).fillCircle(a, 0.7).beginPath().withProps(propso).strokeCircle(a, 0.7);
+      beginPath(props2, view).fillCircle(b, 0.6).beginPath().withProps(propso).strokeCircle(b, 0.6);
+      beginPath(props1, view).fillCircle(c, 0.5).beginPath().withProps(propso).strokeCircle(c, 0.5);
+      b.subO(c).render(view, c, props1);
+      a.subO(b).render(view, b, props2);
+      c.subO(a).render(view, a, props3);
+      directionOrigin = c.addO(b).normalizeW();
+      break;
+  }
+
+  simplex.direction.normalizeScaleO(2).render(view, directionOrigin, propsd);
+}
+
+function drawState(state: State, view: Viewport) {
+  state.clipState && drawClipState(state.clipState, view);
+  state.contact && drawContact(state.contact, view);
+
+  if (state.colliderState) {
+    const colliderState = state.colliderState;
+    colliderState.simplices && colliderState.simplices.forEach(simplex => drawSimplex(simplex, view));
+    colliderState.contact && drawContact(colliderState.contact, view);
+  }
 }
