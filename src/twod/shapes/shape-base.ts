@@ -345,7 +345,7 @@ export abstract class ShapeBase implements IShape {
   }
 
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector) {
-    return this.toLocal(other.toWorld(localPoint, result), result);
+    return other.toLocal(this.toWorld(localPoint, result), result);
   }
 
   // abstract createWorldShape(): this;
