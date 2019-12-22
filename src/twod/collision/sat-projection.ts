@@ -51,12 +51,23 @@ export class SATProjection extends ColliderBase {
 
   // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
-    const { shapeA: first, shapeB: second } = shapes;
+    let shapeA: Shape;
+    let shapeB: Shape;
+
+    // If circle vs other, prefer contact point on circle.
+    if (shapes.shapeA.kind !== "circle" && shapes.shapeB.kind === "circle") {
+      shapeA = shapes.shapeB;
+      shapeB = shapes.shapeA;
+    } else {
+      shapeA = shapes.shapeA;
+      shapeB = shapes.shapeB;
+    }
+
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
 
-    const axes = this.getAxes(first, second, state);
+    const axes = this.getAxes(shapeA, shapeB, state);
     const count = axes.length;
 
     if (count === 0) return undefined;
@@ -67,13 +78,11 @@ export class SATProjection extends ColliderBase {
     const projectionA = new Projection();
     const projectionB = new Projection();
     let point = projectionA.minPoint;
-    let maxPoint = projectionA.maxPoint;
-    const ba = first.position.subO(second.position);
 
     for (let i = 0; i < count; i++) {
       const axis = axes[index].worldNormal;
 
-      if (!first.projectOn(axis, projectionA) || !second.projectOn(axis, projectionB)) return undefined;
+      if (!shapeA.projectOn(axis, projectionA) || !shapeB.projectOn(axis, projectionB)) return undefined;
 
       let overlap = projectionA.calcOverlap(projectionB);
 
@@ -88,17 +97,16 @@ export class SATProjection extends ColliderBase {
       if (overlap < minOverlap) {
         minOverlap = overlap;
 
-        minAxis = axis;
-        point = projectionA.minPoint;
-        maxPoint = projectionA.maxPoint;
+        if (projectionA.min < projectionB.min) {
+          minAxis = axis.negateO();
+          point = projectionA.maxPoint;
+        } else {
+          minAxis = axis;
+          point = projectionA.minPoint;
+        }
       }
 
       index = (index + 1) % count;
-    }
-
-    if (ba.dot(minAxis) < 0) { // Ensure normal points from second to first.
-      minAxis = minAxis.negateO();
-      point = maxPoint;
     }
 
     result.reset();
