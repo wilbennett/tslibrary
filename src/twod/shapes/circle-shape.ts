@@ -39,8 +39,6 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   }
 
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
-    result || (result = new SupportPointImpl(this));
-
     direction = direction.rotateO(-this.angle);
 
     if (direction.magSquared !== 1)
@@ -48,11 +46,28 @@ export class CircleShape extends ShapeBase implements ICircleShape {
 
     const point = direction.scaleO(this.radius).asPosition();
 
+    result || (result = new SupportPointImpl(this));
     result.clear();
     result.shape = this;
     result.point = point;
     result.index = calcCircleIndex(direction.radians);
     result.distance = point.dot(direction);
+    return result;
+  }
+
+  getSupportFromAxis(axis: ShapeAxis, result?: SupportPoint): SupportPoint {
+    let axisDirection = axis.normal;
+    let axisPoint = axis.point;
+
+    const point = axisDirection.scaleO(this.radius).asPosition();
+    const pointToVertex = point.subO(axisPoint);
+
+    result || (result = new SupportPointImpl(this));
+    result.clear();
+    result.shape = this;
+    result.point = point;
+    result.direction = axis.normal.clone();
+    result.distance = pointToVertex.dot(axisDirection);
     return result;
   }
 

@@ -51,17 +51,17 @@ export class SATSupport extends ColliderBase {
 
   // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
-    const { shapeA: first, shapeB: second } = shapes;
+    const { shapeA, shapeB } = shapes;
     const state = this.getState(shapes);
 
     if (state.unsupported) return undefined;
 
-    const axes = this.getAxes(first, second, state);
+    const axes = this.getAxes(shapeA, shapeB, state);
     const count = axes.length;
 
     if (count === 0) return undefined;
 
-    let bestSupport: SupportPoint;
+    let bestSupport: SupportPoint | null = null;
     let bestAxis = axes[0];
     let bestDistance = Infinity;
     let index = state.startIndex;
@@ -69,9 +69,9 @@ export class SATSupport extends ColliderBase {
     for (let i = 0; i < count; i++) {
       const axis = axes[index];
 
-      const support = axis.shape === first
-        ? second.getSupportFromAxis(axis.toWorldWithShape(second, true))
-        : first.getSupportFromAxis(axis.toWorldWithShape(first, true));
+      const support = axis.shape === shapeA
+        ? shapeB.getSupportFromAxis(axis.toWorldWithShape(shapeB, true))
+        : shapeA.getSupportFromAxis(axis.toWorldWithShape(shapeA, true));
 
       if (!support) return undefined;
 
@@ -80,10 +80,15 @@ export class SATSupport extends ColliderBase {
         return null;
       }
 
-      if (support.distance < bestDistance) {
-        bestDistance = support.distance;
-        bestSupport = support;
-        bestAxis = axis;
+      if (support.distance <= bestDistance) {
+        // circle vs circle: Use the axis of the first circle (they are the same).
+        // circle vs other: Prefer axis of other so the contact point will be on the circle.
+        //                  Otherwise, contact point will oscillate between the two shapes.
+        if (!bestSupport || axis.shape.kind !== "circle") {
+          bestDistance = support.distance;
+          bestSupport = support;
+          bestAxis = axis;
+        }
       }
 
       index = (index + 1) % count;
