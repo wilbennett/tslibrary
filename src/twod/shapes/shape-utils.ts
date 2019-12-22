@@ -9,18 +9,15 @@ export function calcCircleSupport(
   result?: SupportPoint): SupportPoint {
   segments || (segments = getCircleSegmentInfo());
   const { segmentCount, cos, sin } = segments;
-  // const center = circle.position;
-  // let offset = Vector.direction(circle.radius, 0);
+  const center = circle.position;
+  let offset = Vector.direction(circle.radius, 0);
 
-  // let bestVertex = offset;
-  const vertices = calcCircleVertices(circle, false, segments);
-  let bestVertex = vertices[0];
+  let bestVertex = offset;
   let bestDistance = -Infinity;
   let bestIndex = -1;
 
   for (let i = 0; i < segmentCount; i++) {
-    // const vertex = center.displaceByO(offset);
-    const vertex = vertices[i];
+    const vertex = center.displaceByO(offset);
     const distance = vertex.dot(direction);
 
     if (distance > bestDistance) {
@@ -29,11 +26,11 @@ export function calcCircleSupport(
       bestDistance = distance;
     }
 
-    // let x = offset.x;
-    // let y = offset.y;
-    // let rx = x * cos - y * sin;
-    // let ry = x * sin + y * cos;
-    // offset.withXY(rx, ry);
+    let x = offset.x;
+    let y = offset.y;
+    let rx = x * cos - y * sin;
+    let ry = x * sin + y * cos;
+    offset.withXY(rx, ry);
   }
 
   result || (result = new SupportPointImpl(circle));
