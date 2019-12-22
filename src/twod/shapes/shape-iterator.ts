@@ -1,4 +1,4 @@
-import { Edge, EdgeImpl, GeometryIterator, Shape } from '.';
+import { Edge, EdgeImpl, GeometryIterator, Shape, SupportPoint } from '.';
 import { Vector } from '../../vectors';
 
 export class ShapeIterator implements GeometryIterator {
@@ -70,4 +70,8 @@ export class ShapeIterator implements GeometryIterator {
 
   next() { this._index = (this._index + 1) % this.vertexCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.vertexCount - 1; }
+
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
+    return this.shape.getSupport(direction, result);
+  }
 }

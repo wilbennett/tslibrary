@@ -1,4 +1,13 @@
-import { Edge, EdgeImpl, GeometryIterator, MinkowskiPoint, MinkowskiPointImpl, Shape, SupportPoint } from '.';
+import {
+  Edge,
+  EdgeImpl,
+  GeometryIterator,
+  MinkowskiPoint,
+  MinkowskiPointImpl,
+  Shape,
+  SupportPoint,
+  SupportPointImpl,
+} from '.';
 import { Vector } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
@@ -191,5 +200,16 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     this._worldPointA = undefined;
     this._worldPointB = undefined;
     return this.worldPoint;
+  }
+
+  // @ts-ignore - unused param.
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
+    result || (result = new SupportPointImpl(this.shape));
+    result.shape = this.shape;
+    result.point = this.point;
+    result.index = 0;
+    result.distance = NaN;
+    result.direction = Vector.empty;
+    return result;
   }
 }

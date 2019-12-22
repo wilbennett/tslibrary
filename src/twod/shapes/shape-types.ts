@@ -125,4 +125,5 @@ export interface GeometryIterator {
 
   next(): void;
   prev(): void;
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint; // Local.
 }

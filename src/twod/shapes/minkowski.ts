@@ -1,4 +1,6 @@
 import {
+  calcCircleVertices,
+  calcCircleVerticesAndEdges,
   CircleShape,
   MinkowskiPoint,
   MinkowskiPointImpl,
@@ -7,7 +9,7 @@ import {
   PolygonShape,
   Shape,
 } from '.';
-import { calcCircleVertices, calcCircleVerticesAndEdges, isTriangleCW } from '..';
+import { isTriangleCW } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { normal, Vector } from '../../vectors';
@@ -93,8 +95,10 @@ export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector)
 
 export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): MinkowskiPoint {
   const direction = worldDirection.normalizeO();
-  const spA = first.getSupport(first.toLocal(direction));
-  const spB = second.getSupport(second.toLocal(direction.negateO()));
+  const iterA = first.getIterator(0, false);
+  const iterB = second.getIterator(0, false);
+  const spA = iterA.getSupport(first.toLocal(direction));
+  const spB = iterB.getSupport(second.toLocal(direction.negateO()));
 
   if (!spA) return NullMinkowskiPoint.instance;
   if (!spB) return NullMinkowskiPoint.instance;
