@@ -7,15 +7,11 @@ export class VerletPositionTime extends IntegratorBase {
   get oldPosition() { return this._oldPosition; }
   set oldPosition(value) {
     this._oldPosition = value;
-    this.dirty();
   }
 
   protected _velocity = Vector.direction(0, 0);
   get velocity() { return this._velocity; }
-  set velocity(value) {
-    this._velocity = value;
-    this.dirty();
-  }
+  set velocity(value) { this._velocity = value; }
 
   applyImpulse(impulse: Vector, contactVector: Vector) {
     this._velocity.add(impulse.scaleO(this.massInfo.massInverse));
@@ -41,6 +37,5 @@ export class VerletPositionTime extends IntegratorBase {
     this._angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
-    this.dirty();
   }
 }

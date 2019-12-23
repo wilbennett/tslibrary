@@ -5,11 +5,7 @@ import { Vector } from '../../vectors';
 export class VerletPosition extends IntegratorBase {
   protected _oldPosition = Vector.position(0, 0);
   get oldPosition() { return this._oldPosition; }
-  set oldPosition(value) {
-    this._oldPosition = value;
-    this.dirty();
-  }
-
+  set oldPosition(value) { this._oldPosition = value; }
   get velocity() { return this._position.subO(this._oldPosition); }
   set velocity(value) { this._position.subO(value, this._oldPosition); }
 
@@ -34,6 +30,5 @@ export class VerletPosition extends IntegratorBase {
     this._angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
-    this.dirty();
   }
 }

@@ -27,6 +27,5 @@ export class EulerSemiImplicit extends IntegratorBase {
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
     this._angle += this._angularVelocity * dt;
-    this.dirty();
   }
 }
