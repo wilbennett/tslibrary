@@ -1,4 +1,5 @@
 import { AABBShape, ICircleShape, SupportPoint, SupportPointImpl } from '.';
+import { calcCircleIndex } from '..';
 import { dir, pos, Vector } from '../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
@@ -7,38 +8,17 @@ export function calcCircleSupport(
   direction: Vector,
   segments?: CircleSegmentInfo,
   result?: SupportPoint): SupportPoint {
-  segments || (segments = getCircleSegmentInfo());
-  const { segmentCount, cos, sin } = segments;
-  const center = circle.position;
-  let offset = Vector.direction(circle.radius, 0);
+  if (direction.magSquared !== 1)
+    direction = direction.normalizeO();
 
-  let bestVertex = offset;
-  let bestDistance = -Infinity;
-  let bestIndex = -1;
-
-  for (let i = 0; i < segmentCount; i++) {
-    const vertex = center.displaceByO(offset);
-    const distance = vertex.dot(direction);
-
-    if (distance > bestDistance) {
-      bestVertex = vertex;
-      bestIndex = i;
-      bestDistance = distance;
-    }
-
-    let x = offset.x;
-    let y = offset.y;
-    let rx = x * cos - y * sin;
-    let ry = x * sin + y * cos;
-    offset.withXY(rx, ry);
-  }
+  const point = direction.scaleO(circle.radius).asPosition();
 
   result || (result = new SupportPointImpl(circle));
+  result.clear();
   result.shape = circle;
-  result.point = bestVertex;
-  result.index = bestIndex;
-  result.distance = NaN;
-  result.direction = Vector.empty;
+  result.point = point;
+  result.index = calcCircleIndex(direction.radians, segments);
+  result.distance = point.dot(direction);
   return result;
 }
 
