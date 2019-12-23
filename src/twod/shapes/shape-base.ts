@@ -310,19 +310,15 @@ export abstract class ShapeBase implements IShape {
   }
 
   toWorld(localPoint: Vector, result?: Vector) {
-    if (this.isWorld) {
-      result = result || Vector.create(0, 0);
-      return result.copyFrom(localPoint);
-    }
+    if (this.isWorld)
+      return result ? result.copyFrom(localPoint) : localPoint.clone();
 
     return this.matrix.transform(localPoint, this.position, result);
   }
 
   toLocal(worldPoint: Vector, result?: Vector) {
-    if (this.isWorld) {
-      result = result || Vector.create(0, 0);
-      return result.copyFrom(worldPoint);
-    }
+    if (this.isWorld)
+      return result ? result.copyFrom(worldPoint) : worldPoint.clone();
 
     return this.matrix.transformInverse(worldPoint, this.position, result);
   }
