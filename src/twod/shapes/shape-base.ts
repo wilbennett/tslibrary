@@ -23,7 +23,6 @@ import {
   Viewport,
 } from '..';
 import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
-import { RotMat2D, RotMatrix } from '../../matrix';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
@@ -55,26 +54,16 @@ export abstract class ShapeBase implements IShape {
       this.updateMassInfo();
 
     if (isWorld)
-      this._isWorld = isWorld;
-
-    this._matrix = new RotMat2D(0); /* TODO: Make dimension agnostic. */
+      this._integrator.isWorld = isWorld;
   }
 
   static vectorClass: VectorClass = Vector2D;
   protected _supportLookup?: [Vector, SupportPoint][] | null;
-
-  protected _isTransformDirty = true;
-  protected _matrix: RotMatrix;
-  protected get matrix() {
-    this._isTransformDirty && this._matrix.setAngle(this._integrator.angle) && this.cleanTransform();
-    return this._matrix;
-  }
   protected _calcInertia: InertiaCalc;
   protected _area: number;
   protected get area() { return this._area; }
   protected set area(value) { this._area = value; }
-  protected _isWorld?: boolean = false;
-  get isWorld() { return !!this._isWorld; }
+  get isWorld() { return this._integrator.isWorld; }
   protected _integratorType: IntegratorClass;
   get integratorType() { return this._integratorType; }
   set integratorType(value) {
@@ -94,7 +83,7 @@ export abstract class ShapeBase implements IShape {
   }
   get velocity() { return this.integrator.velocity; }
   set velocity(value) { this.integrator.velocity = value; }
-  get center() { return this._isWorld ? this.position : ORIGIN; }
+  get center() { return this._integrator.isWorld ? this.position : ORIGIN; }
   get angle() { return this.integrator.angle; }
   set angle(value) { this.setAngle(value); }
   get massInfo() { return this.integrator.massInfo; }
@@ -127,7 +116,6 @@ export abstract class ShapeBase implements IShape {
 
   protected setAngle(radians: number) {
     this.integrator.angle = radians;
-    this.matrix.setAngle(radians);
   }
 
   getFurthestEdges(worldDirection: Vector): Edge[] {
@@ -309,22 +297,10 @@ export abstract class ShapeBase implements IShape {
     return result;
   }
 
-  toWorld(localPoint: Vector, result?: Vector) {
-    if (this.isWorld)
-      return result ? result.copyFrom(localPoint) : localPoint.clone();
-
-    return this.matrix.transform(localPoint, this.position, result);
-  }
-
-  toLocal(worldPoint: Vector, result?: Vector) {
-    if (this.isWorld)
-      return result ? result.copyFrom(worldPoint) : worldPoint.clone();
-
-    return this.matrix.transformInverse(worldPoint, this.position, result);
-  }
-
+  toWorld(localPoint: Vector, result?: Vector) { return this.integrator.toWorld(localPoint, result); }
+  toLocal(worldPoint: Vector, result?: Vector) { return this.integrator.toLocal(worldPoint, result); }
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector) {
-    return other.toLocal(this.toWorld(localPoint, result), result);
+    return this.integrator.toLocalOf(other, localPoint, result);
   }
 
   // abstract createWorldShape(): this;
@@ -359,7 +335,7 @@ export abstract class ShapeBase implements IShape {
     let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 
     ctx.pushTransform();
-    this.matrix.updateTransform(ctx, this.position);
+    this.integrator.updateTransform(ctx);
     ctx.withProps(props).withLineWidth(lineWidth);
 
     this.renderCore(viewport, props);
@@ -430,9 +406,6 @@ export abstract class ShapeBase implements IShape {
 
     return lookup;
   }
-
-  protected dirtyTransform() { this._isTransformDirty = true; }
-  protected cleanTransform() { this._isTransformDirty = false; }
 
   /*
   protected calcTransform(transform: MatrixValues, transformInverse: MatrixValues) {

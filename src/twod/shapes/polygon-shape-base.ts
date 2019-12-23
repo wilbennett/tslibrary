@@ -60,7 +60,7 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
   readonly radius: number;
 
   setPosition(position: Vector) {
-    if (this._isWorld)
+    if (this.integrator.isWorld)
       movePoly(this.vertexList, this.position, position);
 
     super.setPosition(position);

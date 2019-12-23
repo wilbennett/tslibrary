@@ -17,13 +17,12 @@ export class MinkowskiShape extends ShapeBase implements IMinkowskiShape {
   kind: "minkowski" = "minkowski";
 
   constructor(readonly shapeA: Shape, readonly shapeB: Shape, isSum: boolean = false) {
-    super();
+    super(0);
 
     if (isSum)
       this._isSum = isSum;
 
-    this._isWorld = true;
-    this._isTransformDirty = false;
+    this.integrator.isWorld = true;
   }
 
   protected _isSum?: boolean;

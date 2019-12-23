@@ -5,8 +5,9 @@ import { ForceSource } from '../forces';
 
 export class IntegratorBase extends Integrator {
   get isNull() { return false; }
-  protected _isDirty = false;
-  get isDirty() { return this._isDirty; }
+  protected _isWorld?: boolean;
+  get isWorld() { return !!this._isWorld; }
+  set isWorld(value) { this._isWorld = value; }
   protected _massInfo: MassInfo = MassInfo.empty;
   get massInfo() { return this._massInfo; }
   set massInfo(value) { this._massInfo = value; }
@@ -16,10 +17,7 @@ export class IntegratorBase extends Integrator {
 
   protected _position = Vector.position(0, 0);
   get position() { return this._position; }
-  set position(value) {
-    this._position = value;
-    this.dirty();
-  }
+  set position(value) { this._position = value; }
 
   protected _acceleration = Vector.direction(0, 0);
   get acceleration() { return this._acceleration; }
@@ -28,7 +26,7 @@ export class IntegratorBase extends Integrator {
   get angle() { return this._angle; }
   set angle(value) {
     this._angle = value;
-    this.dirty();
+    this.matrix.setAngle(value);
   }
 
   protected _angularVelocity = 0;
@@ -45,9 +43,6 @@ export class IntegratorBase extends Integrator {
   protected _restingSpeedCuttoff: number = 0;
   get restingSpeedCuttoff() { return this._restingSpeedCuttoff; }
   set restingSpeedCuttoff(value) { this._restingSpeedCuttoff = value; }
-
-  dirty() { this._isDirty = true; }
-  clean() { this._isDirty = false; }
 
   protected _force = Vector.direction(0, 0);
   get force() { return this._force; }

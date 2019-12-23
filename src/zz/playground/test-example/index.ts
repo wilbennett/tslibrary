@@ -458,13 +458,13 @@ function createWalls(position: Vector, size: Vector, wallThickness: number) {
   const offset = dir(halfSize.x + halfWallThickness, 0);
   let halfWallSize: Vector;
   let wpos: Vector;
-  /*
-    halfWallSize = dir(halfWallThickness, halfSize.y);
-    wpos = position.addO(offset);
-    createAABB(halfWallSize, wpos, "blue"); // Right wall.
-  
-    wpos = position.addO(offset.negate());
-    createAABB(halfWallSize, wpos, "red"); // Left wall.
+  //*
+  halfWallSize = dir(halfWallThickness, halfSize.y);
+  wpos = position.addO(offset);
+  createAABB(halfWallSize, wpos, "blue"); // Right wall.
+
+  wpos = position.addO(offset.negate());
+  createAABB(halfWallSize, wpos, "red"); // Left wall.
   //*/
   offset.set(0, halfSize.y + halfWallThickness);
   halfWallSize = dir(halfSize.x + wallThickness, halfWallThickness);

@@ -1,13 +1,18 @@
+import { CanvasContext } from '..';
 import { DEFAULT_MATERIAL, MassInfo, TimeStep } from '../../core';
+import { RotMat2D, RotMatrix } from '../../matrix';
 import { Vector } from '../../vectors';
 import { ForceSource } from '../forces';
+import { Shape } from '../shapes';
 
 export type IntegratorClass = typeof Integrator;
 export type ForcesApplier = (now: number, position: Vector, velocity: Vector) => void;
 
 export class Integrator {
+  get isWorld() { return false; }
+  // @ts-ignore - unused param.
+  set isWorld(value) { }
   get isNull() { return true; }
-  get isDirty() { return false; }
   get massInfo() { return MassInfo.empty; }
   // @ts-ignore - unused param.
   set massInfo(value) { }
@@ -24,6 +29,8 @@ export class Integrator {
   // @ts-ignore - unused param.
   set force(value) { }
   get acceleration() { return Vector.empty; }
+  protected _matrix?: RotMatrix;
+  protected get matrix() { return this._matrix || (this._matrix = new RotMat2D(this.angle)); }
   get angle() { return 0; }
   // @ts-ignore - unused param.
   set angle(value) { }
@@ -45,9 +52,6 @@ export class Integrator {
   set restingSpeedCuttoff(value) { }
   get restingSpeedCuttoffSquared() { return this.restingSpeedCuttoff * this.restingSpeedCuttoff; }
 
-  dirty() { }
-  clean() { }
-
   assignTo(other: Integrator) {
     other.position = this.position;
     other.angle = this.angle;
@@ -65,4 +69,27 @@ export class Integrator {
   applyImpulse(impulse: Vector, contactVector: Vector) { }
   // @ts-ignore - unused param.
   integrate(now: number, step: TimeStep) { }
+
+  toWorld(localPoint: Vector, result?: Vector): Vector {
+    if (this.isWorld)
+      return result ? result.copyFrom(localPoint) : localPoint.clone();
+
+    return this.matrix.transform(localPoint, this.position, result);
+  }
+
+  toLocal(worldPoint: Vector, result?: Vector): Vector {
+    if (this.isWorld)
+      return result ? result.copyFrom(worldPoint) : worldPoint.clone();
+
+    return this.matrix.transformInverse(worldPoint, this.position, result);
+  }
+
+  toLocalOf(other: Shape | Integrator, localPoint: Vector, result?: Vector): Vector {
+    return other instanceof Integrator
+      ? other.toLocal(this.toWorld(localPoint, result), result)
+      : other.integrator.toLocal(this.toWorld(localPoint, result), result);
+  }
+
+  setTransform(ctx: CanvasContext) { this.matrix.setTransform(ctx, this.position); }
+  updateTransform(ctx: CanvasContext) { this.matrix.updateTransform(ctx, this.position); }
 }
