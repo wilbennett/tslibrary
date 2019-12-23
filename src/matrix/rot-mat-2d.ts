@@ -1,5 +1,6 @@
-import { Vector } from '../vectors';
 import { RotMatrix } from '.';
+import { CanvasContext } from '../twod';
+import { Vector } from '../vectors';
 
 export class RotMat2D implements RotMatrix {
   constructor(radians: number);
@@ -41,7 +42,7 @@ export class RotMat2D implements RotMatrix {
   transpose() { return new RotMat2D(this._m00, this._m10, this._m01, this._m11); }
 
   transform(v: Vector, position: Vector, result?: Vector) {
-    const w = position.w;
+    const w = v.w;
     const x = position.x * w;
     const y = position.y * w;
 
@@ -55,24 +56,26 @@ export class RotMat2D implements RotMatrix {
     return Vector.create(
       this._m00 * v.x + this._m01 * v.y + x,
       this._m10 * v.x + this._m11 * v.y + y,
+      0,
       v.w);
   }
 
   transformInverse(v: Vector, position: Vector, result?: Vector) {
-    const w = position.w;
-    const x = -position.x * w;
-    const y = -position.y * w;
+    const w = v.w;
+    const vx = v.x - position.x * w;
+    const vy = v.y - position.y * w;
 
     if (result) {
       return result.withXYW(
-        this._m00 * v.x + this._m10 * v.y + x,
-        this._m01 * v.x + this._m11 * v.y + y,
+        this._m00 * vx + this._m10 * vy,
+        this._m01 * vx + this._m11 * vy,
         v.w);
     }
 
     return Vector.create(
-      this._m00 * v.x + this._m10 * v.y + x,
-      this._m01 * v.x + this._m11 * v.y + y,
+      this._m00 * vx + this._m10 * vy,
+      this._m01 * vx + this._m11 * vy,
+      0,
       v.w);
   }
 
@@ -84,12 +87,12 @@ export class RotMat2D implements RotMatrix {
       this._m10 * other._m01 + this._m11 * other._m11);
   }
 
-  setTransform(ctx: CanvasRenderingContext2D, position: Vector) {
+  setTransform(ctx: CanvasContext, position: Vector) {
     const { x, y } = position;
     ctx.setTransform(this._m00, this._m10, this._m01, this._m11, x, y);
   }
 
-  updateTransform(ctx: CanvasRenderingContext2D, position: Vector) {
+  updateTransform(ctx: CanvasContext, position: Vector) {
     const { x, y } = position;
     ctx.transform(this._m00, this._m10, this._m01, this._m11, x, y);
   }
