@@ -380,7 +380,7 @@ function handleMouseDown(ev: MouseEvent) {
 
   switch (ev.button) {
     case 0:
-      //*
+      /*
       const hw = 5;
       const hh = 2;
       const vertices = [
@@ -485,9 +485,9 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  // addStaticCircle(0, -10);
-  // createWalls(origin, dir(60, 60), 5);
-  createWalls(origin, dir(20, 20), 5);
+  addStaticCircle(0, -10);
+  createWalls(origin, dir(60, 60), 5);
+  // createWalls(origin, dir(20, 20), 5);
 }
 
 function beginPath(props: ContextProps, viewport: Viewport) {

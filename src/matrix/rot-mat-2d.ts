@@ -1,6 +1,7 @@
 import { Vector } from '../vectors';
+import { RotMatrix } from '.';
 
-export class RotMat2D {
+export class RotMat2D implements RotMatrix {
   constructor(radians: number);
   constructor(a: number, b: number, c: number, d: number);
   constructor(aOrRadians: number, b?: number, c?: number, d?: number) {
