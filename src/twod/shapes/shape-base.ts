@@ -23,7 +23,7 @@ import {
   Viewport,
 } from '..';
 import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
-import { Matrix2D, MatrixValues } from '../../matrix';
+import { RotMat2D, RotMatrix } from '../../matrix';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
 
@@ -57,15 +57,18 @@ export abstract class ShapeBase implements IShape {
     if (isWorld)
       this._isWorld = isWorld;
 
-    const matrix = this.matrix;
-    this._transform = matrix.createValues();
-    this._transformInverse = matrix.createValues();
+    this._matrix = new RotMat2D(0); /* TODO: Make dimension agnostic. */
   }
 
   static vectorClass: VectorClass = Vector2D;
   protected _supportLookup?: [Vector, SupportPoint][] | null;
 
-  protected get matrix() { return Matrix2D.instance; /* TODO: Make dimension agnostic. */ }
+  protected _isTransformDirty = true;
+  protected _matrix: RotMatrix;
+  protected get matrix() {
+    this._isTransformDirty && this._matrix.setAngle(this._integrator.angle) && this.cleanTransform();
+    return this._matrix;
+  }
   protected _calcInertia: InertiaCalc;
   protected _area: number;
   protected get area() { return this._area; }
@@ -110,25 +113,6 @@ export abstract class ShapeBase implements IShape {
   boundingShape?: Shape;
   referenceShape?: Shape;
   get usesReferenceShape() { return false; }
-  protected _isTransformDirty = true;
-  protected _transform: MatrixValues;
-  get transform() {
-    if (this._isTransformDirty || this.integrator.isDirty) {
-      this.calcTransform(this._transform, this._transformInverse);
-      this.cleanTransform();
-    }
-
-    return this._transform;
-  }
-  protected _transformInverse: MatrixValues;
-  get transformInverse() {
-    if (this._isTransformDirty || this.integrator.isDirty) {
-      this.calcTransform(this._transform, this._transformInverse);
-      this.cleanTransform();
-    }
-
-    return this._transformInverse;
-  }
   protected _props?: ContextProps;
   get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
@@ -139,12 +123,11 @@ export abstract class ShapeBase implements IShape {
 
   setPosition(position: Vector) {
     this.position.copyFrom(position);
-    this.dirtyTransform();
   }
 
   protected setAngle(radians: number) {
     this.integrator.angle = radians;
-    this.dirtyTransform();
+    this.matrix.setAngle(radians);
   }
 
   getFurthestEdges(worldDirection: Vector): Edge[] {
@@ -332,7 +315,7 @@ export abstract class ShapeBase implements IShape {
       return result.copyFrom(localPoint);
     }
 
-    return this.matrix.transform(localPoint, this.transform, result);
+    return this.matrix.transform(localPoint, this.position, result);
   }
 
   toLocal(worldPoint: Vector, result?: Vector) {
@@ -341,7 +324,7 @@ export abstract class ShapeBase implements IShape {
       return result.copyFrom(worldPoint);
     }
 
-    return this.matrix.transform(worldPoint, this.transformInverse, result);
+    return this.matrix.transformInverse(worldPoint, this.position, result);
   }
 
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector) {
@@ -379,10 +362,9 @@ export abstract class ShapeBase implements IShape {
     const props = this.props;
     let lineWidth = viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
 
-    ctx
-      .pushThenUpdate(this.transform)
-      .withProps(props)
-      .withLineWidth(lineWidth);
+    ctx.pushTransform();
+    this.matrix.updateTransform(ctx, this.position);
+    ctx.withProps(props).withLineWidth(lineWidth);
 
     this.renderCore(viewport, props);
     ctx.popTransform();
@@ -456,6 +438,7 @@ export abstract class ShapeBase implements IShape {
   protected dirtyTransform() { this._isTransformDirty = true; }
   protected cleanTransform() { this._isTransformDirty = false; }
 
+  /*
   protected calcTransform(transform: MatrixValues, transformInverse: MatrixValues) {
     const matrix = this.matrix;
     const position = this.position;
@@ -476,4 +459,5 @@ export abstract class ShapeBase implements IShape {
     matrix.getValues(transform);
     matrix.getInverse(transformInverse);
   }
+  //*/
 }
