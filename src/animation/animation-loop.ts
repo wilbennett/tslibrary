@@ -20,6 +20,7 @@ export class AnimationLoop {
   now: number = 0;
   readonly fps = 60;
   readonly secondsPerFrame = 1 / this.fps;
+  maxMissedFramesToProcess = 5;
   get active() { return this._active; }
 
   start() {
@@ -59,6 +60,9 @@ export class AnimationLoop {
 
     // We got called back too early (and not enough prior time to offset)... wait until the next call.
     if (this._secondsToUpdate < this.secondsPerFrame) return;
+
+    // Cap number of missed frames to catch up.
+    this._secondsToUpdate = Math.min(this._secondsToUpdate, this.maxMissedFramesToProcess * this.secondsPerFrame);
 
     // Adjust to the start of the updates.
     this.now = now - this._secondsToUpdate;
