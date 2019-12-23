@@ -1,4 +1,4 @@
-import { Edge, EdgeImpl, GeometryIterator, IPlaneShape, Shape } from '.';
+import { Edge, EdgeImpl, GeometryIterator, IPlaneShape, Shape, SupportPoint } from '.';
 import { pos, Vector } from '../../vectors';
 
 const REF_POSITION = pos(1, 1);
@@ -166,7 +166,11 @@ export class PlaneIterator implements GeometryIterator {
     this.checkReferenceShapePosition(true);
   }
 
-  checkReferenceShapePosition(force: boolean = false) {
+  getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
+    return this.shape.getSupport(direction, result);
+  }
+
+  protected checkReferenceShapePosition(force: boolean = false) {
     const plane = this.shape;
     const refShape = this._refShape;
 
