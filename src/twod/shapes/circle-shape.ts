@@ -111,7 +111,10 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   }
 
   getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
-    return new CircleIterator(this, index, isWorld, circleSegments);
+    this._iterator && !!this._iterator.isWorld !== !!isWorld && (this._iterator = undefined);
+    const result = this._iterator || (this._iterator = new CircleIterator(this, index, isWorld, circleSegments));
+    result.index = index;
+    return result;
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {
