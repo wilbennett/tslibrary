@@ -7,11 +7,10 @@ export class ShapeIterator implements GeometryIterator {
     this._vertices = shape.vertexList.items;
     this._edgeVectors = shape.edgeVectorList.items;
 
-    if (isWorld)
-      this.isWorld = isWorld;
+    this.isWorld = isWorld;
   }
 
-  readonly isWorld?: boolean;
+  readonly isWorld: boolean;
   get vertexCount() { return this.shape.vertexList.length; }
   protected _vertices: Vector[];
   get vertices(): Vector[] {

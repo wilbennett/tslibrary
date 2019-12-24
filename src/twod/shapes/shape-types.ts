@@ -109,6 +109,7 @@ export interface Edge {
 }
 
 export interface GeometryIterator {
+  readonly isWorld: boolean;
   index: number;
   readonly vertexCount: number;
   readonly vertices: Vector[];
