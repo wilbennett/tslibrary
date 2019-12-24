@@ -862,7 +862,7 @@ export abstract class Vector {
 
 
   // @ts-ignore - unused param.
-  renderCore(viewport: Viewport, origin: Vector) { }
+  protected renderCore(viewport: Viewport, origin: Vector) { }
 
   // TODO: Move to separate renderer class.
   // @ts-ignore - unused param.

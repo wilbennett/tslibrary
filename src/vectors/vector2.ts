@@ -313,7 +313,7 @@ export class Vector2 extends Vector {
 
     result || (result = this.newVector());
     const magInv = 1 / this.mag;
-    return isFinite(magInv) ? result.set(x * magInv, y * magInv, 0, w) : result.set(0, 0, w);
+    return isFinite(magInv) ? result.set(x * magInv, y * magInv, 0, w) : result.set(0, 0, 0, w);
   }
 
   perpLeftO(result?: Vector) {
@@ -402,7 +402,7 @@ export class Vector2 extends Vector {
       : `<${this.x.toFixed(precision)}, ${this.y.toFixed(precision)}, ${this.w.toFixed(precision)}>`;
   }
 
-  renderCore(viewport: Viewport, origin: Vector) {
+  protected renderCore(viewport: Viewport, origin: Vector) {
     const ctx = viewport.ctx;
 
     if (this.isPosition) {
