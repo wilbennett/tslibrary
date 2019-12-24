@@ -1,6 +1,5 @@
 import {
   CircleIterator,
-  GeometryIterator,
   ICircleShape,
   ORIGIN,
   Projection,
@@ -34,12 +33,12 @@ export class CircleShape extends ShapeBase implements ICircleShape {
   get hasDynamicAxes() { return true; }
 
   getVertex(index: number) {
-    const iterator = this.getIterator(index, false);
+    const iterator = this.getIterator(index);
     return iterator.vertex;
   }
 
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint {
-    direction = direction.rotateO(-this.angle);
+    // direction = direction.rotateO(-this.angle);
 
     if (direction.magSquared !== 1)
       direction = direction.normalizeO();
@@ -110,11 +109,8 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     return result;
   }
 
-  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
-    this._iterator && !!this._iterator.isWorld !== !!isWorld && (this._iterator = undefined);
-    const result = this._iterator || (this._iterator = new CircleIterator(this, index, isWorld, circleSegments));
-    result.index = index;
-    return result;
+  protected createIterator(isWorld: boolean, circleSegments?: CircleSegmentInfo) {
+    return new CircleIterator(this, 0, isWorld, circleSegments);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {

@@ -95,8 +95,8 @@ export function getSumPoint(first: Shape, second: Shape, worldDirection: Vector)
 
 export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector): MinkowskiPoint {
   const direction = worldDirection.normalizeO();
-  const iterA = first.getIterator(0, false);
-  const iterB = second.getIterator(0, false);
+  const iterA = first.getWorldIterator(0);
+  const iterB = second.getWorldIterator(0);
   const spA = iterA.getSupport(first.toLocal(direction));
   const spB = iterB.getSupport(second.toLocal(direction.negateO()));
 

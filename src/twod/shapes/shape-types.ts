@@ -45,7 +45,8 @@ export interface IShape extends IGeometry {
   toWorld(localPoint: Vector, result?: Vector): Vector;
   toLocal(worldPoint: Vector, result?: Vector): Vector;
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
-  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator;
+  getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
+  getWorldIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
   // createWorldShape(): this;
 }
 

@@ -321,11 +321,22 @@ export abstract class ShapeBase implements IShape {
   }
 
   protected _iterator?: GeometryIterator;
+  protected _worldIterator?: GeometryIterator;
+
   // @ts-ignore - unused param.
-  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
-    this._iterator && !!this._iterator.isWorld !== !!isWorld && (this._iterator = undefined);
+  protected createIterator(isWorld: boolean, circleSegments?: CircleSegmentInfo) {
     // @ts-ignore - assigment compatibility.
-    const result = this._iterator || (this._iterator = new ShapeIterator(this, index, isWorld));
+    return new ShapeIterator(this, 0, isWorld);
+  }
+
+  getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator {
+    const result = this._iterator || (this._iterator = this.createIterator(false, circleSegments));
+    result.index = index;
+    return result;
+  }
+
+  getWorldIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator {
+    const result = this._worldIterator || (this._worldIterator = this.createIterator(true, circleSegments));
     result.index = index;
     return result;
   }

@@ -24,12 +24,13 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
       start.worldDirection.clone(),
       circleSegments);
 
-    this.iterA = this.shapeA.getIterator(start.indexA, true, this.circleSegments);
-    this.iterB = this.shapeB.getIterator(start.indexB, true, this.circleSegments);
+    this.iterA = this.shapeA.getWorldIterator(start.indexA, this.circleSegments);
+    this.iterB = this.shapeB.getWorldIterator(start.indexB, this.circleSegments);
 
     this.init(start);
   }
 
+  get isWorld() { return true; }
   protected iterA: GeometryIterator;
   protected iterB: GeometryIterator;
   protected _iterator?: GeometryIterator;
@@ -121,8 +122,8 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
         this.shapeA.usesReferenceShape && (this.shapeA.referenceShape = this.shapeB);
         this.shapeB.usesReferenceShape && (this.shapeB.referenceShape = this.shapeA);
 
-        result.iterA = this.shapeA.getIterator(iterA.index, true, this.circleSegments);
-        result.iterB = this.shapeB.getIterator(iterB.index, true, this.circleSegments);
+        result.iterA = this.shapeA.getWorldIterator(iterA.index, this.circleSegments);
+        result.iterB = this.shapeB.getWorldIterator(iterB.index, this.circleSegments);
       }
     }
 
