@@ -43,6 +43,188 @@ export class Vector2D extends Vector2 {
   static get zeroPosition() { return Vector2D._zeroPosition || (Vector2D._zeroPosition = new Vector2ZeroPosition()); }
   private static _zeroDirection: Vector;
   static get zeroDirection() { return Vector2D._zeroDirection || (Vector2D._zeroDirection = new Vector2ZeroDirection()); }
+
+  clone(result?: Vector): Vector {
+    return result
+      ? result.copyFrom(this)
+      : new Vector2D(this.x, this.y, this.w);
+  }
+
+  addO(other: Vector, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w);
+
+    return new Vector2D(this.x + other.x, this.y + other.y, this.w + other.w);
+  }
+  add(other: Vector): Vector {
+    this.x += other.x;
+    this.y += other.y;
+    this.w += other.w;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  displaceByO(other: Vector, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x + other.x, this.y + other.y, 0, this.w);
+
+    return new Vector2D(this.x + other.x, this.y + other.y, this.w);
+  }
+  displaceBy(other: Vector): Vector {
+    this.x += other.x;
+    this.y += other.y;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  subO(other: Vector, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w);
+
+    return new Vector2D(this.x - other.x, this.y - other.y, this.w - other.w);
+  }
+  sub(other: Vector): Vector {
+    this.x -= other.x;
+    this.y -= other.y;
+    this.w -= other.w;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  displaceByNegO(other: Vector, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x - other.x, this.y - other.y, 0, this.w);
+
+    return new Vector2D(this.x - other.x, this.y - other.y, this.w);
+  }
+  displaceByNeg(other: Vector): Vector {
+    this.x -= other.x;
+    this.y -= other.y;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  scaleO(scale: number, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x * scale, this.y * scale, 0, this.w);
+
+    return new Vector2D(this.x * scale, this.y * scale, this.w);
+  }
+  scale(scale: number): Vector {
+    this.x *= scale;
+    this.y *= scale;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  negateO(result?: Vector): Vector {
+    if (result)
+      return result.set(-this.x, -this.y, 0, this.w);
+
+    return new Vector2D(-this.x, -this.y, this.w);
+  }
+  negate(): Vector {
+    this.x = -this.x;
+    this.y = -this.y;
+
+    this.__radians = undefined;
+
+    return this;
+  }
+  normalizeO(result?: Vector): Vector {
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+
+    if (isFinite(magInv)) {
+      if (result)
+        return result.set(x * magInv, y * magInv, 0, w);
+
+      return new Vector2D(x * magInv, y * magInv, w);
+    } else {
+      if (result)
+        return result.set(0, 0, 0, w);
+
+      return new Vector2D(0, 0, w);
+    }
+  }
+  normalize(): Vector {
+    let x = this.x;
+    let y = this.y;
+    let w = this.w;
+
+    if (w !== 0 && w !== 1) {
+      w = 1 / w;
+      x *= w;
+      y *= w;
+      w = 1;
+    }
+
+    const magInv = 1 / this.mag;
+
+    if (isFinite(magInv)) {
+      this.x = x * magInv;
+      this.y = y * magInv;
+      this.w = w;
+
+      this.__mag = 1;
+      this.__magSquared = 1;
+    } else {
+      this.x = 0;
+      this.y = 0;
+      this.w = w;
+
+      this.__mag = 0;
+      this.__magSquared = 0;
+      this.__radians = 0;
+    }
+
+    return this;
+  }
+  perpLeftO(result?: Vector): Vector {
+    return result ? result.set(-this.y, this.x, 0, this.w) : new Vector2D(-this.y, this.x, this.w);
+  }
+  perpLeft(): Vector {
+    this.x = -this.y;
+    this.y = this.x;
+
+    this.__radians = undefined;
+    return this;
+  }
+  perpRightO(result?: Vector): Vector {
+    return result ? result.set(this.y, -this.x, 0, this.w) : new Vector2D(this.y, -this.x, this.w);
+  }
+  perpRight(): Vector {
+    this.x = this.y;
+    this.y = -this.x;
+
+    this.__radians = undefined;
+    return this;
+  }
 }
 
 export class PVector2 extends Vector2D {
