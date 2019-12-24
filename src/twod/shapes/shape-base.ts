@@ -320,7 +320,7 @@ export abstract class ShapeBase implements IShape {
     return calcIntersectPoint(this, other, result);
   }
 
-  protected _iterator?: ShapeIterator;
+  protected _iterator?: GeometryIterator;
   // @ts-ignore - unused param.
   getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
     this._iterator && !!this._iterator.isWorld !== !!isWorld && (this._iterator = undefined);
