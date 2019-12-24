@@ -11,7 +11,7 @@ export class ShapeIterator implements GeometryIterator {
       this.isWorld = isWorld;
   }
 
-  protected isWorld?: boolean;
+  readonly isWorld?: boolean;
   get vertexCount() { return this.shape.vertexList.length; }
   protected _vertices: Vector[];
   get vertices(): Vector[] {
