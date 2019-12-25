@@ -67,6 +67,23 @@ export class Vector2D extends Vector2 {
 
     return this;
   }
+  addScaledO(other: Vector, scale: number, result?: Vector): Vector {
+    if (result)
+      return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
+
+    return new Vector2D(this.x + other.x * scale, this.y + other.y * scale, this.w + other.w);
+  }
+  addScaled(other: Vector, scale: number): Vector {
+    this.x += other.x * scale;
+    this.y += other.y * scale;
+    this.w += other.w;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
   displaceByO(other: Vector, result?: Vector): Vector {
     if (result)
       return result.set(this.x + other.x, this.y + other.y, 0, this.w);
