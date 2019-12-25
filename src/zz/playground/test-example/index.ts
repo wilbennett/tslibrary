@@ -15,8 +15,18 @@ import {
   Sutherland,
   Wcb2,
 } from '../../../twod/collision';
-import { CircleShape, PolygonShape, Shape, ShapeAxis, Simplex, UniqueShapeAxesList } from '../../../twod/shapes';
-import { setCircleSegmentCount } from '../../../twod/utils';
+import {
+  CircleShape,
+  getCircleSegmentInfo,
+  getDiffPoint,
+  PolygonShape,
+  setCircleSegmentCount,
+  Shape,
+  ShapeAxis,
+  Simplex,
+  UniqueShapeAxesList,
+} from '../../../twod/shapes';
+import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { dir, normal, pos, Vector } from '../../../vectors';
 import { Gaul, Scene } from './src';
@@ -43,6 +53,7 @@ ctx.fillRect(ctx.bounds);
 
 MathEx.epsilon = 0.0001;
 setCircleSegmentCount(360);
+// setCircleSegmentCount(720);
 const screenBounds = ctx.bounds;
 const origin = pos(0, 0);
 const gridSize = 8;
@@ -56,9 +67,9 @@ const clipper = new Sutherland();
 const scene = new Scene(1 / 60, 10);
 
 const colliders: [string, Collider][] = [
+  ["WCB2", new Wcb2()],
   ["SAT PROJ", new SATProjection()],
   ["SAT SUP", new SATSupport()],
-  ["WCB2", new Wcb2()],
   ["Gaul", new Gaul()],
 ];
 
@@ -85,7 +96,24 @@ resetScene();
 loop.start();
 runner.start();
 
+Minkowski;
+getDiffPoint;
+const segments = getCircleSegmentInfo();
 /*
+setCircleSegmentCount(8);
+const props: ContextProps = { strokeStyle: "yellow", lineWidth: 2 };
+const center = pos(15, 15);
+
+ctx.beginPath().clearRect(ctx.bounds);
+applyTransform();
+const view = graph.getViewport(ctx);
+view.applyTransform();
+
+for (let i = 0; i < segments.segmentCount; i++) {
+  const vertex = segments.getVertex(i, center, 10);
+  beginPath(props, view).strokeCircle(vertex, 1);
+}
+/*/
 const c1 = new CircleShape(3);
 const cp1 = new PolygonShape(8, 3, 0, true);
 const hw = 5;
@@ -102,8 +130,9 @@ c1.props = { strokeStyle: "orange", lineWidth: 2 };
 p1.props = { strokeStyle: "magenta", lineWidth: 2 };
 p1.setPosition(pos(15, 10));
 c1.setPosition(pos(15, 17));
+c1.setPosition(pos(15, 14));
 cp1.setPosition(c1.position);
-c1.angle = 210 * Math.PI / 180;
+c1.angle = 240 * Math.PI / 180;
 p1.angle = 0 * Math.PI / 180;
 cp1.angle = c1.angle;
 const m1 = Minkowski.createDiffPoly(c1, p1)!;
@@ -116,7 +145,7 @@ applyTransform();
 const view = graph.getViewport(ctx);
 view.applyTransform();
 
-let cvertices = c1.getIterator(0, true).vertices;
+let cvertices = c1.getWorldIterator(0).vertices;
 beginPath(c1.props, view)
   .strokePoly(cvertices, true)
   .beginPath()
@@ -124,17 +153,18 @@ beginPath(c1.props, view)
 // c1.render(view);
 cp1.render(view);
 p1.render(view);
-m1.render(view);
+// m1.render(view);
 m2.render(view);
 const start = getDiffPoint(c1, p1, normal(1, 0));
 const start2 = getDiffPoint(cp1, p1, normal(1, 0));
 beginPath(c1.props, view).strokeCircle(start.worldPoint, 1);
 beginPath(cp1.props, view).strokeCircle(start2.worldPoint, 1);
 beginPath(cp1.props, view).strokeCircle(start2.worldPointA, 1);
+beginPath(cp1.props, view).strokeCircle(start2.worldPointB, 1);
 beginPath(c1.props, view).strokeCircle(start.worldPointA, 1);
 beginPath(p1.props, view).strokeCircle(start.worldPointB, 1);
 beginPath(c1.props, view).strokeCircle(p1.toWorld(p1.vertexList.items[0]), 1);
-/*/
+/* /
 const c1 = new CircleShape(10);
 const hw = 20;
 const hh = 8;
@@ -485,7 +515,7 @@ function addStaticCircle(x: number, y: number) {
 
 function resetScene() {
   scene.clear();
-  addStaticCircle(0, -10);
+  // addStaticCircle(0, -10);
   createWalls(origin, dir(60, 60), 5);
   // createWalls(origin, dir(20, 20), 5);
 }
@@ -579,8 +609,8 @@ function drawContact(contact: Contact, view: Viewport) {
   const incEdge = contact.incidentEdge;
   // const mkNormal = contact.minkowskiNormal;
   // const mkDepth = contact.minkowskiDepth || 1;
-  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
-  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  refEdge && beginPath(propsr, view).line(refEdge.start, refEdge.end).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
 
   contact.points.forEach(cp => {
     // beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point.clone(), dir(0.5, 0.5)));
@@ -604,8 +634,8 @@ function drawClipState(clip: ClipState, view: Viewport) {
   const incEdge = contact.incidentEdge;
   const points = contact.points;
   const normal = contact.normal;
-  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
-  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  refEdge && beginPath(propsr, view).line(refEdge.start, refEdge.end).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
   contact && drawContact(contact, view);
 
   points.forEach(cp => {
