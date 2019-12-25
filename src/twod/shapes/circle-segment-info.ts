@@ -1,4 +1,4 @@
-import { ICircleShape, LocalEdge, WorldEdge } from '.';
+import { ICircleShape, LocalEdge, SupportPoint, SupportPointImpl, WorldEdge } from '.';
 import { MathEx } from '../../core';
 import { Vector } from '../../vectors';
 
@@ -69,6 +69,7 @@ export class CircleSegmentInfo {
 
   getNormal(index: number) { return this._edges[index].normal; }
 
+  /*
   getSupportIndex(direction: Vector) {
     const segmentCount = this.segmentCount;
     const vertices = this._vertices;
