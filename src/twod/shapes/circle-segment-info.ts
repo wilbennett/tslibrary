@@ -42,6 +42,7 @@ export class CircleSegmentInfo {
   private _vertices!: Vector[];
   private _edges!: EdgeInfo[];
 
+  // TODO: Support rotation in order to allow circle stacking.
   getVertex(index: number, center: Vector, radius: number) {
     return center.addScaledO(this._vertices[index], radius);
   }
