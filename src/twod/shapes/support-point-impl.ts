@@ -3,7 +3,7 @@ import { Vector } from '../../vectors';
 
 export class SupportPointImpl implements SupportPoint {
   constructor(public shape: Shape, point?: Vector, worldPoint?: Vector, index?: number, distance?: number) {
-    this.point = point || Vector.empty;
+    this._point = point || Vector.empty;
 
     if (worldPoint)
       this._worldPoint = worldPoint;
@@ -12,7 +12,17 @@ export class SupportPointImpl implements SupportPoint {
     this.distance = distance !== undefined ? distance : NaN;
   }
 
-  point: Vector;
+  protected _point?: Vector;
+  get point() {
+    if (!this._point || this._point.isEmpty) {
+      if (!this._worldPoint || this._worldPoint.isEmpty) return Vector.empty;
+
+      this._point = this.shape.toLocal(this.worldPoint);
+    }
+
+    return this._point;
+  }
+  set point(value) { this._point = value; }
   protected _worldPoint?: Vector;
   get worldPoint() {
     if (!this._worldPoint || this._worldPoint.isEmpty) {
@@ -51,7 +61,11 @@ export class SupportPointImpl implements SupportPoint {
 
   index: number;
   distance: number;
-  get isValid() { return this.shape && !this.point.isEmpty; }
+  get isValid() {
+    const havePoint = !!this._point && !this.point.isEmpty;
+    const haveWorldPoint = !!this._worldPoint && !this._worldPoint.isEmpty;
+    return this.shape && (havePoint || haveWorldPoint);
+  }
 
   clear() {
     this.point = Vector.empty;
