@@ -90,6 +90,9 @@ export class ShapeIterator implements GeometryIterator {
       : this._normals[index];
   }
 
+  // @ts-ignore - unused param.
+  reset(index?: number) { }
+
   next() { this._index = (this._index + 1) % this.vertexCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.vertexCount - 1; }
 

@@ -51,6 +51,9 @@ export class CircleIterator implements GeometryIterator {
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
+  // @ts-ignore - unused param.
+  reset(index?: number) {}
+
   next() { this._index = (this._index + 1) % this.segments.segmentCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1; }
 

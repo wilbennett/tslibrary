@@ -113,6 +113,9 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
     this._iterator = undefined;
   }
 
+  // @ts-ignore - unused param.
+  reset(index?: number) { }
+
   clone(result?: SupportTypes): SupportTypes {
     if (!result) {
       result = new MinkowskiDiffIterator(this, this.circleSegments);

@@ -135,6 +135,9 @@ export class PlaneIterator implements GeometryIterator {
   }
   get normal() { return this.normalDirection; }
 
+  // @ts-ignore - unused param.
+  reset(index?: number) { }
+
   next() {
     this._index = 1 - this._index;
     this.checkReferenceShapePosition(true);

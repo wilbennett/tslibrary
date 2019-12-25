@@ -118,6 +118,7 @@ export interface GeometryIterator {
   readonly normalDirection: Vector;
   readonly normal: Vector;
 
+  reset(index?: number): void;
   next(): void;
   prev(): void;
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint; // Local.
