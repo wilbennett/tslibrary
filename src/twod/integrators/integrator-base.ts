@@ -21,7 +21,9 @@ export class IntegratorBase extends Integrator {
 
   protected _acceleration = Vector.direction(0, 0);
   get acceleration() { return this._acceleration; }
-
+  protected _blockRotation = false;
+  get blockRotationTransform() { return this._blockRotation; }
+  set blockRotationTransform(value) { this._blockRotation = value; }
   protected _angle = 0;
   get angle() { return this._angle; }
   set angle(value) {

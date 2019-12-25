@@ -31,6 +31,9 @@ export class Integrator {
   get acceleration() { return Vector.empty; }
   protected _matrix?: RotMatrix;
   protected get matrix() { return this._matrix || (this._matrix = new RotMat2D(this.angle)); }
+  get blockRotationTransform() { return false; }
+  // @ts-ignore - unused param.
+  set blockRotationTransform(value) { }
   get angle() { return 0; }
   // @ts-ignore - unused param.
   set angle(value) { }
@@ -59,6 +62,7 @@ export class Integrator {
     other.angularVelocity = this.angularVelocity;
     other.material = this.material;
     other.massInfo = this.massInfo;
+    other.blockRotationTransform = this.blockRotationTransform;
   }
 
   // @ts-ignore - unused param.
@@ -74,12 +78,26 @@ export class Integrator {
     if (this.isWorld)
       return result ? result.copyFrom(localPoint) : localPoint.clone();
 
+    if (this.blockRotationTransform) {
+      const w = localPoint.w;
+      const vx = localPoint.x + this.position.x * w;
+      const vy = localPoint.y + this.position.y * w;
+      return result ? result.withXY(vx, vy) : localPoint.withXYO(vx, vy);
+    }
+
     return this.matrix.transform(localPoint, this.position, result);
   }
 
   toLocal(worldPoint: Vector, result?: Vector): Vector {
     if (this.isWorld)
       return result ? result.copyFrom(worldPoint) : worldPoint.clone();
+
+    if (this.blockRotationTransform) {
+      const w = worldPoint.w;
+      const vx = worldPoint.x - this.position.x * w;
+      const vy = worldPoint.y - this.position.y * w;
+      return result ? result.withXY(vx, vy) : worldPoint.withXYO(vx, vy);
+    }
 
     return this.matrix.transformInverse(worldPoint, this.position, result);
   }

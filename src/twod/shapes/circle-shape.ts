@@ -27,6 +27,7 @@ export class CircleShape extends ShapeBase implements ICircleShape {
     super(Math.PI * radius * radius, isWorld, material, massInfo, integratorType, m => m * radius * radius);
 
     this.radius = radius;
+    this.integrator.blockRotationTransform = true;
   }
 
   radius: number;
