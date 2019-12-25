@@ -8,6 +8,10 @@ export class CircleIterator implements GeometryIterator {
     this.segments = segments || getCircleSegmentInfo();
 
     this.isWorld = isWorld;
+
+    const count = this.segments.segmentCount;
+    this._vertices = new Array<Vector>(count);
+    this._edgeVectors = new Array<Vector>(count);
   }
 
   readonly isWorld: boolean;
@@ -22,28 +26,49 @@ export class CircleIterator implements GeometryIterator {
   }
   get vertexCount() { return this.segments.segmentCount; }
   protected _haveVertices = false;
-  protected _vertices?: Vector[];
+  protected _vertices: Vector[];
   get vertices(): Vector[] {
-    if (!this._vertices || !this._haveVertices) {
+    if (!this._haveVertices) {
       this._vertices = this.segments.getVertices(this._center, this.circle.radius);
       this._haveVertices = true;
     }
 
     return this._vertices;
   }
-  get vertex() { return this.segments.getVertex(this.index, this._center, this.circle.radius); }
+  get vertex() {
+    const vertices = this._vertices;
+    const index = this.index;
+
+    if (this._haveVertices)
+      return vertices[index];
+
+    return vertices[index]
+      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
+  }
   get nextVertex() {
+    const vertices = this._vertices;
     const index = (this._index + 1) % this.segments.segmentCount;
-    return this.segments.getVertex(index, this._center, this.circle.radius);
+
+    if (this._haveVertices)
+      return vertices[index];
+
+    return vertices[index]
+      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
   }
   get prevVertex() {
+    const vertices = this._vertices;
     const index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
-    return this.segments.getVertex(index, this._center, this.circle.radius);
+
+    if (this._haveVertices)
+      return vertices[index];
+
+    return vertices[index]
+      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
   }
   protected _haveEdgeVectors = false;
-  protected _edgeVectors?: Vector[];
+  protected _edgeVectors: Vector[];
   get edgeVectors(): Vector[] {
-    if (!this._edgeVectors || !this._haveEdgeVectors) {
+    if (!this._haveEdgeVectors) {
       this._edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius);
       this._haveEdgeVectors = true;
     }
@@ -63,14 +88,31 @@ export class CircleIterator implements GeometryIterator {
       ? this.segments.getWorldEdge(this.circle, index, this._center, this.circle.radius)
       : this.segments.getEdge(this.circle, index, this._center, this.circle.radius);
   }
-  get edgeVector() { return this.nextVertex.subO(this.vertex); }
-  get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }
+  get edgeVector() {
+    const edgeVectors = this._edgeVectors;
+    const index = this.index;
+
+    if (this._haveEdgeVectors)
+      return edgeVectors[index];
+
+    return edgeVectors[index] || (edgeVectors[index] = this.nextVertex.subO(this.vertex));
+  }
+  get prevEdgeVector() {
+    const edgeVectors = this._edgeVectors;
+    const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
+
+    if (this._haveEdgeVectors)
+      return edgeVectors[index];
+
+    return edgeVectors[index] || (edgeVectors[index] = this.vertex.subO(this.prevVertex));
+  }
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
   reset(index: number = 0) {
-    this._vertices = [];
-    this._edgeVectors = [];
+    const count = this.segments.segmentCount;
+    this._vertices = new Array<Vector>(count);
+    this._edgeVectors = new Array<Vector>(count);
     this._haveVertices = false;
     this._haveEdgeVectors = false;
     this.index = index;

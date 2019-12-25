@@ -348,13 +348,13 @@ export abstract class ShapeBase implements IShape {
 
   getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator {
     const result = this._iterator || (this._iterator = this.createIterator(false, circleSegments));
-    result.index = index;
+    result.reset(index);
     return result;
   }
 
   getWorldIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator {
     const result = this._worldIterator || (this._worldIterator = this.createIterator(true, circleSegments));
-    result.index = index;
+    result.reset(index);
     return result;
   }
 
