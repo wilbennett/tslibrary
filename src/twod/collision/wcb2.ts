@@ -66,27 +66,27 @@ export class Wcb2 extends ColliderBase {
         negativeNormal = normal.negateO();
     }
 
-    const incidentLeftDot = incidentLeftEdge.normalDirection.dot(negativeNormal);
-    const incidentRightDot = incidentRightEdge.normalDirection.dot(negativeNormal);
+    const incidentLeftDot = incidentLeftEdge.normal.dot(negativeNormal);
+    const incidentRightDot = incidentRightEdge.normal.dot(negativeNormal);
     // Incident edge is the one most in the direction of the normal.
     const incidentEdge = incidentLeftDot > incidentRightDot ? incidentLeftEdge : incidentRightEdge;
-    const incidentStartDot = incidentEdge.worldStart.dot(negativeNormal);
-    const incidentEndDot = incidentEdge.worldEnd.dot(negativeNormal);
+    const incidentStartDot = incidentEdge.start.dot(negativeNormal);
+    const incidentEndDot = incidentEdge.end.dot(negativeNormal);
     // Incident vertex is the one most in the direction of the normal.
     let incidentVertex: Vector;
 
     if (containsOrigin) {
       contact.normal = normal;
-      incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+      incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.start : incidentEdge.end;
     } else {
       const referenceClosest = pos(0, 0);
       const incidentClosest = pos(0, 0);
 
       depth = segmentSegmentClosestPoints(
-        incidentEdge.worldStart,
-        incidentEdge.worldEnd,
-        referenceEdge.worldStart,
-        referenceEdge.worldEnd,
+        incidentEdge.start,
+        incidentEdge.end,
+        referenceEdge.start,
+        referenceEdge.end,
         incidentClosest,
         referenceClosest);
 

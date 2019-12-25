@@ -1,4 +1,4 @@
-import { Edge, EdgeImpl, GeometryIterator, IPlaneShape, Shape, SupportPoint } from '.';
+import { Edge, GeometryIterator, IPlaneShape, LocalEdge, Shape, SupportPoint, WorldEdge } from '.';
 import { pos, Vector } from '../../vectors';
 
 const REF_POSITION = pos(1, 1);
@@ -16,15 +16,14 @@ export class PlaneIterator implements GeometryIterator {
     this._vertices = [];
     this._edgeVectors = [];
 
-    if (isWorld)
-      this.isWorld = isWorld;
+    this.isWorld = isWorld;
 
     this.checkReferenceShapePosition();
   }
 
   protected _refShape: Shape;
   protected _refShapeRefVector: Vector;
-  protected isWorld?: boolean;
+  readonly isWorld: boolean;
   get vertexCount() { return 2; }
   protected readonly _vertices: Vector[];
   get vertices() {
@@ -69,29 +68,19 @@ export class PlaneIterator implements GeometryIterator {
 
     if (!this._edge) {
       if (this.isWorld) {
-        this._edge = new EdgeImpl(
+        this._edge = new WorldEdge(
           this.shape,
           this.index,
-          undefined,
-          undefined,
           this.vertex.clone(),
           this.nextVertex,
-          undefined,
-          undefined,
-          undefined,
-          this.normalDirection);
+          this.normal);
       } else {
-        this._edge = new EdgeImpl(
+        this._edge = new LocalEdge(
           this.shape,
           this.index,
           this.vertex.clone(),
           this.nextVertex,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          this.normalDirection,
-          undefined);
+          this.normalDirection);
       }
     }
 
@@ -102,34 +91,24 @@ export class PlaneIterator implements GeometryIterator {
 
     const vertex = this.vertex.clone();
     const prevVertex = this.prevVertex;
-    const normalDirection = vertex.subO(prevVertex).perpRight();
+    const normal = vertex.subO(prevVertex).perpRight().normalize();
     const index = 1 - this._index;
 
     if (this.isWorld) {
-      return new EdgeImpl(
+      return new WorldEdge(
         this.shape,
         index,
-        undefined,
-        undefined,
         prevVertex,
         vertex,
-        undefined,
-        undefined,
-        undefined,
-        normalDirection);
+        normal);
     }
 
-    return new EdgeImpl(
+    return new LocalEdge(
       this.shape,
       index,
       prevVertex,
       vertex,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      normalDirection,
-      undefined);
+      normal);
   }
   protected _edgeVector?: Vector;
   get edgeVector() {

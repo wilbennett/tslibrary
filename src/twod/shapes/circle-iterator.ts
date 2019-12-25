@@ -1,8 +1,8 @@
-import { Edge, GeometryIterator, ICircleShape, SupportPoint } from '.';
+import { Edge, GeometryIterator, ICircleShape, LocalEdge, SupportPoint } from '.';
 import { pos, Vector } from '../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
-import { EdgeImpl } from './edge-impl';
 import { calcCircleSupport, calcCircleVertices, getCircleVertex } from './shape-utils';
+import { WorldEdge } from './world-edge';
 
 export class CircleIterator implements GeometryIterator {
   constructor(readonly circle: ICircleShape, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
@@ -59,62 +59,42 @@ export class CircleIterator implements GeometryIterator {
 
   get edge(): Edge {
     if (this.isWorld) {
-      return new EdgeImpl(
+      return new WorldEdge(
         this.circle,
         this.index,
-        undefined,
-        undefined,
         this.vertex.clone(),
         this.nextVertex,
-        undefined,
-        undefined,
-        undefined,
-        this.normalDirection);
+        this.normal);
     }
 
-    return new EdgeImpl(
+    return new LocalEdge(
       this.circle,
       this.index,
       this.vertex.clone(),
       this.nextVertex,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      this.normalDirection,
-      undefined);
+      this.normal);
   }
   get prevEdge(): Edge {
     const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
     const vertex = this.vertex.clone();
     const prevVertex = this.prevVertex;
-    const normalDirection = vertex.subO(prevVertex).perpRight();
+    const normal = vertex.subO(prevVertex).perpRight().normalize();
 
     if (this.isWorld) {
-      return new EdgeImpl(
+      return new WorldEdge(
         this.circle,
         index,
-        undefined,
-        undefined,
         prevVertex,
         vertex,
-        undefined,
-        undefined,
-        undefined,
-        normalDirection);
+        normal);
     }
 
-    return new EdgeImpl(
+    return new LocalEdge(
       this.circle,
       index,
       prevVertex,
       vertex,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      normalDirection,
-      undefined);
+      normal);
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }

@@ -1,12 +1,12 @@
 import {
   Edge,
-  EdgeImpl,
   GeometryIterator,
   MinkowskiPoint,
   MinkowskiPointImpl,
   Shape,
   SupportPoint,
   SupportPointImpl,
+  WorldEdge,
 } from '.';
 import { Vector } from '../../vectors';
 import { CircleSegmentInfo } from '../utils';
@@ -91,11 +91,11 @@ export class MinkowskiDiffIterator extends MinkowskiPointImpl implements Geometr
   get edgeVectors(): Vector[] { return []; }
   get edge(): Edge {
     // TODO: Need to fix this.
-    return new EdgeImpl(this.shape, NaN);
+    return new WorldEdge(this.shape, NaN, Vector.empty, Vector.empty, Vector.empty);
   }
   get prevEdge(): Edge {
     // TODO: Need to fix this.
-    return new EdgeImpl(this.shape, NaN);
+    return new WorldEdge(this.shape, NaN, Vector.empty, Vector.empty, Vector.empty);
   }
   get edgeVector() { return this.nextVertex.subO(this.vertex); }
   get prevEdgeVector() { return this.vertex.subO(this.prevVertex); }

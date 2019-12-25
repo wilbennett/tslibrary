@@ -1,6 +1,4 @@
 import {
-  Edge,
-  EdgeImpl,
   GeometryIterator,
   IShape,
   NullSupportPoint,
@@ -11,6 +9,7 @@ import {
   ShapeIterator,
   SupportPoint,
   SupportPointImpl,
+  WorldEdge,
 } from '.';
 import {
   calcIntersectPoint,
@@ -118,14 +117,21 @@ export abstract class ShapeBase implements IShape {
     this.integrator.angle = radians;
   }
 
-  getFurthestEdges(worldDirection: Vector): Edge[] {
+  getFurthestEdges(worldDirection: Vector): WorldEdge[] {
     const vertices = this.vertexList.items;
     const vertexCount = this.vertexList.length;
+    const normals = this.normalList.items;
 
     if (vertexCount < 2) return [];
 
-    // @ts-ignore - "this" not assignable to Shape.
-    if (vertexCount === 2) return new EdgeImpl(this, 0);
+    if (vertexCount === 2) {
+      const v1 = this.toWorld(vertices[0]);
+      const v2 = this.toWorld(vertices[1]);
+      return [
+        // @ts-ignore - "this" not assignable to Shape.
+        new WorldEdge(this, 0, v1, v2, this.toWorld(normals[0]))
+      ];
+    }
 
     let direction = this.toLocal(worldDirection);
 
@@ -142,8 +148,19 @@ export abstract class ShapeBase implements IShape {
     }
 
     const prevIndex = index > 0 ? index - 1 : vertexCount - 1;
-    // @ts-ignore - "this" not assignable to Shape.
-    return [new EdgeImpl(this, prevIndex), new EdgeImpl(this, index)];
+    const nextIndex = (index + 1) % vertexCount;
+    const prevVertex = this.toWorld(vertices[prevIndex]);
+    const vertex = this.toWorld(vertices[index]);
+    const nextVertex = this.toWorld(vertices[nextIndex]);
+    const prevNormal = this.toWorld(normals[prevIndex]);
+    const normal = this.toWorld(normals[index]);
+
+    return [
+      // @ts-ignore - "this" not assignable to Shape.
+      new WorldEdge(this, prevIndex, prevVertex, vertex, prevNormal),
+      // @ts-ignore - "this" not assignable to Shape.
+      new WorldEdge(this, index, vertex, nextVertex, normal)
+    ];
   }
 
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint {

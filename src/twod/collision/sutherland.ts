@@ -39,23 +39,23 @@ export class Sutherland implements Clipper {
   protected clipCore(incidentEdge: Edge, referenceEdge: Edge, result?: ContactPoint[]): ContactPoint[] {
     result || (result = []);
 
-    const refv = referenceEdge.worldEnd.subO(referenceEdge.worldStart).normalize();
-    const startDistance = refv.dot(referenceEdge.worldStart);
-    this.clipSegment(incidentEdge.worldStart, incidentEdge.worldEnd, refv, startDistance, result);
+    const refv = referenceEdge.end.subO(referenceEdge.start).normalize();
+    const startDistance = refv.dot(referenceEdge.start);
+    this.clipSegment(incidentEdge.start, incidentEdge.end, refv, startDistance, result);
 
     if (result.length < 2) return result;
 
-    const endDistance = refv.dot(referenceEdge.worldEnd);
+    const endDistance = refv.dot(referenceEdge.end);
     this.clipSegment(result[0].point, result[1].point, refv.negate(), -endDistance, result);
 
     if (result.length < 2) return result;
 
-    let refNorm = referenceEdge.worldNormal.negateO();
+    let refNorm = referenceEdge.normal.negateO();
     // flip && (refNorm = refNorm.negateO());
 
     const contactPoint0 = result[0];
     const contactPoint1 = result[1];
-    const distance = refNorm.dot(referenceEdge.worldStart);
+    const distance = refNorm.dot(referenceEdge.start);
     contactPoint0.depth = refNorm.dot(contactPoint0.point) - distance;
     contactPoint1.depth = refNorm.dot(contactPoint1.point) - distance;
 
@@ -73,34 +73,34 @@ export class Sutherland implements Clipper {
 
     callback({ contact: contact.clone() });
 
-    const refv = referenceEdge.worldEnd.subO(referenceEdge.worldStart).normalize();
-    const startDistance = refv.dot(referenceEdge.worldStart);
-    this.clipSegment(incidentEdge.worldStart, incidentEdge.worldEnd, refv, startDistance, points);
+    const refv = referenceEdge.end.subO(referenceEdge.start).normalize();
+    const startDistance = refv.dot(referenceEdge.start);
+    this.clipSegment(incidentEdge.start, incidentEdge.end, refv, startDistance, points);
 
     if (points.length < 2) return points;
 
-    clipPlane = new Plane("pointnormal", referenceEdge.worldStart, refv.clone());
+    clipPlane = new Plane("pointnormal", referenceEdge.start, refv.clone());
     callback({ contact: contact.clone(), clipPlane });
 
-    const endDistance = refv.dot(referenceEdge.worldEnd);
+    const endDistance = refv.dot(referenceEdge.end);
     this.clipSegment(points[0].point, points[1].point, refv.negate(), -endDistance, points);
 
     if (points.length < 2) return points;
 
-    clipPlane = new Plane("pointnormal", referenceEdge.worldEnd, refv.clone());
+    clipPlane = new Plane("pointnormal", referenceEdge.end, refv.clone());
     callback({ contact: contact.clone(), clipPlane });
 
-    let refNorm = referenceEdge.worldNormal.negateO();
+    let refNorm = referenceEdge.normal.negateO();
     // flip && (refNorm = refNorm.negateO());
 
-    const distance = refNorm.dot(referenceEdge.worldStart);
+    const distance = refNorm.dot(referenceEdge.start);
     points[0].depth = refNorm.dot(points[0].point) - distance;
     points[1].depth = refNorm.dot(points[1].point) - distance;
 
     points[1].depth < 0 && points.pop();
     points[0].depth < 0 && points.shift();
 
-    clipPlane = new Plane("pointnormal", referenceEdge.worldEnd, refNorm);
+    clipPlane = new Plane("pointnormal", referenceEdge.end, refNorm);
     const cc = contact.clone();
     callback({ contact: cc, clipPlane });
     callback({ contact: cc });

@@ -1,4 +1,4 @@
-import { Projection, ShapeAxis, SupportPoint } from '.';
+import { Projection, ShapeAxis, SupportPoint, WorldEdge } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
@@ -34,7 +34,7 @@ export interface IShape extends IGeometry {
   getVertex(index: number): Vector; // Local;
   getVertices(): Vector[]; // Local;
   getEdgeVectors(): Vector[]; // Local;
-  getFurthestEdges(worldDirection: Vector): Edge[];
+  getFurthestEdges(worldDirection: Vector): WorldEdge[];
   getSupport(direction: Vector, result?: SupportPoint): SupportPoint; // Local.
   getSupportFromAxis(axis: ShapeAxis, result?: SupportPoint): SupportPoint;
   getAxes(result?: ShapeAxis[]): ShapeAxis[];
@@ -97,15 +97,9 @@ export interface Edge {
   shape: Shape;
   index: number;
   start: Vector;
-  worldStart: Vector;
   end: Vector;
-  worldEnd: Vector;
-  normalDirection: Vector;
-  worldNormalDirection: Vector;
   normal: Vector;
-  worldNormal: Vector;
 
-  clear(): void;
   clone(result?: Edge): Edge;
 }
 
