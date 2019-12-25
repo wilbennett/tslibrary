@@ -21,9 +21,15 @@ export class CircleIterator implements GeometryIterator {
     this._index = value;
   }
   get vertexCount() { return this.segments.segmentCount; }
+  protected _haveVertices = false;
   protected _vertices?: Vector[];
   get vertices(): Vector[] {
-    return this._vertices || (this._vertices = this.segments.getVertices(this._center, this.circle.radius));
+    if (!this._vertices || !this._haveVertices) {
+      this._vertices = this.segments.getVertices(this._center, this.circle.radius);
+      this._haveVertices = true;
+    }
+
+    return this._vertices;
   }
   get vertex() { return this.segments.getVertex(this.index, this._center, this.circle.radius); }
   get nextVertex() {
@@ -34,9 +40,15 @@ export class CircleIterator implements GeometryIterator {
     const index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this.segments.getVertex(index, this._center, this.circle.radius);
   }
+  protected _haveEdgeVectors = false;
   protected _edgeVectors?: Vector[];
   get edgeVectors(): Vector[] {
-    return this._edgeVectors || (this._edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius));
+    if (!this._edgeVectors || !this._haveEdgeVectors) {
+      this._edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius);
+      this._haveEdgeVectors = true;
+    }
+
+    return this._edgeVectors;
   }
 
   get edge(): Edge {
@@ -56,8 +68,13 @@ export class CircleIterator implements GeometryIterator {
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
-  // @ts-ignore - unused param.
-  reset(index?: number) { }
+  reset(index: number = 0) {
+    this._vertices = [];
+    this._edgeVectors = [];
+    this._haveVertices = false;
+    this._haveEdgeVectors = false;
+    this.index = index;
+  }
 
   next() { this._index = (this._index + 1) % this.segments.segmentCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1; }
