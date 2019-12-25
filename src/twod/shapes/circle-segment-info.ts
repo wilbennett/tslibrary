@@ -47,6 +47,17 @@ export class CircleSegmentInfo {
     return center.addScaledO(this._vertices[index], radius);
   }
 
+  getVertices(center: Vector, radius: number) {
+    const count = this._segmentCount;
+    const result = new Array<Vector>(count);
+
+    for (let i = 0; i < count; i++) {
+      result[i] = this.getVertex(i, center, radius);
+    }
+
+    return result;
+  }
+
   getEdgeVector(index: number, center: Vector, radius: number) {
     const nextIndex = (index + 1) % this._segmentCount;
     const vertex = this.getVertex(index, center, radius);

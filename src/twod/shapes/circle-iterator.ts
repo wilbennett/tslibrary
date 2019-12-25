@@ -1,6 +1,5 @@
 import { CircleSegmentInfo, Edge, GeometryIterator, getCircleSegmentInfo, ICircleShape, SupportPoint } from '.';
 import { Vector } from '../../vectors';
-import { calcCircleVertices } from './shape-utils';
 
 export class CircleIterator implements GeometryIterator {
   constructor(readonly circle: ICircleShape, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
@@ -22,7 +21,10 @@ export class CircleIterator implements GeometryIterator {
     this._index = value;
   }
   get vertexCount() { return this.segments.segmentCount; }
-  get vertices(): Vector[] { return calcCircleVertices(this.circle, this.isWorld, this.segments); }
+  protected _vertices?: Vector[];
+  get vertices(): Vector[] {
+    return this._vertices || (this._vertices = this.segments.getVertices(this._center, this.circle.radius));
+  }
   get vertex() { return this.segments.getVertex(this.index, this._center, this.circle.radius); }
   get nextVertex() {
     const index = (this._index + 1) % this.segments.segmentCount;
@@ -52,7 +54,7 @@ export class CircleIterator implements GeometryIterator {
   get normal() { return this.normalDirection.normalize(); }
 
   // @ts-ignore - unused param.
-  reset(index?: number) {}
+  reset(index?: number) { }
 
   next() { this._index = (this._index + 1) % this.segments.segmentCount; }
   prev() { this._index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1; }
