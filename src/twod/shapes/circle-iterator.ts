@@ -8,12 +8,7 @@ export class CircleIterator implements GeometryIterator {
     this.segments = segments || getCircleSegmentInfo();
 
     this.isWorld = isWorld;
-
-    const count = this.segments.segmentCount;
-    this._vertices = new Array<Vector>(count);
-    this._edgeVectors = new Array<Vector>(count);
   }
-
   readonly isWorld: boolean;
   protected _center: Vector;
   readonly segments: CircleSegmentInfo;
@@ -26,54 +21,64 @@ export class CircleIterator implements GeometryIterator {
   }
   get vertexCount() { return this.segments.segmentCount; }
   protected _haveVertices = false;
-  protected _vertices: Vector[];
+  protected _vertices = new Map<number, Vector>();
   get vertices(): Vector[] {
     if (!this._haveVertices) {
-      this._vertices = this.segments.getVertices(this._center, this.circle.radius);
+      const vertices = this.segments.getVertices(this._center, this.circle.radius);
+      const map = this._vertices;
+      vertices.forEach((v, i) => map.set(i, v));
       this._haveVertices = true;
     }
 
-    return this._vertices;
+    return Array.from(this._vertices.values());
   }
-  get vertex() {
+  get vertex(): Vector {
     const vertices = this._vertices;
     const index = this.index;
 
-    if (this._haveVertices)
-      return vertices[index];
+    let result = vertices.get(index);
 
-    return vertices[index]
-      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
+    if (result) return result;
+
+    result = this.segments.getVertex(index, this._center, this.circle.radius);
+    vertices.set(index, result);
+    return result;
   }
-  get nextVertex() {
+  get nextVertex(): Vector {
     const vertices = this._vertices;
     const index = (this._index + 1) % this.segments.segmentCount;
 
-    if (this._haveVertices)
-      return vertices[index];
+    let result = vertices.get(index);
 
-    return vertices[index]
-      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
+    if (result) return result;
+
+    result = this.segments.getVertex(index, this._center, this.circle.radius);
+    vertices.set(index, result);
+    return result;
   }
   get prevVertex() {
     const vertices = this._vertices;
     const index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
 
-    if (this._haveVertices)
-      return vertices[index];
+    let result = vertices.get(index);
 
-    return vertices[index]
-      || (vertices[index] = this.segments.getVertex(index, this._center, this.circle.radius));
+    if (result) return result;
+
+    result = this.segments.getVertex(index, this._center, this.circle.radius);
+    vertices.set(index, result);
+    return result;
   }
   protected _haveEdgeVectors = false;
-  protected _edgeVectors: Vector[];
+  protected _edgeVectors = new Map<number, Vector>();
   get edgeVectors(): Vector[] {
     if (!this._haveEdgeVectors) {
-      this._edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius);
+      const edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius);
+      const map = this._edgeVectors;
+      edgeVectors.forEach((v, i) => map.set(i, v));
       this._haveEdgeVectors = true;
     }
 
-    return this._edgeVectors;
+    return Array.from(this._edgeVectors.values());
   }
 
   get edge(): Edge {
@@ -92,27 +97,32 @@ export class CircleIterator implements GeometryIterator {
     const edgeVectors = this._edgeVectors;
     const index = this.index;
 
-    if (this._haveEdgeVectors)
-      return edgeVectors[index];
+    let result = edgeVectors.get(index);
 
-    return edgeVectors[index] || (edgeVectors[index] = this.nextVertex.subO(this.vertex));
+    if (result) return result;
+
+    result = this.nextVertex.subO(this.vertex);
+    edgeVectors.set(index, result);
+    return result;
   }
   get prevEdgeVector() {
     const edgeVectors = this._edgeVectors;
     const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
 
-    if (this._haveEdgeVectors)
-      return edgeVectors[index];
+    let result = edgeVectors.get(index);
 
-    return edgeVectors[index] || (edgeVectors[index] = this.vertex.subO(this.prevVertex));
+    if (result) return result;
+
+    result = this.vertex.subO(this.prevVertex)
+    edgeVectors.set(index, result);
+    return result;
   }
   get normalDirection() { return this.edgeVector.perpRight(); }
   get normal() { return this.normalDirection.normalize(); }
 
   reset(index: number = 0) {
-    const count = this.segments.segmentCount;
-    this._vertices = new Array<Vector>(count);
-    this._edgeVectors = new Array<Vector>(count);
+    this._vertices.clear();
+    this._edgeVectors.clear();
     this._haveVertices = false;
     this._haveEdgeVectors = false;
     this.index = index;
