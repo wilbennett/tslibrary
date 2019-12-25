@@ -81,17 +81,37 @@ export class CircleIterator implements GeometryIterator {
     return Array.from(this._edgeVectors.values());
   }
 
-  get edge(): Edge {
-    return this.isWorld
-      ? this.segments.getWorldEdge(this.circle, this._index, this._center, this.circle.radius)
-      : this.segments.getEdge(this.circle, this._index, this._center, this.circle.radius);
-  }
-  get prevEdge(): Edge {
-    const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
+  protected _edges = new Map<number, Edge>();
 
-    return this.isWorld
+  get edge(): Edge {
+    const edges = this._edges;
+    const index = this._index;
+
+    let result = edges.get(index);
+
+    if (result) return result;
+
+    result = this.isWorld
       ? this.segments.getWorldEdge(this.circle, index, this._center, this.circle.radius)
       : this.segments.getEdge(this.circle, index, this._center, this.circle.radius);
+
+    edges.set(index, result);
+    return result;
+  }
+  get prevEdge(): Edge {
+    const edges = this._edges;
+    const index = this.index > 0 ? this.index - 1 : this.segments.segmentCount - 1;
+
+    let result = edges.get(index);
+
+    if (result) return result;
+
+    result = this.isWorld
+      ? this.segments.getWorldEdge(this.circle, index, this._center, this.circle.radius)
+      : this.segments.getEdge(this.circle, index, this._center, this.circle.radius);
+
+    edges.set(index, result);
+    return result;
   }
   get edgeVector() {
     const edgeVectors = this._edgeVectors;
@@ -123,6 +143,7 @@ export class CircleIterator implements GeometryIterator {
   reset(index: number = 0) {
     this._vertices.clear();
     this._edgeVectors.clear();
+    this._edges.clear();
     this._haveVertices = false;
     this._haveEdgeVectors = false;
     this.index = index;
