@@ -1,6 +1,8 @@
+export { };
+/*
 import { ICircle } from '.';
 import { pos, Vector } from '../../vectors';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
+import { CircleSegmentInfo, getCircleSegmentInfo } from '../shapes';
 
 export function calcCircleVertices(
   circle: ICircle,
@@ -85,3 +87,4 @@ export function calcCircleIndex(radians: number, circleSegments?: CircleSegmentI
   circleSegments || (circleSegments = getCircleSegmentInfo());
   return Math.floor(radians / circleSegments.step);
 }
+//*/
