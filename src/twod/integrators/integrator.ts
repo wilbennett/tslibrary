@@ -90,6 +90,13 @@ export class Integrator {
       : other.integrator.toLocal(this.toWorld(localPoint, result), result);
   }
 
-  setTransform(ctx: CanvasContext) { this.matrix.setTransform(ctx, this.position); }
-  updateTransform(ctx: CanvasContext) { this.matrix.updateTransform(ctx, this.position); }
+  setTransform(ctx: CanvasContext) {
+    if (!this.isWorld)
+      this.matrix.setTransform(ctx, this.position);
+  }
+
+  updateTransform(ctx: CanvasContext) {
+    if (!this.isWorld)
+      this.matrix.updateTransform(ctx, this.position);
+  }
 }
