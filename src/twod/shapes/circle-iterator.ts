@@ -34,7 +34,10 @@ export class CircleIterator implements GeometryIterator {
     const index = this._index > 0 ? this._index - 1 : this.segments.segmentCount - 1;
     return this.segments.getVertex(index, this._center, this.circle.radius);
   }
-  get edgeVectors(): Vector[] { return []; }
+  protected _edgeVectors?: Vector[];
+  get edgeVectors(): Vector[] {
+    return this._edgeVectors || (this._edgeVectors = this.segments.getEdgeVectors(this._center, this.circle.radius));
+  }
 
   get edge(): Edge {
     return this.isWorld

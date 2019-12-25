@@ -65,6 +65,21 @@ export class CircleSegmentInfo {
     return nextVertex.subO(vertex);
   }
 
+  getEdgeVectors(center: Vector, radius: number) {
+    const count = this._segmentCount;
+    const result = new Array<Vector>(count);
+    let vertex = this.getVertex(0, center, radius);
+
+    for (let i = 0; i < count; i++) {
+      const nextIndex = (i + 1) % this._segmentCount;
+      const nextVertex = this.getVertex(nextIndex, center, radius);
+      result[i] = nextVertex.subO(vertex);
+      vertex = nextVertex;
+    }
+
+    return result;
+  }
+
   getEdge(circle: ICircleShape, index: number, center: Vector, radius: number) {
     const edge = this._edges[index];
     const start = center.addScaledO(edge.start, radius);
