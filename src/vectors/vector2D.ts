@@ -242,6 +242,22 @@ export class Vector2D extends Vector2 {
     this.__radians = undefined;
     return this;
   }
+  withXYO(x: number, y: number, result?: Vector): Vector {
+    if (result)
+      return result.set(x, y, 0, this.w);
+
+    return new Vector2D(x, y, this.w);
+  }
+  withXY(x: number, y: number): Vector {
+    this.x = x;
+    this.y = y;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
 }
 
 export class PVector2 extends Vector2D {
