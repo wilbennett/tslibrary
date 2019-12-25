@@ -1,11 +1,16 @@
 import { ColliderBase, ColliderCallback, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
-import { MinkowskiDiffIterator, Simplex, SupportPoint, SupportPointImpl } from '../shapes';
-import * as Minkowski from '../shapes/minkowski';
 import {
   CircleSegmentInfo,
   getCircleSegmentInfo,
+  MinkowskiDiffIterator,
+  Simplex,
+  SupportPoint,
+  SupportPointImpl,
+} from '../shapes';
+import * as Minkowski from '../shapes/minkowski';
+import {
   lineClosestPoint,
   segmentClosestPoint,
   segmentSegmentClosestPoints,

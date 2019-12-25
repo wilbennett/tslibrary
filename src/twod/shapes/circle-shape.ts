@@ -1,5 +1,7 @@
 import {
+  calcCircleIndex,
   CircleIterator,
+  CircleSegmentInfo,
   ICircleShape,
   ORIGIN,
   Projection,
@@ -12,8 +14,6 @@ import {
 import { ContextProps, IntegratorClass, Viewport } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { dir, Vector } from '../../vectors';
-import { calcCircleIndex } from '../geometry';
-import { CircleSegmentInfo } from '../utils';
 
 export class CircleShape extends ShapeBase implements ICircleShape {
   kind: "circle" = "circle";

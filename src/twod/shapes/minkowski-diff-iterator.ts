@@ -1,4 +1,5 @@
 import {
+  CircleSegmentInfo,
   Edge,
   GeometryIterator,
   MinkowskiPoint,
@@ -9,7 +10,6 @@ import {
   WorldEdge,
 } from '.';
 import { Vector } from '../../vectors';
-import { CircleSegmentInfo } from '../utils';
 
 type SupportTypes = SupportPoint | MinkowskiPoint | MinkowskiDiffIterator;
 

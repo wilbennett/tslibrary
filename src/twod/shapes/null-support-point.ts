@@ -1,11 +1,11 @@
 import { PolygonShape, Shape, SupportPoint } from '.';
 import { pos, Vector } from '../../vectors';
 
-const NULL_SHAPE: Shape = new PolygonShape([pos(0, 0)]);
+let NULL_SHAPE: Shape;
 
 export class NullSupportPoint implements SupportPoint {
   static instance = new NullSupportPoint();
-  get shape() { return NULL_SHAPE; }
+  get shape() { return NULL_SHAPE || (NULL_SHAPE = new PolygonShape([pos(0, 0)])); }
   get point() { return Vector.empty; }
   get worldPoint() { return Vector.empty; }
   get direction() { return Vector.empty; }

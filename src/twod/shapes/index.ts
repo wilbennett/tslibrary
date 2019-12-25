@@ -9,6 +9,7 @@ export * from "./local-edge";
 export * from "./unique-shape-axes-list";
 export * from "./support-point-impl";
 export * from "./minkowski-point-impl";
+export * from "./circle-segment-info";
 export * from "./shape-iterator";
 export * from "./minkowski-diff-iterator";
 export * from "./simplex";

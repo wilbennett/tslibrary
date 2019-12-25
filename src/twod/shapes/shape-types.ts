@@ -1,9 +1,8 @@
-import { Projection, ShapeAxis, SupportPoint, WorldEdge } from '.';
+import { Projection, ShapeAxis, SupportPoint, WorldEdge, CircleSegmentInfo } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
-import { CircleSegmentInfo } from '../utils';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
 

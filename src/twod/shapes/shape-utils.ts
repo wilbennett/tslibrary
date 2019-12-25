@@ -1,7 +1,5 @@
-import { AABBShape, ICircleShape, SupportPoint, SupportPointImpl } from '.';
-import { calcCircleIndex } from '..';
+import { AABBShape, CircleSegmentInfo, getCircleSegmentInfo, ICircleShape, SupportPoint, SupportPointImpl } from '.';
 import { dir, pos, Vector } from '../../vectors';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
 export function calcCircleSupport(
   circle: ICircleShape,
@@ -96,6 +94,11 @@ export function getCircleEdge(circle: ICircleShape, index: number, isWorld: bool
 
   return getCircleVertex(circle, nextIndex, isWorld, circleSegments)
     .subO(getCircleVertex(circle, index, isWorld, circleSegments));
+}
+
+export function calcCircleIndex(radians: number, circleSegments?: CircleSegmentInfo) {
+  circleSegments || (circleSegments = getCircleSegmentInfo());
+  return Math.floor(radians / circleSegments.step);
 }
 
 export function createWalls(position: Vector, size: Vector, wallThickness: number) {

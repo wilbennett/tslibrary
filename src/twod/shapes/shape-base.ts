@@ -1,4 +1,5 @@
 import {
+  CircleSegmentInfo,
   GeometryIterator,
   IShape,
   NullSupportPoint,
@@ -23,7 +24,6 @@ import {
 } from '..';
 import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
-import { CircleSegmentInfo } from '../utils';
 
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];

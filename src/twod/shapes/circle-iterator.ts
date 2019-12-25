@@ -1,6 +1,13 @@
-import { Edge, GeometryIterator, ICircleShape, LocalEdge, SupportPoint } from '.';
+import {
+  CircleSegmentInfo,
+  Edge,
+  GeometryIterator,
+  getCircleSegmentInfo,
+  ICircleShape,
+  LocalEdge,
+  SupportPoint,
+} from '.';
 import { pos, Vector } from '../../vectors';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 import { calcCircleSupport, calcCircleVertices, getCircleVertex } from './shape-utils';
 import { WorldEdge } from './world-edge';
 

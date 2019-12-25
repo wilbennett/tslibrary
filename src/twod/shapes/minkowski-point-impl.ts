@@ -1,6 +1,13 @@
-import { getCircleVertex, MinkowskiPoint, Shape, SupportPoint, SupportPointImpl } from '.';
+import {
+  CircleSegmentInfo,
+  getCircleSegmentInfo,
+  getCircleVertex,
+  MinkowskiPoint,
+  Shape,
+  SupportPoint,
+  SupportPointImpl,
+} from '.';
 import { Vector } from '../../vectors';
-import { CircleSegmentInfo, getCircleSegmentInfo } from '../utils';
 
 const ZERO_DIRECTION = Vector.direction(0, 0);
 

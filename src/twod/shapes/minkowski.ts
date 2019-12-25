@@ -1,6 +1,7 @@
 import {
   calcCircleVertices,
   calcCircleVerticesAndEdges,
+  CircleSegmentInfo,
   CircleShape,
   MinkowskiPoint,
   MinkowskiPointImpl,
@@ -14,7 +15,6 @@ import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
 import { normal, Vector } from '../../vectors';
 import * as Poly from '../geometry/polygon-utils';
-import { CircleSegmentInfo } from '../utils';
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
 export type MinkowskiPointsState = [MinkowskiPoint[], MinkowskiPoint[]]; // Points, Vertices.
