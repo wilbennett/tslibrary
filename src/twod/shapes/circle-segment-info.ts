@@ -128,11 +128,10 @@ export class CircleSegmentInfo {
 
     const cos = this._cos;
     const sin = this._sin;
-    const center = Vector.direction(0, 0);
     let offset = Vector.direction(1, 0);
 
     for (let i = 0; i < segmentCount; i++) {
-      vertices[i] = center.addO(offset);
+      vertices[i] = offset.clone();
 
       let x = offset.x;
       let y = offset.y;
