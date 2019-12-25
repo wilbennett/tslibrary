@@ -1,6 +1,7 @@
 import { CircleSegmentInfo, Edge, GeometryIterator, getCircleSegmentInfo, ICircleShape, SupportPoint } from '.';
 import { Vector } from '../../vectors';
 
+// TODO: Investigate. Too much garbage collection.
 export class CircleIterator implements GeometryIterator {
   constructor(readonly circle: ICircleShape, index: number, isWorld: boolean = false, segments?: CircleSegmentInfo) {
     this._index = index;
