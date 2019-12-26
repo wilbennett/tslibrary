@@ -3,8 +3,6 @@ import { Viewport } from '../../../../twod';
 import { Collider } from '../../../../twod/collision';
 import { Shape } from '../../../../twod/shapes';
 
-const { gravity } = IEMath;
-
 export class Scene {
   constructor(public dt: number, public iterations: number) {
     this.collider = new Gaul();
@@ -17,7 +15,7 @@ export class Scene {
   integrateForces(b: IBody, dt: number) {
     if (b.im === 0) return;
 
-    b.velocity.add((b.force.scaleO(b.im).addO(gravity)).scaleO(dt / 2));
+    b.velocity.add((b.force.scaleO(b.im).addO(IEMath.gravity)).scaleO(dt / 2));
     b.angularVelocity += b.torque * b.iI * (dt / 2);
   }
 

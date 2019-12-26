@@ -1,6 +1,6 @@
 import { MathEx } from '../../../../core';
 import { Brush } from '../../../../twod';
-import { dir } from '../../../../vectors';
+import { dir, Vector } from '../../../../vectors';
 
 const colors: Brush[] = [
   "red",
@@ -14,8 +14,15 @@ const colors: Brush[] = [
 
 export class IEMath {
   static readonly gravityScale = 5;
-  static readonly gravity = dir(0, -10 * IEMath.gravityScale);
   static readonly dt = 1 / 60;
+  private static _gravity: Vector;
+  static get gravity() { return this._gravity; }
+  private static _gravityStrength: number;
+  static get gravityStrength() { return this._gravityStrength; }
+  static set gravityStrength(value) {
+    this._gravityStrength = value;
+    this._gravity = dir(0, -this._gravityStrength * IEMath.gravityScale);
+  }
 
   static sqr(n: number) { return n * n; }
   static biasGreaterThan(a: number, b: number) {
@@ -26,3 +33,5 @@ export class IEMath {
 
   static randomBrush() { return MathEx.random(colors); }
 }
+
+IEMath.gravityStrength = 10;
