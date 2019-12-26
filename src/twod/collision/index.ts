@@ -10,6 +10,7 @@ export * from "./simple-broad-phase";
 export * from "./simple-narrow-phase";
 export * from "./collider-base";
 export * from "./simple-collider";
+export * from "./circle-collider";
 export * from "./sat-projection";
 export * from "./sat-support";
 export * from "./gjk";

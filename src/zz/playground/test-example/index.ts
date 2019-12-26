@@ -14,6 +14,7 @@ import {
   ShapePair,
   Sutherland,
   Wcb2,
+  CircleCollider,
 } from '../../../twod/collision';
 import {
   CircleShape,
@@ -67,7 +68,7 @@ const clipper = new Sutherland();
 const scene = new Scene(1 / 60, 10);
 
 const colliders: [string, Collider][] = [
-  ["WCB2", new Wcb2()],
+  ["WCB2", new CircleCollider(new Wcb2())],
   ["SAT PROJ", new SATProjection()],
   ["SAT SUP", new SATSupport()],
   ["Gaul", new Gaul()],
