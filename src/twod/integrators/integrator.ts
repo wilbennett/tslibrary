@@ -9,6 +9,10 @@ export type IntegratorClass = typeof Integrator;
 export type ForcesApplier = (now: number, position: Vector, velocity: Vector) => void;
 
 export class Integrator {
+  // @ts-ignore - missing return value.
+  get shape(): Shape { }
+  // @ts-ignore - unused param.
+  set shape(value) { }
   get isWorld() { return false; }
   // @ts-ignore - unused param.
   set isWorld(value) { }
@@ -56,6 +60,7 @@ export class Integrator {
   get restingSpeedCuttoffSquared() { return this.restingSpeedCuttoff * this.restingSpeedCuttoff; }
 
   assignTo(other: Integrator) {
+    other.shape = this.shape;
     other.position = this.position;
     other.angle = this.angle;
     other.velocity = this.velocity;

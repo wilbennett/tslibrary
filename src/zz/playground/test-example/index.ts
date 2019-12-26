@@ -5,6 +5,7 @@ import { DelayEaser, Ease, Easer, EaseRunner, NumberEaser, SequentialEaser } fro
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Line, Viewport } from '../../../twod';
 import {
+  CircleCollider,
   ClipState,
   Collider,
   ColliderState,
@@ -14,11 +15,9 @@ import {
   ShapePair,
   Sutherland,
   Wcb2,
-  CircleCollider,
 } from '../../../twod/collision';
 import {
   CircleShape,
-  getCircleSegmentInfo,
   getDiffPoint,
   PolygonShape,
   setCircleSegmentCount,
@@ -30,7 +29,7 @@ import {
 import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { dir, normal, pos, Vector } from '../../../vectors';
-import { Gaul, Scene } from './src';
+import { Gaul, IEMath, Scene } from './src';
 
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
@@ -99,24 +98,50 @@ runner.start();
 
 Minkowski;
 getDiffPoint;
-const segments = getCircleSegmentInfo();
-/*
-setCircleSegmentCount(8);
-const props: ContextProps = { strokeStyle: "yellow", lineWidth: 2 };
-const center = pos(15, 15);
 
-ctx.beginPath().clearRect(ctx.bounds);
-applyTransform();
-const view = graph.getViewport(ctx);
-view.applyTransform();
+const materials: { [index: string]: Material } = {
+  default: {
+    name: "default",
+    restitution: 0.2,
+    density: 0,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
 
-for (let i = 0; i < segments.segmentCount; i++) {
-  const vertex = segments.getVertex(i, center, 10);
-  beginPath(props, view).strokeCircle(vertex, 1);
-}
-/*/
-const c1 = new CircleShape(3);
-const cp1 = new PolygonShape(8, 3, 0, true);
+  bouncy: {
+    name: "bouncy",
+    restitution: 0.7,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  superBouncy: {
+    name: "super bouncy",
+    restitution: 0.9,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  wood: {
+    name: "wood",
+    restitution: 0.4,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+
+  plastic: {
+    name: "plastic",
+    restitution: 0.2,
+    density: 0.6,
+    staticFriction: 0.5,
+    kineticFriction: 0.3
+  },
+};
+
+IEMath.gravityStrength = 0;
 const hw = 5;
 const hh = 2;
 const vertices = [
@@ -125,100 +150,13 @@ const vertices = [
   pos(hw, hh),
   pos(-hw, hh),
 ];
-const p1 = new PolygonShape(vertices);
-cp1.props = { strokeStyle: "red", lineWidth: 2 };
-c1.props = { strokeStyle: "orange", lineWidth: 2 };
-p1.props = { strokeStyle: "magenta", lineWidth: 2 };
-p1.setPosition(pos(15, 10));
-c1.setPosition(pos(15, 17));
-c1.setPosition(pos(15, 14));
-cp1.setPosition(c1.position);
-c1.angle = 240 * Math.PI / 180;
+const p1 = new PolygonShape(vertices, materials.bouncy);
+scene.add(p1, 15, 10);
 p1.angle = 0 * Math.PI / 180;
-cp1.angle = c1.angle;
-const m1 = Minkowski.createDiffPoly(c1, p1)!;
-const m2 = Minkowski.createDiffPoly(cp1, p1)!;
-// const m1 = Minkowski.createDiffPoly(p1, c1)!;
-m1.props = { strokeStyle: "green", lineWidth: 3 };
-m2.props = { strokeStyle: "red", lineWidth: 3 };
-ctx.beginPath().clearRect(ctx.bounds);
-applyTransform();
-const view = graph.getViewport(ctx);
-view.applyTransform();
-
-let cvertices = c1.getWorldIterator(0).vertices;
-beginPath(c1.props, view)
-  .strokePoly(cvertices, true)
-  .beginPath()
-  .moveTo(c1.position).lineTo(cvertices[0]).stroke();
-// c1.render(view);
-cp1.render(view);
-p1.render(view);
-// m1.render(view);
-m2.render(view);
-const start = getDiffPoint(c1, p1, normal(1, 0));
-const start2 = getDiffPoint(cp1, p1, normal(1, 0));
-beginPath(c1.props, view).strokeCircle(start.worldPoint, 1);
-beginPath(cp1.props, view).strokeCircle(start2.worldPoint, 1);
-beginPath(cp1.props, view).strokeCircle(start2.worldPointA, 1);
-beginPath(cp1.props, view).strokeCircle(start2.worldPointB, 1);
-beginPath(c1.props, view).strokeCircle(start.worldPointA, 1);
-beginPath(p1.props, view).strokeCircle(start.worldPointB, 1);
-beginPath(c1.props, view).strokeCircle(p1.toWorld(p1.vertexList.items[0]), 1);
-/* /
-const c1 = new CircleShape(10);
-const hw = 20;
-const hh = 8;
-const vertices = [
-  pos(-hw, -hh),
-  pos(hw, -hh),
-  pos(hw, hh),
-  pos(-hw, hh),
-];
-const p1 = new PolygonShape(vertices);
-c1.props = { strokeStyle: "orange", lineWidth: 2 };
 p1.props = { strokeStyle: "magenta", lineWidth: 2 };
-const supProps: ContextProps = { strokeStyle: "yellow", lineWidth: 2 };
-p1.setPosition(pos(0, 0));
-c1.setPosition(pos(-10, 10));
-c1.angle = 0 * Math.PI / 180;
-p1.angle = 0 * Math.PI / 180;
-
-const axes = c1.getDynamicAxes(p1);
-
-ctx.beginPath().clearRect(ctx.bounds);
-applyTransform();
-const view = graph.getViewport(ctx);
-view.applyTransform();
-
-c1.render(view);
-p1.render(view);
-
-// axes.forEach(axis => {
-//   const sup = p1.getSupportFromAxis(axis.toWorldWithShape(p1, true));
-//   const plane = new Plane("pointnormal", axis.worldPoint, axis.worldNormal);
-//   plane.props = c1.props;
-//   beginPath(c1.props, view).strokeCircle(axis.worldPoint, 1);
-//   beginPath(supProps, view).strokeRect(Bounds.fromCenter(sup.worldPoint.clone(), dir(1, 1)));
-//   sup.worldDirection.scaleO(sup.distance).render(view, sup.worldPoint, supProps);
-//   plane.render(view);
-// });
-const ss = new SATProjection();
-// const pair = new ShapePair(c1, p1);
-const pair = new ShapePair(p1, c1);
-const contact = ss.calcContact(pair);
-drawSat(pair, view);
-
-if (contact) {
-  const cp = contact.points[0];
-  const contactPoint = contact.points[0].point;
-  beginPath(supProps, view).strokeRect(Bounds.fromCenter(contactPoint.clone(), dir(1, 1)));
-  contact.normal.scaleO(cp.depth).render(view, contactPoint, supProps);
-}
-//*/
-
-view.restoreTransform();
-restoreTransform();
+const forceProps = { strokeStyle: "yellow", lineWidth: 2 };
+const forcePoint = p1.toWorld(p1.vertexList.items[1].displaceByO(dir(-3, 0)));
+const force = p1.toWorld(dir(40 * 10, 0)).rotate(10 * Math.PI / 180);
 
 let stepping = false;
 const mouse = pos(0, 0);
@@ -313,26 +251,11 @@ function update() {
       scene.bodies.remove(body);
   }
 
-  scene.step();
-
-  if (stateAnim)
-    runner.remove(stateAnim);
-
-  stateAnim = null;
-  states.splice(0);
-  stateIndex = -1;
-
-  const collider: Collider = colliders.find(c => c[0] === elCollider.value)![1];
-
-  if (collider && collider instanceof Wcb2 && scene.bodies.length === 2) {
-    const bodies = scene.bodies;
-    const shapeA = bodies[0].shape;
-    const shapeB = bodies[1].shape;
-    const pair = new ShapePair(shapeA, shapeB);
-    collider.calcContactProgress(pair, pushColliderState, pushClipState, pair.contact, false);
-    stateIndex = states.length - 1;
-    createStateAnim();
+  if (frame === (60 * 2)) {
+    p1.integrator.applyForceAt(forcePoint, force);
   }
+
+  scene.step();
 }
 
 function render() {
@@ -353,6 +276,8 @@ function render() {
   view.applyTransform();
 
   scene.render(view);
+
+  force.render(view, forcePoint.displaceByNegO(force), forceProps);
 
   stateIndex >= 0 && drawState(states[stateIndex], view);
 

@@ -45,6 +45,8 @@ export abstract class ShapeBase implements IShape {
     this._calcInertia = calcInertia;
     this._integratorType = integratorType;
     this._integrator = new integratorType();
+    // @ts-ignore - "this" not assignable to Shape.
+    this._integrator.shape = this;
     this._integrator.material = material;
 
     if (massInfo)

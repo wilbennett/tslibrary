@@ -2,8 +2,12 @@ import { Integrator } from '.';
 import { DEFAULT_MATERIAL, MassInfo } from '../../core';
 import { Vector } from '../../vectors';
 import { ForceSource } from '../forces';
+import { Shape } from '../shapes';
 
-export class IntegratorBase extends Integrator {
+export abstract class IntegratorBase extends Integrator {
+  protected _shape!: Shape;
+  get shape() { return this._shape; }
+  set shape(value) { this._shape = value; }
   get isNull() { return false; }
   protected _isWorld?: boolean;
   get isWorld() { return !!this._isWorld; }
