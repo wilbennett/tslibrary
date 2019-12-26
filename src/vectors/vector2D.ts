@@ -45,14 +45,43 @@ export class Vector2D extends Vector2 {
   static get zeroDirection() { return Vector2D._zeroDirection || (Vector2D._zeroDirection = new Vector2ZeroDirection()); }
 
   clone(result?: Vector): Vector {
-    return result
-      ? result.copyFrom(this)
-      : new Vector2D(this.x, this.y, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.copyFrom(this);
+
+      result.x = this.x;
+      result.y = this.y;
+      result.w = this.w;
+
+      result.__mag = this.__mag;
+      result.__magSquared = this.__magSquared;
+      result.__radians = this.__radians;
+
+      return result;
+    }
+
+    const res = new Vector2D(this.x, this.y, this.w);
+    res.__mag = this.__mag;
+    res.__magSquared = this.__magSquared;
+    res.__radians = this.__radians;
+    return res;
   }
 
   addO(other: Vector, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x + other.x, this.y + other.y, 0, this.w + other.w);
+
+      result.x = this.x + other.x;
+      result.y = this.y + other.y;
+      result.w = this.w + other.w;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x + other.x, this.y + other.y, this.w + other.w);
   }
@@ -68,8 +97,20 @@ export class Vector2D extends Vector2 {
     return this;
   }
   addScaledO(other: Vector, scale: number, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x + other.x * scale, this.y + other.y * scale, 0, this.w + other.w);
+
+      result.x = this.x + other.x * scale;
+      result.y = this.y + other.y * scale;
+      result.w = this.w + other.w;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x + other.x * scale, this.y + other.y * scale, this.w + other.w);
   }
@@ -85,8 +126,19 @@ export class Vector2D extends Vector2 {
     return this;
   }
   displaceByO(other: Vector, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x + other.x, this.y + other.y, 0, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x + other.x, this.y + other.y, 0, this.w);
+
+      result.x = this.x + other.x;
+      result.y = this.y + other.y;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x + other.x, this.y + other.y, this.w);
   }
@@ -101,8 +153,20 @@ export class Vector2D extends Vector2 {
     return this;
   }
   subO(other: Vector, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x - other.x, this.y - other.y, 0, this.w - other.w);
+
+      result.x = this.x - other.x;
+      result.y = this.y - other.y;
+      result.w = this.w - other.w;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x - other.x, this.y - other.y, this.w - other.w);
   }
@@ -118,8 +182,19 @@ export class Vector2D extends Vector2 {
     return this;
   }
   displaceByNegO(other: Vector, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x - other.x, this.y - other.y, 0, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x - other.x, this.y - other.y, 0, this.w);
+
+      result.x = this.x - other.x;
+      result.y = this.y - other.y;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x - other.x, this.y - other.y, this.w);
   }
@@ -134,8 +209,19 @@ export class Vector2D extends Vector2 {
     return this;
   }
   scaleO(scale: number, result?: Vector): Vector {
-    if (result)
-      return result.set(this.x * scale, this.y * scale, 0, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.x * scale, this.y * scale, 0, this.w);
+
+      result.x = this.x * scale;
+      result.y = this.y * scale;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(this.x * scale, this.y * scale, this.w);
   }
@@ -150,8 +236,17 @@ export class Vector2D extends Vector2 {
     return this;
   }
   negateO(result?: Vector): Vector {
-    if (result)
-      return result.set(-this.x, -this.y, 0, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(-this.x, -this.y, 0, this.w);
+
+      result.x = -this.x;
+      result.y = -this.y;
+
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(-this.x, -this.y, this.w);
   }
@@ -178,13 +273,32 @@ export class Vector2D extends Vector2 {
     const magInv = 1 / this.mag;
 
     if (isFinite(magInv)) {
-      if (result)
-        return result.set(x * magInv, y * magInv, 0, w);
+      if (result) {
+        if (!(result instanceof Vector2D))
+          return result.set(x * magInv, y * magInv, 0, w);
+
+        result.x = x * magInv;
+        result.y = y * magInv;
+        result.w = w;
+
+        result.__mag = 1;
+        result.__magSquared = 1;
+      }
 
       return new Vector2D(x * magInv, y * magInv, w);
     } else {
-      if (result)
-        return result.set(0, 0, 0, w);
+      if (result) {
+        if (!(result instanceof Vector2D))
+          return result.set(0, 0, 0, w);
+
+        result.x = 0;
+        result.y = 0;
+        result.w = w;
+
+        result.__mag = 0;
+        result.__magSquared = 0;
+        result.__radians = 0;
+      }
 
       return new Vector2D(0, 0, w);
     }
@@ -223,7 +337,18 @@ export class Vector2D extends Vector2 {
     return this;
   }
   perpLeftO(result?: Vector): Vector {
-    return result ? result.set(-this.y, this.x, 0, this.w) : new Vector2D(-this.y, this.x, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(-this.y, this.x, 0, this.w);
+
+      result.x = -this.y;
+      result.y = this.x;
+
+      result.__radians = undefined;
+      return result;
+    }
+
+    return new Vector2D(-this.y, this.x, this.w);
   }
   perpLeft(): Vector {
     this.x = -this.y;
@@ -233,7 +358,18 @@ export class Vector2D extends Vector2 {
     return this;
   }
   perpRightO(result?: Vector): Vector {
-    return result ? result.set(this.y, -this.x, 0, this.w) : new Vector2D(this.y, -this.x, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(this.y, -this.x, 0, this.w);
+
+      result.x = this.y;
+      result.y = -this.x;
+
+      result.__radians = undefined;
+      return result;
+    }
+
+    return new Vector2D(this.y, -this.x, this.w);
   }
   perpRight(): Vector {
     this.x = this.y;
@@ -243,14 +379,54 @@ export class Vector2D extends Vector2 {
     return this;
   }
   withXYO(x: number, y: number, result?: Vector): Vector {
-    if (result)
-      return result.set(x, y, 0, this.w);
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(x, y, 0, this.w);
+
+      result.x = x;
+      result.y = y;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
 
     return new Vector2D(x, y, this.w);
   }
   withXY(x: number, y: number): Vector {
     this.x = x;
     this.y = y;
+
+    this.__mag = undefined;
+    this.__magSquared = undefined;
+    this.__radians = undefined;
+
+    return this;
+  }
+  withXYWO(x: number, y: number, w: number, result?: Vector): Vector {
+    if (result) {
+      if (!(result instanceof Vector2D))
+        return result.set(x, y, 0, w);
+
+      result.x = x;
+      result.y = y;
+      result.w = w;
+
+      result.__mag = undefined;
+      result.__magSquared = undefined;
+      result.__radians = undefined;
+
+      return result;
+    }
+
+    return new Vector2D(x, y, w);
+  }
+  withXYW(x: number, y: number, w: number): Vector {
+    this.x = x;
+    this.y = y;
+    this.w = w;
 
     this.__mag = undefined;
     this.__magSquared = undefined;

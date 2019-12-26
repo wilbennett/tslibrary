@@ -13,7 +13,7 @@ import {
 import { isTriangleCW } from '..';
 import { Tristate } from '../../core';
 import { assertNever } from '../../utils';
-import { normal, Vector } from '../../vectors';
+import { dir, normal, Vector } from '../../vectors';
 import * as Poly from '../geometry/polygon-utils';
 
 export type MinkowskiOperation = (vertexA: Vector, vertexB: Vector) => Vector;
@@ -21,6 +21,7 @@ export type MinkowskiPointsState = [MinkowskiPoint[], MinkowskiPoint[]]; // Poin
 export type MinkowskiPointsCallback = (state: MinkowskiPointsState) => void;
 
 const START_DIRECTION = normal(1, 0);
+const temp1 = dir(0, 0);
 
 // Andrew's Algorithm: https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
 export function convexHull(points: MinkowskiPoint[], stateCallback?: MinkowskiPointsCallback, result?: MinkowskiPoint[]) {
@@ -97,8 +98,8 @@ export function getDiffPoint(first: Shape, second: Shape, worldDirection: Vector
   const direction = worldDirection.normalizeO();
   const iterA = first.getWorldIterator(0);
   const iterB = second.getWorldIterator(0);
-  const spA = iterA.getSupport(first.toLocal(direction));
-  const spB = iterB.getSupport(second.toLocal(direction.negateO()));
+  const spA = iterA.getSupport(first.toLocal(direction, temp1));
+  const spB = iterB.getSupport(second.toLocal(direction.negateO(temp1), temp1));
 
   if (!spA) return NullMinkowskiPoint.instance;
   if (!spB) return NullMinkowskiPoint.instance;
