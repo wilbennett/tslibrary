@@ -55,7 +55,9 @@ function circleToCircle(contact: Contact) {
 
   if (distance === 0) {
     contact.normal = dir(0, 1);
-    contactPoints.push(new ContactPoint(circleA.position.clone(), Math.max(circleA.radius, circleB.radius)));
+    const penetration = circleA.radius + circleB.radius;
+    const maxRadius = Math.max(circleA.radius, circleB.radius);
+    contactPoints.push(new ContactPoint(circleA.position.addScaledO(normal, maxRadius), penetration));
   } else {
     normal.div(distance);
     contact.normal = normal;
