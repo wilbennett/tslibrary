@@ -68,6 +68,8 @@ export class Integrator {
   // @ts-ignore - unused param.
   applyForce(force: Vector) { }
   // @ts-ignore - unused param.
+  applyForceAt(worldPoint: Vector, force: Vector) { }
+  // @ts-ignore - unused param.
   applyTorque(radians: number) { }
   // @ts-ignore - unused param.
   applyImpulse(impulse: Vector, contactVector: Vector) { }

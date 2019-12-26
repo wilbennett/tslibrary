@@ -54,13 +54,22 @@ export class IntegratorBase extends Integrator {
   set torque(value) { this._torque = value; }
 
   applyForce(force: Vector) { this._force.add(force); }
+
+  applyForceAt(worldPoint: Vector, force: Vector) {
+    if (this.massInfo.massInverse === 0) return;
+
+    const contactVector = worldPoint.subO(this._position);
+    this._force.add(force);
+    this._torque += contactVector.cross2D(force);
+  }
+
   applyTorque(radians: number) { this._torque += radians; }
 
   protected updateForces(now: number, position: Vector, velocity: Vector) {
-    this._force.set(0, 0, 0, 0);
-    this._torque = 0;
-
     this.worldForces.forEach(force => force.process(this, now, position, velocity));
     this.localForces.forEach(force => force.process(this, now, position, velocity));
+
+    this._force.set(0, 0, 0, 0);
+    this._torque = 0;
   }
 }
