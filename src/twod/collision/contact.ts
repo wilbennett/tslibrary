@@ -126,12 +126,7 @@ export class Contact {
     return result;
   }
 
-  clipPoints(clipper: Clipper, clipCallback?: ClipCallback) {
-    if (!this.canClip) return;
-    if (!this.isCollision) return;
-    if (!this.referenceEdge || !this.incidentEdge) return;
-
-    clipper.clip(this, clipCallback);
+  ensurePointOrder() {
     const points = this.points;
 
     if (points.length > 1 && points[0].depth < points[1].depth) { // Always put the deeper point first.
@@ -139,7 +134,15 @@ export class Contact {
       points[0] = points[1];
       points[1] = temp;
     }
+  }
 
+  clipPoints(clipper: Clipper, clipCallback?: ClipCallback) {
+    if (!this.canClip) return;
+    if (!this.isCollision) return;
+    if (!this.referenceEdge || !this.incidentEdge) return;
+
+    clipper.clip(this, clipCallback);
+    this.ensurePointOrder();
     return this.points;
   }
 
@@ -172,9 +175,9 @@ export class Contact {
     const rightEdge = edges[0];
     const leftEdge = edges[1];
 
-    const v0 = rightEdge.worldStart;
-    const v = rightEdge.worldEnd;
-    const v1 = leftEdge.worldEnd;
+    const v0 = rightEdge.start;
+    const v = rightEdge.end;
+    const v1 = leftEdge.end;
 
     const left = v.subO(v1).normalize();
     const right = v.subO(v0).normalize();
@@ -198,8 +201,8 @@ export class Contact {
 
     if (!refEdge || !incEdge) return this.markEdgesNull();
 
-    const refVector = refEdge.worldEnd.subO(refEdge.worldStart);
-    const incVector = incEdge.worldEnd.subO(incEdge.worldStart);
+    const refVector = refEdge.end.subO(refEdge.start);
+    const incVector = incEdge.end.subO(incEdge.start);
 
     const refDotNormal = Math.abs(refVector.dot(normal));
     const incDotNormal = Math.abs(incVector.dot(normal));

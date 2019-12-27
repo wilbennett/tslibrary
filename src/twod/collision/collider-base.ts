@@ -1,4 +1,4 @@
-import { Clipper, Collider, Contact, ShapePair, ColliderCallback, ClipCallback } from '.';
+import { ClipCallback, Clipper, Collider, ColliderCallback, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 
 export abstract class ColliderBase implements Collider {
@@ -46,7 +46,10 @@ export abstract class ColliderBase implements Collider {
     if (result === undefined && this.fallback)
       return this.fallback.calcContact(shapes, result, calcDistance);
 
-    result && this.clipper && result.clipPoints(this.clipper);
+    if (result) {
+      this.clipper && result.clipPoints(this.clipper);
+      result.ensurePointOrder();
+    }
 
     return result;
   }
