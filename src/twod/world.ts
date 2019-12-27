@@ -38,6 +38,8 @@ export class World implements IWorld {
     this._restingSpeedCutoff = value;
     this._shapes.forEach(shape => shape.integrator.restingSpeedCuttoff = value);
   }
+  protected _worldTime = 0;
+  get worldTime() { return this._worldTime; }
   readonly forces: ForceSource[];
   broadPhase?: BroadPhase;
   narrowPhase?: NarrowPhase;
@@ -76,6 +78,7 @@ export class World implements IWorld {
   }
 
   update(timestep: TimeStep, now: DOMHighResTimeStamp) {
+    this._worldTime = now;
     const broadPhase = this.broadPhase;
     const narrowPhase = this.narrowPhase;
     const collisionResolver = this.collisionResolver;
