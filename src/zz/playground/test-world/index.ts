@@ -17,8 +17,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { AABBShape, createWalls, PolygonShape, Shape } from '../../../twod/shapes';
-import { setCircleSegmentCount } from '../../../twod/utils';
+import { AABBShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 
@@ -468,8 +467,8 @@ function drawContact(contact: Contact, view: Viewport) {
   const normalAB = contact.normalAB;
   const refEdge = contact.referenceEdge;
   const incEdge = contact.incidentEdge;
-  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
-  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  refEdge && beginPath(propsr, view).line(refEdge.start, refEdge.end).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
 
   contact.points.forEach(cp => {
     beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
