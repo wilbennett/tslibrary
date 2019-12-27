@@ -1,4 +1,4 @@
-import { CanvasContext, Viewport } from '.';
+import { CanvasContext, IWorld, Viewport } from '.';
 import { TimeStep } from '../core';
 import { Bounds } from '../misc';
 import { dir } from '../vectors';
@@ -6,7 +6,7 @@ import { BroadPhase, CollisionResolver, Contact, NarrowPhase, ShapePair, ShapePa
 import { ForceSource, Gravity } from './forces';
 import { Shape } from './shapes';
 
-export class World {
+export class World implements IWorld {
   constructor(bounds: Bounds) {
     this.bounds = bounds;
     this.forces = [];
