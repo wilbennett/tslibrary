@@ -27,7 +27,7 @@ import {
 } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, normal, pos, Vector } from '../../../vectors';
-import { Gaul, IEMath, Scene } from './src';
+import { Gaul, Scene } from './src';
 
 const gridExtent = 600;
 const canvasb = UiUtils.getCanvasElement("canvasb");
@@ -94,6 +94,7 @@ resetScene();
 loop.start();
 runner.start();
 
+/*
 const materials: { [index: string]: Material } = {
   default: {
     name: "default",
@@ -136,7 +137,7 @@ const materials: { [index: string]: Material } = {
   },
 };
 
-IEMath.gravityStrength = 0;
+// IEMath.gravityStrength = 0;
 const hw = 5;
 const hh = 2;
 const vertices = [
@@ -152,6 +153,7 @@ p1.props = { strokeStyle: "magenta", lineWidth: 2 };
 const forceProps = { strokeStyle: "yellow", lineWidth: 2 };
 const forcePoint = p1.toWorld(p1.vertexList.items[1].displaceByO(dir(-3, 0)));
 const force = p1.toWorld(dir(40 * 10, 0)).rotate(10 * Math.PI / 180);
+//*/
 
 let stepping = false;
 const mouse = pos(0, 0);
@@ -246,9 +248,7 @@ function update() {
       scene.bodies.remove(body);
   }
 
-  if (frame === (60 * 2)) {
-    p1.integrator.applyForceAt(forcePoint, force);
-  }
+  // if (frame === (60 * 2)) p1.integrator.applyForceAt(forcePoint, force);
 
   scene.step();
 }
@@ -272,7 +272,7 @@ function render() {
 
   scene.render(view);
 
-  force.render(view, forcePoint.displaceByNegO(force), forceProps);
+  // force.render(view, forcePoint.displaceByNegO(force), forceProps);
 
   stateIndex >= 0 && drawState(states[stateIndex], view);
 
