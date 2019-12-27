@@ -1,7 +1,7 @@
-import { Integrator } from '..';
 import { Vector } from '../../vectors';
+import { Shape } from '../shapes';
 
 
 export interface ForceSource {
-  process(integrator: Integrator, now: number, position: Vector, velocity: Vector): void;
+  process(shape: Shape, now: number, position: Vector, velocity: Vector): void;
 }

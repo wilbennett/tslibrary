@@ -1,6 +1,6 @@
 import { ForceSourceBase } from '.';
-import { Integrator } from '..';
 import { dir, Vector } from '../../vectors';
+import { Shape } from '../shapes';
 
 export class Gravity extends ForceSourceBase {
   constructor(public acceleration: Vector = dir(0, -9.8)) {
@@ -8,7 +8,7 @@ export class Gravity extends ForceSourceBase {
   }
 
   // @ts-ignore - unused param.
-  protected processCore(integrator: Integrator, now: number, position: Vector, velocity: Vector) {
-    integrator.applyForce(this.acceleration);
+  protected processCore(shape: Shape, now: number, position: Vector, velocity: Vector) {
+    shape.integrator.applyForce(this.acceleration);
   }
 }
