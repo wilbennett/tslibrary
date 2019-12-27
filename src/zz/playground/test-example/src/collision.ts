@@ -18,13 +18,16 @@ export class Gaul extends ColliderBase {
       case "circle":
         switch (shapeB.kind) {
           case "circle": Collision.circleToCircle(result); break;
-          case "polygon": Collision.circleToPolygon(result); break;
+          case "polygon":
+          case "aabb": Collision.circleToPolygon(result); break;
           default: break;
         }
         break;
       case "polygon":
+      case "aabb":
         switch (shapeB.kind) {
           case "circle": Collision.polygonToCircle(result); break;
+          case "aabb":
           case "polygon": Collision.polygonToPolygon(result); break;
           default: break;
         }
