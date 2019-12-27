@@ -1,38 +1,56 @@
 import { Body, Gaul, IBody, IEMath, Manifold } from '.';
+import { TimeStep } from '../../../../core';
 import { Viewport } from '../../../../twod';
 import { Collider } from '../../../../twod/collision';
+import { ForceSource, Gravity } from '../../../../twod/forces';
 import { Shape } from '../../../../twod/shapes';
 
 export class Scene {
   constructor(public dt: number, public iterations: number) {
     this.collider = new Gaul();
+
+    this.forces = [];
+    const gravity = new Gravity(IEMath.gravity);
+    this.forces.push(gravity);
   }
 
   bodies: IBody[] = [];
   contacts: Manifold[] = [];
   collider: Collider;
+  forces: ForceSource[];
 
   integrateForces(b: IBody, dt: number) {
     if (b.im === 0) return;
 
-    b.velocity.add((b.force.scaleO(b.im).addO(IEMath.gravity)).scaleO(dt / 2));
-    b.angularVelocity += b.torque * b.iI * (dt / 2);
+    const gravity = IEMath.gravity;
+    const force = b.force.clone();
+    // force.add(gravity);
+    const acceleration = force.scale(b.im);
+    acceleration.add(gravity);
+    b.velocity.add(acceleration.scaleO(dt / 2));
+
+    const angularAcceleration = b.torque * b.iI;
+    b.angularVelocity += angularAcceleration * (dt / 2);
+
+    // b.velocity.add((b.force.scaleO(b.im).addO(IEMath.gravity)).scaleO(dt / 2));
+    // b.velocity.add(acceleration.scaleO(dt / 2));
+    // b.angularVelocity += b.torque * b.iI * (dt / 2);
   }
 
   integrateVelocity(b: IBody, dt: number) {
     if (b.im === 0) return;
 
-    b.position.add(b.velocity.scaleO(dt));
+    b.position.addScaled(b.velocity, dt);
     b.orient += b.angularVelocity * dt;
-    b.setOrient(b.orient);
     this.integrateForces(b, dt);
   }
 
   integrate(b: IBody, dt: number) {
     if (b.im === 0) return;
 
-    this.integrateForces(b, dt);
-    this.integrateVelocity(b, dt);
+    // this.integrateForces(b, dt);
+    // this.integrateVelocity(b, dt);
+    b.shape.integrator.integrate(0, TimeStep.DT_60_FPS);
   }
 
   broadPhase() {
@@ -125,6 +143,7 @@ export class Scene {
   add(shape: Shape, x: number, y: number): IBody {
     const b = new Body(shape, x, y);
     this.bodies.push(b);
+    b.shape.integrator.worldForces = this.forces;
     return b;
   }
 
