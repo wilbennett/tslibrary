@@ -1,6 +1,6 @@
 import { ColliderBase, Contact, ContactPoint } from '.';
 import { MathEx } from '../../core';
-import { dir, Vector } from '../../vectors';
+import { dir } from '../../vectors';
 import { ICircleShape, IPolygonShape } from '../shapes';
 
 export class CircleCollider extends ColliderBase {
@@ -36,9 +36,6 @@ export class CircleCollider extends ColliderBase {
 const temp1 = dir(0, 0);
 const temp2 = dir(0, 0);
 
-function dot(v1: Vector, v2: Vector) { return v1.dot(v2); }
-function distSqr(v1: Vector, v2: Vector) { return v1.distanceSquared(v2); }
-
 function circleToCircle(contact: Contact) {
   contact.reset();
   const circleA = <ICircleShape>contact.shapeA;
@@ -59,7 +56,7 @@ function circleToCircle(contact: Contact) {
     const maxRadius = Math.max(circleA.radius, circleB.radius);
     contactPoints.push(new ContactPoint(circleA.position.addScaledO(normal, maxRadius), penetration));
   } else {
-    normal.div(distance);
+    normal.scale(1 / distance);
     contact.normal = normal;
     contactPoints.push(new ContactPoint(circleA.position.addScaledO(normal, circleA.radius), radius - distance));
   }
@@ -79,7 +76,7 @@ function circleToPolygon(contact: Contact) {
   let edgeIndex = 0;
 
   for (let i = 0; i < polyVertices.length; ++i) {
-    const s = dot(polyNormals[i], circleCenter.subO(polyVertices[i], temp1));
+    const s = polyNormals[i].dot(circleCenter.subO(polyVertices[i], temp1));
 
     if (s > circle.radius) return;
 
@@ -89,10 +86,6 @@ function circleToPolygon(contact: Contact) {
     }
   }
 
-  let v1 = polyVertices[edgeIndex];
-  const i2 = edgeIndex + 1 < polyVertices.length ? edgeIndex + 1 : 0;
-  let v2 = polyVertices[i2];
-
   if (separation < MathEx.epsilon) { // Center is inside polygon.
     const normal = poly.toWorld(polyNormals[edgeIndex]).negate();
     contact.normal = normal;
@@ -100,39 +93,40 @@ function circleToPolygon(contact: Contact) {
     return;
   }
 
-  const dot1 = dot(circleCenter.subO(v1, temp1), v2.subO(v1, temp2));
+  const v1 = polyVertices[edgeIndex];
+  const i2 = edgeIndex + 1 < polyVertices.length ? edgeIndex + 1 : 0;
+  const v2 = polyVertices[i2];
+  const v1ToCircleCenter = circleCenter.subO(v1, temp1);
+  const edge = v2.subO(v1, temp2);
+  const edgeLengthSqr = edge.dot(edge);
+  const projection = v1ToCircleCenter.dot(edge);
   const penetration = circle.radius - separation;
 
-  if (dot1 <= 0) { // Closest to v1.
-    if (distSqr(circleCenter, v1) > circle.radius * circle.radius) return;
+  if (projection <= 0 || edgeLengthSqr === 0) { // Closest to v1.
+    if (v1ToCircleCenter.magSquared > circle.radius * circle.radius) return;
 
-    const normal = v1.subO(circleCenter);
-    poly.toWorld(normal, normal);
-    normal.normalize();
-    v1 = poly.toWorld(v1);
+    const normal = v1ToCircleCenter.negateO();
+    poly.toWorld(normal, normal).normalize();
     contact.normal = normal;
-    contactPoints.push(new ContactPoint(v1, penetration));
+    contactPoints.push(new ContactPoint(poly.toWorld(v1), penetration));
     return;
   }
 
-  const dot2 = dot(circleCenter.subO(v2, temp1), v1.subO(v2, temp2));
+  if (projection >= edgeLengthSqr) { // Closest to v2.
+    const circleCenterToV2 = v2.subO(circleCenter);
 
-  if (dot2 <= 0) { // Closest to v2.
-    if (distSqr(circleCenter, v2) > circle.radius * circle.radius) return;
+    if (circleCenterToV2.magSquared > circle.radius * circle.radius) return;
 
-    const normal = v2.subO(circleCenter);
-    poly.toWorld(normal, normal);
-    normal.normalize();
-    v2 = poly.toWorld(v2);
+    const normal = poly.toWorld(circleCenterToV2, circleCenterToV2).normalize();
     contact.normal = normal;
-    contactPoints.push(new ContactPoint(v2, penetration));
+    contactPoints.push(new ContactPoint(poly.toWorld(v2), penetration));
     return;
   }
 
   // Closest to face.
   let normal = polyNormals[edgeIndex];
 
-  if (dot(circleCenter.subO(v1), normal) > circle.radius) return;
+  if (v1ToCircleCenter.dot(normal) > circle.radius) return;
 
   normal = poly.toWorld(normal);
   contact.normal = normal.negate();

@@ -18,7 +18,6 @@ import {
 } from '../../../twod/collision';
 import {
   CircleShape,
-  getDiffPoint,
   PolygonShape,
   setCircleSegmentCount,
   Shape,
@@ -26,7 +25,6 @@ import {
   Simplex,
   UniqueShapeAxesList,
 } from '../../../twod/shapes';
-import * as Minkowski from '../../../twod/shapes/minkowski';
 import { UiUtils } from '../../../utils';
 import { dir, normal, pos, Vector } from '../../../vectors';
 import { Gaul, IEMath, Scene } from './src';
@@ -95,9 +93,6 @@ drawGraph();
 resetScene();
 loop.start();
 runner.start();
-
-Minkowski;
-getDiffPoint;
 
 const materials: { [index: string]: Material } = {
   default: {
