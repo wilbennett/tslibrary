@@ -1,11 +1,18 @@
 import { ColliderBase, ColliderCallback, Contact, ShapePair } from '.';
 import { Tristate } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
-import { MinkowskiDiffIterator, MinkowskiPoint, ORIGIN, Simplex, SupportPoint, SupportPointImpl } from '../shapes';
-import * as Minkowski from '../shapes/minkowski';
 import {
   CircleSegmentInfo,
   getCircleSegmentInfo,
+  MinkowskiDiffIterator,
+  MinkowskiPoint,
+  ORIGIN,
+  Simplex,
+  SupportPoint,
+  SupportPointImpl,
+} from '../shapes';
+import * as Minkowski from '../shapes/minkowski';
+import {
   lineClosestPoint,
   segmentClosestPoint,
   segmentSegmentClosestPoints,
@@ -65,27 +72,27 @@ export class Wcb extends ColliderBase {
         negativeNormal = normal.negateO();
     }
 
-    const incidentLeftDot = incidentLeftEdge.normalDirection.dot(negativeNormal);
-    const incidentRightDot = incidentRightEdge.normalDirection.dot(negativeNormal);
+    const incidentLeftDot = incidentLeftEdge.normal.dot(negativeNormal);
+    const incidentRightDot = incidentRightEdge.normal.dot(negativeNormal);
     // Incident edge is the one most in the direction of the normal.
     const incidentEdge = incidentLeftDot > incidentRightDot ? incidentLeftEdge : incidentRightEdge;
-    const incidentStartDot = incidentEdge.worldStart.dot(negativeNormal);
-    const incidentEndDot = incidentEdge.worldEnd.dot(negativeNormal);
+    const incidentStartDot = incidentEdge.start.dot(negativeNormal);
+    const incidentEndDot = incidentEdge.end.dot(negativeNormal);
     // Incident vertex is the one most in the direction of the normal.
     let incidentVertex: Vector;
 
     if (containsOrigin) {
       contact.normal = normal;
-      incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.worldStart : incidentEdge.worldEnd;
+      incidentVertex = incidentStartDot > incidentEndDot ? incidentEdge.start : incidentEdge.end;
     } else {
       const referenceClosest = pos(0, 0);
       const incidentClosest = pos(0, 0);
 
       depth = segmentSegmentClosestPoints(
-        incidentEdge.worldStart,
-        incidentEdge.worldEnd,
-        referenceEdge.worldStart,
-        referenceEdge.worldEnd,
+        incidentEdge.start,
+        incidentEdge.end,
+        referenceEdge.start,
+        referenceEdge.end,
         incidentClosest,
         referenceClosest);
 
@@ -580,7 +587,7 @@ export class Wcb extends ColliderBase {
 
     mkPoints.push(mka.clone());
     const mkai = new MinkowskiDiffIterator(mka, this.circleSegments);
-    spPoints.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().worldStart));
+    spPoints.push(new SupportPointImpl(mkai.shape, undefined, mkai.getShapeEdge().start));
     callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     direction.negate();
@@ -593,7 +600,7 @@ export class Wcb extends ColliderBase {
 
     mkPoints.push(mkb.clone());
     let mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
-    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
+    spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().start));
     callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
 
     if (!calcDistance && b.dot(direction) <= 0) return false; // b did not cross origin in direction.
@@ -611,7 +618,7 @@ export class Wcb extends ColliderBase {
       mkPoints.push(mkb.clone());
       const mkbi = new MinkowskiDiffIterator(mkb, this.circleSegments);
       spPoints.shift();
-      spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().worldStart));
+      spPoints.push(new SupportPointImpl(mkbi.shape, undefined, mkbi.getShapeEdge().start));
       callback({ simplices: [mkSimplex.clone(), spSimplex.clone()] });
     }
 
