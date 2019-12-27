@@ -17,11 +17,11 @@ export class EulerExplicit extends IntegratorBase {
     this.updateForces(now, this.position, this.velocity);
 
     this._acceleration = this._force.scaleO(this.massInfo.massInverse);
-    this._position.addScaled(this._velocity.toPixelsO(), dt);
+    this.position.addScaled(this._velocity.toPixelsO(), dt);
     this._velocity.addScaled(this._acceleration, dt);
 
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
-    this._angle += this._angularVelocity * dt;
+    this.angle += this._angularVelocity * dt;
     this._angularVelocity += this._angularAcceleration * dt;
 
     this.clearForces();

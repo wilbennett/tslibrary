@@ -22,11 +22,11 @@ export class EulerSemiImplicit extends IntegratorBase {
 
     this._acceleration = this._force.scaleO(this.massInfo.massInverse);
     this._velocity.addScaled(this._acceleration, dt);
-    this._position.addScaled(this._velocity.toPixelsO(), dt);
+    this.position.addScaled(this._velocity.toPixelsO(), dt);
 
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
-    this._angle += this._angularVelocity * dt;
+    this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
 
     this.clearForces();
   }

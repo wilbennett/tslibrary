@@ -27,12 +27,12 @@ export class RK2 extends IntegratorBase {
     this.updateForces(now + dt, pos2, vel2);
     const acc2 = this._force.scaleO(this.massInfo.massInverse);
 
-    this._position.addScaled(vel2.add(vel1).toPixels(), dtDiv2);
+    this.position.addScaled(vel2.add(vel1).toPixels(), dtDiv2);
     this._acceleration = acc1.add(acc2);
     this._velocity.addScaled(this._acceleration, dtDiv2);
 
     // TODO: Update.
-    this._angle += this._angularVelocity * dt;
+    this.angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
 

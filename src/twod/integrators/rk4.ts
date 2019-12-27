@@ -44,11 +44,11 @@ export class RK4 extends IntegratorBase {
     const velSum = vel2.add(vel3).add(vel4).add(vel1);
     this._acceleration = acc1.add(acc2).add(acc3).add(acc4);
 
-    this._position.addScaled(velSum.toPixels(), dtDiv6);
+    this.position.addScaled(velSum.toPixels(), dtDiv6);
     this._velocity.addScaled(this._acceleration, dtDiv6);
 
     // TODO: Update.
-    this._angle += this._angularVelocity * dt;
+    this.angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
 
