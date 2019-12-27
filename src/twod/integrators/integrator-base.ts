@@ -69,11 +69,13 @@ export abstract class IntegratorBase extends Integrator {
 
   applyTorque(radians: number) { this._torque += radians; }
 
+  protected clearForces(clearAngularForces: boolean = true) {
+    this._force.set(0, 0, 0, 0);
+    clearAngularForces && (this._torque = 0);
+  }
+
   protected updateForces(now: number, position: Vector, velocity: Vector) {
     this.worldForces.forEach(force => force.process(this.shape, now, position, velocity));
     this.localForces.forEach(force => force.process(this.shape, now, position, velocity));
-
-    this._force.set(0, 0, 0, 0);
-    this._torque = 0;
   }
 }

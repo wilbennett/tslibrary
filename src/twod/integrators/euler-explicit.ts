@@ -23,5 +23,7 @@ export class EulerExplicit extends IntegratorBase {
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angle += this._angularVelocity * dt;
     this._angularVelocity += this._angularAcceleration * dt;
+
+    this.clearForces();
   }
 }

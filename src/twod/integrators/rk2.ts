@@ -23,6 +23,7 @@ export class RK2 extends IntegratorBase {
 
     const pos2 = pos1.addScaledO(vel1.toPixelsO(), dt);
     const vel2 = vel1.addScaledO(acc1, dt);
+    this.clearForces(false);
     this.updateForces(now + dt, pos2, vel2);
     const acc2 = this._force.scaleO(this.massInfo.massInverse);
 
@@ -34,5 +35,7 @@ export class RK2 extends IntegratorBase {
     this._angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
+
+    this.clearForces();
   }
 }

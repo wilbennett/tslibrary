@@ -25,16 +25,19 @@ export class RK4 extends IntegratorBase {
 
     const pos2 = pos1.addScaledO(vel1.toPixelsO(), dtDiv2);
     const vel2 = vel1.addScaledO(acc1, dtDiv2);
+    this.clearForces(false);
     this.updateForces(now + dtDiv3, pos2, vel2);
     const acc2 = this._force.scaleO(this.massInfo.massInverse);
 
     const pos3 = pos1.addScaledO(vel2.toPixelsO(), dtDiv2);
     const vel3 = vel1.addScaledO(acc2, dtDiv2);
+    this.clearForces(false);
     this.updateForces(now + dtDiv3 + dtDiv3, pos3, vel3);
     const acc3 = this._force.scaleO(this.massInfo.massInverse);
 
     const pos4 = pos1.addScaledO(vel3.toPixelsO(), dt);
     const vel4 = vel1.addScaledO(acc3, dt);
+    this.clearForces(false);
     this.updateForces(now + dt, pos4, vel4);
     const acc4 = this._force.scaleO(this.massInfo.massInverse);
 
@@ -48,5 +51,7 @@ export class RK4 extends IntegratorBase {
     this._angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
+
+    this.clearForces();
   }
 }

@@ -31,5 +31,7 @@ export class VerletVelocity extends IntegratorBase {
     this._angle += this._angularVelocity * dt;
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
+
+    this.clearForces();
   }
 }
