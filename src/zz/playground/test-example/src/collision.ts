@@ -14,6 +14,10 @@ export class Gaul extends ColliderBase {
   // @ts-ignore - unused param.
   set clipper(value) { };
 
+  protected isCollidingCore(shapes: ShapePair): boolean | undefined {
+    return undefined;
+  }
+
   // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
     const { shapeA, shapeB } = result;
@@ -21,25 +25,23 @@ export class Gaul extends ColliderBase {
     switch (shapeA.kind) {
       case "circle":
         switch (shapeB.kind) {
-          case "circle": Collision.circleToCircle(result); break;
+          case "circle": return Collision.circleToCircle(result);
           case "polygon":
-          case "aabb": Collision.circleToPolygon(result); break;
-          default: break;
+          case "aabb": return Collision.circleToPolygon(result);
+          default: return undefined;
         }
         break;
       case "polygon":
       case "aabb":
         switch (shapeB.kind) {
-          case "circle": Collision.polygonToCircle(result); break;
+          case "circle": return Collision.polygonToCircle(result);
           case "aabb":
-          case "polygon": Collision.polygonToPolygon(result); break;
-          default: break;
+          case "polygon": return Collision.polygonToPolygon(result);
+          default: return undefined;
         }
         break;
-      default: break;
+      default: return undefined;
     }
-
-    return result;
   }
 }
 
@@ -55,7 +57,7 @@ export class Collision {
     const dist_sqr = normal.magSquared;
     const radius = A.radius + B.radius;
 
-    if (dist_sqr >= radius * radius) return; // Not in contact
+    if (dist_sqr >= radius * radius) return null; // Not in contact
 
     const distance = Math.sqrt(dist_sqr);
 
@@ -67,6 +69,8 @@ export class Collision {
       contact.normal = normal;
       contactPoints.push(new ContactPoint(normal.scaleO(A.radius).addO(A.position), radius - distance));
     }
+
+    return contact;
   }
 
   static circleToPolygon(contact: Contact, flipShapes: boolean = false) {
@@ -89,7 +93,7 @@ export class Collision {
     for (let i = 0; i < verticesB.length; ++i) {
       const s = Dot(normalsB[i], center.displaceByNegO(verticesB[i]));
 
-      if (s > A.radius) return;
+      if (s > A.radius) return null;
 
       if (s > separation) {
         separation = s;
@@ -107,7 +111,7 @@ export class Collision {
       const normal = B.toWorld(normalsB[faceNormal]).negate();// B.u.multVec(normalsB[faceNormal]).negateO();
       contact.normal = normal;
       contactPoints.push(new ContactPoint(normal.scaleO(A.radius).addO(A.position), A.radius));
-      return;
+      return contact;
     }
 
     // Determine which voronoi region of the edge center of circle lies within
@@ -116,7 +120,7 @@ export class Collision {
     const penetration = A.radius - separation;
 
     if (dot1 <= 0) { // Closest to v1
-      if (DistSqr(center, v1) > A.radius * A.radius) return;
+      if (DistSqr(center, v1) > A.radius * A.radius) return null;
 
       let n = v1.subO(center);
       n = B.toWorld(n);// B.u.multVec(n);
@@ -125,7 +129,7 @@ export class Collision {
       v1 = B.toWorld(v1);// B.u.multVec(v1).displaceByO(b.position);
       contactPoints.push(new ContactPoint(v1, penetration));
     } else if (dot2 <= 0) { // Closest to v2
-      if (DistSqr(center, v2) > A.radius * A.radius) return;
+      if (DistSqr(center, v2) > A.radius * A.radius) return null;
 
       let n = v2.subO(center);
       v2 = B.toWorld(v2);// B.u.multVec(v2).displaceByO(b.position);
@@ -136,17 +140,20 @@ export class Collision {
     } else { // Closest to face
       let n = normalsB[faceNormal].clone();
 
-      if (Dot(center.subO(v1), n) > A.radius) return;
+      if (Dot(center.subO(v1), n) > A.radius) return null;
 
       n = B.toWorld(n);// B.u.multVec(n);
       contact.normal = n.negate();
       contactPoints.push(new ContactPoint(n.scaleO(A.radius).addO(A.position), penetration));
     }
+
+    return contact;
   }
 
   static polygonToCircle(contact: Contact) {
-    this.circleToPolygon(contact, true);
-    contact.normal = contact.normal.negateO();
+    const result = this.circleToPolygon(contact, true);
+    result && (result.normal = result.normal.negate());
+    return result;
   }
 
   static polygonToPolygon(contact: Contact) {
@@ -158,12 +165,12 @@ export class Collision {
     // Check for a separating axis with A's face planes
     let [faceA, penetrationA] = findAxisLeastPenetration(A, B);
 
-    if (penetrationA >= 0) return;
+    if (penetrationA >= 0) return null;
 
     // Check for a separating axis with B's face planes
     let [faceB, penetrationB] = findAxisLeastPenetration(B, A);
 
-    if (penetrationB >= 0) return;
+    if (penetrationB >= 0) return null;
 
     let referenceIndex: number;
     let flip = false; // Always point from a to b
@@ -213,10 +220,10 @@ export class Collision {
 
     // Clip incident face to reference face side planes
     if (clip(sidePlaneNormal.negateO(), negSide, incidentFace) < 2)
-      return; // Due to floating point error, possible to not have required points
+      return contact; // Due to floating point error, possible to not have required points
 
     if (clip(sidePlaneNormal, posSide, incidentFace) < 2)
-      return; // Due to floating point error, possible to not have required points
+      return contact; // Due to floating point error, possible to not have required points
 
     // Flip
     contact.normal = flip ? refFaceNormal.negateO() : refFaceNormal;
@@ -233,6 +240,8 @@ export class Collision {
     if (separation <= 0) {
       contactPoints.push(new ContactPoint(incidentFace[1], -separation));
     }
+
+    return contact;
   }
 }
 
