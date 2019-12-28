@@ -112,7 +112,7 @@ export abstract class ShapeBase implements IShape {
   getEdgeVectors() { return this.edgeVectorList.items; }
 
   setPosition(position: Vector) {
-    this.position.copyFrom(position);
+    this.position.withXY(position.x, position.y);
   }
 
   protected setAngle(radians: number) {
