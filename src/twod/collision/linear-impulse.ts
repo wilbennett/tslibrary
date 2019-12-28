@@ -22,17 +22,14 @@ export class LinearImpulse extends CollisionResolverBase {
     contact.isResting = relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared;
   }
 
-  // @ts-ignore - unused param.
-  resolve(contact: Contact, isLastIteration: boolean) {
+  resolve(contact: Contact) {
     const { shapeA, shapeB } = contact;
-    const invMassA = shapeA.massInfo.massInverse;
-    const invMassB = shapeB.massInfo.massInverse;
+    // const invMassA = shapeA.massInfo.massInverse;
+    // const invMassB = shapeB.massInfo.massInverse;
     const contactPoint = contact.points[0];
     const integratorA = shapeA.integrator;
     const integratorB = shapeB.integrator;
     const normal = contact.normalAB;
-
-    !this.globalPositionalCorrection && this.correctPositions(shapeA, shapeB, invMassA, invMassB, contactPoint.depth, normal);
 
     const va = integratorA.velocity;
     const vb = integratorB.velocity;

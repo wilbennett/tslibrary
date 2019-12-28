@@ -14,7 +14,7 @@ export abstract class CollisionResolverBase implements CollisionResolver {
 
   // @ts-ignore - unused param.
   initialize(contact: Contact) { }
-  abstract resolve(contact: Contact, isLastIteration: boolean): void;
+  abstract resolve(contact: Contact): void;
 
   correctPositions(contact: Contact) {
     if (!this.positionalCorrection) return;

@@ -31,8 +31,7 @@ export class Impulse extends CollisionResolverBase {
     }
   }
 
-  // @ts-ignore - unused param.
-  resolve(contact: Contact, isLastIteration: boolean) {
+  resolve(contact: Contact) {
     const { shapeA, shapeB } = contact;
     const normal = contact.normalAB;
 

@@ -5,7 +5,7 @@ export class ProjectionResolver extends CollisionResolverBase {
     super();
 
     this.positionalCorrection = true;
-    this.relaxationCount = 2;
+    this.relaxationCount = 1;
   }
 
   initialize(contact: Contact) {
@@ -18,7 +18,7 @@ export class ProjectionResolver extends CollisionResolverBase {
     contact.isResting = relativeVelocity.magSquared < integratorA.restingSpeedCuttoffSquared;
   }
 
-  resolve(contact: Contact, isLastIteration: boolean) {
+  resolve(contact: Contact) {
     const { shapeA, shapeB } = contact;
     // const invMassA = shapeA.massInfo.massInverse;
     // const invMassB = shapeB.massInfo.massInverse;
@@ -28,9 +28,6 @@ export class ProjectionResolver extends CollisionResolverBase {
     // if (contactPoint.depth <= 0) return; //* Screened out by narrow phase.
 
     const normal = contact.normalAB;
-
-    if (!isLastIteration) return;
-
     const restitution = contact.isResting ? 0 : contact.shapes.restitution;
     shapeA.velocity.reflectViaNormal(normal).scale(restitution);
     shapeB.velocity.reflectViaNormal(normal).scale(restitution);

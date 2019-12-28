@@ -55,6 +55,7 @@ export class World implements IWorld {
   add(shape: Shape) {
     if (this._shapes.has(shape)) return;
 
+    // TODO: Temporary. Naively adding pairs for all shapes. Need to add/remove in broad phase.
     this._pairManager.addShape(shape, this._shapes);
     this._shapes.add(shape);
     shape.integrator.worldForces = this.forces;
@@ -82,8 +83,7 @@ export class World implements IWorld {
     const broadPhase = this.broadPhase;
     const narrowPhase = this.narrowPhase;
     const collisionResolver = this.collisionResolver;
-    const relaxationCount = Math.max(collisionResolver ? collisionResolver.relaxationCount : 1, 1);
-    const lastIndex = relaxationCount - 1;
+    const relaxationCount = Math.max(collisionResolver?.relaxationCount ?? 1, 1);
     let collidingPairs: ShapePair[] = [];
     let contacts: Contact[] = [];
 
@@ -101,10 +101,9 @@ export class World implements IWorld {
           contacts.forEach(contact => collisionResolver.initialize(contact));
 
           for (let i = 0; i < relaxationCount; i++) {
-            const isLastIteration = i === lastIndex;
-            contacts.forEach(contact => collisionResolver.resolve(contact, isLastIteration));
+            contacts.forEach(contact => collisionResolver.resolve(contact));
           }
-          
+
           contacts.forEach(contact => collisionResolver.correctPositions(contact));
         }
       }
