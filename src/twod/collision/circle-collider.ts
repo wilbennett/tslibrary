@@ -1,4 +1,4 @@
-import { ColliderBase, Contact, ContactPoint } from '.';
+import { ColliderBase, Contact, ContactPoint, ShapePair } from '.';
 import { MathEx } from '../../core';
 import { dir } from '../../vectors';
 import { ICircleShape, IPolygonShape } from '../shapes';
@@ -7,6 +7,29 @@ export class CircleCollider extends ColliderBase {
   // constructor(fallback?: Collider) {
   //   super(fallback);
   // }
+
+  protected isCollidingCore(shapes: ShapePair): boolean | undefined {
+    const { shapeA, shapeB } = shapes;
+
+    switch (shapeA.kind) {
+      case "circle":
+        switch (shapeB.kind) {
+          case "circle": return isCircleToCircle(shapes.contact);
+          case "polygon":
+          case "aabb": return isCircleToPolygon(shapes.contact);
+          default: return undefined;
+        }
+
+      case "polygon":
+      case "aabb":
+        switch (shapeB.kind) {
+          case "circle": return isPolygonToCircle(shapes.contact);
+          default: return undefined;
+        }
+
+      default: return undefined;
+    }
+  }
 
   // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
@@ -35,6 +58,39 @@ export class CircleCollider extends ColliderBase {
 
 const temp1 = dir(0, 0);
 const temp2 = dir(0, 0);
+
+function isCircleToCircle(contact: Contact) {
+  contact.reset();
+  const circleA = <ICircleShape>contact.shapeA;
+  const circleB = <ICircleShape>contact.shapeB;
+
+  const normal = circleB.position.subO(circleA.position);
+  const dist_sqr = normal.magSquared;
+  const radius = circleA.radius + circleB.radius;
+
+  return dist_sqr < radius * radius;
+}
+
+function isCircleToPolygon(contact: Contact) {
+  contact.reset();
+  const aIsCircle = contact.shapeA.kind === "circle";
+  const circle = aIsCircle ? <ICircleShape>contact.shapeA : <ICircleShape>contact.shapeB;
+  const poly = aIsCircle ? <IPolygonShape>contact.shapeB : <IPolygonShape>contact.shapeA;
+  const polyVertices = poly.vertexList.items;
+  const polyNormals = poly.normalList.items;
+
+  const circleCenter = poly.toLocal(circle.position);
+
+  for (let i = 0; i < polyVertices.length; ++i) {
+    const s = polyNormals[i].dot(circleCenter.subO(polyVertices[i], temp1));
+
+    if (s > circle.radius) return false;
+  }
+
+  return true;
+}
+
+function isPolygonToCircle(contact: Contact) { return isCircleToPolygon(contact); }
 
 function circleToCircle(contact: Contact) {
   contact.reset();
