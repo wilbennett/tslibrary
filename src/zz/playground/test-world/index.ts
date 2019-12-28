@@ -126,7 +126,7 @@ const materials: { [index: string]: Material } = {
 
 const defaultMaterial = materials.default;
 const bouncy = materials.bouncy;
-// const superBouncy = materials.superBouncy;
+const superBouncy = materials.superBouncy;
 const plastic = materials.plastic;
 // const wood = materials.wood;
 
@@ -136,7 +136,7 @@ const plastic = materials.plastic;
 
 CircleShape;
 // TODO: Something weird happening with rotated circles and collision detection. Need to investigate.
-const ball = new CircleShape(2.5, plastic);
+const ball = new CircleShape(2.5, superBouncy);
 // const ball = new AABBShape(dir(2.5, 2.5), bouncy);
 ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
@@ -176,7 +176,7 @@ const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash
 
 const shapeSets: Shape[][] = [
   [bottomWall, ball],
-  [leftWall, bottomWall, rightWall, topWall, ball],
+  [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
 ];
@@ -185,8 +185,8 @@ const wcb2 = new Wcb2();
 const wcb = new Wcb();
 
 const colliders: [string, Collider][] = [
-  ["Gaul", new Gaul()],
   ["WCB2", new CircleCollider(wcb2)],
+  ["Gaul", new Gaul()],
   ["WCB", new CircleCollider(wcb)],
 ];
 
