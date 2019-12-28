@@ -15,21 +15,21 @@ export class CircleCollider extends ColliderBase {
     switch (shapeA.kind) {
       case "circle":
         switch (shapeB.kind) {
-          case "circle": circleToCircle(result); break;
-          case "polygon": circleToPolygon(result); break;
+          case "circle": return circleToCircle(result);
+          case "polygon":
+          case "aabb": return circleToPolygon(result);
           default: return undefined;
         }
-        break;
+
       case "polygon":
+      case "aabb":
         switch (shapeB.kind) {
-          case "circle": polygonToCircle(result); break;
+          case "circle": return polygonToCircle(result);
           default: return undefined;
         }
-        break;
+
       default: return undefined;
     }
-
-    return result;
   }
 }
 
@@ -46,7 +46,7 @@ function circleToCircle(contact: Contact) {
   const dist_sqr = normal.magSquared;
   const radius = circleA.radius + circleB.radius;
 
-  if (dist_sqr >= radius * radius) return;
+  if (dist_sqr >= radius * radius) return null;
 
   const distance = Math.sqrt(dist_sqr);
 
@@ -60,6 +60,8 @@ function circleToCircle(contact: Contact) {
     contact.normal = normal;
     contactPoints.push(new ContactPoint(circleA.position.addScaledO(normal, circleA.radius), radius - distance));
   }
+
+  return contact;
 }
 
 function circleToPolygon(contact: Contact) {
@@ -78,7 +80,7 @@ function circleToPolygon(contact: Contact) {
   for (let i = 0; i < polyVertices.length; ++i) {
     const s = polyNormals[i].dot(circleCenter.subO(polyVertices[i], temp1));
 
-    if (s > circle.radius) return;
+    if (s > circle.radius) return null;
 
     if (s > separation) {
       separation = s;
@@ -90,7 +92,7 @@ function circleToPolygon(contact: Contact) {
     const normal = poly.toWorld(polyNormals[edgeIndex]).negate();
     contact.normal = normal;
     contactPoints.push(new ContactPoint(circle.position.addScaledO(normal, circle.radius), circle.radius));
-    return;
+    return contact;
   }
 
   const v1 = polyVertices[edgeIndex];
@@ -103,37 +105,39 @@ function circleToPolygon(contact: Contact) {
   const penetration = circle.radius - separation;
 
   if (projection <= 0 || edgeLengthSqr === 0) { // Closest to v1.
-    if (v1ToCircleCenter.magSquared > circle.radius * circle.radius) return;
+    if (v1ToCircleCenter.magSquared > circle.radius * circle.radius) return null;
 
     const normal = v1ToCircleCenter.negateO();
     poly.toWorld(normal, normal).normalize();
     contact.normal = normal;
     contactPoints.push(new ContactPoint(poly.toWorld(v1), penetration));
-    return;
+    return contact;
   }
 
   if (projection >= edgeLengthSqr) { // Closest to v2.
     const circleCenterToV2 = v2.subO(circleCenter);
 
-    if (circleCenterToV2.magSquared > circle.radius * circle.radius) return;
+    if (circleCenterToV2.magSquared > circle.radius * circle.radius) return null;
 
     const normal = poly.toWorld(circleCenterToV2, circleCenterToV2).normalize();
     contact.normal = normal;
     contactPoints.push(new ContactPoint(poly.toWorld(v2), penetration));
-    return;
+    return contact;
   }
 
   // Closest to face.
   let normal = polyNormals[edgeIndex];
 
-  if (v1ToCircleCenter.dot(normal) > circle.radius) return;
+  if (v1ToCircleCenter.dot(normal) > circle.radius) return null;
 
   normal = poly.toWorld(normal);
   contact.normal = normal.negate();
   contactPoints.push(new ContactPoint(circle.position.addScaledO(normal, circle.radius), penetration));
+  return contact;
 }
 
 function polygonToCircle(contact: Contact) {
-  circleToPolygon(contact);
-  contact.normal = contact.normal.negateO();
+  const result = circleToPolygon(contact);
+  result && (result.normal = result.normal.negateO());
+  return result;
 }
