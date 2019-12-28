@@ -132,6 +132,7 @@ export class Vector2D extends Vector2 {
 
       result.x = this.x + other.x;
       result.y = this.y + other.y;
+      result.w = this.w;
 
       result.__mag = undefined;
       result.__magSquared = undefined;
@@ -188,6 +189,7 @@ export class Vector2D extends Vector2 {
 
       result.x = this.x - other.x;
       result.y = this.y - other.y;
+      result.w = this.w;
 
       result.__mag = undefined;
       result.__magSquared = undefined;
@@ -215,6 +217,7 @@ export class Vector2D extends Vector2 {
 
       result.x = this.x * scale;
       result.y = this.y * scale;
+      result.w = this.w;
 
       result.__mag = undefined;
       result.__magSquared = undefined;
@@ -242,6 +245,7 @@ export class Vector2D extends Vector2 {
 
       result.x = -this.x;
       result.y = -this.y;
+      result.w = this.w;
 
       result.__radians = undefined;
 
@@ -343,6 +347,7 @@ export class Vector2D extends Vector2 {
 
       result.x = -this.y;
       result.y = this.x;
+      result.w = this.w;
 
       result.__radians = undefined;
       return result;
@@ -364,6 +369,7 @@ export class Vector2D extends Vector2 {
 
       result.x = this.y;
       result.y = -this.x;
+      result.w = this.w;
 
       result.__radians = undefined;
       return result;
@@ -385,6 +391,7 @@ export class Vector2D extends Vector2 {
 
       result.x = x;
       result.y = y;
+      result.w = this.w;
 
       result.__mag = undefined;
       result.__magSquared = undefined;
