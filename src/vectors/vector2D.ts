@@ -356,8 +356,9 @@ export class Vector2D extends Vector2 {
     return new Vector2D(-this.y, this.x, this.w);
   }
   perpLeft(): Vector {
+    const thisx = this.x;
     this.x = -this.y;
-    this.y = this.x;
+    this.y = thisx;
 
     this.__radians = undefined;
     return this;
@@ -378,8 +379,9 @@ export class Vector2D extends Vector2 {
     return new Vector2D(this.y, -this.x, this.w);
   }
   perpRight(): Vector {
+    const thisx = this.x;
     this.x = this.y;
-    this.y = -this.x;
+    this.y = -thisx;
 
     this.__radians = undefined;
     return this;
