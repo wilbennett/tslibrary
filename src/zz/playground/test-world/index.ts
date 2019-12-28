@@ -185,6 +185,7 @@ const wcb2 = new Wcb2();
 const wcb = new Wcb();
 
 const colliders: [string, Collider][] = [
+  ["Gaul", new Gaul()],
   ["WCB2", new CircleCollider(wcb2)],
   ["WCB", new CircleCollider(wcb)],
 ];
@@ -200,7 +201,6 @@ wcb2.clipper = clipper;
 wcb.clipper = clipper;
 
 colliders.forEach(entry => entry[1].clipper = clipper);
-colliders.unshift(["Gaul", new Gaul()]);
 
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;

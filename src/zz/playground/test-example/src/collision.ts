@@ -1,6 +1,6 @@
 import { IEMath } from '.';
 import { MathEx, Tristate } from '../../../../core';
-import { ColliderBase, Contact, ContactPoint, ShapePair } from '../../../../twod/collision';
+import { Clipper, ColliderBase, Contact, ContactPoint, ShapePair } from '../../../../twod/collision';
 import { ICircleShape, IPolygonShape } from '../../../../twod/shapes';
 import { dir, Vector } from '../../../../vectors';
 
@@ -10,6 +10,10 @@ function DistSqr(v1: Vector, v2: Vector) { return v1.distanceSquared(v2); }
 function assert(condition: boolean) { if (!condition) throw new Error("UNEXPECTED CONDITION"); }
 
 export class Gaul extends ColliderBase {
+  get clipper(): Clipper | undefined { return undefined; }
+  // @ts-ignore - unused param.
+  set clipper(value) { };
+
   // @ts-ignore - unused param.
   protected calcContactCore(shapes: ShapePair, result: Contact, calcDistance: boolean): Tristate<Contact> {
     const { shapeA, shapeB } = result;
