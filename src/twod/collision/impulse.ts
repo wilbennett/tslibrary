@@ -61,13 +61,7 @@ export class Impulse extends CollisionResolverBase {
       const rbCrossN = rb.cross2D(normal);
       const invMassSum = invMass + raCrossN * raCrossN * inertiaIA + rbCrossN * rbCrossN * inertiaIB;
 
-      let velocityBias = 0;
-
-      if (relVelocityInNormal < -1)
-        velocityBias = -restitution * relVelocityInNormal;
-
-      // let relVelMagToRemove = -(1.0 + restitution) * relVelocityInNormal;
-      let relVelMagToRemove = -(relVelocityInNormal - velocityBias);
+      let relVelMagToRemove = -(1.0 + restitution) * relVelocityInNormal;
       relVelMagToRemove /= invMassSum;
 
       const impulse = normal.scaleO(relVelMagToRemove);
