@@ -5,6 +5,7 @@ import { EaseRunner } from '../../../easing';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
 import {
+  CircleCollider,
   Collider,
   CollisionResolver,
   Contact,
@@ -17,9 +18,10 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { AABBShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
+import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
+import { Gaul } from '../test-example/src';
 
 // const { ONE_DEGREE } = MathEx;
 // const ZERO_DIRECTION = dir(0, 0);
@@ -132,6 +134,7 @@ const plastic = materials.plastic;
 // for (const name in materials) { materials[name].staticFriction = 0; }
 // for (const name in materials) { materials[name].kineticFriction = 0; }
 
+CircleShape;
 // TODO: Something weird happening with rotated circles and collision detection. Need to investigate.
 // const ball = new CircleShape(2.5, plastic);
 const ball = new AABBShape(dir(2.5, 2.5), bouncy);
@@ -172,14 +175,18 @@ const normalProps: ContextProps = { strokeStyle: "black", lineWidth: 1, lineDash
 const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash: [0.4, 0.1] };
 
 const shapeSets: Shape[][] = [
+  [bottomWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
 ];
 
+const wcb2 = new Wcb2();
+const wcb = new Wcb();
+
 const colliders: [string, Collider][] = [
-  ["WCB2", new Wcb2()],
-  ["WCB", new Wcb()],
+  ["WCB2", new CircleCollider(wcb2)],
+  ["WCB", new CircleCollider(wcb)],
 ];
 
 const collisionResolvers: [string, CollisionResolver][] = [
@@ -189,8 +196,11 @@ const collisionResolvers: [string, CollisionResolver][] = [
 ];
 
 const clipper = new Sutherland();
+wcb2.clipper = clipper;
+wcb.clipper = clipper;
 
 colliders.forEach(entry => entry[1].clipper = clipper);
+colliders.unshift(["Gaul", new Gaul()]);
 
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;
@@ -444,7 +454,6 @@ function changeShapes() {
 
 function applyCollisionResolver() {
   const resolver: CollisionResolver = collisionResolvers.find(c => c[0] === elCollideResolve.value)![1];
-  resolver.globalPositionalCorrection = true;
   world.collisionResolver = resolver;
 }
 
