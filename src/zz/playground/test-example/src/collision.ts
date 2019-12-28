@@ -15,7 +15,28 @@ export class Gaul extends ColliderBase {
   set clipper(value) { };
 
   protected isCollidingCore(shapes: ShapePair): boolean | undefined {
-    return undefined;
+    const { shapeA, shapeB } = shapes;
+
+    switch (shapeA.kind) {
+      case "circle":
+        switch (shapeB.kind) {
+          case "circle": return Collision.isCircleToCircle(shapes.contact);
+          case "polygon":
+          case "aabb": return Collision.isCircleToPolygon(shapes.contact);
+          default: return undefined;
+        }
+
+      case "polygon":
+      case "aabb":
+        switch (shapeB.kind) {
+          case "circle": return Collision.isPolygonToCircle(shapes.contact);
+          case "aabb":
+          case "polygon": return Collision.isPolygonToPolygon(shapes.contact);
+          default: return undefined;
+        }
+
+      default: return undefined;
+    }
   }
 
   // @ts-ignore - unused param.
@@ -30,7 +51,7 @@ export class Gaul extends ColliderBase {
           case "aabb": return Collision.circleToPolygon(result);
           default: return undefined;
         }
-        break;
+
       case "polygon":
       case "aabb":
         switch (shapeB.kind) {
@@ -39,13 +60,68 @@ export class Gaul extends ColliderBase {
           case "polygon": return Collision.polygonToPolygon(result);
           default: return undefined;
         }
-        break;
+
       default: return undefined;
     }
   }
 }
 
 export class Collision {
+  static isCircleToCircle(contact: Contact) {
+    contact.reset();
+    const A = <ICircleShape>contact.shapeA;
+    const B = <ICircleShape>contact.shapeB;
+
+    let normal = B.position.subO(A.position); // Calculate translational vector, which is normal
+
+    const dist_sqr = normal.magSquared;
+    const radius = A.radius + B.radius;
+
+    return dist_sqr < radius * radius;
+  }
+
+  static isCircleToPolygon(contact: Contact, flipShapes: boolean = false) {
+    contact.reset();
+    const A = flipShapes ? <ICircleShape>contact.shapeB : <ICircleShape>contact.shapeA;
+    const B = flipShapes ? <IPolygonShape>contact.shapeA : <IPolygonShape>contact.shapeB;
+    const verticesB = B.vertexList.items;
+    const normalsB = B.normalList.items;
+
+    // Transform circle center to Polygon model space
+    let center = A.position.clone();
+    center = B.toLocal(center);// B.u.transpose().multVec(center.displaceByNegO(b.position));
+
+    // Find separation. Exact concept as using support points in Polygon vs Polygon
+
+    for (let i = 0; i < verticesB.length; ++i) {
+      const s = Dot(normalsB[i], center.displaceByNegO(verticesB[i]));
+
+      if (s > A.radius) return false;
+    }
+
+    return true;
+  }
+
+  static isPolygonToCircle(contact: Contact) { return this.isCircleToPolygon(contact, true); }
+
+  static isPolygonToPolygon(contact: Contact) {
+    contact.reset();
+    const A = <IPolygonShape>contact.shapeA;
+    const B = <IPolygonShape>contact.shapeB;
+
+    // Check for a separating axis with A's face planes
+    let [, penetrationA] = findAxisLeastPenetration(A, B);
+
+    if (penetrationA >= 0) return false;
+
+    // Check for a separating axis with B's face planes
+    let [, penetrationB] = findAxisLeastPenetration(B, A);
+
+    if (penetrationB >= 0) return false;
+
+    return true;
+  }
+
   static circleToCircle(contact: Contact) {
     contact.reset();
     const A = <ICircleShape>contact.shapeA;

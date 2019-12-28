@@ -136,8 +136,8 @@ const plastic = materials.plastic;
 
 CircleShape;
 // TODO: Something weird happening with rotated circles and collision detection. Need to investigate.
-// const ball = new CircleShape(2.5, plastic);
-const ball = new AABBShape(dir(2.5, 2.5), bouncy);
+const ball = new CircleShape(2.5, plastic);
+// const ball = new AABBShape(dir(2.5, 2.5), bouncy);
 ball.setPosition(pos(2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
 // ball.velocity = dir(0, -1);
