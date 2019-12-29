@@ -18,6 +18,7 @@ export class TriangleShape extends PolygonShapeBase implements ITriangleShape {
   constructor(
     vertices: Vector[],
     material?: Material,
+    adjustCenter?: boolean,
     isWorld?: boolean,
     massInfo?: MassInfo,
     integratorType?: IntegratorClass,
@@ -42,16 +43,17 @@ export class TriangleShape extends PolygonShapeBase implements ITriangleShape {
       const vertices = Array.from<Vector, Vector>({ length: 3 }, () => pos(0, 0));
       generatePoly(vertices, radius, startAngle, regular);
 
-      super(vertices, false, material, massInfo, vectorClass, integratorType);
+      super(vertices, false, false, material, massInfo, vectorClass, integratorType);
     } else {
       const vertices = param1;
       const material = param2;
-      const isWorld = param3;
-      const massInfo = param4;
-      const integratorType = param5;
-      const vectorClass = param6;
+      const adjustCenter = param3;
+      const isWorld = param4;
+      const massInfo = param5;
+      const integratorType = param6;
+      const vectorClass = param7;
 
-      super(vertices.slice(0, 3), isWorld, material, massInfo, vectorClass, integratorType);
+      super(vertices.slice(0, 3), adjustCenter, isWorld, material, massInfo, vectorClass, integratorType);
     }
 
     this.kind = "triangle";

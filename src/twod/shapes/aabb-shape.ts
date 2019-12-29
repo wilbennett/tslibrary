@@ -17,7 +17,7 @@ export class AABBShape extends PolygonShapeBase implements IAABBShape {
     const hs = halfSize.asPositionO();
     const vertices = [hs.withNegYO(), hs, hs.withNegXO(), hs.negateO()];
 
-    super(vertices, isWorld, material, massInfo, vectorClass, integratorType);
+    super(vertices, true, isWorld, material, massInfo, vectorClass, integratorType);
 
     this.halfSize = halfSize;
     this.kind = "aabb";

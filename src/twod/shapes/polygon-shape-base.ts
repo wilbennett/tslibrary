@@ -1,7 +1,7 @@
 import { IPolygonShapeBase, ShapeBase } from '.';
 import { ContextProps, IntegratorClass, Viewport } from '..';
 import { MassInfo, Material } from '../../core';
-import { Vector, VectorClass, VectorGroupsBuilder } from '../../vectors';
+import { pos, Vector, VectorClass, VectorGroupsBuilder } from '../../vectors';
 import {
   calcPolyCenterAreaInertia,
   calcPolyRadius,
@@ -23,6 +23,7 @@ export function createPolyData(
 export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShapeBase {
   constructor(
     inputVertices: Vector[],
+    adjustCenter: boolean = true,
     isWorld: boolean = false,
     material?: Material,
     massInfo?: MassInfo,
@@ -34,9 +35,15 @@ export abstract class PolygonShapeBase extends ShapeBase implements IPolygonShap
     let area: number;
     let inertia: number;
 
-    if (!isWorld)
-      [radius, center, area, inertia] = normalizePolyCenter(inputVertices);
-    else {
+    if (!isWorld) {
+      if (adjustCenter)
+        [radius, center, area, inertia] = normalizePolyCenter(inputVertices);
+      else {
+        center = pos(0, 0);
+        [, area, inertia] = calcPolyCenterAreaInertia(inputVertices);
+        radius = calcPolyRadius(inputVertices, center);
+      }
+    } else {
       [center, area, inertia] = calcPolyCenterAreaInertia(inputVertices);
       radius = calcPolyRadius(inputVertices, center);
     }

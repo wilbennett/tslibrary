@@ -19,6 +19,7 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
   constructor(
     vertices: Vector[],
     material?: Material,
+    adjustCenter?: boolean,
     isWorld?: boolean,
     massInfo?: MassInfo,
     integratorType?: IntegratorClass,
@@ -44,16 +45,17 @@ export class PolygonShape extends PolygonShapeBase implements IPolygonShape {
       const vertices = Array.from<Vector, Vector>({ length: vertexCount }, () => pos(0, 0));
       generatePoly(vertices, radius, startAngle, regular);
 
-      super(vertices, false, material, massInfo, vectorClass, integratorType);
+      super(vertices, true, false, material, massInfo, vectorClass, integratorType);
     } else {
       const vertices: Vector[] = param1;
       const material: Material | undefined = param2;
-      const isWorld: boolean = param3;
-      const massInfo: MassInfo | undefined = param4;
-      const integratorType: IntegratorClass | undefined = param5;
-      const vectorClass: VectorClass = param6 || ShapeBase.vectorClass;
+      const adjustCenter: boolean = param3;
+      const isWorld: boolean = param4;
+      const massInfo: MassInfo | undefined = param5;
+      const integratorType: IntegratorClass | undefined = param6;
+      const vectorClass: VectorClass = param7 || ShapeBase.vectorClass;
 
-      super(vertices, isWorld, material, massInfo, vectorClass, integratorType);
+      super(vertices, adjustCenter, isWorld, material, massInfo, vectorClass, integratorType);
     }
 
     this.kind = "polygon";
