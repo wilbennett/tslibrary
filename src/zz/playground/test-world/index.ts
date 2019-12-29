@@ -78,6 +78,8 @@ setCircleSegmentCount(20);
 // setCircleSegmentCount(8);
 
 const graph = new Graph(ctx.bounds.clone(), gridSize);
+graph.background = "black";
+graph.lineBrush = "rgba(70, 70, 70)";
 const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
 const gview = graph.getViewport(ctx);
 world.createDefaultView(ctx, gview.viewBounds.clone());
@@ -162,20 +164,18 @@ topWall.material = defaultMaterial;
 // ball3.integratorType = EulerExplicit;
 // triangle.integratorType = EulerExplicit;
 
-ball.props = { fillStyle: colors[0] };
-ball2.props = { fillStyle: colors[0] };
-ball3.props = { fillStyle: colors[0] };
+ball.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
+ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
+ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
-leftWall.props = { fillStyle: colors[7] };
-bottomWall.props = { fillStyle: colors[7] };
-rightWall.props = { fillStyle: colors[7] };
-topWall.props = { fillStyle: colors[7] };
-
-const normalProps: ContextProps = { strokeStyle: "black", lineWidth: 1, lineDash: [] };
-const collideProps: ContextProps = { strokeStyle: "teal", lineWidth: 5, lineDash: [0.4, 0.1] };
+leftWall.props = { fillStyle: colors[0] };
+bottomWall.props = { fillStyle: colors[1] };
+rightWall.props = { fillStyle: colors[2] };
+topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
   [bottomWall, ball],
+  [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
@@ -292,13 +292,6 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   ctx.beginPath().clearRect(ctx.bounds);
   applyTransform();
 
-  setNormalShapeProps();
-
-  drawCollision && world.collidingPairs.forEach(pair => {
-    setCollideShapeProps(pair.shapeA);
-    setCollideShapeProps(pair.shapeB);
-  });
-
   world.render(timestep, now);
 
   const view = world.view!;
@@ -322,7 +315,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
 }
 
 function drawGraph() {
-  ctxb.beginPath().withFillStyle("grey").fillRect(ctxb.bounds);
+  ctxb.beginPath().clearRect(ctxb.bounds);
 
   ctxb
     .save()
@@ -395,6 +388,10 @@ function handleMouseDown(ev: MouseEvent) {
   if (ev.button === 2) {
     const shape = new PolygonShape(MathEx.randomInt(3, 8), 3, 0, false, bouncy);
     shape.setPosition(mouse);
+    const background = MathEx.random(colors);
+    let stroke = MathEx.random(colors);
+    while (stroke === background) stroke = MathEx.random(colors);
+    shape.props = { fillStyle: background, strokeStyle: stroke, lineWidth: 2 };
     shapeSet.push(shape);
     world.add(shape);
     return;
@@ -438,14 +435,6 @@ function populateCollisionResolvers() {
   }
 }
 
-function setNormalShapeProps() {
-  shapeSet.forEach(shape => Object.assign(shape.props, normalProps));
-}
-
-function setCollideShapeProps(shape: Shape) {
-  Object.assign(shape.props, collideProps);
-}
-
 function changeShapes() {
   world.clear();
   shapeSet = shapeSets[shapeSetIndex];
@@ -465,11 +454,11 @@ function applyCollider() {
 
 function drawContact(contact: Contact, view: Viewport) {
   const propsc: ContextProps = { strokeStyle: "greenyellow", fillStyle: "greenyellow", lineWidth: 2, lineDash: [] };
-  const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 4, lineDash: [] };
-  const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [0.2, 0.2] };
-  const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [] };
-  const propsnab: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 4, lineDash: [0.2, 0.2] };
-  const propsrv: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 4, lineDash: [] };
+  const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 2, lineDash: [] };
+  const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 2, lineDash: [0.2, 0.2] };
+  const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 1, lineDash: [] };
+  const propsnab: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 1, lineDash: [0.2, 0.2] };
+  const propsrv: ContextProps = { strokeStyle: "green", fillStyle: "green", lineWidth: 1, lineDash: [] };
 
   const scaling = 4;
   const normal = contact.normal;
@@ -480,7 +469,7 @@ function drawContact(contact: Contact, view: Viewport) {
   incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
 
   contact.points.forEach(cp => {
-    beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
+    // beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point, dir(0.5, 0.5)));
     // normal.scaleO(cp.depth).render(view, cp.point, propsn);
     normal.scaleO(cp.depth).scaleO(scaling).render(view, cp.point, propsn);
     normalAB.scaleO(cp.depth).scaleO(scaling).render(view, cp.point, propsnab);
