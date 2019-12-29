@@ -11,6 +11,7 @@ export abstract class Vector {
   static get instanceConstructor() { return this._instanceConstructor; }
   static set instanceConstructor(value: VectorConstructor) { this._instanceConstructor = value; }
 
+  static pixelsPerMeter = 5;
   static tipDrawHeight = 5;
   static get elementCount() { return 4; }
   get elementCount() { return Vector.elementCount; }
@@ -139,7 +140,6 @@ export abstract class Vector {
 
   get degrees() { return this.radians * MathEx.ONE_RADIAN; }
 
-  static pixelsPerMeter = 30;
   private static _empty: Vector;
   static get empty() { return Vector._empty || (Vector._empty = new NullVector()); }
   static get [Symbol.species]() { return this; }
