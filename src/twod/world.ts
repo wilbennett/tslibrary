@@ -51,6 +51,8 @@ export class World implements IWorld {
   clear() {
     this._shapes.clear();
     this._pairManager.clear();
+    this.forces.splice(0);
+    this.gravityConst = this._gravityConst; // Add gravity back in.
   }
 
   add(shape: Shape) {
