@@ -68,6 +68,16 @@ export class World implements IWorld {
     shape.integrator.worldForces = [];
   }
 
+  addForce(force: ForceSource) {
+    force.initialize(this);
+    this.forces.push(force);
+  }
+
+  removeForce(force: ForceSource) {
+    this.forces.remove(force);
+    force.finalize(this);
+  }
+
   createView(ctx: CanvasContext, viewBounds?: Bounds, screenBounds?: Bounds) {
     viewBounds || (viewBounds = this.bounds.clone());
     screenBounds || (screenBounds = ctx.bounds.clone());
