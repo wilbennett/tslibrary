@@ -21,6 +21,51 @@ export class ShapePairManager {
     return mapB && mapB.get(shapeB);
   }
 
+  addPair(pair: ShapePair) {
+    const pairs = this.pairs;
+
+    if (pairs.find(p => p.equals(pair))) return;
+
+    const { shapeA, shapeB } = pair;
+    const pairsByShape = this.pairsByShape;
+    const pairsByPairs = this.pairsByPair;
+    let pairsForShapeA: ShapePair[] = pairsByShape.get(shapeA) ?? [];
+    let pairsForShapeB: ShapePair[] = pairsByShape.get(shapeB) ?? [];
+    let pairsMapA: Map<Shape, ShapePair> = pairsByPairs.get(shapeA) ?? new Map<Shape, ShapePair>();
+    let pairsMapB: Map<Shape, ShapePair> = pairsByPairs.get(shapeB) ?? new Map<Shape, ShapePair>();
+
+    pairs.push(pair);
+    pairsForShapeA.push(pair);
+    pairsForShapeB.push(pair);
+    pairsMapA.set(shapeA, pair);
+    pairsMapB.set(shapeB, pair);
+
+    pairsByShape.set(shapeA, pairsForShapeA);
+    pairsByShape.set(shapeB, pairsForShapeB);
+    pairsByPairs.set(shapeA, pairsMapA);
+    pairsByPairs.set(shapeB, pairsMapB);
+  }
+
+  removePair(pair: ShapePair) {
+    const pairs = this.pairs;
+
+    if (pairs.find(p => p === pair)) return;
+
+    const { shapeA, shapeB } = pair;
+    const pairsByShape = this.pairsByShape;
+    const pairsByPairs = this.pairsByPair;
+    let pairsForShapeA: ShapePair[] | undefined = pairsByShape.get(shapeA);
+    let pairsForShapeB: ShapePair[] | undefined = pairsByShape.get(shapeB);
+    let pairsMapA: Map<Shape, ShapePair> | undefined = pairsByPairs.get(shapeA);
+    let pairsMapB: Map<Shape, ShapePair> | undefined = pairsByPairs.get(shapeB);
+
+    pairs.remove(pair);
+    pairsForShapeA && pairsForShapeA.remove(pair);
+    pairsForShapeB && pairsForShapeB.remove(pair);
+    pairsMapA && pairsMapA.delete(shapeB);
+    pairsMapB && pairsMapB.delete(shapeA);
+  }
+
   addShape(shape: Shape, existingShapes: Set<Shape>) {
     const inverseMass = shape.massInfo.massInverse;
     const pairs = this.pairs;
