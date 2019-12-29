@@ -132,7 +132,7 @@ const superBouncy = materials.superBouncy;
 const plastic = materials.plastic;
 // const wood = materials.wood;
 
-// for (const name in materials) { materials[name].restitution = 1; }
+for (const name in materials) { materials[name].restitution = 1; }
 // for (const name in materials) { materials[name].staticFriction = 0; }
 // for (const name in materials) { materials[name].kineticFriction = 0; }
 
@@ -141,6 +141,8 @@ CircleShape;
 const ball = new CircleShape(2.5, superBouncy);
 // const ball = new AABBShape(dir(2.5, 2.5), bouncy);
 ball.setPosition(pos(2.5, 7.5));
+const ball1 = new CircleShape(1.5, superBouncy);
+ball1.setPosition(pos(-2.5, 7.5));
 // ball.setPosition(pos(2.5, -0.5));
 // ball.velocity = dir(0, -1);
 // ball.velocity = dir(0, -0.2);
@@ -165,6 +167,7 @@ topWall.material = defaultMaterial;
 // triangle.integratorType = EulerExplicit;
 
 ball.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
+ball1.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
@@ -174,7 +177,7 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
-  [bottomWall, ball],
+  [bottomWall, ball, ball1],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
@@ -285,6 +288,8 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   !dragging && world.update(timestep, now);
 }
 
+const propsv: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [] };
+
 function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   ++frame === (fps * pauseAfterSeconds) && pause();
   stepping && pause();
@@ -297,10 +302,11 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   const view = world.view!;
   view.applyTransform();
 
-  const propsv: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [] };
-
   shapeSet.forEach(shape => {
-    shape.velocity.scaleO(5).render(view, shape.position, propsv);
+    shape.velocity
+      .normalizeO().scale(0.5)
+      //.scaleO(5)
+      .render(view, shape.position, propsv);
   });
 
   world.contacts.forEach(contact => drawContact(contact, view));
