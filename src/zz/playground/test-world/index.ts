@@ -400,6 +400,7 @@ function handleMouseDown(ev: MouseEvent) {
     shape.props = { fillStyle: background, strokeStyle: stroke, lineWidth: 2 };
     shapeSet.push(shape);
     world.add(shape);
+    rerender();
     return;
   }
 
