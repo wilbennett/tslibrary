@@ -132,7 +132,7 @@ const superBouncy = materials.superBouncy;
 const plastic = materials.plastic;
 // const wood = materials.wood;
 
-for (const name in materials) { materials[name].restitution = 1; }
+// for (const name in materials) { materials[name].restitution = 1; }
 // for (const name in materials) { materials[name].staticFriction = 0; }
 // for (const name in materials) { materials[name].kineticFriction = 0; }
 
