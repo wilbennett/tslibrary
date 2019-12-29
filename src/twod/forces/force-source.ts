@@ -8,6 +8,7 @@ export interface ForceSource {
   endTime: number;
 
   initialize(world: IWorld): void;
+  finalize(world: IWorld): void;
   isActive(time: number): boolean;
   isExpired(time: number): boolean;
   process(shape: Shape, now: number, position: Vector, velocity: Vector): void;

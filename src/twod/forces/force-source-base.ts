@@ -9,6 +9,8 @@ export abstract class ForceSourceBase implements ForceSource {
 
   // @ts-ignore - unused param.
   initialize(world: IWorld) { }
+  // @ts-ignore - unused param.
+  finalize(world: IWorld) { }
   isActive(time: number) { return time >= this.startTime && time <= this.endTime; }
   isExpired(time: number) { return time > this.endTime; }
 
