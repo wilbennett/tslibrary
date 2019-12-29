@@ -1,4 +1,4 @@
-import { Projection, ShapeAxis, SupportPoint, WorldEdge, CircleSegmentInfo } from '.';
+import { CircleSegmentInfo, Projection, ShapeAxis, SupportPoint, WorldEdge } from '.';
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
@@ -23,6 +23,8 @@ export interface IShape extends IGeometry {
   referenceShape?: Shape;
   usesReferenceShape: boolean; // e.g. plane can use another shape to determine vertices/edges.
   hasDynamicAxes: boolean;
+  isCustomCollide: boolean;
+  isCustomRender: boolean;
 
   velocity: Vector;
   massInfo: MassInfo;

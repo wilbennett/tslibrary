@@ -100,6 +100,12 @@ export abstract class ShapeBase implements IShape {
   get edgeVectorList() { return this.data.get("edge"); }
   get normalList() { return this.data.get("normal"); }
   get hasDynamicAxes() { return false; }
+  protected _isCustomCollide?: boolean;
+  get isCustomCollide() { return !!this._isCustomCollide; }
+  set isCustomCollide(value) { this._isCustomCollide = value; }
+  protected _isCustomRender?: boolean;
+  get isCustomRender() { return !!this._isCustomRender; }
+  set isCustomRender(value) { this._isCustomRender = value; }
   boundingShape?: Shape;
   referenceShape?: Shape;
   get usesReferenceShape() { return false; }

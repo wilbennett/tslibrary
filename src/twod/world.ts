@@ -56,7 +56,7 @@ export class World implements IWorld {
     if (this._shapes.has(shape)) return;
 
     // TODO: Temporary. Naively adding pairs for all shapes. Need to add/remove in broad phase.
-    this._pairManager.addShape(shape, this._shapes);
+    !shape.isCustomCollide && this._pairManager.addShape(shape, this._shapes);
     this._shapes.add(shape);
     shape.integrator.worldForces = this.forces;
     shape.integrator.restingSpeedCuttoff = this._restingSpeedCutoff;
@@ -122,7 +122,7 @@ export class World implements IWorld {
     view.applyTransform();
 
     try {
-      this._shapes.forEach(shape => shape.render(view));
+      this._shapes.forEach(shape => !shape.isCustomRender && shape.render(view));
     } finally {
       view.restoreTransform();
     }
