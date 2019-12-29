@@ -30,6 +30,7 @@ export class World implements IWorld {
     this._gravity = new Gravity(gravityAcceleration);
     this.forces.push(this._gravity);
 
+    // TODO: Used last TimeStep instead.
     this.restingSpeedCutoff = gravityAcceleration.scaleO(TimeStep.DT_60_FPS.dt).mag;
   }
   private _restingSpeedCutoff!: number;
