@@ -18,7 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { Fluid, ForceSource, Wind } from '../../../twod/forces';
+import { Fan, Fluid, ForceSource, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -158,6 +158,8 @@ const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
 const wind = new Wind(dir(8, 2.5), dir(0, 8));
 wind.position = pos(0, -4.5);
+const fan = new Fan(5, dir(0, 4));
+fan.position = pos(0, -4.5);
 const fluid = new Fluid(dir(8, 2.5), 40);
 fluid.position = pos(0, -4.5);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
@@ -177,6 +179,7 @@ ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
 wind.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
+fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluid.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
@@ -187,6 +190,7 @@ const shapeSets: Shape[][] = [
   [bottomWall, ball, ball1],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
+  [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
@@ -195,6 +199,7 @@ const shapeSets: Shape[][] = [
 const forceSets: ForceSource[][] = [
   [],
   [wind],
+  [fan],
   [fluid],
   [wind],
   [wind],
@@ -333,7 +338,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   const view = world.view!;
   view.applyTransform();
 
-  shapeSet.forEach(shape => {
+  world.shapes.forEach(shape => {
     shape.velocity
       .normalizeO().scale(0.5)
       //.scaleO(5)
@@ -419,7 +424,7 @@ function handleMouseMove(ev: MouseEvent) {
 function handleMouseDown(ev: MouseEvent) {
   updateMouse(ev);
 
-  if (ev.ctrlKey && ev.button === 1) {
+  if (ev.button === 1) {
     for (let i = currentShapes.length - 1; i >= 0; i--) {
       const shape = currentShapes[i];
       currentShapes.remove(shape);
