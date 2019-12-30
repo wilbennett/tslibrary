@@ -93,7 +93,8 @@ export abstract class IntegratorBase extends Integrator {
     this._angularVelocity += this._angularAcceleration * dt;
     this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
 
-    this._angularVelocity > this.maxAngularVelocity * 0.5 && (this._angularVelocity *= this._angularDamping);
+    // this._angularVelocity > this.maxAngularVelocity * 0.5 && (this._angularVelocity *= this._angularDamping);
+    this._angularAcceleration === 0 && this._angularVelocity > 0.5 && (this._angularVelocity *= this._angularDamping);
     this._angularVelocity = MathEx.clamp(this._angularVelocity, -this.maxAngularVelocity, this.maxAngularVelocity);
   }
 
