@@ -18,7 +18,7 @@ export class VerletPositionTime extends IntegratorBase {
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
-  integrate(now: number, step: TimeStep) {
+  protected integrateLinear(now: number, step: TimeStep) {
     const dt = step.dt;
     const olddt = step.dt;
     const dtSqr = step.dtSquared;
@@ -32,12 +32,8 @@ export class VerletPositionTime extends IntegratorBase {
     pos.addScaled(pos.subO(oldPos), dt / olddt).addScaled(acc, dtSqr);
     this._velocity.copyFrom(pos.subO(oldPos).scale(halfDivDt));
     oldPos.copyFrom(temp);
-
-    // TODO: Update.
-    this.angle += this._angularVelocity * dt;
-    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
-    this._angularVelocity += this._angularAcceleration * dt;
-
-    this.clearForces();
   }
+
+  // @ts-ignore - unused param.
+  protected integrateAngular(now: number, step: TimeStep) { }
 }

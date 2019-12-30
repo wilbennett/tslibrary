@@ -1,5 +1,5 @@
 import { Integrator } from '.';
-import { DEFAULT_MATERIAL, MassInfo } from '../../core';
+import { DEFAULT_MATERIAL, MassInfo, TimeStep } from '../../core';
 import { Vector } from '../../vectors';
 import { ForceSource } from '../forces';
 import { Shape } from '../shapes';
@@ -68,6 +68,28 @@ export abstract class IntegratorBase extends Integrator {
   }
 
   applyTorque(radians: number) { this._torque += radians; }
+
+  integrate(now: number, step: TimeStep) {
+    if (this.massInfo.massInverse === 0) return;
+
+    this.integrateLinear(now, step);
+    this.integrateAngular(now, step);
+
+    this.clearForces();
+  }
+
+  // @ts-ignore - unused param.
+  protected integrateLinear(now: number, step: TimeStep) {
+  }
+
+  // @ts-ignore - unused param.
+  protected integrateAngular(now: number, step: TimeStep) {
+    const dt = step.dt;
+
+    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
+    this._angularVelocity += this._angularAcceleration * dt;
+    this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
+  }
 
   protected clearForces(clearAngularForces: boolean = true) {
     this._force.set(0, 0, 0, 0);

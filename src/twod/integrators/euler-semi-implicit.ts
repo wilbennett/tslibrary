@@ -14,20 +14,12 @@ export class EulerSemiImplicit extends IntegratorBase {
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
-  integrate(now: number, step: TimeStep) {
-    if (this.massInfo.massInverse === 0) return;
-
+  protected integrateLinear(now: number, step: TimeStep) {
     const dt = step.dt;
     this.updateForces(now, this.position, this.velocity);
 
     this._acceleration = this._force.scaleO(this.massInfo.massInverse);
     this._velocity.addScaled(this._acceleration, dt);
     this.position.addScaled(this._velocity.toPixelsO(), dt);
-
-    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
-    this._angularVelocity += this._angularAcceleration * dt;
-    this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
-
-    this.clearForces();
   }
 }

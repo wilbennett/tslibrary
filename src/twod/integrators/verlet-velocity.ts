@@ -12,7 +12,7 @@ export class VerletVelocity extends IntegratorBase {
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
-  integrate(now: number, step: TimeStep) {
+  protected integrateLinear(now: number, step: TimeStep) {
     const dt = step.dt;
     const dtDiv2 = step.dtDiv2;
     const dtSqrDiv2 = step.dtSqrDiv2;
@@ -26,12 +26,8 @@ export class VerletVelocity extends IntegratorBase {
     this.updateForces(now, pos, vel);
     acc = this._force.scaleO(this.massInfo.massInverse); // NOTE: Assume force does not depend explicitly on velocity.
     vel.addScaled(acc.add(prevAcc), dtDiv2);
-
-    // TODO: Update.
-    this.angle += this._angularVelocity * dt;
-    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
-    this._angularVelocity += this._angularAcceleration * dt;
-
-    this.clearForces();
   }
+
+  // @ts-ignore - unused param.
+  protected integrateAngular(now: number, step: TimeStep) { }
 }

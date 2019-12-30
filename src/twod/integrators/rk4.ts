@@ -12,7 +12,7 @@ export class RK4 extends IntegratorBase {
     this._angularVelocity += this.massInfo.inertiaInverse * contactVector.cross2D(impulse);
   }
 
-  integrate(now: number, step: TimeStep) {
+  protected integrateLinear(now: number, step: TimeStep) {
     const dt = step.dt;
     const dtDiv2 = step.dtDiv2;
     const dtDiv3 = step.dtDiv3;
@@ -46,12 +46,5 @@ export class RK4 extends IntegratorBase {
 
     this.position.addScaled(velSum.toPixels(), dtDiv6);
     this._velocity.addScaled(this._acceleration, dtDiv6);
-
-    // TODO: Update.
-    this.angle += this._angularVelocity * dt;
-    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
-    this._angularVelocity += this._angularAcceleration * dt;
-
-    this.clearForces();
   }
 }
