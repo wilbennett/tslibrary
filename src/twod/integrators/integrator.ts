@@ -48,6 +48,9 @@ export class Integrator {
   // @ts-ignore - unused param.
   set torque(value) { }
   get angularAcceleration() { return 0; }
+  get angularDamping() { return 1; }
+  // @ts-ignore - unused param.
+  set angularDamping(value) { }
   get worldForces(): ForceSource[] { return []; }
   // @ts-ignore - unused param.
   set worldForces(value) { }

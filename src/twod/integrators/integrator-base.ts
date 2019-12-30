@@ -40,6 +40,9 @@ export abstract class IntegratorBase extends Integrator {
   set angularVelocity(value) { this._angularVelocity = value; }
   protected _angularAcceleration = 0;
   get angularAcceleration() { return this._angularAcceleration; }
+  protected _angularDamping = 0.85;
+  get angularDamping() { return this._angularDamping; }
+  set angularDamping(value) { this._angularDamping = value; }
   protected _worldForces: ForceSource[] = [];
   get worldForces() { return this._worldForces; }
   set worldForces(value) { this._worldForces = value; }
@@ -89,6 +92,8 @@ export abstract class IntegratorBase extends Integrator {
     this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
     this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
+
+    this._angularVelocity *= this._angularDamping;
   }
 
   protected clearForces(clearAngularForces: boolean = true) {

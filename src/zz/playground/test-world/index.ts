@@ -189,7 +189,7 @@ const shapeSets: Shape[][] = [
 ];
 
 const forceSets: ForceSource[][] = [
-  [wind],
+  [],
   [wind],
   [wind],
   [wind],
