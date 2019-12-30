@@ -22,6 +22,14 @@ export function isTriangleCCW(a: Vector, b: Vector, c: Vector) {
   return signedArea >= 0;
 }
 
+// Line.
+// Christer Ericson - Real Time Collision Detection.
+// @ts-ignore - unused param.
+export function planeClosestPoint(position: Vector, normal: Vector, point: Vector, result?: Vector) {
+  const t = normal.dot(point.subO(position));
+  return point.subO(normal.scaleO(t, result), result);
+}
+
 //
 // Segment.
 // Christer Ericson - Real Time Collision Detection.
@@ -45,6 +53,14 @@ export function segmentClosestPoint(start: Vector, end: Vector, point: Vector, r
   if (t >= 1) return result.copyFrom(end);
 
   return start.addScaledO(edge, t, result);
+}
+
+// Line.
+// Christer Ericson - Real Time Collision Detection.
+// @ts-ignore - unused param.
+export function planeDistToPoint(position: Vector, normal: Vector, point: Vector, result?: Vector) {
+  const t = normal.dot(point.subO(position));
+  return t;
 }
 
 //
