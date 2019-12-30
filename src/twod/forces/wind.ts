@@ -39,7 +39,7 @@ export class Wind extends ForceSourceBase {
     this._speedSquared = this._speedDirection.magSquared;
   }
   get position() { return this._shape.position; }
-  set position(value) { this._shape.setPosition(value); }
+  set position(value) { this._shape.position = value; }
   get props() { return this._shape.props; }
   set props(value) { this._shape.props = value; }
 
@@ -53,6 +53,8 @@ export class Wind extends ForceSourceBase {
     this._world = undefined;
     this._collider = undefined;
   }
+
+  setPosition(position: Vector) { this._shape.setPosition(position); }
 
   // @ts-ignore - unused param.
   protected processCore(shape: Shape, now: number, position: Vector, velocity: Vector) {
