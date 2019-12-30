@@ -8,7 +8,7 @@ const windForce = dir(0, 0);
 const force = dir(0, 0);
 const temp1 = dir(0, 0);
 
-const QUARTER_PI = Math.PI * 0.25;
+const EIGTH_PI = Math.PI * 0.125;
 
 export class Wind extends ForceSourceBase {
   constructor(readonly halfSize: Vector, speedDirection: Vector = dir(0, 0)) {
@@ -28,6 +28,7 @@ export class Wind extends ForceSourceBase {
     return this._collider || (this._collider = world?.broadPhase?.collider ?? world?.narrowPhase?.collider);
   }
   protected _shape: Shape;
+  protected rotationPercent: number = 0.005;
   protected _speedSquared: number = 0;
   protected _direction: Vector = dir(0, 0);
   protected _speedDirection: Vector = dir(0, 0);
@@ -72,7 +73,7 @@ export class Wind extends ForceSourceBase {
     // acceleration (a) = windspeed * windspeed
     // F = Am * a
 
-    let area = shape.kind === "circle" ? (shape.radius + shape.radius) * QUARTER_PI : 1;
+    let area = shape.kind === "circle" ? (shape.radius + shape.radius) * EIGTH_PI : 1;
     contactPoints.length > 1 && (area = contactPoints[0].point.subO(contactPoints[1].point, temp1).mag);
     const airMass = shape.material.density * area;
     const acceleration = this._speedSquared;
@@ -83,7 +84,7 @@ export class Wind extends ForceSourceBase {
       const strength = contactPoint.depth * depthScale;
       windForce.scaleO(strength, force);
       shape.integrator.applyForce(force);
-      windForce.scaleO(strength * 0.04, force);
+      windForce.scaleO(strength * this.rotationPercent, force);
       shape.integrator.applyForceAt(contactPoint.point, force);
     }
   }
