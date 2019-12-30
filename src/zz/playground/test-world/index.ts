@@ -18,7 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { ForceSource, Wind } from '../../../twod/forces';
+import { Fluid, ForceSource, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -158,6 +158,8 @@ const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
 const wind = new Wind(dir(8, 2.5), dir(0, 8));
 wind.position = pos(0, -4.5);
+const fluid = new Fluid(dir(8, 2.5), 40);
+fluid.position = pos(0, -4.5);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -175,6 +177,7 @@ ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
 wind.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
+fluid.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
 rightWall.props = { fillStyle: colors[2] };
@@ -182,6 +185,7 @@ topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
   [bottomWall, ball, ball1],
+  [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
@@ -191,6 +195,7 @@ const shapeSets: Shape[][] = [
 const forceSets: ForceSource[][] = [
   [],
   [wind],
+  [fluid],
   [wind],
   [wind],
   [wind],
@@ -223,6 +228,7 @@ let stepping = elStepping.checked;
 let shapeSetIndex = 0;
 let shapeSet = shapeSets[shapeSetIndex];
 let forceSet = forceSets[shapeSetIndex];
+let currentShapes: Shape[] = [];
 let dragging = false;
 let dragTarget: Shape | null = null;
 const dragOffset = dir(0, 0);
@@ -294,6 +300,7 @@ elCollideResolve.addEventListener("change", () => {
 elStepping.addEventListener("change", () => stepping = elStepping.checked);
 canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
+canvas.addEventListener("dblclick", handleMouseDoubleClick);
 canvas.addEventListener("mouseup", handleMouseUp);
 canvas.addEventListener("contextmenu", ev => ev.preventDefault());
 
@@ -303,8 +310,10 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   for (let i = shapeSet.length - 1; i >= 0; i--) {
     const shape = shapeSet[i];
 
-    if (shape.position.y < view.viewBounds.bottom)
+    if (shape.position.y < view.viewBounds.bottom) {
       shapeSet.remove(shape);
+      world.remove(shape);
+    }
   }
 
   !dragging && world.update(timestep, now);
@@ -408,25 +417,40 @@ function handleMouseMove(ev: MouseEvent) {
 }
 
 function handleMouseDown(ev: MouseEvent) {
-  if (dragging) return;
-  // if (ev.button !== 0) return;
-
   updateMouse(ev);
 
-  if (ev.button === 2) {
-    if (Math.random() < 0.2)
-      addRandomCircle(mouse);
-    else
-      addRandomPoly(mouse);
+  if (ev.ctrlKey && ev.button === 1) {
+    for (let i = currentShapes.length - 1; i >= 0; i--) {
+      const shape = currentShapes[i];
+      currentShapes.remove(shape);
+      world.remove(shape);
+    }
 
     rerender();
     return;
   }
 
+  if (ev.ctrlKey && ev.button === 2) {
+    addRandomShape(pos(-5, 12));
+    addRandomShape(pos(0, 12));
+    addRandomShape(pos(5, 12));
+    rerender();
+    return;
+  }
+
+  if (ev.button === 2) {
+    addRandomShape(mouse);
+    rerender();
+    return;
+  }
+
+  if (dragging) return;
   if (ev.button !== 0) return;
 
-  for (let i = 0; i < shapeSet.length; i++) {
-    const shape = shapeSet[i];
+  const shapes = [...shapeSet, ...currentShapes];
+
+  for (let i = 0; i < shapes.length; i++) {
+    const shape = shapes[i];
 
     if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
 
@@ -437,6 +461,29 @@ function handleMouseDown(ev: MouseEvent) {
     shape.position.subO(mouse, dragOffset);
     dragTarget = shape;
     dragging = true;
+    break;
+  }
+}
+
+function handleMouseDoubleClick(ev: MouseEvent) {
+  updateMouse(ev);
+
+  if (ev.button !== 0) return;
+
+  const shapes = [...shapeSet, ...currentShapes];
+
+  for (let i = 0; i < shapes.length; i++) {
+    const shape = shapes[i];
+
+    if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
+
+    shape.toLocal(mouse, shapePoint);
+
+    if (!shape.containsPoint(shapePoint, 0.3)) continue;
+
+    // shapeSet.remove(shape);
+    world.remove(shape);
+    rerender();
     break;
   }
 }
@@ -459,7 +506,7 @@ function setShapeProps(shape: Shape) {
 function addShape(shape: Shape, position: Vector) {
   shape.setPosition(position);
   setShapeProps(shape);
-  shapeSet.push(shape);
+  currentShapes.push(shape);
   world.add(shape);
 }
 
@@ -473,6 +520,13 @@ function addRandomPoly(position: Vector) {
   const isRegular = Math.random() < 0.2;
   const shape = new PolygonShape(MathEx.randomInt(3, 8), radius, 0, isRegular, bouncy);
   addShape(shape, position);
+}
+
+function addRandomShape(position: Vector) {
+  if (Math.random() < 0.2)
+    addRandomCircle(position);
+  else
+    addRandomPoly(position);
 }
 
 function populateColliders() {
@@ -493,6 +547,7 @@ function changeShapes() {
   shapeSet.forEach(shape => world.add(shape));
   forceSet = forceSets[shapeSetIndex];
   forceSet.forEach(force => world.addForce(force));
+  currentShapes = [];
 }
 
 function applyCollisionResolver() {
