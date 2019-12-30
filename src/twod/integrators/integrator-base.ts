@@ -40,7 +40,7 @@ export abstract class IntegratorBase extends Integrator {
   set angularVelocity(value) { this._angularVelocity = value; }
   protected _angularAcceleration = 0;
   get angularAcceleration() { return this._angularAcceleration; }
-  protected _angularDamping = 0.85;
+  protected _angularDamping = 0.99;
   get angularDamping() { return this._angularDamping; }
   set angularDamping(value) { this._angularDamping = value; }
   protected _worldForces: ForceSource[] = [];
