@@ -31,7 +31,7 @@ export abstract class IntegratorBase extends Integrator {
   protected _angle = 0;
   get angle() { return this._angle; }
   set angle(value) {
-    this._angle = value;
+    this._angle = MathEx.wrapRadians(value);
     this.matrix.setAngle(value);
   }
 
