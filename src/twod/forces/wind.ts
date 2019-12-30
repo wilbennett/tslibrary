@@ -8,7 +8,7 @@ const windForce = dir(0, 0);
 const force = dir(0, 0);
 const temp1 = dir(0, 0);
 
-const EIGTH_PI = Math.PI * 0.125;
+const CIRCLE_AREA_SCALE = 0.2;
 
 export class Wind extends ForceSourceBase {
   constructor(readonly halfSize: Vector, speedDirection: Vector = dir(0, 0)) {
@@ -73,7 +73,7 @@ export class Wind extends ForceSourceBase {
     // acceleration (a) = windspeed * windspeed
     // F = Am * a
 
-    let area = shape.kind === "circle" ? (shape.radius + shape.radius) * EIGTH_PI : 1;
+    let area = shape.kind === "circle" ? (shape.radius + shape.radius) * Math.PI * CIRCLE_AREA_SCALE : 1;
     contactPoints.length > 1 && (area = contactPoints[0].point.subO(contactPoints[1].point, temp1).mag);
     const airMass = shape.material.density * area;
     const acceleration = this._speedSquared;
