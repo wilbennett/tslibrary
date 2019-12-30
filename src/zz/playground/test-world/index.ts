@@ -414,7 +414,7 @@ function handleMouseDown(ev: MouseEvent) {
   updateMouse(ev);
 
   if (ev.button === 2) {
-    if (Math.random() < 0.3)
+    if (Math.random() < 0.2)
       addRandomCircle(mouse);
     else
       addRandomPoly(mouse);
@@ -470,7 +470,7 @@ function addRandomCircle(position: Vector) {
 
 function addRandomPoly(position: Vector) {
   const radius = MathEx.randomInt(2, 3);
-  const isRegular = Math.random() > 0.5;
+  const isRegular = Math.random() < 0.2;
   const shape = new PolygonShape(MathEx.randomInt(3, 8), radius, 0, isRegular, bouncy);
   addShape(shape, position);
 }
