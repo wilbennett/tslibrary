@@ -18,7 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { Fan, Fluid, ForceSource, Gravitational, Wind } from '../../../twod/forces';
+import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -158,7 +158,10 @@ fan.position = pos(0, -4.5);
 const fluid = new Fluid(dir(8, 2.5), 40);
 fluid.position = pos(0, -4.5);
 const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 10, 40);
-// gravitational.position = pos(0, -4.5);
+const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
+const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
+// antiGravitational2.position.withXY(-10, -10);
+antiGravitational2.position = ball.position;
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -190,6 +193,7 @@ const shapeSets: Shape[][] = [
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
+  [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
@@ -199,6 +203,7 @@ const forceSets: ForceSource[][] = [
   [],
   [gravitational],
   [wind],
+  [antiGravitational, antiGravitational2],
   [fan],
   [fluid],
   [wind],
