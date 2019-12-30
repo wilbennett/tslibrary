@@ -57,7 +57,8 @@ export class Fluid extends ForceSourceBase {
     if (!this.collider) return;
 
     // TODO: Use ShapePairManager to cache.
-    const pair = new ShapePair(shape, this._shape);
+    // const pair = new ShapePair(shape, this._shape);
+    const pair = new ShapePair(this._shape, shape);
     this.collider.calcContact(pair);
     const contact = pair.contact;
 
@@ -79,11 +80,10 @@ export class Fluid extends ForceSourceBase {
 
     // TODO: Angular drag?
     velocity.normalizeScaleO(-magnitude, drag); // Drag applies in the opposite direction of motion.
+    shape.integrator.applyForce(drag);
 
     for (const contactPoint of contactPoints) {
       const strength = contactPoint.depth * depthScale;
-      drag.scaleO(strength, force);
-      shape.integrator.applyForce(force);
       drag.scaleO(strength * this.rotationPercent, force);
       shape.integrator.applyForceAt(contactPoint.point, force);
     }

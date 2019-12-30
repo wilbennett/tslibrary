@@ -61,7 +61,8 @@ export class Wind extends ForceSourceBase {
     if (!this.collider) return;
 
     // TODO: Use ShapePairManager to cache.
-    const pair = new ShapePair(shape, this._shape);
+    // const pair = new ShapePair(shape, this._shape);
+    const pair = new ShapePair(this._shape, shape);
     this.collider.calcContact(pair);
     const contact = pair.contact;
 
@@ -82,10 +83,10 @@ export class Wind extends ForceSourceBase {
     const magnitude = airMass * acceleration;
     this._direction.scaleO(magnitude, windForce);
 
+    shape.integrator.applyForce(windForce);
+
     for (const contactPoint of contactPoints) {
       const strength = contactPoint.depth * depthScale;
-      windForce.scaleO(strength, force);
-      shape.integrator.applyForce(force);
       windForce.scaleO(strength * this.rotationPercent, force);
       shape.integrator.applyForceAt(contactPoint.point, force);
     }
