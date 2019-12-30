@@ -126,6 +126,8 @@ export class Fan extends ForceSourceBase {
     const speed = this._speedDirection.mag;
     const distToTarget = Math.abs(MathEx.calcDecayTime(speed, this._decayRate, speed * this.minSpeedPercent));
     const hw = this._baseWidth * 0.5;
+
+    //*
     const heightVec = this._direction.scaleO(distToTarget);
     const baseVec = this._direction.scaleO(hw).perpRight();
     const bl = position.addO(baseVec);
@@ -133,12 +135,7 @@ export class Fan extends ForceSourceBase {
     const tr = br.addO(baseVec.negateO().scale(2));
     const tl = tr.addO(heightVec.negateO());
 
-    const vertices = [
-      bl,
-      br,
-      tr,
-      tl
-    ];
+    const vertices = [bl, br, tr, tl];
     /*/
     const vertices = [
       pos(0, -hw),
