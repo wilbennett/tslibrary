@@ -11,7 +11,7 @@ export class World implements IWorld {
     this.bounds = bounds;
     this.forces = [];
 
-    this.gravityConst = 9.8;
+    this.gravityConst = Gravity.earth;
   }
 
   protected _shapes = new Set<Shape>();
