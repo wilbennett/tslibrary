@@ -48,6 +48,9 @@ export class Integrator {
   // @ts-ignore - unused param.
   set torque(value) { }
   get angularAcceleration() { return 0; }
+  get maxAngularVelocity() { return 1; }
+  // @ts-ignore - unused param.
+  set maxAngularVelocity(value) { }
   get angularDamping() { return 1; }
   // @ts-ignore - unused param.
   set angularDamping(value) { }
