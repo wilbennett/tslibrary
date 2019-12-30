@@ -77,6 +77,8 @@ export class ShapePairManager {
     pairsByShape.set(shape, pairsForShape);
 
     for (const existing of existingShapes) {
+      if (existing.isCustomCollide) continue;
+
       const pairsForExisting = this.getPairs(existing);
       const existingPairsMap = pairsByPairs.get(existing);
 
