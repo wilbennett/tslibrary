@@ -18,6 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
+import { ForceSource, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -71,7 +72,7 @@ let angle = 0;
 // const duration = 5;
 const pauseAfterSeconds = Infinity;//30;
 let autoChangeShapes = true;
-let drawCollision = false;
+// let drawCollision = false;
 setCircleSegmentCount(30);
 setCircleSegmentCount(360);
 setCircleSegmentCount(20);
@@ -155,6 +156,8 @@ ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
+const wind = new Wind(dir(5, 2.5), dir(0, 8));
+wind.position = pos(0, -4.5);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -171,6 +174,7 @@ ball1.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
+wind.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
 rightWall.props = { fillStyle: colors[2] };
@@ -182,6 +186,14 @@ const shapeSets: Shape[][] = [
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
   [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
+];
+
+const forceSets: ForceSource[][] = [
+  [wind],
+  [wind],
+  [wind],
+  [wind],
+  [wind],
 ];
 
 const wcb2 = new Wcb2();
@@ -210,6 +222,7 @@ let lastRenderTimeStep: TimeStep | undefined = undefined;
 let stepping = elStepping.checked;
 let shapeSetIndex = 0;
 let shapeSet = shapeSets[shapeSetIndex];
+let forceSet = forceSets[shapeSetIndex];
 let dragging = false;
 let dragTarget: Shape | null = null;
 const dragOffset = dir(0, 0);
@@ -285,6 +298,15 @@ canvas.addEventListener("mouseup", handleMouseUp);
 canvas.addEventListener("contextmenu", ev => ev.preventDefault());
 
 function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
+  const view = graph.getViewport(ctx);
+
+  for (let i = shapeSet.length - 1; i >= 0; i--) {
+    const shape = shapeSet[i];
+
+    if (shape.position.y < view.viewBounds.bottom)
+      shapeSet.remove(shape);
+  }
+
   !dragging && world.update(timestep, now);
 }
 
@@ -446,6 +468,8 @@ function changeShapes() {
   world.clear();
   shapeSet = shapeSets[shapeSetIndex];
   shapeSet.forEach(shape => world.add(shape));
+  forceSet = forceSets[shapeSetIndex];
+  forceSet.forEach(force => world.addForce(force));
 }
 
 function applyCollisionResolver() {
@@ -460,7 +484,7 @@ function applyCollider() {
 }
 
 function drawContact(contact: Contact, view: Viewport) {
-  const propsc: ContextProps = { strokeStyle: "greenyellow", fillStyle: "greenyellow", lineWidth: 2, lineDash: [] };
+  // const propsc: ContextProps = { strokeStyle: "greenyellow", fillStyle: "greenyellow", lineWidth: 2, lineDash: [] };
   const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 2, lineDash: [] };
   const propsi: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 2, lineDash: [0.2, 0.2] };
   const propsn: ContextProps = { strokeStyle: "yellow", fillStyle: "yellow", lineWidth: 1, lineDash: [] };
