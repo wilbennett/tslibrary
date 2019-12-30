@@ -414,14 +414,11 @@ function handleMouseDown(ev: MouseEvent) {
   updateMouse(ev);
 
   if (ev.button === 2) {
-    const shape = new PolygonShape(MathEx.randomInt(3, 8), 3, 0, false, bouncy);
-    shape.setPosition(mouse);
-    const background = MathEx.random(colors);
-    let stroke = MathEx.random(colors);
-    while (stroke === background) stroke = MathEx.random(colors);
-    shape.props = { fillStyle: background, strokeStyle: stroke, lineWidth: 2 };
-    shapeSet.push(shape);
-    world.add(shape);
+    if (Math.random() < 0.3)
+      addRandomCircle(mouse);
+    else
+      addRandomPoly(mouse);
+
     rerender();
     return;
   }
@@ -450,6 +447,32 @@ function handleMouseUp(ev: MouseEvent) {
 
   dragging = false;
   dragTarget = null;
+}
+
+function setShapeProps(shape: Shape) {
+  const background = MathEx.random(colors);
+  let stroke = MathEx.random(colors);
+  while (stroke === background) stroke = MathEx.random(colors);
+  shape.props = { fillStyle: background, strokeStyle: stroke, lineWidth: 2 };
+}
+
+function addShape(shape: Shape, position: Vector) {
+  shape.setPosition(position);
+  setShapeProps(shape);
+  shapeSet.push(shape);
+  world.add(shape);
+}
+
+function addRandomCircle(position: Vector) {
+  const shape = new CircleShape(MathEx.randomInt(1, 3), bouncy);
+  addShape(shape, position);
+}
+
+function addRandomPoly(position: Vector) {
+  const radius = MathEx.randomInt(2, 3);
+  const isRegular = Math.random() > 0.5;
+  const shape = new PolygonShape(MathEx.randomInt(3, 8), radius, 0, isRegular, bouncy);
+  addShape(shape, position);
 }
 
 function populateColliders() {
