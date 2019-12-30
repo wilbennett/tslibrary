@@ -15,6 +15,7 @@ export class World implements IWorld {
   }
 
   protected _shapes = new Set<Shape>();
+  get shapes() { return this._shapes; }
   protected _pairManager = new ShapePairManager();
   protected _gravity!: Gravity;
 
