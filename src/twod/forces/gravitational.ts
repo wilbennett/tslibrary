@@ -4,7 +4,6 @@ import { Shape } from '../shapes';
 
 const force = dir(0, 0);
 const temp1 = dir(0, 0);
-const temp2 = dir(0, 0);
 
 export class Gravitational extends ForceSourceBase {
   constructor(public mass: number, public minRadius: number = 15, public maxRadius: number = 30) {
