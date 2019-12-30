@@ -18,7 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { Fan, Fluid, ForceSource, Wind } from '../../../twod/forces';
+import { Fan, Fluid, ForceSource, Gravitational, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -29,7 +29,7 @@ import { Gaul } from '../test-example/src';
 
 // console.clear();
 
-const gridExtent = 600;
+const gridExtent = Math.min(window.innerWidth, window.innerHeight);
 const canvasb = UiUtils.getCanvasElement("canvasb");
 canvasb.width = gridExtent;
 canvasb.height = gridExtent;
@@ -78,12 +78,7 @@ setCircleSegmentCount(360);
 setCircleSegmentCount(20);
 // setCircleSegmentCount(8);
 
-const graph = new Graph(ctx.bounds.clone(), gridSize);
-graph.background = "black";
-graph.lineBrush = "rgba(70, 70, 70)";
-const world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
-const gview = graph.getViewport(ctx);
-world.createDefaultView(ctx, gview.viewBounds.clone());
+let [graph, world] = createGraphAndWorld();
 
 const materials: { [index: string]: Material } = {
   default: {
@@ -162,6 +157,8 @@ const fan = new Fan(5, dir(0, 4));
 fan.position = pos(0, -4.5);
 const fluid = new Fluid(dir(8, 2.5), 40);
 fluid.position = pos(0, -4.5);
+const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 10, 40);
+// gravitational.position = pos(0, -4.5);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -187,6 +184,8 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
+  [ball, ball1],
+  [ball],
   [bottomWall, ball, ball1],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
@@ -198,9 +197,11 @@ const shapeSets: Shape[][] = [
 
 const forceSets: ForceSource[][] = [
   [],
+  [gravitational],
   [wind],
   [fan],
   [fluid],
+  [wind],
   [wind],
   [wind],
   [wind],
@@ -302,6 +303,14 @@ elCollideResolve.addEventListener("change", () => {
   applyCollisionResolver();
 });
 
+window.addEventListener("resize", () => {
+  [graph, world] = createGraphAndWorld();
+  drawGraph();
+  applyCollider();
+  changeShapes();
+  rerender();
+});
+
 elStepping.addEventListener("change", () => stepping = elStepping.checked);
 canvas.addEventListener("mousemove", handleMouseMove);
 canvas.addEventListener("mousedown", handleMouseDown);
@@ -311,12 +320,14 @@ canvas.addEventListener("contextmenu", ev => ev.preventDefault());
 
 function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   const view = graph.getViewport(ctx);
+  const shapes = [...shapeSet, ...currentShapes];
 
-  for (let i = shapeSet.length - 1; i >= 0; i--) {
-    const shape = shapeSet[i];
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    const shape = shapes[i];
 
-    if (shape.position.y < view.viewBounds.bottom) {
+    if (shape.position.y < view.viewBounds.bottom * 4) {
       shapeSet.remove(shape);
+      currentShapes.remove(shape);
       world.remove(shape);
     }
   }
@@ -379,6 +390,22 @@ function applyTransform() {
 
 function restoreTransform() {
   ctx.restore();
+}
+
+function createGraphAndWorld(): [Graph, World] {
+  const gridExtent = Math.min(window.innerWidth, window.innerHeight);
+  canvasb.width = gridExtent;
+  canvasb.height = gridExtent;
+  canvas.width = gridExtent;
+  canvas.height = gridExtent;
+
+  let graph = new Graph(ctx.bounds.clone(), gridSize);
+  graph.background = "black";
+  graph.lineBrush = "rgba(70, 70, 70)";
+  let world = new World(Bounds.fromCenter(origin, ctx.bounds.size));
+  const gview = graph.getViewport(ctx);
+  world.createDefaultView(ctx, gview.viewBounds.clone());
+  return [graph, world];
 }
 
 function setStepping(value: boolean) {

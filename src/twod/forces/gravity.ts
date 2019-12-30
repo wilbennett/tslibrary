@@ -9,6 +9,7 @@ export class Gravity extends ForceSourceBase {
     super();
   }
 
+  static readonly universalConstant = 6.67428e-11;
   static readonly sun = 274;
   static readonly jupiter = 24.92;
   static readonly neptune = 11.15;
