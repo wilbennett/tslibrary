@@ -40,7 +40,7 @@ export abstract class IntegratorBase extends Integrator {
   set angularVelocity(value) { this._angularVelocity = value; }
   protected _angularAcceleration = 0;
   get angularAcceleration() { return this._angularAcceleration; }
-  protected _angularDamping = 1.0;
+  protected _angularDamping = 0.90;
   get angularDamping() { return this._angularDamping; }
   set angularDamping(value) { this._angularDamping = value; }
   protected _worldForces: ForceSource[] = [];
@@ -93,7 +93,7 @@ export abstract class IntegratorBase extends Integrator {
     this._angularVelocity += this._angularAcceleration * dt;
     this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
 
-    this._angularVelocity *= this._angularDamping;
+    this._angularVelocity > this.maxAngularVelocity * 0.5 && (this._angularVelocity *= this._angularDamping);
     this._angularVelocity = MathEx.clamp(this._angularVelocity, -this.maxAngularVelocity, this.maxAngularVelocity);
   }
 

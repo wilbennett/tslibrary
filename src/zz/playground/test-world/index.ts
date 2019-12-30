@@ -156,7 +156,7 @@ ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
-const wind = new Wind(dir(5, 2.5), dir(0, 8));
+const wind = new Wind(dir(8, 2.5), dir(0, 8));
 wind.position = pos(0, -4.5);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
