@@ -58,7 +58,7 @@ export abstract class Color {
   get isFrozen() { return this.hasFlag(Color.FLAG_FROZEN); }
 
   get isWebColor() {
-    if (this.isDirty) {
+    if (this.isDirty()) {
       this.clean();
       this.updateIsWebColor();
     }
