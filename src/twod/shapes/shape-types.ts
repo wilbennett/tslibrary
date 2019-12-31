@@ -1,5 +1,5 @@
 import { CircleSegmentInfo, Projection, ShapeAxis, SupportPoint, WorldEdge } from '.';
-import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment } from '..';
+import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment, IWorld } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
@@ -32,6 +32,8 @@ export interface IShape extends IGeometry {
 
   props: ContextProps;
 
+  initialize(world: IWorld): void;
+  finalize(world: IWorld): void;
   getVertex(index: number): Vector; // Local;
   getVertices(): Vector[]; // Local;
   getEdgeVectors(): Vector[]; // Local;

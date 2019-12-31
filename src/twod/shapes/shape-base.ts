@@ -20,6 +20,7 @@ import {
   Geometry,
   Integrator,
   IntegratorClass,
+  IWorld,
   Viewport,
 } from '..';
 import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
@@ -116,6 +117,17 @@ export abstract class ShapeBase implements IShape {
   getVertex(index: number) { return this.vertexList.items[index]; }
   getVertices() { return this.vertexList.items; }
   getEdgeVectors() { return this.edgeVectorList.items; }
+
+  // @ts-ignore - unused param.
+  initialize(world: IWorld) {
+
+  }
+
+  // @ts-ignore - unused param.
+  finalize(world: IWorld) {
+
+  }
+
 
   setPosition(position: Vector) {
     this.position.withXY(position.x, position.y);

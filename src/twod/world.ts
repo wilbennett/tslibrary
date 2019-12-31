@@ -50,6 +50,10 @@ export class World implements IWorld {
   contacts: Contact[] = [];
 
   clear() {
+    const self = this;
+    this._shapes.forEach(shape => shape.finalize(self));
+    this.forces.forEach(force => force.finalize(self));
+
     this._shapes.clear();
     this._pairManager.clear();
     this.forces.splice(0);
@@ -59,6 +63,7 @@ export class World implements IWorld {
   add(shape: Shape) {
     if (this._shapes.has(shape)) return;
 
+    shape.initialize(this);
     // TODO: Temporary. Naively adding pairs for all shapes. Need to add/remove in broad phase.
     !shape.isCustomCollide && this._pairManager.addShape(shape, this._shapes);
     this._shapes.add(shape);
@@ -69,6 +74,7 @@ export class World implements IWorld {
   remove(shape: Shape) {
     this._shapes.delete(shape);
     this._pairManager.removeShape(shape);
+    shape.finalize(this);
     shape.integrator.worldForces = [];
   }
 
