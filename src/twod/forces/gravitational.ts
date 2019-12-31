@@ -1,5 +1,5 @@
 import { ForceProcessParams, ForceSourceBase, Gravity } from '.';
-import { dir, pos, Vector } from '../../vectors';
+import { dir } from '../../vectors';
 
 const force = dir(0, 0);
 const temp1 = dir(0, 0);
@@ -8,10 +8,6 @@ export class Gravitational extends ForceSourceBase {
   constructor(public mass: number, public minRadius: number = 15, public maxRadius: number = 30) {
     super();
   }
-
-  protected _position: Vector = pos(0, 0);
-  get position() { return this._position; }
-  set position(value) { this._position = value; }
 
   protected processCore(params: ForceProcessParams) {
     const { shape, position } = params;

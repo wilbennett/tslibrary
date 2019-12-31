@@ -16,6 +16,7 @@ export type ForceProcessParams = {
 export interface ForceSource {
   startTime: number;
   endTime: number;
+  shape?: Shape;
 
   initialize(world: IWorld): void;
   finalize(world: IWorld): void;

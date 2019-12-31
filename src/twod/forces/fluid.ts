@@ -1,8 +1,7 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
-import { IWorld } from '..';
 import { dir, Vector } from '../../vectors';
-import { Collider, ShapePair } from '../collision';
-import { AABBShape, Shape } from '../shapes';
+import { ShapePair } from '../collision';
+import { AABBShape } from '../shapes';
 
 const drag = dir(0, 0);
 const force = dir(0, 0);
@@ -21,38 +20,17 @@ export class Fluid extends ForceSourceBase {
     this._shape.props = { fillStyle: "transparent", strokeStyle: "transparent" };
   }
 
-  protected _world?: IWorld;
-  protected _collider?: Collider;
-  protected get collider() {
-    const world = this._world;
-    return this._collider || (this._collider = world?.broadPhase?.collider ?? world?.narrowPhase?.collider);
-  }
-  protected _shape: Shape;
   protected rotationPercent: number = 0.1;
   protected _dragCoefficient: number = 0;
   get dragCoefficient() { return this._dragCoefficient; }
   set dragCoefficient(value) {
     this._dragCoefficient = value;
   }
-  get position() { return this._shape.position; }
-  set position(value) { this._shape.position = value; }
-  get props() { return this._shape.props; }
-  set props(value) { this._shape.props = value; }
-
-  initialize(world: IWorld) {
-    this._world = world;
-    world.add(this._shape);
-  }
-
-  finalize(world: IWorld) {
-    world.remove(this._shape);
-    this._world = undefined;
-    this._collider = undefined;
-  }
-
-  setPosition(position: Vector) { this._shape.setPosition(position); }
+  get props() { return this._shape?.props || {}; }
+  set props(value) { this._shape && (this._shape.props = value); }
 
   protected processCore(params: ForceProcessParams) {
+    if (!this._shape) return;
     if (!this.collider) return;
 
     const { shape, velocity } = params;

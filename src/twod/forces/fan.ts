@@ -1,9 +1,8 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
-import { IWorld } from '..';
 import { MathEx } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
-import { Collider, ShapePair } from '../collision';
-import { PolygonShape, Shape } from '../shapes';
+import { ShapePair } from '../collision';
+import { PolygonShape } from '../shapes';
 import { planeDistToPoint } from '../utils/utils2d';
 
 const windForce = dir(0, 0);
@@ -21,15 +20,10 @@ export class Fan extends ForceSourceBase {
     this.speedDirection = speedDirection;
   }
 
-  protected _world?: IWorld;
-  protected _collider?: Collider;
-  protected get collider() {
-    const world = this._world;
-    return this._collider || (this._collider = world?.broadPhase?.collider ?? world?.narrowPhase?.collider);
-  }
   minSpeedPercent = 0.05;
-  protected _shape?: Shape;
-  protected get shape() { return this._shape || (this._shape = this.recreateShape()); }
+  get shape() { return this._shape || (this._shape = this.recreateShape()); }
+  // @ts-ignore - unused param.
+  set shape(value) { }
   protected rotationPercent: number = 1;
   protected _baseWidth: number;
   protected _decayRate: number;
@@ -51,19 +45,9 @@ export class Fan extends ForceSourceBase {
   get props() { return this.shape.props; }
   set props(value) { this.shape.props = value; }
 
-  initialize(world: IWorld) {
-    this._world = world;
-    world.add(this.shape);
-  }
-
-  finalize(world: IWorld) {
-    world.remove(this.shape);
-    this._world = undefined;
-    this._collider = undefined;
-  }
-
   setPosition(position: Vector) {
-    this.shape.setPosition(position);
+    super.setPosition(position);
+    this._shape = this.recreateShape();
   }
 
   protected processCore(params: ForceProcessParams) {
