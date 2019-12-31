@@ -4,9 +4,8 @@ import { MathEx, Tristate } from '../../../core';
 import { ArrayEaser, ConcurrentEaser, DelayEaser, Ease, Easer, EaseRunner, SequentialEaser } from '../../../easing';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport } from '../../../twod';
 import { ShapePair } from '../../../twod/collision';
-import { CircleShape, MinkowskiPoint, PolygonShape, Shape } from '../../../twod/shapes';
+import { CircleShape, MinkowskiPoint, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { setCircleSegmentCount } from '../../../twod/utils/utils2d';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 

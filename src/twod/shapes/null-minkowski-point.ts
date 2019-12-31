@@ -1,5 +1,4 @@
-import { MinkowskiPoint, NullSupportPoint, SupportPoint } from '.';
-import { getCircleSegmentInfo } from '../utils';
+import { getCircleSegmentInfo, MinkowskiPoint, NullSupportPoint, SupportPoint } from '.';
 
 export class NullMinkowskiPoint extends NullSupportPoint implements MinkowskiPoint {
   static instance = new NullMinkowskiPoint();

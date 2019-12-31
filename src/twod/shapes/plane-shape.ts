@@ -1,7 +1,15 @@
-import { GeometryIterator, IPlaneShape, PlaneIterator, ShapeAxis, ShapeBase, SupportPoint, SupportPointImpl } from '.';
+import {
+  CircleSegmentInfo,
+  GeometryIterator,
+  IPlaneShape,
+  PlaneIterator,
+  ShapeAxis,
+  ShapeBase,
+  SupportPoint,
+  SupportPointImpl,
+} from '.';
 import { ContextProps, Viewport } from '..';
 import { Vector } from '../../vectors';
-import { CircleSegmentInfo } from '../utils';
 
 export class PlaneShape extends ShapeBase implements IPlaneShape {
   kind: "plane" = "plane";
@@ -29,7 +37,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     if (!this.referenceShape)
       throw new Error("Must set referenceShape before getting vertices.");
 
-    const iterator = this.getIterator(0, false);
+    const iterator = this.getIterator(0);
     return iterator.vertices;
   }
 
@@ -37,7 +45,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     if (!this.referenceShape)
       throw new Error("Must set referenceShape before getting vertices.");
 
-    const iterator = this.getIterator(0, false);
+    const iterator = this.getIterator(0);
     return index === 0 ? iterator.vertex : iterator.nextVertex;
   }
 
@@ -45,7 +53,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     if (!this.referenceShape)
       throw new Error("Must set referenceShape before getting edge vectors.");
 
-    const iterator = this.getIterator(0, false);
+    const iterator = this.getIterator(0);
     return iterator.edgeVectors;
   }
 
@@ -59,7 +67,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     if (!this.referenceShape)
       throw new Error("Must set referenceShape before getting support points.");
 
-    const iterator = this.getIterator(0, false);
+    const iterator = this.getIterator(0);
     let point: Vector;
     let index: number;
 
@@ -92,7 +100,7 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
     const axisDirection = axis.normal;
     const axisPoint = axis.point;
 
-    const iterator = this.getIterator(0, false);
+    const iterator = this.getIterator(0);
     let point: Vector;
     let index: number;
 
@@ -121,11 +129,11 @@ export class PlaneShape extends ShapeBase implements IPlaneShape {
   }
 
   // @ts-ignore - unused param.
-  getIterator(index: number, isWorld?: boolean, circleSegments?: CircleSegmentInfo): GeometryIterator {
+  getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator {
     if (!this.referenceShape)
       throw new Error("Must set referenceShape before getting iterator.");
 
-    return new PlaneIterator(this, this.referenceShape, index, isWorld);
+    return new PlaneIterator(this, this.referenceShape, index);
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {

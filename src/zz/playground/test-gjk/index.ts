@@ -16,9 +16,8 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { CircleShape, PlaneShape, PolygonShape, Shape, Simplex } from '../../../twod/shapes';
+import { CircleShape, PlaneShape, PolygonShape, setCircleSegmentCount, Shape, Simplex } from '../../../twod/shapes';
 import * as Minkowski from '../../../twod/shapes/minkowski';
-import { setCircleSegmentCount } from '../../../twod/utils';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 import { Gaul } from '../test-example/src';
@@ -958,8 +957,8 @@ function drawClipState(clip: ClipState, view: Viewport) {
   const incEdge = contact.incidentEdge;
   const points = contact.points;
   const normal = contact.normal;
-  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
-  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  refEdge && beginPath(propsr, view).line(refEdge.start, refEdge.end).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
   contact && drawContact(contact, view);
 
   points.forEach(cp => {
@@ -981,8 +980,8 @@ function drawContact(contact: Contact, view: Viewport) {
   const incEdge = contact.incidentEdge;
   const mkNormal = contact.minkowskiNormal;
   const mkDepth = contact.minkowskiDepth || 1;
-  refEdge && beginPath(propsr, view).line(refEdge.worldStart, refEdge.worldEnd).stroke();
-  incEdge && beginPath(propsi, view).line(incEdge.worldStart, incEdge.worldEnd).stroke();
+  refEdge && beginPath(propsr, view).line(refEdge.start, refEdge.end).stroke();
+  incEdge && beginPath(propsi, view).line(incEdge.start, incEdge.end).stroke();
 
   contact.points.forEach(cp => {
     beginPath(propsc, view).fillRect(Bounds.fromCenter(cp.point.clone(), dir(0.5, 0.5)));
