@@ -31,7 +31,7 @@ export abstract class IntegratorBase extends Integrator {
   protected _angle = 0;
   get angle() { return this._angle; }
   set angle(value) {
-    this._angle = MathEx.wrapRadians(value);
+    this._angle = MathEx.wrapRadiansAbs(value);
     this.matrix.setAngle(value);
   }
 
@@ -89,7 +89,7 @@ export abstract class IntegratorBase extends Integrator {
   protected integrateAngular(now: number, step: TimeStep) {
     const dt = step.dt;
 
-    this._angularAcceleration += this._torque * this.massInfo.inertiaInverse;
+    this._angularAcceleration = this._torque * this.massInfo.inertiaInverse;
     this._angularVelocity += this._angularAcceleration * dt;
     this.angle += this._angularVelocity * Vector.pixelsPerMeter * dt;
 
