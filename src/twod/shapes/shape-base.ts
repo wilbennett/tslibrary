@@ -123,11 +123,20 @@ export abstract class ShapeBase implements IShape {
 
   initialize(world: IWorld) {
     this._world = world;
-    this._attachedForces.forEach(force => world.addForce(force));
+
+    this._attachedForces.forEach(force => {
+      // @ts-ignore - assigment compatibility.
+      force.shape = this;
+      world.addForce(force);
+    });
   }
 
   finalize(world: IWorld) {
-    this._attachedForces.forEach(force => world.removeForce(force));
+    this._attachedForces.forEach(force => {
+      force.shape = undefined;
+      world.removeForce(force);
+    });
+
     this._world = undefined;
   }
 
