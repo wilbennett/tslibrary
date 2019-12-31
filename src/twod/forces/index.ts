@@ -6,3 +6,4 @@ export * from "./anti-gravitational";
 export * from "./wind";
 export * from "./fan";
 export * from "./fluid";
+export * from "./heading-force";

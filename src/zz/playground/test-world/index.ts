@@ -18,7 +18,7 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, Wind } from '../../../twod/forces';
+import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -167,8 +167,9 @@ const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8
 const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 ball.addAttachedForce(antiGravitational2);
-// const vehicleShape = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
-// vehicleShape.setPosition(pos(0, 7.5));
+const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
+vehicle.setPosition(pos(0, 7.5));
+vehicle.addLocalForce(new HeadingForce());
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -190,13 +191,14 @@ triangle.props = { fillStyle: colors[1] };
 windShape.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluidShape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
-// vehicleShape.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
+vehicle.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
 rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const objectSets: [Shape[], ForceSource[]][] = [
+  [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], []],
   [[bottomWall, ball, ball1], []],
   [[bottomWall, ball, ball1], []],
   [[ball], [gravitational]],
