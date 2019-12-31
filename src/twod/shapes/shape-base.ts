@@ -397,7 +397,6 @@ export abstract class ShapeBase implements IShape {
       force.startTime = this._world.worldTime;
       force.endTime = force.startTime + duration;
     }
-    // TODO: Need to remove from localForces when expired.
   }
 
   removeLocalForce(force: ForceSource) {
@@ -408,7 +407,6 @@ export abstract class ShapeBase implements IShape {
     // @ts-ignore - assigment compatibility.
     force.shape = this;
     this._attachedForces.push(force);
-    // TODO: Need to remove from _attachedForces when expired.
     this._world && this._world.addForce(force, duration);
   }
 
@@ -416,6 +414,26 @@ export abstract class ShapeBase implements IShape {
     force.shape = undefined;
     this._attachedForces.remove(force);
     this._world && this._world.removeForce(force);
+  }
+
+  removeExpiredForces(now: number) {
+    const localForces = this.integrator.localForces;
+
+    for (let i = localForces.length - 1; i > 0; i--) {
+      const force = localForces[i];
+
+      if (force.isExpired(now))
+        this.removeLocalForce(force);
+    }
+
+    const attachedForces = this._attachedForces;
+
+    for (let i = attachedForces.length - 1; i > 0; i--) {
+      const force = attachedForces[i];
+
+      if (force.isExpired(now))
+        this.removeAttachedForce(force);
+    }
   }
 
 

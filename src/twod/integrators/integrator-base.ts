@@ -75,6 +75,8 @@ export abstract class IntegratorBase extends Integrator {
   applyTorque(radians: number) { this._torque += radians; }
 
   integrate(now: number, step: TimeStep) {
+    this.shape.removeExpiredForces(now);
+
     if (this.massInfo.massInverse === 0) return;
 
     this.integrateLinear(now, step);

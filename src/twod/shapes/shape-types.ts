@@ -55,6 +55,7 @@ export interface IShape extends IGeometry {
   removeLocalForce(force: ForceSource): void;
   addAttachedForce(force: ForceSource, duration?: number): void;
   removeAttachedForce(force: ForceSource): void;
+  removeExpiredForces(now: number): void;
   // createWorldShape(): this;
 }
 
