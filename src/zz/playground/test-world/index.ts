@@ -196,31 +196,17 @@ bottomWall.props = { fillStyle: colors[1] };
 rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
-const shapeSets: Shape[][] = [
-  [leftWall, bottomWall, rightWall, topWall, windShape],
-  // [bottomWall, ball, ball1],
-  [ball],
-  [bottomWall, ball, ball1],
-  [leftWall, bottomWall, rightWall, ball],
-  [leftWall, bottomWall, rightWall, ball],
-  [leftWall, bottomWall, rightWall, ball, fluidShape],
-  [leftWall, bottomWall, rightWall, ball],
-  [leftWall, bottomWall, rightWall, topWall, ball2],
-  [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
-  [leftWall, bottomWall, rightWall, topWall, ball3, triangle],
-];
-
-const forceSets: ForceSource[][] = [
-  [],
-  [gravitational],
-  [],
-  [antiGravitational],
-  [fan],
-  [],
-  [],
-  [],
-  [],
-  [],
+const objectSets: [Shape[], ForceSource[]][] = [
+  [[bottomWall, ball, ball1], []],
+  [[bottomWall, ball, ball1], []],
+  [[ball], [gravitational]],
+  [[leftWall, bottomWall, rightWall, ball], [antiGravitational]],
+  [[leftWall, bottomWall, rightWall, ball, windShape], []],
+  [[leftWall, bottomWall, rightWall, ball, fluidShape], []],
+  [[leftWall, bottomWall, rightWall, ball], [fan]],
+  [[leftWall, bottomWall, rightWall, topWall, ball2], []],
+  [[leftWall, bottomWall, rightWall, topWall, ball2, triangle], []],
+  [[leftWall, bottomWall, rightWall, topWall, ball3, triangle], []],
 ];
 
 const wcb2 = new Wcb2();
@@ -247,9 +233,8 @@ colliders.forEach(entry => entry[1].clipper = clipper);
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;
 let stepping = elStepping.checked;
-let shapeSetIndex = 0;
-let shapeSet = shapeSets[shapeSetIndex];
-let forceSet = forceSets[shapeSetIndex];
+let objectSetIndex = 0;
+let [shapeSet, forceSet] = objectSets[objectSetIndex];
 let currentShapes: Shape[] = [];
 let dragging = false;
 let dragTarget: Shape | null = null;
@@ -295,13 +280,13 @@ elChangeShapes.addEventListener("change", () => {
 });
 
 elPrevShapes.addEventListener("click", () => {
-  shapeSetIndex = shapeSetIndex > 0 ? shapeSetIndex - 1 : shapeSets.length - 1;
+  objectSetIndex = objectSetIndex > 0 ? objectSetIndex - 1 : objectSets.length - 1;
   changeShapes();
   rerender();
 });
 
 elNextShapes.addEventListener("click", () => {
-  shapeSetIndex = (shapeSetIndex + 1) % shapeSets.length;
+  objectSetIndex = (objectSetIndex + 1) % objectSets.length;
   changeShapes();
   rerender();
 });
@@ -580,9 +565,8 @@ function populateCollisionResolvers() {
 
 function changeShapes() {
   world.clear();
-  shapeSet = shapeSets[shapeSetIndex];
+  [shapeSet, forceSet] = objectSets[objectSetIndex];
   shapeSet.forEach(shape => world.add(shape));
-  forceSet = forceSets[shapeSetIndex];
   forceSet.forEach(force => world.addForce(force));
   currentShapes = [];
 }
