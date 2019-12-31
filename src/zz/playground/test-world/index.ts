@@ -213,8 +213,8 @@ const shapeSets: Shape[][] = [
 const forceSets: ForceSource[][] = [
   [],
   [gravitational],
-  [wind],
-  [antiGravitational, antiGravitational2],
+  [],
+  [antiGravitational],
   [fan],
   [],
   [],
