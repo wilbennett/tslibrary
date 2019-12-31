@@ -390,6 +390,20 @@ export abstract class ShapeBase implements IShape {
     return result;
   }
 
+  addLocalForce(force: ForceSource, duration: number = Infinity) {
+    this.integrator.localForces.push(force);
+
+    if (this._world) {
+      force.startTime = this._world.worldTime;
+      force.endTime = force.startTime + duration;
+    }
+    // TODO: Need to remove from localForces when expired.
+  }
+
+  removeLocalForce(force: ForceSource) {
+    this.integrator.localForces.remove(force);
+  }
+
   addAttachedForce(force: ForceSource, duration?: number) {
     // @ts-ignore - assigment compatibility.
     force.shape = this;

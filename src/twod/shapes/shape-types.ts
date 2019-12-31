@@ -51,6 +51,8 @@ export interface IShape extends IGeometry {
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
   getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
   getWorldIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
+  addLocalForce(force: ForceSource, duration?: number): void;
+  removeLocalForce(force: ForceSource): void;
   addAttachedForce(force: ForceSource, duration?: number): void;
   removeAttachedForce(force: ForceSource): void;
   // createWorldShape(): this;
