@@ -28,7 +28,7 @@ export class Fluid extends ForceSourceBase {
     return this._collider || (this._collider = world?.broadPhase?.collider ?? world?.narrowPhase?.collider);
   }
   protected _shape: Shape;
-  protected rotationPercent: number = 0.0005;
+  protected rotationPercent: number = 0.1;
   protected _dragCoefficient: number = 0;
   get dragCoefficient() { return this._dragCoefficient; }
   set dragCoefficient(value) {

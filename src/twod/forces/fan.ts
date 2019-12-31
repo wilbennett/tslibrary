@@ -19,22 +19,6 @@ export class Fan extends ForceSourceBase {
     this._baseWidth = baseWidth;
     this._decayRate = decayRate;
     this.speedDirection = speedDirection;
-
-    // const speed = speedDirection.mag;
-    // const distToTarget = Math.abs(MathEx.calcDecayTime(speed, decayRate, speed * 0.05));
-    // const hw = baseWidth * 0.5;
-
-    // const vertices = [
-    //   pos(0, -hw),
-    //   pos(distToTarget, -hw),
-    //   pos(distToTarget, hw),
-    //   pos(0, hw),
-    // ];
-
-    // this._shape = new PolygonShape(vertices, undefined, false);
-    // this._shape.angle = speedDirection.radians;
-    // this._shape.isCustomCollide = true;
-    // this._shape.props = { fillStyle: "transparent", strokeStyle: "transparent" };
   }
 
   protected _world?: IWorld;
@@ -46,7 +30,7 @@ export class Fan extends ForceSourceBase {
   minSpeedPercent = 0.05;
   protected _shape?: Shape;
   protected get shape() { return this._shape || (this._shape = this.recreateShape()); }
-  protected rotationPercent: number = 0.005;
+  protected rotationPercent: number = 1;
   protected _baseWidth: number;
   protected _decayRate: number;
   protected _speedSquared: number = 0;
