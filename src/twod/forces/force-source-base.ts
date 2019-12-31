@@ -5,8 +5,25 @@ import { Collider } from '../collision';
 import { Shape } from '../shapes';
 
 export abstract class ForceSourceBase implements ForceSource {
-  startTime: number = 0;
-  endTime: number = Infinity;
+  _startTime: number = 0;
+  get startTime() { return this._startTime; }
+  set startTime(value) {
+    this._startTime = value;
+    this._endTime = this._startTime + this._duration;
+  }
+  _endTime: number = Infinity;
+  get endTime() { return this._endTime; }
+  set endTime(value) {
+    this._endTime = value;
+    this._startTime = this._endTime - this._duration;
+  }
+  _duration: number = Infinity;
+  get duration() { return this._duration; }
+  set duration(value) {
+    this._duration = value;
+    this._endTime = this._startTime + this._duration;
+  }
+  isEnabled = true;
   protected _shape?: Shape;
   get shape() { return this._shape; }
   set shape(value) { this._shape = value; }
@@ -35,7 +52,7 @@ export abstract class ForceSourceBase implements ForceSource {
     this._collider = undefined;
   }
 
-  isActive(time: number) { return time >= this.startTime && time <= this.endTime; }
+  isActive(time: number) { return this.isEnabled && time >= this.startTime && time <= this.endTime; }
   isExpired(time: number) { return time > this.endTime; }
 
   setPosition(position: Vector) {

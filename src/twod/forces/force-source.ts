@@ -14,8 +14,10 @@ export type ForceProcessParams = {
 };
 
 export interface ForceSource {
+  duration: number;
   startTime: number;
   endTime: number;
+  isEnabled: boolean;
   shape?: Shape;
 
   initialize(world: IWorld): void;

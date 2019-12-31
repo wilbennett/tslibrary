@@ -390,24 +390,22 @@ export abstract class ShapeBase implements IShape {
     return result;
   }
 
-  addLocalForce(force: ForceSource, duration: number = Infinity) {
+  addLocalForce(force: ForceSource, duration?: number, setStartTime: boolean = true) {
     this.integrator.localForces.push(force);
-
-    if (this._world) {
-      force.startTime = this._world.worldTime;
-      force.endTime = force.startTime + duration;
-    }
+    this._world && setStartTime && (force.startTime = this._world.worldTime);
+    duration !== undefined && (force.duration = duration);
   }
 
   removeLocalForce(force: ForceSource) {
     this.integrator.localForces.remove(force);
   }
 
-  addAttachedForce(force: ForceSource, duration?: number) {
+  addAttachedForce(force: ForceSource, duration?: number, setStartTime: boolean = true) {
     // @ts-ignore - assigment compatibility.
     force.shape = this;
+    duration !== undefined && (force.duration = duration);
     this._attachedForces.push(force);
-    this._world && this._world.addForce(force, duration);
+    this._world && this._world.addForce(force, duration, setStartTime);
   }
 
   removeAttachedForce(force: ForceSource) {
@@ -419,7 +417,7 @@ export abstract class ShapeBase implements IShape {
   removeExpiredForces(now: number) {
     const localForces = this.integrator.localForces;
 
-    for (let i = localForces.length - 1; i > 0; i--) {
+    for (let i = localForces.length - 1; i >= 0; i--) {
       const force = localForces[i];
 
       if (force.isExpired(now))
@@ -428,11 +426,13 @@ export abstract class ShapeBase implements IShape {
 
     const attachedForces = this._attachedForces;
 
-    for (let i = attachedForces.length - 1; i > 0; i--) {
+    for (let i = attachedForces.length - 1; i >= 0; i--) {
       const force = attachedForces[i];
 
-      if (force.isExpired(now))
+      if (force.isExpired(now)) {
         this.removeAttachedForce(force);
+        // console.log(`removed expired ${force.constructor.name} @ ${now}`);
+      }
     }
   }
 

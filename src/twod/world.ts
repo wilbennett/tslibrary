@@ -78,10 +78,10 @@ export class World implements IWorld {
     shape.integrator.worldForces = [];
   }
 
-  addForce(force: ForceSource, duration: number = Infinity) {
-    force.startTime = this._worldTime;
-    force.endTime = force.startTime + duration;
+  addForce(force: ForceSource, duration?: number, setStartTime: boolean = true) {
     force.initialize(this);
+    setStartTime && (force.startTime = this._worldTime);
+    duration !== undefined && (force.duration = duration);
     this.forces.push(force);
   }
 

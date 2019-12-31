@@ -11,6 +11,6 @@ export interface IWorld {
 
   add(shape: Shape): void;
   remove(shape: Shape): void;
-  addForce(force: ForceSource, duration?: number): void;
+  addForce(force: ForceSource, duration?: number, setStartTime?: boolean): void;
   removeForce(force: ForceSource): void;
 }
