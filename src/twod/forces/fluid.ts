@@ -1,7 +1,6 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
-import { dir, Vector } from '../../vectors';
+import { dir } from '../../vectors';
 import { ShapePair } from '../collision';
-import { AABBShape } from '../shapes';
 
 const drag = dir(0, 0);
 const force = dir(0, 0);
@@ -10,14 +9,10 @@ const temp1 = dir(0, 0);
 const CIRCLE_AREA_SCALE = 0.2;
 
 export class Fluid extends ForceSourceBase {
-  constructor(readonly halfSize: Vector, dragCoefficient: number = 0) {
+  constructor(dragCoefficient: number = 0) {
     super();
 
     this.dragCoefficient = dragCoefficient;
-
-    this._shape = new AABBShape(halfSize);
-    this._shape.isCustomCollide = true;
-    this._shape.props = { fillStyle: "transparent", strokeStyle: "transparent" };
   }
 
   protected rotationPercent: number = 0.1;
@@ -26,8 +21,6 @@ export class Fluid extends ForceSourceBase {
   set dragCoefficient(value) {
     this._dragCoefficient = value;
   }
-  get props() { return this._shape?.props || {}; }
-  set props(value) { this._shape && (this._shape.props = value); }
 
   protected processCore(params: ForceProcessParams) {
     if (!this._shape) return;

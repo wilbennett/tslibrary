@@ -158,8 +158,11 @@ windShape.isCustomCollide = true;
 windShape.position = pos(0, -4.5);
 const fan = new Fan(5, dir(0, 4));
 fan.position = pos(0, -4.5);
-const fluid = new Fluid(dir(8, 2.5), 40);
-fluid.position = pos(0, -4.5);
+const fluid = new Fluid(40);
+const fluidShape = new AABBShape(dir(8, 2.5));
+fluidShape.addAttachedForce(fluid);
+fluidShape.isCustomCollide = true;
+fluidShape.position = pos(0, -4.5);
 const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8, 80);
 const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
@@ -187,7 +190,7 @@ ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
 windShape.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
-fluid.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
+fluidShape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
 // vehicleShape.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
@@ -201,7 +204,7 @@ const shapeSets: Shape[][] = [
   [bottomWall, ball, ball1],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, ball],
-  [leftWall, bottomWall, rightWall, ball],
+  [leftWall, bottomWall, rightWall, ball, fluidShape],
   [leftWall, bottomWall, rightWall, ball],
   [leftWall, bottomWall, rightWall, topWall, ball2],
   [leftWall, bottomWall, rightWall, topWall, ball2, triangle],
@@ -209,17 +212,16 @@ const shapeSets: Shape[][] = [
 ];
 
 const forceSets: ForceSource[][] = [
-  // [],
   [],
   [gravitational],
   [wind],
   [antiGravitational, antiGravitational2],
   [fan],
-  [fluid],
-  [wind],
-  [wind],
-  [wind],
-  [wind],
+  [],
+  [],
+  [],
+  [],
+  [],
 ];
 
 const wcb2 = new Wcb2();
