@@ -11,7 +11,14 @@ export abstract class Vector {
   static get instanceConstructor() { return this._instanceConstructor; }
   static set instanceConstructor(value: VectorConstructor) { this._instanceConstructor = value; }
 
-  static pixelsPerMeter = 5;
+  private static _pixelsPerMeter = 5;
+  static get pixelsPerMeter() { return Vector._pixelsPerMeter; }
+  static set pixelsPerMeter(value) {
+    Vector._pixelsPerMeter = value;
+    Vector._pixelsPerMeterInverse = 1 / value;
+  }
+  private static _pixelsPerMeterInverse = 1 / Vector.pixelsPerMeter;
+  static get pixelsPerMeterInverse() { return Vector._pixelsPerMeterInverse; }
   static tipDrawHeight = 5;
   static get elementCount() { return 4; }
   get elementCount() { return Vector.elementCount; }
