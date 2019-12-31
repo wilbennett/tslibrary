@@ -19,11 +19,11 @@ export class VerletVelocity extends IntegratorBase {
     const pos = this.position;
     const vel = this.velocity;
 
-    this.updateForces(now, pos, vel);
+    this.updateForces(now, step, pos, vel, this.angle, this.angularVelocity);
     let acc = this._force.scaleO(this.massInfo.massInverse);
     const prevAcc = acc;
     pos.addScaled(vel, dt).addScaled(acc, dtSqrDiv2);
-    this.updateForces(now, pos, vel);
+    this.updateForces(now, step, pos, vel, this.angle, this.angularVelocity);
     acc = this._force.scaleO(this.massInfo.massInverse); // NOTE: Assume force does not depend explicitly on velocity.
     vel.addScaled(acc.add(prevAcc), dtDiv2);
   }

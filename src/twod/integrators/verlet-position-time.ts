@@ -27,7 +27,7 @@ export class VerletPositionTime extends IntegratorBase {
     const oldPos = this.oldPosition;
 
     const temp = pos.clone();
-    this.updateForces(now, pos, this.velocity);
+    this.updateForces(now, step, pos, this.velocity, this.angle, this.angularVelocity);
     const acc = this._force.scaleO(this.massInfo.massInverse);
     pos.addScaled(pos.subO(oldPos), dt / olddt).addScaled(acc, dtSqr);
     this._velocity.copyFrom(pos.subO(oldPos).scale(halfDivDt));

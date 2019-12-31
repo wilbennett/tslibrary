@@ -20,25 +20,25 @@ export class RK4 extends IntegratorBase {
 
     const pos1 = this.position;
     const vel1 = this.velocity;
-    this.updateForces(now, pos1, vel1);
+    this.updateForces(now, step, pos1, vel1, this.angle, this.angularVelocity);
     const acc1 = this._force.scaleO(this.massInfo.massInverse);
 
     const pos2 = pos1.addScaledO(vel1.toPixelsO(), dtDiv2);
     const vel2 = vel1.addScaledO(acc1, dtDiv2);
     this.clearForces(false);
-    this.updateForces(now + dtDiv3, pos2, vel2);
+    this.updateForces(now + dtDiv3, step, pos2, vel2, this.angle, this.angularVelocity);
     const acc2 = this._force.scaleO(this.massInfo.massInverse);
 
     const pos3 = pos1.addScaledO(vel2.toPixelsO(), dtDiv2);
     const vel3 = vel1.addScaledO(acc2, dtDiv2);
     this.clearForces(false);
-    this.updateForces(now + dtDiv3 + dtDiv3, pos3, vel3);
+    this.updateForces(now + dtDiv3 + dtDiv3, step, pos3, vel3, this.angle, this.angularVelocity);
     const acc3 = this._force.scaleO(this.massInfo.massInverse);
 
     const pos4 = pos1.addScaledO(vel3.toPixelsO(), dt);
     const vel4 = vel1.addScaledO(acc3, dt);
     this.clearForces(false);
-    this.updateForces(now + dt, pos4, vel4);
+    this.updateForces(now + dt, step, pos4, vel4, this.angle, this.angularVelocity);
     const acc4 = this._force.scaleO(this.massInfo.massInverse);
 
     const velSum = vel2.add(vel3).add(vel4).add(vel1);

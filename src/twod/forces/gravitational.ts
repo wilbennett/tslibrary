@@ -14,8 +14,19 @@ export class Gravitational extends ForceSourceBase {
   get position() { return this._position; }
   set position(value) { this._position = value; }
 
-  // @ts-ignore - unused param.
-  protected processCore(shape: Shape, now: number, position: Vector, velocity: Vector) {
+  protected processCore(
+    shape: Shape,
+    // @ts-ignore - unused param.
+    now: number,
+    // @ts-ignore - unused param.
+    step: TimeStep,
+    position: Vector,
+    // @ts-ignore - unused param.
+    velocity: Vector,
+    // @ts-ignore - unused param.
+    angle: number,
+    // @ts-ignore - unused param.
+    angularVelocity: number) {
     // G = universal gravitational constant, m1 = mass1, m2 = mass2
     // r = vector to shape, rNormal = r normalized
     // F = (G * m1 * m2) / r² * rNormal

@@ -103,8 +103,15 @@ export abstract class IntegratorBase extends Integrator {
     clearAngularForces && (this._torque = 0);
   }
 
-  protected updateForces(now: number, position: Vector, velocity: Vector) {
-    this.worldForces.forEach(force => force.process(this.shape, now, position, velocity));
-    this.localForces.forEach(force => force.process(this.shape, now, position, velocity));
+  protected updateForces(
+    now: number,
+    step: TimeStep,
+    position: Vector,
+    velocity: Vector,
+    angle: number,
+    angularVelocity: number) {
+    const shape = this.shape;
+    this.worldForces.forEach(force => force.process(shape, now, step, position, velocity, angle, angularVelocity));
+    this.localForces.forEach(force => force.process(shape, now, step, position, velocity, angle, angularVelocity));
   }
 }

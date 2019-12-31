@@ -52,8 +52,19 @@ export class Fluid extends ForceSourceBase {
 
   setPosition(position: Vector) { this._shape.setPosition(position); }
 
-  // @ts-ignore - unused param.
-  protected processCore(shape: Shape, now: number, position: Vector, velocity: Vector) {
+  protected processCore(
+    shape: Shape,
+    // @ts-ignore - unused param.
+    now: number,
+    // @ts-ignore - unused param.
+    step: TimeStep,
+    // @ts-ignore - unused param.
+    position: Vector,
+    velocity: Vector,
+    // @ts-ignore - unused param.
+    angle: number,
+    // @ts-ignore - unused param.
+    angularVelocity: number) {
     if (!this.collider) return;
 
     // TODO: Use ShapePairManager to cache.

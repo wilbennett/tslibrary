@@ -14,7 +14,7 @@ export class EulerExplicit extends IntegratorBase {
 
   protected integrateLinear(now: number, step: TimeStep) {
     const dt = step.dt;
-    this.updateForces(now, this.position, this.velocity);
+    this.updateForces(now, step, this.position, this.velocity, this.angle, this.angularVelocity);
 
     this._acceleration = this._force.scaleO(this.massInfo.massInverse);
     this.position.addScaled(this._velocity.toPixelsO(), dt);

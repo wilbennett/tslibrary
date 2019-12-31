@@ -66,8 +66,20 @@ export class Fan extends ForceSourceBase {
     this.shape.setPosition(position);
   }
 
-  // @ts-ignore - unused param.
-  protected processCore(shape: Shape, now: number, position: Vector, velocity: Vector) {
+  protected processCore(
+    shape: Shape,
+    // @ts-ignore - unused param.
+    now: number,
+    // @ts-ignore - unused param.
+    step: TimeStep,
+    // @ts-ignore - unused param.
+    position: Vector,
+    // @ts-ignore - unused param.
+    velocity: Vector,
+    // @ts-ignore - unused param.
+    angle: number,
+    // @ts-ignore - unused param.
+    angularVelocity: number) {
     if (!this.collider) return;
 
     // TODO: Use ShapePairManager to cache.
