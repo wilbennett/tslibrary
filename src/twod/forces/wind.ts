@@ -28,7 +28,7 @@ export class Wind extends ForceSourceBase {
     return this._collider || (this._collider = world?.broadPhase?.collider ?? world?.narrowPhase?.collider);
   }
   protected _shape: Shape;
-  protected rotationPercent: number = 0.005;
+  protected rotationPercent: number = 1;
   protected _speedSquared: number = 0;
   protected _direction: Vector = dir(0, 0);
   protected _speedDirection: Vector = dir(0, 0);
