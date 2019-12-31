@@ -1,6 +1,5 @@
-import { ForceSourceBase } from '.';
+import { ForceProcessParams, ForceSourceBase } from '.';
 import { dir, Vector } from '../../vectors';
-import { Shape } from '../shapes';
 
 const force = dir(0, 0);
 
@@ -23,20 +22,8 @@ export class Gravity extends ForceSourceBase {
   static readonly pluto = 0.58;
 
 
-  protected processCore(
-    shape: Shape,
-    // @ts-ignore - unused param.
-    now: number,
-    // @ts-ignore - unused param.
-    step: TimeStep,
-    // @ts-ignore - unused param.
-    position: Vector,
-    // @ts-ignore - unused param.
-    velocity: Vector,
-    // @ts-ignore - unused param.
-    angle: number,
-    // @ts-ignore - unused param.
-    angularVelocity: number) {
+  protected processCore(params: ForceProcessParams) {
+    const shape = params.shape;
     this.acceleration.scaleO(shape.massInfo.mass, force);
     shape.integrator.applyForce(force);
   }

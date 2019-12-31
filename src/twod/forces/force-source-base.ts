@@ -1,8 +1,5 @@
-import { ForceSource } from '.';
+import { ForceProcessParams, ForceSource } from '.';
 import { IWorld } from '..';
-import { TimeStep } from '../../core';
-import { Vector } from '../../vectors';
-import { Shape } from '../shapes';
 
 export abstract class ForceSourceBase implements ForceSource {
   startTime: number = 0;
@@ -15,26 +12,12 @@ export abstract class ForceSourceBase implements ForceSource {
   isActive(time: number) { return time >= this.startTime && time <= this.endTime; }
   isExpired(time: number) { return time > this.endTime; }
 
-  protected abstract processCore(
-    shape: Shape,
-    now: number,
-    step: TimeStep,
-    position: Vector,
-    velocity: Vector,
-    angle: number,
-    angularVelocity: number): void;
+  protected abstract processCore(params: ForceProcessParams): void;
 
-  process(
-    shape: Shape,
-    now: number,
-    step: TimeStep,
-    position: Vector,
-    velocity: Vector,
-    angle: number,
-    angularVelocity: number) {
-    if (!this.isActive(now)) return;
-    if (this.isExpired(now)) return;
+  process(params: ForceProcessParams) {
+    if (!this.isActive(params.now)) return;
+    if (this.isExpired(params.now)) return;
 
-    this.processCore(shape, now, step, position, velocity, angle, angularVelocity);
+    this.processCore(params);
   }
 }

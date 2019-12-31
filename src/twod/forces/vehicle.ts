@@ -1,7 +1,6 @@
-import { ForceSourceBase } from '.';
-import { MathEx, TimeStep } from '../../core';
+import { ForceProcessParams, ForceSourceBase } from '.';
+import { MathEx } from '../../core';
 import { Vector } from '../../vectors';
-import { Shape } from '../shapes';
 
 export class HeadingForce extends ForceSourceBase {
   constructor() {
@@ -20,16 +19,8 @@ export class HeadingForce extends ForceSourceBase {
 
   turnSpeed = 0.01;
 
-  protected processCore(
-    shape: Shape,
-    // @ts-ignore - unused param.
-    now: number,
-    step: TimeStep,
-    // @ts-ignore - unused param.
-    position: Vector,
-    velocity: Vector,
-    angle: number,
-    angularVelocity: number) {
+  protected processCore(params: ForceProcessParams) {
+    const { shape, step, angle, velocity, angularVelocity } = params;
     let shapeAngle = angle;
     const velocityAngle = velocity.radians;
 

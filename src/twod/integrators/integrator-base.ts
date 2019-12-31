@@ -1,8 +1,10 @@
 import { Integrator } from '.';
 import { DEFAULT_MATERIAL, MassInfo, MathEx, TimeStep } from '../../core';
 import { Vector } from '../../vectors';
-import { ForceSource } from '../forces';
+import { ForceProcessParams, ForceSource } from '../forces';
 import { Shape } from '../shapes';
+
+let forceProcessParams: ForceProcessParams | undefined;
 
 export abstract class IntegratorBase extends Integrator {
   protected _shape!: Shape;
@@ -111,7 +113,22 @@ export abstract class IntegratorBase extends Integrator {
     angle: number,
     angularVelocity: number) {
     const shape = this.shape;
-    this.worldForces.forEach(force => force.process(shape, now, step, position, velocity, angle, angularVelocity));
-    this.localForces.forEach(force => force.process(shape, now, step, position, velocity, angle, angularVelocity));
+    let params: ForceProcessParams;
+
+    if (!forceProcessParams)
+      params = (forceProcessParams = { shape, now, step, position, velocity, angle, angularVelocity });
+    else {
+      forceProcessParams.shape = shape;
+      forceProcessParams.now = now;
+      forceProcessParams.step = step;
+      forceProcessParams.position = position;
+      forceProcessParams.velocity = velocity;
+      forceProcessParams.angle = angle;
+      forceProcessParams.angularVelocity = angularVelocity;
+      params = forceProcessParams;
+    }
+
+    this.worldForces.forEach(force => force.process(params));
+    this.localForces.forEach(force => force.process(params));
   }
 }

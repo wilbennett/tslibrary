@@ -1,4 +1,4 @@
-import { ForceSourceBase } from '.';
+import { ForceProcessParams, ForceSourceBase } from '.';
 import { IWorld } from '..';
 import { dir, Vector } from '../../vectors';
 import { Collider, ShapePair } from '../collision';
@@ -56,21 +56,10 @@ export class Wind extends ForceSourceBase {
 
   setPosition(position: Vector) { this._shape.setPosition(position); }
 
-  protected processCore(
-    shape: Shape,
-    // @ts-ignore - unused param.
-    now: number,
-    // @ts-ignore - unused param.
-    step: TimeStep,
-    // @ts-ignore - unused param.
-    position: Vector,
-    // @ts-ignore - unused param.
-    velocity: Vector,
-    // @ts-ignore - unused param.
-    angle: number,
-    // @ts-ignore - unused param.
-    angularVelocity: number) {
+  protected processCore(params: ForceProcessParams) {
     if (!this.collider) return;
+
+    const { shape } = params;
 
     // TODO: Use ShapePairManager to cache.
     // const pair = new ShapePair(shape, this._shape);
