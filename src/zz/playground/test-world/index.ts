@@ -151,23 +151,27 @@ ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
-const wind = new Wind(dir(8, 2.5), dir(0, 8));
+const wind = new Wind(dir(8, 2.5), dir(0, 5));
 wind.position = pos(0, -4.5);
 const fan = new Fan(5, dir(0, 4));
 fan.position = pos(0, -4.5);
 const fluid = new Fluid(dir(8, 2.5), 40);
 fluid.position = pos(0, -4.5);
-const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 10, 40);
+const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8, 80);
 const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 // antiGravitational2.position.withXY(-10, -10);
 antiGravitational2.position = ball.position;
+// const vehicleShape = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
+// vehicleShape.setPosition(pos(0, 7.5));
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
 rightWall.material = defaultMaterial;
 topWall.material = defaultMaterial;
 
+// world.gravityConst = 0;
+// vehicleShape.velocity.withXY(0, -0.1);
 // ball.integratorType = EulerExplicit;
 // ball2.integratorType = EulerExplicit;
 // ball3.integratorType = EulerExplicit;
@@ -181,13 +185,15 @@ triangle.props = { fillStyle: colors[1] };
 wind.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluid.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
+// vehicleShape.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
 rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
-  [ball, ball1],
+  [leftWall, bottomWall, rightWall, topWall],
+  // [bottomWall, ball, ball1],
   [ball],
   [bottomWall, ball, ball1],
   [leftWall, bottomWall, rightWall, ball],
@@ -200,7 +206,8 @@ const shapeSets: Shape[][] = [
 ];
 
 const forceSets: ForceSource[][] = [
-  [],
+  // [],
+  [wind],
   [gravitational],
   [wind],
   [antiGravitational, antiGravitational2],
@@ -325,11 +332,8 @@ canvas.addEventListener("contextmenu", ev => ev.preventDefault());
 
 function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   const view = graph.getViewport(ctx);
-  const shapes = [...shapeSet, ...currentShapes];
 
-  for (let i = shapes.length - 1; i >= 0; i--) {
-    const shape = shapes[i];
-
+  for (const shape of world.shapes) {
     if (shape.position.y < view.viewBounds.bottom * 4) {
       shapeSet.remove(shape);
       currentShapes.remove(shape);
@@ -337,7 +341,7 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
     }
   }
 
-  !dragging && world.update(timestep, now);
+  !dragging && world.update(now, timestep);
 }
 
 const propsv: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [] };
@@ -349,7 +353,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   ctx.beginPath().clearRect(ctx.bounds);
   applyTransform();
 
-  world.render(timestep, now);
+  world.render(now, timestep);
 
   const view = world.view!;
   view.applyTransform();
@@ -484,11 +488,7 @@ function handleMouseDown(ev: MouseEvent) {
   if (dragging) return;
   if (ev.button !== 0) return;
 
-  const shapes = [...shapeSet, ...currentShapes];
-
-  for (let i = 0; i < shapes.length; i++) {
-    const shape = shapes[i];
-
+  for (const shape of world.shapes) {
     if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
 
     shape.toLocal(mouse, shapePoint);
@@ -507,11 +507,7 @@ function handleMouseDoubleClick(ev: MouseEvent) {
 
   if (ev.button !== 0) return;
 
-  const shapes = [...shapeSet, ...currentShapes];
-
-  for (let i = 0; i < shapes.length; i++) {
-    const shape = shapes[i];
-
+  for (const shape of world.shapes) {
     if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
 
     shape.toLocal(mouse, shapePoint);

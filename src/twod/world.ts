@@ -92,7 +92,7 @@ export class World implements IWorld {
     this.view = this.createView(ctx, viewBounds, screenBounds);
   }
 
-  update(timestep: TimeStep, now: DOMHighResTimeStamp) {
+  update(now: DOMHighResTimeStamp, timestep: TimeStep) {
     this._worldTime = now;
     const broadPhase = this.broadPhase;
     const narrowPhase = this.narrowPhase;
@@ -128,7 +128,7 @@ export class World implements IWorld {
   }
 
   // @ts-ignore - unused param.
-  render(timestep: TimeStep, now: DOMHighResTimeStamp) {
+  render(now: DOMHighResTimeStamp, timestep: TimeStep) {
     const view = this.view;
 
     if (!view) return;
