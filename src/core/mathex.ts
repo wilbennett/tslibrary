@@ -44,6 +44,14 @@ export class MathEx {
     return radians - this.TWO_PI * Math.floor((radians + Math.PI) / this.TWO_PI);
   }
 
+  static wrapRadiansAbs(radians: number) {
+    if (radians >= 0 && radians <= this.TWO_PI)
+      return radians;
+
+    const result = radians % this.TWO_PI;
+    return result > 0 ? result : result + this.TWO_PI;
+  }
+
   static wrapDegrees(degrees: number) { return MathEx.wrap(degrees, 0, 360); }
 
   static lerp(start: number, end: number, t: number) { return (end - start) * t + start; }
