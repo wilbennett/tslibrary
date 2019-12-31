@@ -25,6 +25,7 @@ import {
 } from '..';
 import { DEFAULT_MATERIAL, MassInfo, Material, MathEx, Tristate } from '../../core';
 import { dir, Vector, Vector2D, VectorClass, VectorGroups } from '../../vectors';
+import { ForceSource } from '../forces';
 
 export const EMPTY_AXES: Vector[] = [];
 export const EMPTY_SUPPORT_AXES: ShapeAxis[] = [];
@@ -110,6 +111,8 @@ export abstract class ShapeBase implements IShape {
   boundingShape?: Shape;
   referenceShape?: Shape;
   get usesReferenceShape() { return false; }
+  protected _world?: IWorld;
+  protected _attachedForces: ForceSource[] = [];
   protected _props?: ContextProps;
   get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
@@ -118,14 +121,14 @@ export abstract class ShapeBase implements IShape {
   getVertices() { return this.vertexList.items; }
   getEdgeVectors() { return this.edgeVectorList.items; }
 
-  // @ts-ignore - unused param.
   initialize(world: IWorld) {
-
+    this._world = world;
+    this._attachedForces.forEach(force => world.addForce(force));
   }
 
-  // @ts-ignore - unused param.
   finalize(world: IWorld) {
-
+    this._attachedForces.forEach(force => world.removeForce(force));
+    this._world = undefined;
   }
 
 
@@ -377,6 +380,18 @@ export abstract class ShapeBase implements IShape {
     result.reset(index);
     return result;
   }
+
+  addAttachedForce(force: ForceSource, duration?: number) {
+    this._attachedForces.push(force);
+    // TODO: Need to remove from _attachedForces when expired.
+    this._world && this._world.addForce(force, duration);
+  }
+
+  removeAttachedForce(force: ForceSource) {
+    this._attachedForces.remove(force);
+    this._world && this._world.removeForce(force);
+  }
+
 
   // @ts-ignore - unused param.
   protected renderCore(viewport: Viewport, props: ContextProps) { }

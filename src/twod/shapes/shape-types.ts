@@ -2,6 +2,7 @@ import { CircleSegmentInfo, Projection, ShapeAxis, SupportPoint, WorldEdge } fro
 import { ContextProps, ICircle, IGeometry, ILine, Integrator, IRay, ISegment, IWorld } from '..';
 import { MassInfo, Material, Tristate } from '../../core';
 import { Vector, VectorCollection, VectorGroups } from '../../vectors';
+import { ForceSource } from '../forces';
 import { IAABB, IPlane, IPolygon, IPolygonBase, ITriangle } from '../geometry';
 
 export type SupportInfo = [Vector, number]; // Vertext, index.
@@ -50,6 +51,8 @@ export interface IShape extends IGeometry {
   toLocalOf(other: Shape, localPoint: Vector, result?: Vector): Vector;
   getIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
   getWorldIterator(index: number, circleSegments?: CircleSegmentInfo): GeometryIterator;
+  addAttachedForce(force: ForceSource, duration?: number): void;
+  removeAttachedForce(force: ForceSource): void;
   // createWorldShape(): this;
 }
 
