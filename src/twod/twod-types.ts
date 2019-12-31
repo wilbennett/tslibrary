@@ -7,6 +7,7 @@ export interface IWorld {
   readonly bounds: Bounds;
   readonly broadPhase?: BroadPhase;
   readonly narrowPhase?: NarrowPhase;
+  readonly worldTime: number;
 
   add(shape: Shape): void;
   remove(shape: Shape): void;
