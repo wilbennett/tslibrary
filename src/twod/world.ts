@@ -72,7 +72,9 @@ export class World implements IWorld {
     shape.integrator.worldForces = [];
   }
 
-  addForce(force: ForceSource) {
+  addForce(force: ForceSource, duration: number = Infinity) {
+    force.startTime = this._worldTime;
+    force.endTime = force.startTime + duration;
     force.initialize(this);
     this.forces.push(force);
   }
@@ -101,6 +103,7 @@ export class World implements IWorld {
     let collidingPairs: ShapePair[] = [];
     let contacts: Contact[] = [];
 
+    this.removeExpiredForces();
     this._shapes.forEach(shape => shape.integrator.integrate(now, timestep));
 
     if (narrowPhase && collisionResolver) {
@@ -139,6 +142,19 @@ export class World implements IWorld {
       this._shapes.forEach(shape => !shape.isCustomRender && shape.render(view));
     } finally {
       view.restoreTransform();
+    }
+  }
+
+  protected removeExpiredForces() {
+    const worldTime = this._worldTime;
+    const forces = this.forces;
+
+    for (let i = forces.length - 1; i >= 0; i--) {
+      const force = forces[i];
+
+      if (!force.isExpired(worldTime)) continue;
+
+      this.removeForce(force);
     }
   }
 }
