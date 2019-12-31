@@ -1,6 +1,7 @@
 export class TimeStep {
     constructor(dt: number) {
         this.dt = dt;
+        this.dtInverse = 1 / dt;
         this.dtDiv2 = dt * 0.5;
         this.dtDiv3 = dt / 3;
         this.dtDiv6 = dt / 5;
@@ -10,6 +11,7 @@ export class TimeStep {
     }
 
     readonly dt: number;
+    readonly dtInverse: number;
     readonly dtDiv2: number;
     readonly dtDiv3: number;
     readonly dtDiv6: number;
