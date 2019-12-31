@@ -1,7 +1,6 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
 import { dir, Vector } from '../../vectors';
 import { ShapePair } from '../collision';
-import { AABBShape } from '../shapes';
 
 const windForce = dir(0, 0);
 const force = dir(0, 0);
@@ -10,14 +9,10 @@ const temp1 = dir(0, 0);
 const CIRCLE_AREA_SCALE = 0.2;
 
 export class Wind extends ForceSourceBase {
-  constructor(readonly halfSize: Vector, speedDirection: Vector = dir(0, 0)) {
+  constructor(speedDirection: Vector = dir(0, 0)) {
     super();
 
     this.speedDirection = speedDirection;
-
-    this._shape = new AABBShape(halfSize);
-    this._shape.isCustomCollide = true;
-    this._shape.props = { fillStyle: "transparent", strokeStyle: "transparent" };
   }
 
   protected rotationPercent: number = 1;
@@ -30,8 +25,6 @@ export class Wind extends ForceSourceBase {
     this._speedDirection.normalizeO(this._direction);
     this._speedSquared = this._speedDirection.magSquared;
   }
-  get props() { return this._shape?.props || {}; }
-  set props(value) { this._shape && (this._shape.props = value); }
 
   protected processCore(params: ForceProcessParams) {
     if (!this._shape) return;

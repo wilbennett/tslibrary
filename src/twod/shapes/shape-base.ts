@@ -382,12 +382,15 @@ export abstract class ShapeBase implements IShape {
   }
 
   addAttachedForce(force: ForceSource, duration?: number) {
+    // @ts-ignore - assigment compatibility.
+    force.shape = this;
     this._attachedForces.push(force);
     // TODO: Need to remove from _attachedForces when expired.
     this._world && this._world.addForce(force, duration);
   }
 
   removeAttachedForce(force: ForceSource) {
+    force.shape = undefined;
     this._attachedForces.remove(force);
     this._world && this._world.removeForce(force);
   }

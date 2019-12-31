@@ -27,11 +27,10 @@ export abstract class ForceSourceBase implements ForceSource {
 
   initialize(world: IWorld) {
     this._world = world;
-    this.shape && world.add(this.shape);
   }
 
+  // @ts-ignore - unused param.
   finalize(world: IWorld) {
-    this.shape && world.remove(this.shape);
     this._world = undefined;
     this._collider = undefined;
   }

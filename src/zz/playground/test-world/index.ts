@@ -151,8 +151,11 @@ ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
-const wind = new Wind(dir(8, 2.5), dir(0, 5));
-wind.position = pos(0, -4.5);
+const wind = new Wind(dir(0, 5));
+const windShape = new AABBShape(dir(8, 2.5));
+windShape.addAttachedForce(wind);
+windShape.isCustomCollide = true;
+windShape.position = pos(0, -4.5);
 const fan = new Fan(5, dir(0, 4));
 fan.position = pos(0, -4.5);
 const fluid = new Fluid(dir(8, 2.5), 40);
@@ -182,7 +185,7 @@ ball1.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball2.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 triangle.props = { fillStyle: colors[1] };
-wind.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
+windShape.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluid.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
 // vehicleShape.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
@@ -192,7 +195,7 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const shapeSets: Shape[][] = [
-  [leftWall, bottomWall, rightWall, topWall],
+  [leftWall, bottomWall, rightWall, topWall, windShape],
   // [bottomWall, ball, ball1],
   [ball],
   [bottomWall, ball, ball1],
@@ -207,7 +210,7 @@ const shapeSets: Shape[][] = [
 
 const forceSets: ForceSource[][] = [
   // [],
-  [wind],
+  [],
   [gravitational],
   [wind],
   [antiGravitational, antiGravitational2],
