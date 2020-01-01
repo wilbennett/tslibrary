@@ -385,14 +385,16 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   const view = world.view!;
   view.applyTransform();
 
+  /*
   world.shapes.forEach(shape => {
     shape.velocity
       .normalizeO().scale(0.5)
       //.scaleO(5)
       .render(view, shape.position, propsv);
   });
+  //*/
 
-  world.contacts.forEach(contact => drawContact(contact, view));
+  // world.contacts.forEach(contact => drawContact(contact, view));
   view.restoreTransform();
 
   // ball.angle += 1 * ONE_DEGREE;
