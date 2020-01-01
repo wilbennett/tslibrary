@@ -26,6 +26,7 @@ export class SteeringForce extends ForceSourceBase {
     actions.forEach(action => self._actions.remove(action));
   }
 
+  clear() { this._actions.splice(0); }
 
   protected processCore(params: ForceProcessParams) {
     force.withXYW(0, 0, 0);
