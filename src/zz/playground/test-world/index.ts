@@ -19,6 +19,7 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
+import { Seek, SteeringForce } from '../../../twod/forces/steering';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -67,6 +68,7 @@ MathEx.epsilon = 0.0001;
 Vector.tipDrawHeight = 1.0;
 const screenBounds = ctx.bounds;
 const origin = pos(0, 0);
+const mouse = pos(0, 0);
 const gridSize = 20;
 let angle = 0;
 // const duration = 5;
@@ -168,9 +170,15 @@ const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 1000000000
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 ball.addAttachedForce(antiGravitational2);
 const vehicleHeading = new HeadingForce();
+const seek = new Seek();
+// seek.target = pos(0, 0);
+seek.target = mouse;
+const steering = new SteeringForce();
+steering.add(seek);
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
+vehicle.addLocalForce(seek);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -201,7 +209,7 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const objectSets: [Shape[], ForceSource[]][] = [
-  [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], []],
+  [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], [steering]],
   [[bottomWall, ball, ball1], []],
   [[bottomWall, ball, ball1], []],
   [[ball], [gravitational]],
@@ -245,7 +253,6 @@ let dragging = false;
 let dragTarget: Shape | null = null;
 const dragOffset = dir(0, 0);
 const dragPos = pos(0, 0);
-const mouse = pos(0, 0);
 const shapePoint = pos(0, 0);
 
 // const delay = new DelayEaser(2);
