@@ -167,9 +167,10 @@ const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8
 const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 ball.addAttachedForce(antiGravitational2);
+const vehicleHeading = new HeadingForce();
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
 vehicle.setPosition(pos(0, 7.5));
-vehicle.addLocalForce(new HeadingForce());
+vehicle.addLocalForce(vehicleHeading);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -177,7 +178,9 @@ rightWall.material = defaultMaterial;
 topWall.material = defaultMaterial;
 
 // world.gravityConst = 0;
-// vehicleShape.velocity.withXY(0, -0.1);
+// vehicle.velocity.withXY(0, -0.01);
+// vehicleHeading.turnSpeed = 0.03;
+// vehicleHeading.angleLookAheadSteps = 8;
 // ball.integratorType = EulerExplicit;
 // ball2.integratorType = EulerExplicit;
 // ball3.integratorType = EulerExplicit;
