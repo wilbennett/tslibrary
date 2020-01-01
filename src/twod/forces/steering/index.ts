@@ -4,3 +4,4 @@ export * from "./group-action";
 export * from "./steering-force";
 export * from "./seek";
 export * from "./arrive";
+export * from "./wander";
