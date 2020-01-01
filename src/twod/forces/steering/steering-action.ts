@@ -1,4 +1,7 @@
-import { ForceSourceBase } from '..';
+import { ForceProcessParams, ForceSourceBase } from '..';
+import { dir, Vector } from '../../../vectors';
+
+const desiredSeek = dir(0, 0);
 
 export abstract class SteeringAction extends ForceSourceBase {
   weight = 1;
@@ -8,4 +11,22 @@ export abstract class SteeringAction extends ForceSourceBase {
   protected _maxForce: number = 9;
   get maxForce() { return this._maxForce; }
   set maxForce(value) { this._maxForce = value; }
+
+  protected processCore(params: ForceProcessParams) {
+    const desiredVelocity = this.calcDesiredVelocity(params);
+
+    if (desiredVelocity.isEmpty) return Vector.empty;
+
+    desiredVelocity.normalizeScale(this._maxSpeed);
+    const force = desiredVelocity.sub(params.velocity);
+    const maxForce = this._maxForce;
+    force.magSquared > maxForce * maxForce && force.normalizeScale(maxForce);
+    return force;
+  }
+
+  protected abstract calcDesiredVelocity(params: ForceProcessParams): Vector;
+
+  protected calcDesiredSeekVelocity(position: Vector, target: Vector) {
+    return target.subO(position, desiredSeek);
+  }
 }

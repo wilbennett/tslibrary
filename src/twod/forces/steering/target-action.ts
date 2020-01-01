@@ -1,8 +1,6 @@
 import { SteeringAction } from '.';
 import { ForceProcessParams } from '..';
-import { dir, Vector } from '../../../vectors';
-
-const desiredSeek = dir(0, 0);
+import { Vector } from '../../../vectors';
 
 export abstract class TargetAction extends SteeringAction {
   protected _target?: Vector;
@@ -14,17 +12,6 @@ export abstract class TargetAction extends SteeringAction {
     if (!this._target) return Vector.empty;
     if (params.shape !== this._shape) return Vector.empty;
 
-    const maxForce = this._maxForce;
-    const desiredVelocity = this.calcDesiredVelocity(params);
-    desiredVelocity.normalizeScale(this._maxSpeed);
-    const force = desiredVelocity.sub(params.velocity);
-    force.magSquared > maxForce * maxForce && force.normalizeScale(maxForce);
-    return force;
-  }
-
-  protected abstract calcDesiredVelocity(params: ForceProcessParams): Vector;
-
-  protected calcDesiredSeekVelocity(position: Vector, target: Vector) {
-    return target.subO(position, desiredSeek);
+    return super.processCore(params);
   }
 }
