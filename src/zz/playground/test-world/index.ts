@@ -19,7 +19,7 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Align, Arrive, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
+import { Align, Arrive, Cohesion, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -627,6 +627,16 @@ function addVehicleGroupAlign(index: number, maxDistance: number, weight: number
   alignGroup.steering.add(align);
 }
 
+function addVehicleGroupCohesion(index: number, maxDistance: number, weight: number) {
+  const cohesionGroup = vehicleGroups[index];
+  const cohesion = new Cohesion();
+  cohesion.group = cohesionGroup.vehicles;
+  cohesion.maxDistance = maxDistance;
+  cohesion.weight = weight;
+  cohesion.maxForce = 3;
+  cohesionGroup.steering.add(cohesion);
+}
+
 function assignVehicleGroupAction(index: number) {
   switch (index) {
     case 0: return addVehicleGroupSeparate(index, 2, 1);
@@ -634,6 +644,10 @@ function assignVehicleGroupAction(index: number) {
     case 2:
       addVehicleGroupSeparate(index, 2, 1);
       addVehicleGroupAlign(index, 5, 1);
+      break;
+    case 3:
+      addVehicleGroupSeparate(index, 2, 1);
+      addVehicleGroupCohesion(index, 5, 0.5);
       break;
   }
 }

@@ -6,6 +6,7 @@ const force = dir(0, 0);
 
 export class SteeringForce extends ForceSourceBase {
   protected _actions: SteeringAction[] = [];
+  get actions() { return this._actions; }
   protected _maxSpeed: number = 9;
   get maxSpeed() { return this._maxSpeed; }
   set maxSpeed(value) {
