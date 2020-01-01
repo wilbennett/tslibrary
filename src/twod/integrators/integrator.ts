@@ -54,6 +54,9 @@ export class Integrator {
   get angularDamping() { return 1; }
   // @ts-ignore - unused param.
   set angularDamping(value) { }
+  get gravityScale() { return 1; }
+  // @ts-ignore - unused param.
+  set gravityScale(value) { }
   get worldForces(): ForceSource[] { return []; }
   // @ts-ignore - unused param.
   set worldForces(value) { }

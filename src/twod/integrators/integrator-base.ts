@@ -45,6 +45,9 @@ export abstract class IntegratorBase extends Integrator {
   protected _angularDamping = 0.90;
   get angularDamping() { return this._angularDamping; }
   set angularDamping(value) { this._angularDamping = value; }
+  protected _gravityScale = 1;
+  get gravityScale() { return this._gravityScale; }
+  set gravityScale(value) { this._gravityScale = value; }
   protected _worldForces: ForceSource[] = [];
   get worldForces() { return this._worldForces; }
   set worldForces(value) { this._worldForces = value; }

@@ -24,7 +24,7 @@ export class Gravity extends ForceSourceBase {
 
   protected processCore(params: ForceProcessParams) {
     const shape = params.shape;
-    this.acceleration.scaleO(shape.massInfo.mass, force);
+    this.acceleration.scaleO(shape.massInfo.mass * shape.integrator.gravityScale, force);
     shape.integrator.applyForce(force);
     return force;
   }
