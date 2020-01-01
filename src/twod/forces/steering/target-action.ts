@@ -8,12 +8,6 @@ export abstract class TargetAction extends SteeringAction {
   protected _target?: Vector;
   get target() { return this._target || Vector.empty; }
   set target(value) { this._target = value; }
-  protected _maxSpeed: number = 9;
-  get maxSpeed() { return this._maxSpeed; }
-  set maxSpeed(value) { this._maxSpeed = value; }
-  protected _maxForce: number = 9;
-  get maxForce() { return this._maxForce; }
-  set maxForce(value) { this._maxForce = value; }
 
   protected processCore(params: ForceProcessParams) {
     if (!this._shape) return Vector.empty;
