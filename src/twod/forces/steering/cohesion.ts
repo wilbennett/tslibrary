@@ -13,7 +13,6 @@ export class Cohesion extends GroupAction {
 
     const maxDistanceSquared = this.maxDistance * this.maxDistance;
     desired.withXY(0, 0);
-    let count = 0;
 
     for (const shape of this._group!) {
       position.subO(shape.position, difference);
@@ -22,11 +21,8 @@ export class Cohesion extends GroupAction {
       if (distanceSquared === 0 || distanceSquared >= maxDistanceSquared) continue;
 
       desired.add(shape.position);
-      // desired.displaceBy(shape.position);
-      count++;
     }
 
-    // return count > 0 ? desired.div(count).asDirection() : Vector.empty;
     return desired.asCartesianDirection();
   }
 }
