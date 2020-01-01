@@ -18,6 +18,7 @@ export class HeadingForce extends ForceSourceBase {
   }
 
   turnSpeed = 0.01;
+  maxTorque = Math.PI * 0.5;
 
   protected processCore(params: ForceProcessParams) {
     const { shape, step, angle, velocity, angularVelocity } = params;
@@ -30,11 +31,14 @@ export class HeadingForce extends ForceSourceBase {
     let targetAngle = abs <= Math.PI ? abs : MathEx.TWO_PI - abs;
     (diff < 0 || abs > Math.PI) && (targetAngle = -targetAngle);
 
+    if (abs < Math.PI * 0.01) return Vector.empty;
+
     let torque = targetAngle;
     torque *= this.turnSpeed;
     torque *= step.dtInverse;
     torque *= Vector.pixelsPerMeterInverse;
     torque = torque * shape.massInfo.inertiaInverse * step.dtInverse;
+    torque = MathEx.clamp(torque, -this.maxTorque, this.maxTorque);
 
     shape.integrator.applyTorque(torque);
     return Vector.empty;

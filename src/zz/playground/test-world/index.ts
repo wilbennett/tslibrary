@@ -170,6 +170,8 @@ const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 1000000000
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 ball.addAttachedForce(antiGravitational2);
 const vehicleHeading = new HeadingForce();
+vehicleHeading.turnSpeed = 5;
+vehicleHeading.angleLookAheadSteps = 20;
 const seek = new Seek();
 // seek.target = pos(0, 0);
 seek.target = mouse;
@@ -177,7 +179,7 @@ const arrive = new Arrive();
 arrive.target = seek.target;
 arrive.radius = 4;
 const steering = new SteeringForce();
-steering.add(seek);
+// steering.add(seek);
 steering.add(arrive);
 steering.maxSpeed = 2;
 steering.maxForce = 7;
@@ -185,7 +187,7 @@ const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos
 vehicle.integrator.gravityScale = 0.0001;
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
-vehicle.addLocalForce(seek);
+// vehicle.addLocalForce(seek);
 vehicle.addLocalForce(arrive);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
@@ -195,8 +197,8 @@ topWall.material = defaultMaterial;
 
 // world.gravityConst = 0;
 // vehicle.velocity.withXY(0, -0.01);
-// vehicleHeading.turnSpeed = 0.03;
-// vehicleHeading.angleLookAheadSteps = 8;
+// vehicleHeading.turnSpeed = 10;
+// vehicleHeading.angleLookAheadSteps = 18;
 // ball.integratorType = EulerExplicit;
 // ball2.integratorType = EulerExplicit;
 // ball3.integratorType = EulerExplicit;
