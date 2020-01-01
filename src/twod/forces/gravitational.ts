@@ -19,10 +19,11 @@ export class Gravitational extends ForceSourceBase {
     const r = this.position.subO(position, temp1);
     const denom = r.magSquared;
 
-    if (denom < this.minRadius * this.minRadius) return;
-    if (denom > this.maxRadius * this.maxRadius) return;
+    if (denom < this.minRadius * this.minRadius) return Vector.empty;
+    if (denom > this.maxRadius * this.maxRadius) return Vector.empty;
 
     r.normalizeScaleO(numerator / denom, force);
     shape.integrator.applyForce(force);
+    return force;
   }
 }

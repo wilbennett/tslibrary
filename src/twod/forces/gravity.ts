@@ -26,5 +26,6 @@ export class Gravity extends ForceSourceBase {
     const shape = params.shape;
     this.acceleration.scaleO(shape.massInfo.mass, force);
     shape.integrator.applyForce(force);
+    return force;
   }
 }

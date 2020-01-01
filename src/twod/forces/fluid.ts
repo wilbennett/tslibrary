@@ -1,5 +1,5 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
-import { dir } from '../../vectors';
+import { dir, Vector } from '../../vectors';
 import { ShapePair } from '../collision';
 
 const drag = dir(0, 0);
@@ -23,8 +23,8 @@ export class Fluid extends ForceSourceBase {
   }
 
   protected processCore(params: ForceProcessParams) {
-    if (!this._shape) return;
-    if (!this.collider) return;
+    if (!this._shape) return Vector.empty;
+    if (!this.collider) return Vector.empty;
 
     const { shape, velocity } = params;
 
@@ -34,7 +34,7 @@ export class Fluid extends ForceSourceBase {
     this.collider.calcContact(pair);
     const contact = pair.contact;
 
-    if (!contact.isCollision) return;
+    if (!contact.isCollision) return Vector.empty;
 
     const contactPoints = contact.points;
     const totalDepth = contactPoints[0].depth + (contactPoints[1]?.depth ?? 0);
@@ -59,5 +59,7 @@ export class Fluid extends ForceSourceBase {
       drag.scaleO(strength * this.rotationPercent, force);
       shape.integrator.applyForceAt(contactPoint.point, force);
     }
+
+    return Vector.empty;
   }
 }

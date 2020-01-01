@@ -37,5 +37,6 @@ export class HeadingForce extends ForceSourceBase {
     torque = torque * shape.massInfo.inertiaInverse * step.dtInverse;
 
     shape.integrator.applyTorque(torque);
+    return Vector.empty;
   }
 }

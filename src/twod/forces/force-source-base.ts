@@ -62,12 +62,12 @@ export abstract class ForceSourceBase implements ForceSource {
       this._position.withXY(position.x, position.y);
   }
 
-  protected abstract processCore(params: ForceProcessParams): void;
+  protected abstract processCore(params: ForceProcessParams): Vector;
 
   process(params: ForceProcessParams) {
-    if (!this.isActive(params.now)) return;
-    if (this.isExpired(params.now)) return;
+    if (!this.isActive(params.now)) return Vector.empty;
+    if (this.isExpired(params.now)) return Vector.empty;
 
-    this.processCore(params);
+    return this.processCore(params);
   }
 }

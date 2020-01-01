@@ -51,7 +51,7 @@ export class Fan extends ForceSourceBase {
   }
 
   protected processCore(params: ForceProcessParams) {
-    if (!this.collider) return;
+    if (!this.collider) return Vector.empty;
 
     const { shape } = params;
 
@@ -61,7 +61,7 @@ export class Fan extends ForceSourceBase {
     this.collider.calcContact(pair);
     const contact = pair.contact;
 
-    if (!contact.isCollision) return;
+    if (!contact.isCollision) return Vector.empty;
 
     const contactPoints = contact.points;
     const depthScale = 1 / contactPoints.length;
@@ -87,6 +87,8 @@ export class Fan extends ForceSourceBase {
       windForce.scaleO(strength * this.rotationPercent, force);
       shape.integrator.applyForceAt(contactPoint.point, force);
     }
+
+    return Vector.empty;
   }
 
   protected recreateShape() {

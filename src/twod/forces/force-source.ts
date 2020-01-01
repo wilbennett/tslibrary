@@ -25,5 +25,5 @@ export interface ForceSource {
   isActive(time: number): boolean;
   isExpired(time: number): boolean;
 
-  process(params: ForceProcessParams): void;
+  process(params: ForceProcessParams): Vector;
 }
