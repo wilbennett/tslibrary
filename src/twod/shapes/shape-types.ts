@@ -32,6 +32,7 @@ export interface IShape extends IGeometry {
   material: Material;
 
   props: ContextProps;
+  tag?: any;
 
   initialize(world: IWorld): void;
   finalize(world: IWorld): void;

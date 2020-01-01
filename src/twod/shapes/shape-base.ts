@@ -116,6 +116,7 @@ export abstract class ShapeBase implements IShape {
   protected _props?: ContextProps;
   get props(): ContextProps { return this._props || { strokeStyle: "black", fillStyle: "black", lineDash: [] }; }
   set props(value) { this._props = value; }
+  tag?: any;
 
   getVertex(index: number) { return this.vertexList.items[index]; }
   getVertices() { return this.vertexList.items; }
