@@ -391,12 +391,15 @@ export abstract class ShapeBase implements IShape {
   }
 
   addLocalForce(force: ForceSource, duration?: number, setStartTime: boolean = true) {
+    // @ts-ignore - assigment compatibility.
+    force.shape = this;
     this.integrator.localForces.push(force);
     this._world && setStartTime && (force.startTime = this._world.worldTime);
     duration !== undefined && (force.duration = duration);
   }
 
   removeLocalForce(force: ForceSource) {
+    force.shape = undefined;
     this.integrator.localForces.remove(force);
   }
 
@@ -429,10 +432,8 @@ export abstract class ShapeBase implements IShape {
     for (let i = attachedForces.length - 1; i >= 0; i--) {
       const force = attachedForces[i];
 
-      if (force.isExpired(now)) {
+      if (force.isExpired(now))
         this.removeAttachedForce(force);
-        // console.log(`removed expired ${force.constructor.name} @ ${now}`);
-      }
     }
   }
 
