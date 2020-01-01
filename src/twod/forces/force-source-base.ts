@@ -5,19 +5,19 @@ import { Collider } from '../collision';
 import { Shape } from '../shapes';
 
 export abstract class ForceSourceBase implements ForceSource {
-  _startTime: number = 0;
+  protected _startTime: number = 0;
   get startTime() { return this._startTime; }
   set startTime(value) {
     this._startTime = value;
     this._endTime = this._startTime + this._duration;
   }
-  _endTime: number = Infinity;
+  protected _endTime: number = Infinity;
   get endTime() { return this._endTime; }
   set endTime(value) {
     this._endTime = value;
     this._startTime = this._endTime - this._duration;
   }
-  _duration: number = Infinity;
+  protected _duration: number = Infinity;
   get duration() { return this._duration; }
   set duration(value) {
     this._duration = value;
