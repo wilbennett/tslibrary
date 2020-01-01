@@ -19,7 +19,7 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Arrive, Seek, SteeringForce, Wander } from '../../../twod/forces/steering';
+import { Arrive, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -190,9 +190,10 @@ const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos
 vehicle.integrator.gravityScale = 0.0001;
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
+wander.shape = vehicle;
 // vehicle.addLocalForce(seek);
 // vehicle.addLocalForce(arrive);
-vehicle.addLocalForce(wander);
+// vehicle.addLocalForce(wander);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -256,6 +257,14 @@ wcb2.clipper = clipper;
 wcb.clipper = clipper;
 
 colliders.forEach(entry => entry[1].clipper = clipper);
+
+type VehicleGroupInfo = { steering: SteeringForce, vehicles: Set<Shape>, index: number };
+
+const vehicleGroups = Array.from<unknown, VehicleGroupInfo>(
+  { length: colors.length },
+  (_, index) => createVehicleGroupInfo(index));
+
+assignVehicleGroupActions();
 
 let lastRenderTime: DOMHighResTimeStamp | undefined = undefined;
 let lastRenderTimeStep: TimeStep | undefined = undefined;
@@ -353,6 +362,9 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
       shapeSet.remove(shape);
       currentShapes.remove(shape);
       world.remove(shape);
+
+      if (shape.tag)
+        removeVehicle(shape);
     }
   }
 
@@ -480,6 +492,9 @@ function handleMouseDown(ev: MouseEvent) {
       const shape = currentShapes[i];
       currentShapes.remove(shape);
       world.remove(shape);
+
+      if (shape.tag)
+        removeVehicle(shape);
     }
 
     rerender();
@@ -495,7 +510,11 @@ function handleMouseDown(ev: MouseEvent) {
   }
 
   if (ev.button === 2) {
-    addRandomShape(mouse);
+    if (objectSetIndex === 0)
+      addRandomVehicle(mouse);
+    else
+      addRandomShape(mouse);
+
     rerender();
     return;
   }
@@ -531,6 +550,10 @@ function handleMouseDoubleClick(ev: MouseEvent) {
 
     // shapeSet.remove(shape);
     world.remove(shape);
+
+    if (shape.tag !== undefined)
+      removeVehicle(shape);
+
     rerender();
     break;
   }
@@ -577,6 +600,129 @@ function addRandomShape(position: Vector) {
     addRandomPoly(position);
 }
 
+function createVehicleGroupInfo(groupIndex: number) {
+  const steering = new SteeringForce();
+  steering.maxSpeed = 2;
+  steering.maxForce = 7;
+  world.addForce(steering);
+  return { steering, vehicles: new Set<Shape>(), index: groupIndex };
+}
+
+function addVehicleGroupSeparate(index: number, minDistance: number, weight: number) {
+  const separateGroup = vehicleGroups[index];
+  const separate = new Separate();
+  separate.group = separateGroup.vehicles;
+  separate.minDistance = minDistance;
+  separate.weight = weight;
+  separateGroup.steering.add(separate);
+}
+
+function assignVehicleGroupAction(index: number) {
+  switch (index) {
+    case 0: return addVehicleGroupSeparate(index, 2, 1);
+    case 1: return addVehicleGroupSeparate(index, 1, 1);
+  }
+}
+
+function assignVehicleGroupActions() {
+  for (let i = 0; i < vehicleGroups.length; i++) {
+    assignVehicleGroupAction(i);
+  }
+}
+
+function addVehicleWander(vehicle: Shape, steering: SteeringForce) {
+  const wander = new Wander();
+  wander.maxSpeed = steering.maxSpeed;
+  wander.maxForce = steering.maxForce;
+  wander.shape = vehicle;
+  steering.add(wander);
+  addVehicleAntiGrav(vehicle, 5);
+}
+
+function addVehicleAntiGrav(vehicle: Shape, duration?: number) {
+  const antiGrav = new AntiGravitational(vehicle.massInfo.mass * 10000000000000, 3, 7);
+  vehicle.addAttachedForce(antiGrav, duration);
+}
+
+function addVehicleSeek(vehicle: Shape, position: Vector, steering: SteeringForce) {
+  const seek = new Seek();
+  seek.shape = vehicle;
+  seek.target = position;
+  seek.maxSpeed = steering.maxSpeed;
+  seek.maxForce = steering.maxForce;
+  steering.add(seek);
+}
+
+function addVehicleArrive(vehicle: Shape, position: Vector, steering: SteeringForce) {
+  const arrive = new Arrive();
+  arrive.shape = vehicle;
+  arrive.target = position;
+  arrive.radius = 4;
+  arrive.maxSpeed = steering.maxSpeed;
+  arrive.maxForce = steering.maxForce;
+  steering.add(arrive);
+}
+
+function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
+  const steering = group.steering;
+  const first: Shape = group.vehicles.values().next().value;
+  vehicle !== first && addVehicleSeek(vehicle, first.position, steering);
+
+  if (vehicle === first) {
+    addVehicleWander(vehicle, steering);
+    vehicle.props.strokeStyle = "yellow";
+    vehicle.props.lineWidth = 3;
+  }
+
+  switch (group.index) {
+    case 0:
+      break;
+    case 1:
+      vehicle === first && addVehicleArrive(vehicle, mouse, steering);
+      break;
+    case 2:
+      vehicle === first && addVehicleAntiGrav(vehicle);
+      break;
+  }
+}
+
+function removeVehicle(vehicle: Shape) {
+  const index: number = vehicle.tag;
+  const group = vehicleGroups[index];
+  let first: Shape = group.vehicles.values().next().value;
+  group.vehicles.delete(vehicle);
+
+  if (vehicle !== first) return;
+  if (group.vehicles.size === 0) return;
+
+  const steering: SteeringForce = group.steering;
+  steering.clear();
+  assignVehicleGroupAction(index);
+  group.vehicles.forEach(vehicle => addVehicleAction(vehicle, group));
+}
+
+function addRandomVehicle(position: Vector) {
+  const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
+  vehicle.setPosition(position);
+  vehicle.integrator.gravityScale = 0.0001;
+  const vehicleHeading = new HeadingForce();
+  vehicleHeading.turnSpeed = 5;
+  vehicleHeading.angleLookAheadSteps = 3;
+  vehicleHeading.maxTorque = Math.PI * 2;
+  vehicle.addLocalForce(vehicleHeading);
+
+  const bIndex = MathEx.randomInt(colors.length - 1);
+  let sIndex = bIndex;
+  while (sIndex === bIndex || sIndex === 2) sIndex = MathEx.randomInt(colors.length - 1);
+  vehicle.props = { fillStyle: colors[bIndex], strokeStyle: colors[sIndex], lineWidth: 2 };
+  vehicle.tag = bIndex;
+  const group = vehicleGroups[bIndex];
+  group.vehicles.add(vehicle);
+  world.add(vehicle);
+  addVehicleAction(vehicle, group);
+  currentShapes.push(vehicle);
+}
+
 function populateColliders() {
   for (const [colliderName] of colliders) {
     elCollider.appendChild(UiUtils.createOption(colliderName));
@@ -591,10 +737,16 @@ function populateCollisionResolvers() {
 
 function changeShapes() {
   world.clear();
+  vehicleGroups.forEach(g => g.vehicles.clear());
+
   [shapeSet, forceSet] = objectSets[objectSetIndex];
   shapeSet.forEach(shape => world.add(shape));
   forceSet.forEach(force => world.addForce(force));
   currentShapes = [];
+
+  if (objectSetIndex === 0) {
+    vehicleGroups.forEach(g => world.addForce(g.steering));
+  }
 }
 
 function applyCollisionResolver() {
