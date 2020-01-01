@@ -19,7 +19,7 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Seek, SteeringForce } from '../../../twod/forces/steering';
+import { Arrive, Seek, SteeringForce } from '../../../twod/forces/steering';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -171,14 +171,23 @@ const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 100000000
 ball.addAttachedForce(antiGravitational2);
 const vehicleHeading = new HeadingForce();
 const seek = new Seek();
+seek.maxSpeed = 15;
+seek.maxForce = 5;
 // seek.target = pos(0, 0);
 seek.target = mouse;
+const arrive = new Arrive();
+arrive.target = seek.target;
+arrive.radius = 3;
+arrive.maxSpeed = seek.maxSpeed;
+arrive.maxForce = seek.maxForce;
 const steering = new SteeringForce();
 steering.add(seek);
+steering.add(arrive);
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
 vehicle.addLocalForce(seek);
+vehicle.addLocalForce(arrive);
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
