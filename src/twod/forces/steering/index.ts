@@ -6,3 +6,4 @@ export * from "./seek";
 export * from "./arrive";
 export * from "./wander";
 export * from "./separate";
+export * from "./align";

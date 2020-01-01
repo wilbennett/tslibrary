@@ -19,7 +19,7 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Arrive, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
+import { Align, Arrive, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
 import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
@@ -617,10 +617,24 @@ function addVehicleGroupSeparate(index: number, minDistance: number, weight: num
   separateGroup.steering.add(separate);
 }
 
+function addVehicleGroupAlign(index: number, maxDistance: number, weight: number) {
+  const alignGroup = vehicleGroups[index];
+  const align = new Align();
+  align.group = alignGroup.vehicles;
+  align.maxDistance = maxDistance;
+  align.weight = weight;
+  align.maxForce = 4;
+  alignGroup.steering.add(align);
+}
+
 function assignVehicleGroupAction(index: number) {
   switch (index) {
     case 0: return addVehicleGroupSeparate(index, 2, 1);
     case 1: return addVehicleGroupSeparate(index, 1, 1);
+    case 2:
+      addVehicleGroupSeparate(index, 2, 1);
+      addVehicleGroupAlign(index, 5, 1);
+      break;
   }
 }
 
@@ -681,7 +695,7 @@ function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
       vehicle === first && addVehicleArrive(vehicle, mouse, steering);
       break;
     case 2:
-      vehicle === first && addVehicleAntiGrav(vehicle);
+      // vehicle === first && addVehicleAntiGrav(vehicle);
       break;
   }
 }
