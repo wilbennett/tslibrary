@@ -10,6 +10,8 @@ export class FlowFieldShape extends AABBShape {
     this.isCustomCollide = true;
   }
 
+  vectorProps?: ContextProps;
+
   protected renderCore(view: Viewport, props: ContextProps) {
     super.renderCore(view, props);
 
@@ -37,14 +39,10 @@ export class FlowFieldShape extends AABBShape {
         center.withXY(minX + halfCellWidth, minY + halfCellHeight);
 
         ctx.beginPath().rect(minX, minY, cellWidth, cellHeight);
+        props.fillStyle && ctx.withFillStyle(props.fillStyle).fill();
+        props.strokeStyle && ctx.withStrokeStyle(props.strokeStyle).stroke();
 
-        if (props.fillStyle)
-          ctx.fill();
-
-        if (props.strokeStyle)
-          ctx.stroke();
-
-        vector.normalizeScaleO(cellRadius, temp).render(view, center, props);
+        vector.normalizeScaleO(cellRadius, temp).render(view, center, this.vectorProps ?? props);
       }
     }
   }
