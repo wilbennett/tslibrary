@@ -20,11 +20,13 @@ export class FlowFieldShape extends AABBShape {
     const cellHeight = cellSize.y;
     const halfCellWidth = cellWidth * 0.5;
     const halfCellHeight = cellHeight * 0.5;
+    const cellRadius = Math.min(halfCellWidth, halfCellHeight);
     const width = flowField.width;
     const height = flowField.height;
     const halfX = this.halfSize.x;
     const halfY = this.halfSize.y;
     const center = pos(0, 0);
+    const temp = pos(0, 0);
 
     for (let r = 0; r < height; r++) {
       for (let c = 0; c < width; c++) {
@@ -42,7 +44,7 @@ export class FlowFieldShape extends AABBShape {
         if (props.strokeStyle)
           ctx.stroke();
 
-        vector.render(view, center, props);
+        vector.normalizeScaleO(cellRadius, temp).render(view, center, props);
       }
     }
   }
