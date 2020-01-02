@@ -20,7 +20,17 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Align, Arrive, Cohesion, Flow, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
+import {
+  Align,
+  Arrive,
+  Cohesion,
+  Flee,
+  Flow,
+  Seek,
+  Separate,
+  SteeringForce,
+  Wander,
+} from '../../../twod/forces/steering';
 import {
   AABBShape,
   CircleShape,
@@ -721,6 +731,17 @@ function addVehicleArrive(vehicle: Shape, position: Vector, steering: SteeringFo
   steering.add(arrive);
 }
 
+function addVehicleFlee(vehicle: Shape, position: Vector, steering: SteeringForce) {
+  const flee = new Flee();
+  flee.shape = vehicle;
+  flee.target = position;
+  flee.radius = 5;
+  flee.maxSpeed = steering.maxSpeed;
+  flee.maxForce = steering.maxForce;
+  flee.weight = 3;
+  steering.add(flee);
+}
+
 function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
   const steering = group.steering;
   const first: Shape = group.vehicles.values().next().value;
@@ -739,6 +760,14 @@ function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
       vehicle === first && addVehicleArrive(vehicle, mouse, steering);
       break;
     case 2:
+      break;
+    case 3:
+      // vehicle === first && addVehicleAntiGrav(vehicle);
+      break;
+    case 4:
+      vehicle === first && addVehicleFlee(vehicle, mouse, steering);
+      break;
+    case 5:
       // vehicle === first && addVehicleAntiGrav(vehicle);
       break;
   }
