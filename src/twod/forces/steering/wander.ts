@@ -5,6 +5,8 @@ import { CircleSegmentInfo, getCircleSegmentInfo } from '../../shapes';
 import { TargetAction } from './target-action';
 
 const desired = dir(0, 0);
+const nextPosition = dir(0, 0);
+const velocityPixels = dir(0, 0);
 
 export class Wander extends TargetAction {
   constructor() {
@@ -24,8 +26,8 @@ export class Wander extends TargetAction {
 
     if (this._stepsRemain === 0) {
       const index = MathEx.randomInt(this.circleSegments.segmentCount - 1);
-      const nextPosition = position.addScaledO(velocity.toPixelsO(), step.dt);
-      this.target = this.circleSegments.getVertex(index, nextPosition, this.radius);
+      position.addScaledO(velocity.toPixelsO(velocityPixels), step.dt, nextPosition);
+      this.circleSegments.getVertex(index, nextPosition, this.radius, this.target);
       this._stepsRemain = this.stepCount;
     }
 
