@@ -623,39 +623,46 @@ function addRandomShape(position: Vector) {
 
 function createVehicleGroupInfo(groupIndex: number) {
   const steering = new SteeringForce();
-  steering.maxSpeed = 2;
-  steering.maxForce = 7;
+  steering.maxSpeed = 30;
+  steering.maxForce = 20;
   world.addForce(steering);
   return { steering, vehicles: new Set<Shape>(), index: groupIndex };
 }
 
 function addVehicleGroupSeparate(index: number, minDistance: number, weight: number) {
   const separateGroup = vehicleGroups[index];
+  const steering = separateGroup.steering;
   const separate = new Separate();
   separate.group = separateGroup.vehicles;
   separate.minDistance = minDistance;
   separate.weight = weight;
-  separateGroup.steering.add(separate);
+  separate.maxSpeed = steering.maxSpeed;
+  separate.maxForce = steering.maxForce;
+  steering.add(separate);
 }
 
 function addVehicleGroupAlign(index: number, maxDistance: number, weight: number) {
   const alignGroup = vehicleGroups[index];
+  const steering = alignGroup.steering;
   const align = new Align();
   align.group = alignGroup.vehicles;
   align.maxDistance = maxDistance;
   align.weight = weight;
-  align.maxForce = 4;
-  alignGroup.steering.add(align);
+  align.maxSpeed = steering.maxSpeed;
+  align.maxForce = steering.maxForce;
+  steering.add(align);
 }
 
 function addVehicleGroupCohesion(index: number, maxDistance: number, weight: number) {
   const cohesionGroup = vehicleGroups[index];
+  const steering = cohesionGroup.steering;
   const cohesion = new Cohesion();
   cohesion.group = cohesionGroup.vehicles;
   cohesion.maxDistance = maxDistance;
   cohesion.weight = weight;
-  cohesion.maxForce = 3;
-  cohesionGroup.steering.add(cohesion);
+  cohesion.maxSpeed = steering.maxSpeed;
+  cohesion.maxForce = steering.maxForce;
+  steering.add(cohesion);
 }
 
 function assignVehicleGroupAction(index: number) {
@@ -664,11 +671,11 @@ function assignVehicleGroupAction(index: number) {
     case 1: return addVehicleGroupSeparate(index, 1, 1);
     case 2:
       addVehicleGroupSeparate(index, 2, 1);
-      addVehicleGroupAlign(index, 5, 1);
+      addVehicleGroupAlign(index, 10, 1);
       break;
     case 3:
       addVehicleGroupSeparate(index, 2, 1);
-      addVehicleGroupCohesion(index, 5, 0.5);
+      addVehicleGroupCohesion(index, 10, 1);
       break;
   }
 }
@@ -706,7 +713,7 @@ function addVehicleArrive(vehicle: Shape, position: Vector, steering: SteeringFo
   const arrive = new Arrive();
   arrive.shape = vehicle;
   arrive.target = position;
-  arrive.radius = 4;
+  arrive.radius = 10;
   arrive.maxSpeed = steering.maxSpeed;
   arrive.maxForce = steering.maxForce;
   steering.add(arrive);
@@ -754,11 +761,6 @@ function addRandomVehicle(position: Vector) {
   const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
   vehicle.setPosition(position);
   vehicle.integrator.gravityScale = 0.0001;
-  const vehicleHeading = new HeadingForce();
-  vehicleHeading.turnSpeed = 5;
-  vehicleHeading.angleLookAheadSteps = 3;
-  vehicleHeading.maxTorque = Math.PI * 2;
-  vehicle.addLocalForce(vehicleHeading);
 
   const bIndex = MathEx.randomInt(colors.length - 1);
   let sIndex = bIndex;
@@ -770,6 +772,12 @@ function addRandomVehicle(position: Vector) {
   world.add(vehicle);
   addVehicleAction(vehicle, group);
   currentShapes.push(vehicle);
+
+  const vehicleHeading = new HeadingForce();
+  vehicleHeading.turnSpeed = 5;
+  vehicleHeading.angleLookAheadSteps = 3;
+  vehicleHeading.maxTorque = Math.PI * 2;
+  vehicle.addLocalForce(vehicleHeading);
 }
 
 function populateColliders() {
