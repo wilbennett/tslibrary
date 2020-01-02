@@ -19,8 +19,8 @@ export class FlowFieldRandom extends FlowFieldBase {
   protected generateDataCore(data: Vector[]) {
     const minSpeed = this._minSpeed;
     const maxSpeed = this._maxSpeed;
-    const minIndex = Math.round(this._minAngle * MathEx.ONE_RADIAN);
-    const maxIndex = Math.round(this._maxAngle * MathEx.ONE_RADIAN);
+    const minIndex = Math.max(Math.round(this._minAngle * MathEx.ONE_RADIAN), 0);
+    const maxIndex = Math.min(Math.round(this._maxAngle * MathEx.ONE_RADIAN), 359);
     const segments = this._circleSegments;
     const count = this._width * this._height;
 
