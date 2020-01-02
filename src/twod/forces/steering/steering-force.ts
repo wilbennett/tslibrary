@@ -1,5 +1,6 @@
 import { SteeringAction } from '.';
 import { ForceProcessParams, ForceSourceBase } from '..';
+import { IWorld } from '../..';
 import { dir } from '../../../vectors';
 
 const force = dir(0, 0);
@@ -28,6 +29,16 @@ export class SteeringForce extends ForceSourceBase {
   }
 
   clear() { this._actions.splice(0); }
+
+  initialize(world: IWorld) {
+    super.initialize(world);
+    this._actions.forEach(action => action.initialize(world));
+  }
+
+  finalize(world: IWorld) {
+    super.finalize(world);
+    this._actions.forEach(action => action.finalize(world));
+  }
 
   protected processCore(params: ForceProcessParams) {
     force.withXYW(0, 0, 0);
