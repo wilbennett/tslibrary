@@ -6,6 +6,8 @@ import { pos } from '../../vectors';
 export class FlowFieldShape extends AABBShape {
   constructor(public flowField: FlowField) {
     super(flowField.boundsSize.scaleO(0.5));
+
+    this.isCustomCollide = true;
   }
 
   protected renderCore(view: Viewport, props: ContextProps) {
