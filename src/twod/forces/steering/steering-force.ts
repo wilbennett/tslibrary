@@ -20,6 +20,7 @@ export class SteeringForce extends ForceSourceBase {
     this._maxForce = value;
     this._actions.forEach(action => action.maxForce = value);
   }
+  scale: number = 1;
 
   add(action: SteeringAction, duration?: number, setStartTime: boolean = true) {
     if (this._world) {
@@ -71,7 +72,7 @@ export class SteeringForce extends ForceSourceBase {
     totalWeightInv = 1 / totalWeightInv;
 
     for (const action of actions) {
-      force.add(action.process(params).scale(action.weight * totalWeightInv));
+      force.add(action.process(params).scale(action.weight * totalWeightInv + this.scale));
     }
 
     params.shape.integrator.applyForce(force);

@@ -625,6 +625,7 @@ function createVehicleGroupInfo(groupIndex: number) {
   const steering = new SteeringForce();
   steering.maxSpeed = 30;
   steering.maxForce = 20;
+  steering.scale = 4.5;
   world.addForce(steering);
   return { steering, vehicles: new Set<Shape>(), index: groupIndex };
 }
@@ -716,6 +717,7 @@ function addVehicleArrive(vehicle: Shape, position: Vector, steering: SteeringFo
   arrive.radius = 10;
   arrive.maxSpeed = steering.maxSpeed;
   arrive.maxForce = steering.maxForce;
+  arrive.weight = 3;
   steering.add(arrive);
 }
 
