@@ -23,6 +23,7 @@ export * from "./polygon-shape";
 export * from "./aabb-shape";
 export * from "./triangle-shape";
 export * from "./minkowski-shape";
+export * from "./flow-field-shape";
 export * from "./null-support-point";
 export * from "./null-minkowski-point";
 export * from "./circle-iterator";
