@@ -4,6 +4,7 @@ import { dir, Vector } from '../../../vectors';
 
 const desired = dir(0, 0);
 const difference = dir(0, 0);
+const target = dir(0, 0);
 
 export class Cohesion extends GroupAction {
   maxDistance: number = 5;
@@ -14,20 +15,29 @@ export class Cohesion extends GroupAction {
 
     const isProportional = this.isProportional;
     const maxDistanceSquared = this.maxDistance * this.maxDistance;
-    desired.withXY(0, 0);
+    target.withXY(0, 0);
     let count = 0;
 
     for (const shape of this._group!) {
-      position.subO(shape.position, difference);
+      shape.position.subO(position, difference);
       const distanceSquared = difference.magSquared;
 
       if (distanceSquared === 0 || distanceSquared >= maxDistanceSquared) continue;
 
-      isProportional && difference.normalizeScale(1 / difference.mag);
-      desired.add(difference);
+      target.add(shape.position);
       count++;
     }
 
-    return count > 0 ? desired.div(count) : Vector.empty;
+    if (count === 0) return Vector.empty;
+
+    target.asCartesianPosition();
+    target.subO(position, desired);
+
+    if (isProportional) {
+      const distance = desired.mag;
+      desired.normalizeScaleO(this.maxSpeed / (this.maxDistance - distance + 0.001));
+    }
+
+    return desired;
   }
 }
