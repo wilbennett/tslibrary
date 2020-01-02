@@ -1,6 +1,9 @@
 import { ICircleShape, LocalEdge, SupportPoint, SupportPointImpl, WorldEdge } from '.';
 import { MathEx } from '../../core';
-import { Vector } from '../../vectors';
+import { pos, Vector } from '../../vectors';
+
+const temp1 = pos(0, 0);
+const temp2 = pos(0, 0);
 
 class EdgeInfo {
   constructor(
@@ -43,8 +46,8 @@ export class CircleSegmentInfo {
   private _edges!: EdgeInfo[];
 
   // TODO: Support rotation in order to allow circle stacking.
-  getVertex(index: number, center: Vector, radius: number) {
-    return center.addScaledO(this._vertices[index], radius);
+  getVertex(index: number, center: Vector, radius: number, result?: Vector) {
+    return center.addScaledO(this._vertices[index], radius, result);
   }
 
   getVertices(center: Vector, radius: number) {
@@ -58,11 +61,11 @@ export class CircleSegmentInfo {
     return result;
   }
 
-  getEdgeVector(index: number, center: Vector, radius: number) {
+  getEdgeVector(index: number, center: Vector, radius: number, result?: Vector) {
     const nextIndex = (index + 1) % this._segmentCount;
-    const vertex = this.getVertex(index, center, radius);
-    const nextVertex = this.getVertex(nextIndex, center, radius);
-    return nextVertex.subO(vertex);
+    const vertex = this.getVertex(index, center, radius, temp1);
+    const nextVertex = this.getVertex(nextIndex, center, radius, temp2);
+    return nextVertex.subO(vertex, result);
   }
 
   getEdgeVectors(center: Vector, radius: number) {
@@ -82,15 +85,15 @@ export class CircleSegmentInfo {
 
   getEdge(circle: ICircleShape, index: number, center: Vector, radius: number) {
     const edge = this._edges[index];
-    const start = center.addScaledO(edge.start, radius);
-    const end = center.addScaledO(edge.end, radius);
+    const start = center.addScaledO(edge.start, radius, temp1);
+    const end = center.addScaledO(edge.end, radius, temp2);
     return new LocalEdge(circle, index, start, end, this._edges[index].normal);
   }
 
   getWorldEdge(circle: ICircleShape, index: number, center: Vector, radius: number) {
     const edge = this._edges[index];
-    const start = center.addScaledO(edge.start, radius);
-    const end = center.addScaledO(edge.end, radius);
+    const start = center.addScaledO(edge.start, radius, temp1);
+    const end = center.addScaledO(edge.end, radius, temp2);
     return new WorldEdge(circle, index, start, end, this._edges[index].normal);
   }
 
