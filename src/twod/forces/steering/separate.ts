@@ -23,11 +23,15 @@ export class Separate extends GroupAction {
 
       if (distanceSquared === 0 || distanceSquared >= minDistanceSquared) continue;
 
-      isProportional && difference.normalizeScale(1 / difference.mag);
+      difference.normalize();
+      isProportional && difference.scale(1 / difference.mag);
       desired.add(difference);
       count++;
     }
 
-    return count > 0 ? desired.div(count) : Vector.empty;
+    if (count === 0) return Vector.empty;
+
+    desired.div(count).normalizeScale(this.maxSpeed);
+    return desired;
   }
 }
