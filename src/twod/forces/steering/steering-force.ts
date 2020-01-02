@@ -1,7 +1,7 @@
 import { SteeringAction } from '.';
 import { ForceProcessParams, ForceSourceBase } from '..';
 import { IWorld } from '../..';
-import { dir } from '../../../vectors';
+import { dir, Vector } from '../../../vectors';
 
 const force = dir(0, 0);
 
@@ -21,7 +21,14 @@ export class SteeringForce extends ForceSourceBase {
     this._actions.forEach(action => action.maxForce = value);
   }
 
-  add(...actions: SteeringAction[]) { this._actions.push(...actions); }
+  add(action: SteeringAction, duration?: number, setStartTime: boolean = true) {
+    if (this._world) {
+      setStartTime && (action.startTime = this._world.worldTime);
+      duration !== undefined && (action.duration = duration);
+    }
+
+    this._actions.push(action);
+  }
 
   remove(...actions: SteeringAction[]) {
     const self = this;
@@ -41,10 +48,30 @@ export class SteeringForce extends ForceSourceBase {
   }
 
   protected processCore(params: ForceProcessParams) {
-    force.withXYW(0, 0, 0);
+    if (this._actions.length === 0) return Vector.empty;
 
-    for (const action of this._actions) {
-      force.add(action.process(params).scale(action.weight));
+    const now = params.now;
+    const actions = this._actions;
+    force.withXYW(0, 0, 0);
+    let totalWeightInv = 0;
+
+    for (let i = actions.length - 1; i >= 0; i--) {
+      const action = actions[i];
+
+      if (action.isExpired(now)) {
+        actions.remove(action);
+        continue;
+      }
+
+      totalWeightInv += action.weight;
+    }
+
+    if (this._actions.length === 0) return Vector.empty;
+
+    totalWeightInv = 1 / totalWeightInv;
+
+    for (const action of actions) {
+      force.add(action.process(params).scale(action.weight * totalWeightInv));
     }
 
     params.shape.integrator.applyForce(force);
