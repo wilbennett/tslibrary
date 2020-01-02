@@ -2,6 +2,7 @@ import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Material, MathEx, TimeStep } from '../../../core';
 import { EaseRunner } from '../../../easing';
+import { FlowFieldRandom } from '../../../flow-fields';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
 import {
@@ -19,8 +20,16 @@ import {
   Wcb2,
 } from '../../../twod/collision';
 import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
-import { Align, Arrive, Cohesion, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
-import { AABBShape, CircleShape, createWalls, PolygonShape, setCircleSegmentCount, Shape } from '../../../twod/shapes';
+import { Align, Arrive, Cohesion, Flow, Seek, Separate, SteeringForce, Wander } from '../../../twod/forces/steering';
+import {
+  AABBShape,
+  CircleShape,
+  createWalls,
+  FlowFieldShape,
+  PolygonShape,
+  setCircleSegmentCount,
+  Shape,
+} from '../../../twod/shapes';
 import { UiUtils } from '../../../utils';
 import { dir, pos, Vector } from '../../../vectors';
 import { Gaul } from '../test-example/src';
@@ -180,10 +189,14 @@ const arrive = new Arrive();
 arrive.target = seek.target;
 arrive.radius = 4;
 const wander = new Wander();
+const flowField = new FlowFieldRandom(10, 10, dir(15, 15));
+const flow = new Flow();
+flow.flowField = flowField;
 const steering = new SteeringForce();
 // steering.add(seek);
 // steering.add(arrive);
-steering.add(wander);
+// steering.add(wander);
+steering.add(flow);
 steering.maxSpeed = 2;
 steering.maxForce = 7;
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
@@ -191,9 +204,12 @@ vehicle.integrator.gravityScale = 0.0001;
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
 wander.shape = vehicle;
-// vehicle.addLocalForce(seek);
-// vehicle.addLocalForce(arrive);
-// vehicle.addLocalForce(wander);
+const flowFieldShape = new FlowFieldShape(flowField);
+// flowFieldShape.position = pos(0, -4.5);
+// ball1.integrator.gravityScale = 0.2;
+flow.shape = flowFieldShape;
+flow.maxSpeed = 20;
+flow.maxForce = 20;
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -217,6 +233,8 @@ triangle.props = { fillStyle: colors[1] };
 windShape.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluidShape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
+flowFieldShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
+flowFieldShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
 vehicle.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
 leftWall.props = { fillStyle: colors[0] };
 bottomWall.props = { fillStyle: colors[1] };
@@ -224,7 +242,8 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const objectSets: [Shape[], ForceSource[]][] = [
-  [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], [steering]],
+  [[leftWall, bottomWall, rightWall, topWall, flowFieldShape, vehicle], [steering]],
+  // [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], [steering]],
   [[bottomWall, ball, ball1], []],
   [[bottomWall, ball, ball1], []],
   [[ball], [gravitational]],
