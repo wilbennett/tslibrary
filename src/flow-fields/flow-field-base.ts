@@ -56,8 +56,8 @@ export abstract class FlowFieldBase implements FlowField {
 
   getVectorForPoint(point: Vector): Vector {
     const cellSize = this._cellSize;
-    const col = Math.round(point.x / cellSize.x);
-    const row = Math.round(point.y / cellSize.y);
+    const col = Math.floor(point.x / cellSize.x);
+    const row = Math.floor(point.y / cellSize.y);
     return this.data[row * this._width + col];
   }
 
@@ -72,8 +72,8 @@ export abstract class FlowFieldBase implements FlowField {
 
   getCellRectForPoint(point: Vector): FlowRect {
     const cellSize = this._cellSize;
-    const col = Math.round(point.x / cellSize.x);
-    const row = Math.round(point.y / cellSize.y);
+    const col = Math.floor(point.x / cellSize.x);
+    const row = Math.floor(point.y / cellSize.y);
     const minX = col * cellSize.x;
     const minY = row * cellSize.y;
     const maxX = minX + cellSize.x;
