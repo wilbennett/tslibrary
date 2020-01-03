@@ -25,6 +25,6 @@ export class Align extends GroupAction {
       count++;
     }
 
-    return count > 0 ? desired.div(count) : Vector.empty;
+    return count > 0 ? desired.div(count).normalizeScale(this._maxSpeed) : Vector.empty;
   }
 }

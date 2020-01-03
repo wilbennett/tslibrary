@@ -4,7 +4,6 @@ import { dir, pos } from '../../../vectors';
 import { CircleSegmentInfo, getCircleSegmentInfo } from '../../shapes';
 import { TargetAction } from './target-action';
 
-const desired = dir(0, 0);
 const nextPosition = dir(0, 0);
 const velocityPixels = dir(0, 0);
 
@@ -32,7 +31,6 @@ export class Wander extends TargetAction {
     }
 
     this._stepsRemain--;
-    this.target.subO(position, desired);
-    return desired;
+    return this.seek(this.target, position, true);
   }
 }

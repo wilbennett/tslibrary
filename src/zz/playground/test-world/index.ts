@@ -734,7 +734,7 @@ function assignVehicleGroupActions() {
 
 function addVehicleWander(vehicle: Shape, steering: SteeringForce) {
   const wander = new Wander();
-  wander.maxSpeed = steering.maxSpeed;
+  wander.maxSpeed = 10;
   wander.maxForce = steering.maxForce;
   wander.shape = vehicle;
   steering.add(wander);

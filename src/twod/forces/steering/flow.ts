@@ -32,6 +32,6 @@ export class Flow extends SteeringAction {
 
     if (!vector || vector.isEmpty) return Vector.empty;
 
-    return desired.copyFrom(vector);
+    return desired.copyFrom(vector).normalizeScale(this._maxSpeed);
   }
 }

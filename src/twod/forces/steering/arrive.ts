@@ -23,17 +23,13 @@ export class Arrive extends TargetAction {
     this._maxSpeed = value;
     this._map = this.createMap();
   }
+  isProportional = false;
 
   protected calcDesiredVelocity(params: ForceProcessParams) {
     this.target.subO(params.position, desired);
     const radius = this.radius;
-
-    if (desired.magSquared < radius * radius) {
-      const scale = this._map.convert(desired.mag);
-      desired.normalizeScale(scale);
-    }
-
-    return desired;
+    const maxSpeed = this.isProportional ? this._maxSpeed : undefined;
+    return this.seek(this.target, params.position, desired.magSquared < radius * radius, maxSpeed);
   }
 
   protected createMap() { return new RangeMapper(0, this._radius, 0, this.maxSpeed); }
