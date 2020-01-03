@@ -1,4 +1,5 @@
 import { ForceProcessParams, ForceSourceBase } from '.';
+import { IWorld } from '..';
 import { MathEx } from '../../core';
 import { dir, pos, Vector } from '../../vectors';
 import { ShapePair } from '../collision';
@@ -44,6 +45,16 @@ export class Fan extends ForceSourceBase {
   }
   get props() { return this.shape.props; }
   set props(value) { this.shape.props = value; }
+
+  initialize(world: IWorld) {
+    super.initialize(world);
+    world.add(this.shape);
+  }
+
+  finalize(world: IWorld) {
+    super.finalize(world);
+    world.remove(this.shape);
+  }
 
   setPosition(position: Vector) {
     super.setPosition(position);
