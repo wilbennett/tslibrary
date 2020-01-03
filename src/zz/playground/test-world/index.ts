@@ -431,6 +431,7 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
 }
 
 const propsv: ContextProps = { strokeStyle: "cyan", fillStyle: "cyan", lineWidth: 4, lineDash: [] };
+const mouseProps: ContextProps = { strokeStyle: "cyan", fillStyle: "transparent", lineWidth: 1, lineDash: [] };
 
 function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   ++frame === (fps * pauseAfterSeconds) && pause();
@@ -454,6 +455,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
   //*/
 
   // world.contacts.forEach(contact => drawContact(contact, view));
+  beginPath(mouseProps, view).strokeCircle(mouse, 0.2);
   view.restoreTransform();
 
   // ball.angle += 1 * ONE_DEGREE;
