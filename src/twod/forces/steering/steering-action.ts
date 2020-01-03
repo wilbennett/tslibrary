@@ -1,5 +1,7 @@
 import { ForceProcessParams, ForceSourceBase } from '..';
-import { Vector } from '../../../vectors';
+import { dir, Vector } from '../../../vectors';
+
+const desiredSeek = dir(0, 0);
 
 export abstract class SteeringAction extends ForceSourceBase {
   weight = 1;
@@ -25,4 +27,9 @@ export abstract class SteeringAction extends ForceSourceBase {
   }
 
   protected abstract calcDesiredVelocity(params: ForceProcessParams): Vector;
+
+  // @ts-ignore - unused param.
+  protected seek(target: Vector, position: Vector, proportional: boolean = false) {
+    return target.subO(position, desiredSeek);
+  }
 }
