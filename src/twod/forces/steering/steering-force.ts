@@ -21,6 +21,8 @@ export class SteeringForce extends ForceSourceBase {
     this._actions.forEach(action => action.maxForce = value);
   }
   scale: number = 1;
+  protected _forces: Vector[] = [];
+  protected _weightedMags: number[] = [];
 
   add(action: SteeringAction, duration?: number, setStartTime: boolean = true) {
     if (this._world) {
@@ -53,8 +55,12 @@ export class SteeringForce extends ForceSourceBase {
 
     const now = params.now;
     const actions = this._actions;
+    const forces = this._forces;
+    const weightedMags = this._weightedMags;
     force.withXYW(0, 0, 0);
-    let totalWeightInv = 0;
+    let totalMag = 0;
+    let totalWeightedMagsInv = 0;
+    let index = 0;
 
     for (let i = actions.length - 1; i >= 0; i--) {
       const action = actions[i];
@@ -64,15 +70,28 @@ export class SteeringForce extends ForceSourceBase {
         continue;
       }
 
-      totalWeightInv += action.weight;
+      const currentForce = action.process(params);
+      const mag = currentForce.mag;
+      const weightedMag = mag * action.weight;
+      currentForce.div(mag);
+      forces[index] = currentForce;
+      weightedMags[index] = weightedMag;
+      totalMag += mag;
+      totalWeightedMagsInv += weightedMag;
+      index++;
     }
 
-    if (this._actions.length === 0) return Vector.empty;
+    const count = this._actions.length;
 
-    totalWeightInv = 1 / totalWeightInv;
+    if (count === 0) return Vector.empty;
 
-    for (const action of actions) {
-      force.add(action.process(params).scale(action.weight * totalWeightInv + this.scale));
+    totalWeightedMagsInv = 1 / totalWeightedMagsInv;
+
+    for (let i = 0; i < count; i++) {
+      const currentForce = forces[i];
+      const scale = weightedMags[i] * totalWeightedMagsInv;
+      currentForce.scale(totalMag * scale);
+      force.add(currentForce);
     }
 
     params.shape.integrator.applyForce(force);
