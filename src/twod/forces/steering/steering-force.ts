@@ -8,26 +8,31 @@ const force = dir(0, 0);
 export class SteeringForce extends ForceSourceBase {
   protected _actions: SteeringAction[] = [];
   get actions() { return this._actions; }
-  protected _maxSpeed: number = 9;
-  get maxSpeed() { return this._maxSpeed; }
-  set maxSpeed(value) {
-    this._maxSpeed = value;
+  protected _maxActionSpeed: number = 9;
+  get maxActionSpeed() { return this._maxActionSpeed; }
+  set maxActionSpeed(value) {
+    this._maxActionSpeed = value;
     this._actions.forEach(action => action.maxSpeed = value);
   }
-  protected _maxForce: number = 9;
-  get maxForce() { return this._maxForce; }
-  set maxForce(value) {
-    this._maxForce = value;
+  protected _maxActionForce: number = 9;
+  get maxActionForce() { return this._maxActionForce; }
+  set maxActionForce(value) {
+    this._maxActionForce = value;
     this._actions.forEach(action => action.maxForce = value);
   }
   scale: number = 1;
   protected _forces: Vector[] = [];
   protected _weightedMags: number[] = [];
 
-  add(action: SteeringAction, duration?: number, setStartTime: boolean = true) {
+  add(action: SteeringAction, adjustLimits: boolean = true, duration?: number, setStartTime: boolean = true) {
     if (this._world) {
       setStartTime && (action.startTime = this._world.worldTime);
       duration !== undefined && (action.duration = duration);
+    }
+
+    if (adjustLimits) {
+      action.maxSpeed = this._maxActionSpeed;
+      action.maxForce = this._maxActionForce;
     }
 
     this._actions.push(action);

@@ -222,8 +222,8 @@ const steering = new SteeringForce();
 // steering.add(arrive);
 // steering.add(wander);
 steering.add(flow);
-steering.maxSpeed = 40;
-steering.maxForce = 200;
+steering.maxActionSpeed = 40;
+steering.maxActionForce = 200;
 steering.scale = 5;
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
 vehicle.integrator.gravityScale = 0.0001;
@@ -668,8 +668,8 @@ function addRandomShape(position: Vector) {
 
 function createVehicleGroupInfo(groupIndex: number) {
   const steering = new SteeringForce();
-  steering.maxSpeed = 30;
-  steering.maxForce = 20;
+  steering.maxActionSpeed = 30;
+  steering.maxActionForce = 20;
   steering.scale = 4.5;
   world.addForce(steering);
   return { steering, vehicles: new Set<Shape>(), index: groupIndex };
@@ -682,8 +682,6 @@ function addVehicleGroupSeparate(index: number, minDistance: number, weight: num
   separate.group = separateGroup.vehicles;
   separate.minDistance = minDistance;
   separate.weight = weight;
-  separate.maxSpeed = steering.maxSpeed;
-  separate.maxForce = steering.maxForce;
   steering.add(separate);
 }
 
@@ -694,8 +692,6 @@ function addVehicleGroupAlign(index: number, maxDistance: number, weight: number
   align.group = alignGroup.vehicles;
   align.maxDistance = maxDistance;
   align.weight = weight;
-  align.maxSpeed = steering.maxSpeed;
-  align.maxForce = steering.maxForce;
   steering.add(align);
 }
 
@@ -706,8 +702,6 @@ function addVehicleGroupCohesion(index: number, maxDistance: number, weight: num
   cohesion.group = cohesionGroup.vehicles;
   cohesion.maxDistance = maxDistance;
   cohesion.weight = weight;
-  cohesion.maxSpeed = steering.maxSpeed;
-  cohesion.maxForce = steering.maxForce;
   steering.add(cohesion);
 }
 
@@ -735,9 +729,9 @@ function assignVehicleGroupActions() {
 function addVehicleWander(vehicle: Shape, steering: SteeringForce) {
   const wander = new Wander();
   wander.maxSpeed = 10;
-  wander.maxForce = steering.maxForce;
+  wander.maxForce = steering.maxActionForce;
   wander.shape = vehicle;
-  steering.add(wander);
+  steering.add(wander, false);
   addVehicleAntiGrav(vehicle, 5);
 }
 
@@ -750,8 +744,6 @@ function addVehicleSeek(vehicle: Shape, position: Vector, steering: SteeringForc
   const seek = new Seek();
   seek.shape = vehicle;
   seek.target = position;
-  seek.maxSpeed = steering.maxSpeed;
-  seek.maxForce = steering.maxForce;
   steering.add(seek);
 }
 
@@ -760,8 +752,6 @@ function addVehicleArrive(vehicle: Shape, position: Vector, steering: SteeringFo
   arrive.shape = vehicle;
   arrive.target = position;
   arrive.radius = 10;
-  arrive.maxSpeed = steering.maxSpeed;
-  arrive.maxForce = steering.maxForce;
   arrive.weight = 3;
   steering.add(arrive);
 }
@@ -771,8 +761,6 @@ function addVehicleFlee(vehicle: Shape, position: Vector, steering: SteeringForc
   flee.shape = vehicle;
   flee.target = position;
   flee.radius = 5;
-  flee.maxSpeed = steering.maxSpeed;
-  flee.maxForce = steering.maxForce;
   flee.weight = 3;
   steering.add(flee);
 }
