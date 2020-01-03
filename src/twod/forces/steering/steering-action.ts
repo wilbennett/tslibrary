@@ -16,8 +16,6 @@ export abstract class SteeringAction extends ForceSourceBase {
 
     if (desiredVelocity.isEmpty) return Vector.empty;
 
-    const maxSpeed = this._maxSpeed;
-    desiredVelocity.magSquared > maxSpeed * maxSpeed && desiredVelocity.normalizeScale(maxSpeed);
     desiredVelocity.scale(Vector.pixelsPerMeter * params.step.dt);
     const force = desiredVelocity.sub(params.velocity);
     const maxForce = this._maxForce;
