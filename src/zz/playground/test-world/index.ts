@@ -1,8 +1,8 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Material, MathEx, TimeStep } from '../../../core';
-import { EaseRunner } from '../../../easing';
-import { FlowFieldRandom } from '../../../flow-fields';
+import { Ease, EaseManager, EaseRunner, NumberEaser } from '../../../easing';
+import { FlowFieldNoise } from '../../../flow-fields';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
 import {
@@ -172,18 +172,28 @@ ball3.setPosition(pos(2.5, 7.5));
 ball3.velocity = dir(0, -0.2);
 const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
 // triangle.velocity = dir(0, -0.2);
-const wind = new Wind(dir(0, 5));
-const windShape = new AABBShape(dir(8, 2.5));
+const wind = new Wind(dir(0, 8));
+const windShape = new AABBShape(dir(6, 1.5));
 windShape.addAttachedForce(wind);
 windShape.isCustomCollide = true;
-windShape.position = pos(0, -4.5);
-const fan = new Fan(5, dir(0, 4));
-fan.position = pos(0, -4.5);
-const fluid = new Fluid(40);
-const fluidShape = new AABBShape(dir(8, 2.5));
+windShape.position = pos(4, -8.5);
+const wind2 = new Wind(dir(0, 5));
+const wind2Shape = new AABBShape(dir(8, 2.5));
+wind2Shape.addAttachedForce(wind2);
+wind2Shape.isCustomCollide = true;
+wind2Shape.position = pos(0, -4.5);
+const fan = new Fan(5, Vector.fromDegrees(60, 50), 0.4);
+fan.position = pos(-10, -10.0);
+const fluid = new Fluid(30);
+const fluidShape = new AABBShape(dir(4, 1.5));
 fluidShape.addAttachedForce(fluid);
 fluidShape.isCustomCollide = true;
-fluidShape.position = pos(0, -4.5);
+fluidShape.position = pos(6, 3.5);
+const fluid2 = new Fluid(40);
+const fluid2Shape = new AABBShape(dir(8, 2.5));
+fluid2Shape.addAttachedForce(fluid2);
+fluid2Shape.isCustomCollide = true;
+fluid2Shape.position = pos(0, -4.5);
 const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8, 80);
 const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
 const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
@@ -199,7 +209,12 @@ const arrive = new Arrive();
 arrive.target = seek.target;
 arrive.radius = 4;
 const wander = new Wander();
-const flowField = new FlowFieldRandom(10, 10, dir(15, 15));
+// const flowField = new FlowFieldRandom(10, 10, dir(15, 15));
+const flowField = new FlowFieldNoise(6, 5, dir(14, 5));
+flowField.xIncrement = 0.01;
+flowField.yIncrement = 0.03;
+flowField.minSpeed = 70;
+flowField.maxSpeed = 200;
 const flow = new Flow();
 flow.flowField = flowField;
 const steering = new SteeringForce();
@@ -207,19 +222,18 @@ const steering = new SteeringForce();
 // steering.add(arrive);
 // steering.add(wander);
 steering.add(flow);
-steering.maxSpeed = 2;
-steering.maxForce = 7;
+steering.maxSpeed = 40;
+steering.maxForce = 200;
+steering.scale = 5;
 const vehicle = new PolygonShape([pos(0, -0.5), pos(0.5, -0.5), pos(1.5, 0), pos(0.5, 0.5), pos(0, 0.5)], plastic);
 vehicle.integrator.gravityScale = 0.0001;
 vehicle.setPosition(pos(0, 7.5));
 vehicle.addLocalForce(vehicleHeading);
 wander.shape = vehicle;
 const flowFieldShape = new FlowFieldShape(flowField);
-// flowFieldShape.position = pos(0, -4.5);
+flowFieldShape.position = pos(3, 7.5);
 // ball1.integrator.gravityScale = 0.2;
 flow.shape = flowFieldShape;
-flow.maxSpeed = 20;
-flow.maxForce = 20;
 const [leftWall, bottomWall, rightWall, topWall] = createWalls(origin, dir(20, 20), 3);
 leftWall.material = defaultMaterial;
 bottomWall.material = defaultMaterial;
@@ -243,6 +257,7 @@ triangle.props = { fillStyle: colors[1] };
 windShape.props = { fillStyle: "transparent", strokeStyle: "gray", lineWidth: 1 };
 fan.props = { fillStyle: "transparent", strokeStyle: "magenta", lineWidth: 1 };
 fluidShape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
+fluid2Shape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
 flowFieldShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
 flowFieldShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
 vehicle.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
@@ -252,14 +267,14 @@ rightWall.props = { fillStyle: colors[2] };
 topWall.props = { fillStyle: colors[3] };
 
 const objectSets: [Shape[], ForceSource[]][] = [
-  [[leftWall, bottomWall, rightWall, topWall, flowFieldShape, vehicle], [steering]],
+  [[leftWall, bottomWall, rightWall, topWall, flowFieldShape, windShape, fluidShape, vehicle], [steering, fan]],
   // [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], [steering]],
   [[bottomWall, ball, ball1], []],
   [[bottomWall, ball, ball1], []],
   [[ball], [gravitational]],
   [[leftWall, bottomWall, rightWall, ball], [antiGravitational]],
-  [[leftWall, bottomWall, rightWall, ball, windShape], []],
-  [[leftWall, bottomWall, rightWall, ball, fluidShape], []],
+  [[leftWall, bottomWall, rightWall, ball, wind2Shape], []],
+  [[leftWall, bottomWall, rightWall, ball, fluid2Shape], []],
   [[leftWall, bottomWall, rightWall, ball], [fan]],
   [[leftWall, bottomWall, rightWall, topWall, ball2], []],
   [[leftWall, bottomWall, rightWall, topWall, ball2, triangle], []],
@@ -308,6 +323,14 @@ const dragPos = pos(0, 0);
 const shapePoint = pos(0, 0);
 
 // const delay = new DelayEaser(2);
+const flowXInc = new NumberEaser(0.01, 0.05, 60, Ease.inOutElastic, v => { flowField.xStartOffset = v; });
+const flowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.xStartOffset = v; });
+const flowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.yStartOffset = v; });
+const flowZ = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.zOffset = v; });
+
+flowX.onCompleted(() => flowX.ease = EaseManager.getRandomEase());
+flowY.onCompleted(() => flowY.ease = EaseManager.getRandomEase());
+flowZ.onCompleted(() => flowZ.ease = EaseManager.getRandomEase());
 
 const fps = 60;
 // const secsPerFrame = 1 / fps;
@@ -315,6 +338,13 @@ const fps = 60;
 let frame = -1;
 const loop = new AnimationLoop(update, render);
 const runner = new EaseRunner(loop);
+
+runner.add(
+  // flowXInc.repeat(Infinity),
+  flowX.repeat(Infinity),
+  flowY.repeat(Infinity),
+  flowZ.repeat(Infinity)
+);
 
 populateColliders();
 populateCollisionResolvers();
@@ -553,6 +583,8 @@ function handleMouseDown(ev: MouseEvent) {
   if (dragging) return;
   if (ev.button !== 0) return;
 
+  let clickedShape: Shape | null = null;
+
   for (const shape of world.shapes) {
     if (shape === leftWall || shape === bottomWall || shape === rightWall || shape === topWall) continue;
 
@@ -560,11 +592,14 @@ function handleMouseDown(ev: MouseEvent) {
 
     if (!shape.containsPoint(shapePoint, 0.3)) continue;
 
-    shape.position.subO(mouse, dragOffset);
-    dragTarget = shape;
-    dragging = true;
-    break;
+    clickedShape = shape;
   }
+
+  if (!clickedShape) return;
+
+  clickedShape.position.subO(mouse, dragOffset);
+  dragTarget = clickedShape;
+  dragging = true;
 }
 
 function handleMouseDoubleClick(ev: MouseEvent) {
