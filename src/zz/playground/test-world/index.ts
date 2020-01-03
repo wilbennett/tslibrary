@@ -768,7 +768,7 @@ function addVehicleFlee(vehicle: Shape, position: Vector, steering: SteeringForc
 function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
   const steering = group.steering;
   const first: Shape = group.vehicles.values().next().value;
-  vehicle !== first && addVehicleSeek(vehicle, first.position, steering);
+  vehicle !== first && group.index !== 3 && addVehicleSeek(vehicle, first.position, steering);
 
   if (vehicle === first) {
     addVehicleWander(vehicle, steering);
