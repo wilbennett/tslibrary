@@ -5,6 +5,7 @@ export * from "./gravitational";
 export * from "./anti-gravitational";
 export * from "./wind-base";
 export * from "./wind";
+export * from "./flow-wind";
 export * from "./fan";
 export * from "./fluid";
 export * from "./heading-force";

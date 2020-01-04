@@ -19,7 +19,16 @@ import {
   Wcb,
   Wcb2,
 } from '../../../twod/collision';
-import { AntiGravitational, Fan, Fluid, ForceSource, Gravitational, HeadingForce, Wind } from '../../../twod/forces';
+import {
+  AntiGravitational,
+  Fan,
+  FlowWind,
+  Fluid,
+  ForceSource,
+  Gravitational,
+  HeadingForce,
+  Wind,
+} from '../../../twod/forces';
 import {
   Align,
   Arrive,
@@ -159,6 +168,7 @@ let bottomWall: AABBShape;
 let rightWall: AABBShape;
 let topWall: AABBShape;
 let flowField: FlowFieldNoise;
+let windFlowField: FlowFieldNoise;
 let objectSets: [Shape[], ForceSource[]][] = [];
 createTestObjects();
 
@@ -209,9 +219,17 @@ const flowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flo
 const flowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.yStartOffset = v; });
 const flowZ = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.zOffset = v; });
 
+const windFlowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.xStartOffset = v; });
+const windFlowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.yStartOffset = v; });
+const windFlowZ = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.zOffset = v; });
+
 flowX.onCompleted(() => flowX.ease = EaseManager.getRandomEase());
 flowY.onCompleted(() => flowY.ease = EaseManager.getRandomEase());
 flowZ.onCompleted(() => flowZ.ease = EaseManager.getRandomEase());
+
+windFlowX.onCompleted(() => windFlowX.ease = EaseManager.getRandomEase());
+windFlowY.onCompleted(() => windFlowY.ease = EaseManager.getRandomEase());
+windFlowZ.onCompleted(() => windFlowZ.ease = EaseManager.getRandomEase());
 
 const fps = 60;
 // const secsPerFrame = 1 / fps;
@@ -224,7 +242,11 @@ runner.add(
   // flowXInc.repeat(Infinity),
   flowX.repeat(Infinity),
   flowY.repeat(Infinity),
-  flowZ.repeat(Infinity)
+  flowZ.repeat(Infinity),
+
+  windFlowX.repeat(Infinity),
+  windFlowY.repeat(Infinity),
+  windFlowZ.repeat(Infinity)
 );
 
 populateColliders();
@@ -841,23 +863,43 @@ function createTestObjects() {
   ball3.velocity = dir(0, -0.2);
   const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
   // triangle.velocity = dir(0, -0.2);
+
   const fan = new Fan(Math.min(innerRect.size.x * 0.2, 5), Vector.fromDegrees(60, 15), 0.4);
   fan.position = innerRect.min.addO(innerRectOffset);
+
   const wind = new Wind(dir(0, 10));
   const windShape = new AABBShape(dir(innerRect.size.x * 0.5 * 0.7, Math.min(innerRect.size.y * 0.5 * 0.15, 5)));
   windShape.addAttachedForce(wind);
   windShape.isCustomCollide = true;
   let offset = dir(innerRectOffset.x + innerRect.halfSize.x - windShape.halfSize.x, innerRectOffset.y - (innerRect.halfSize.y - windShape.halfSize.y));
   windShape.position = origin.addO(offset);
+
   const wind2 = new Wind(dir(0, 5));
   const wind2Shape = new AABBShape(dir(8, 2.5));
   wind2Shape.addAttachedForce(wind2);
   wind2Shape.isCustomCollide = true;
   wind2Shape.position = pos(0, -4.5);
+
   const flowCellSize = 2;
-  const flowBoundsSize = dir(innerRect.size.x * 0.6, innerRect.size.y * 0.3);
-  const flowWidth = Math.round(flowBoundsSize.x / flowCellSize);
-  const flowHeight = Math.round(flowBoundsSize.y / flowCellSize);
+  let flowBoundsSize = dir(innerRect.size.x, innerRect.size.y * 0.5);
+  let flowWidth = Math.round(flowBoundsSize.x / flowCellSize);
+  let flowHeight = Math.round(flowBoundsSize.y / flowCellSize);
+  windFlowField = new FlowFieldNoise(flowWidth, flowHeight, flowBoundsSize);
+  windFlowField.xIncrement = 0.01;
+  windFlowField.yIncrement = 0.03;
+  windFlowField.minSpeed = 5;
+  windFlowField.maxSpeed = 8;
+  const flowWind = new FlowWind();
+  flowWind.flowField = windFlowField;
+  const flowWindShape = new FlowFieldShape(windFlowField);
+  flowWind.shape = flowWindShape;
+  flowWindShape.addAttachedForce(flowWind);
+  flowWindShape.isCustomCollide = true;
+  flowWindShape.position = origin.displaceByNegO(flowWindShape.halfSize.withXO(0)).add(innerRectOffset);
+
+  flowBoundsSize = dir(innerRect.size.x * 0.6, innerRect.size.y * 0.3);
+  flowWidth = Math.round(flowBoundsSize.x / flowCellSize);
+  flowHeight = Math.round(flowBoundsSize.y / flowCellSize);
   flowField = new FlowFieldNoise(flowWidth, flowHeight, flowBoundsSize);
   flowField.xIncrement = 0.01;
   flowField.yIncrement = 0.03;
@@ -873,23 +915,27 @@ function createTestObjects() {
   offset = dir(innerRectOffset.x + innerRect.halfSize.x - flowShape.halfSize.x, innerRectOffset.y + (innerRect.halfSize.y - flowShape.halfSize.y));
   flowShape.position = origin.addO(offset);
   flow.shape = flowShape;
+
   const fluid = new Fluid(30);
   const fluidShape = new AABBShape(flowShape.halfSize.scaleO(0.5));
   fluidShape.addAttachedForce(fluid);
   fluidShape.isCustomCollide = true;
   offset = dir(fluidShape.halfSize.x, -(flowShape.halfSize.y + fluidShape.halfSize.y));
   fluidShape.position = flowShape.position.addO(offset);
+
   const fluid2 = new Fluid(40);
   const fluid2Shape = new AABBShape(dir(8, 2.5));
   fluid2Shape.addAttachedForce(fluid2);
   fluid2Shape.isCustomCollide = true;
   fluid2Shape.position = pos(0, -4.5);
+
   const goo = new Fluid(150);
   const gooShape = new AABBShape(dir(fluidShape.halfSize.x * 0.5, (fluidShape.position.y - windShape.position.y - fluidShape.halfSize.y - windShape.halfSize.y) * 0.5 - 2));
   gooShape.addAttachedForce(goo);
   gooShape.isCustomCollide = true;
   offset = dir(gooShape.halfSize.x, -(fluidShape.halfSize.y + gooShape.halfSize.y));
   gooShape.position = fluidShape.position.addO(offset);
+
   const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8, 80);
   const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
   const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
@@ -908,6 +954,8 @@ function createTestObjects() {
   gooShape.props = { fillStyle: WebColors.brown.withAlpha(0.2), strokeStyle: WebColors.brown.withAlpha(0.3), lineWidth: 1 };
   flowShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
   flowShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
+  flowWindShape.props = { fillStyle: WebColors.whitesmoke.withAlpha(0.05), strokeStyle: WebColors.whitesmoke.withAlpha(0.1), lineWidth: 2 };
+  flowWindShape.vectorProps = { fillStyle: "white", strokeStyle: "white", lineWidth: 2 };
   leftWall.props = { fillStyle: colors[0] };
   bottomWall.props = { fillStyle: colors[1] };
   rightWall.props = { fillStyle: colors[2] };
@@ -918,6 +966,7 @@ function createTestObjects() {
     [[bottomWall, ball, ball1], []],
     [[ball], [gravitational]],
     [[leftWall, bottomWall, rightWall, ball], [antiGravitational]],
+    [[leftWall, bottomWall, rightWall, ball, flowWindShape], []],
     [[leftWall, bottomWall, rightWall, ball, wind2Shape], []],
     [[leftWall, bottomWall, rightWall, ball, fluid2Shape], []],
     [[leftWall, bottomWall, rightWall, ball], [fan]],
