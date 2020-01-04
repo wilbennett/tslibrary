@@ -218,20 +218,10 @@ const shapePoint = pos(0, 0);
 const fanAngle = new NumberEaser(30, 90, 4, Ease.inOutQuad, v => { fan.angle = v * MathEx.ONE_DEGREE; });
 
 // const flowXInc = new NumberEaser(0.01, 0.05, 60, Ease.inOutElastic, v => { flowField.xStartOffset = v; });
-const flowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.xStartOffset = v; });
-const flowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.yStartOffset = v; });
-const flowZ = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.zOffset = v; });
+const flowZ = new NumberEaser(0, 50, 60, EaseManager.getRandomEase(), v => { flowField.zOffset = v; });
+const windFlowZ = new NumberEaser(0, 50, 180, EaseManager.getRandomEase(), v => { windFlowField.zOffset = v; });
 
-const windFlowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.xStartOffset = v; });
-const windFlowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.yStartOffset = v; });
-const windFlowZ = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { windFlowField.zOffset = v; });
-
-flowX.onCompleted(() => flowX.ease = EaseManager.getRandomEase());
-flowY.onCompleted(() => flowY.ease = EaseManager.getRandomEase());
 flowZ.onCompleted(() => flowZ.ease = EaseManager.getRandomEase());
-
-windFlowX.onCompleted(() => windFlowX.ease = EaseManager.getRandomEase());
-windFlowY.onCompleted(() => windFlowY.ease = EaseManager.getRandomEase());
 windFlowZ.onCompleted(() => windFlowZ.ease = EaseManager.getRandomEase());
 
 const fps = 60;
@@ -245,13 +235,8 @@ runner.add(
   fanAngle.pingPong().repeat(Infinity),
 
   // flowXInc.repeat(Infinity),
-  flowX.repeat(Infinity),
-  flowY.repeat(Infinity),
-  flowZ.repeat(Infinity),
-
-  windFlowX.repeat(Infinity),
-  windFlowY.repeat(Infinity),
-  windFlowZ.repeat(Infinity)
+  flowZ.pingPong().repeat(Infinity),
+  windFlowZ.pingPong().repeat(Infinity)
 );
 
 populateColliders();
@@ -960,7 +945,7 @@ function createTestObjects() {
   flowShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
   flowShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
   flowWindShape.props = { fillStyle: WebColors.whitesmoke.withAlpha(0.05), strokeStyle: WebColors.whitesmoke.withAlpha(0.1), lineWidth: 2 };
-  flowWindShape.vectorProps = { fillStyle: "white", strokeStyle: "white", lineWidth: 2 };
+  flowWindShape.vectorProps = { fillStyle: WebColors.white.withAlpha(0.2), strokeStyle: WebColors.white.withAlpha(0.2), lineWidth: 2 };
   leftWall.props = { fillStyle: colors[0] };
   bottomWall.props = { fillStyle: colors[1] };
   rightWall.props = { fillStyle: colors[2] };
