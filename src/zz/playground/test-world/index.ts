@@ -884,6 +884,12 @@ function createTestObjects() {
   fluid2Shape.addAttachedForce(fluid2);
   fluid2Shape.isCustomCollide = true;
   fluid2Shape.position = pos(0, -4.5);
+  const goo = new Fluid(150);
+  const gooShape = new AABBShape(dir(fluidShape.halfSize.x * 0.5, (fluidShape.position.y - windShape.position.y - fluidShape.halfSize.y - windShape.halfSize.y) * 0.5 - 2));
+  gooShape.addAttachedForce(goo);
+  gooShape.isCustomCollide = true;
+  offset = dir(gooShape.halfSize.x, -(fluidShape.halfSize.y + gooShape.halfSize.y));
+  gooShape.position = fluidShape.position.addO(offset);
   const gravitational = new Gravitational(ball1.massInfo.mass * 100000000000000, 8, 80);
   const antiGravitational = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
   const antiGravitational2 = new AntiGravitational(ball1.massInfo.mass * 10000000000000, 3, 7);
@@ -899,6 +905,7 @@ function createTestObjects() {
   fan.props = { fillStyle: WebColors.magenta.withAlpha(0.2), strokeStyle: WebColors.magenta.withAlpha(0.1), lineWidth: 1 };
   fluidShape.props = { fillStyle: WebColors.green.withAlpha(0.2), strokeStyle: WebColors.green.withAlpha(0.3), lineWidth: 1 };
   fluid2Shape.props = { fillStyle: WebColors.green.withAlpha(0.2), strokeStyle: WebColors.green.withAlpha(0.3), lineWidth: 1 };
+  gooShape.props = { fillStyle: WebColors.brown.withAlpha(0.2), strokeStyle: WebColors.brown.withAlpha(0.3), lineWidth: 1 };
   flowShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
   flowShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
   leftWall.props = { fillStyle: colors[0] };
@@ -907,7 +914,7 @@ function createTestObjects() {
   topWall.props = { fillStyle: colors[3] };
 
   objectSets = [
-    [[leftWall, bottomWall, rightWall, topWall, flowShape, windShape, fluidShape], [steering, fan]],
+    [[leftWall, bottomWall, rightWall, topWall, flowShape, windShape, fluidShape, gooShape], [steering, fan]],
     [[bottomWall, ball, ball1], []],
     [[ball], [gravitational]],
     [[leftWall, bottomWall, rightWall, ball], [antiGravitational]],
