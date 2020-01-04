@@ -75,14 +75,20 @@ export class FlowFieldNoise extends FlowFieldBase {
     const zOffset = this.zOffset;
     const minAngle = this.minAngle * MathEx.ONE_RADIAN;
     const angleRange = this.maxAngle * MathEx.ONE_RADIAN - minAngle;
+    const unitVectors = this.unitVectors;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const radius = MathEx.randomInt(minSpeed, maxSpeed);
         let angle = noise.getValue3D(xOffset, yOffset, zOffset);
         angle = angle % 360;
         angle = minAngle + (angle % angleRange);
-        data[y * width + x] = Vector.fromDegrees(angle, radius, 0);
+
+        if (!unitVectors) {
+          const radius = MathEx.randomInt(minSpeed, maxSpeed);
+          data[y * width + x] = Vector.fromDegrees(angle, radius, 0);
+        } else
+          data[y * width + x] = Vector.fromDegrees(angle, undefined, 0);
+
         xOffset += xIncrement;
       }
 

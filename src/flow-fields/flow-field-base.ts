@@ -41,6 +41,9 @@ export abstract class FlowFieldBase implements FlowField {
     this._maxSpeed = value;
     this._data = undefined;
   }
+  protected _unitVectors?: boolean;
+  get unitVectors() { return !!this._unitVectors; }
+  set unitVectors(value) { this._unitVectors = value; }
   protected _boundsSize: Vector = dir(10, 10);
   get boundsSize() { return this._boundsSize; }
   set boundsSize(value) {

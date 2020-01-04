@@ -15,6 +15,7 @@ export interface FlowField {
   maxAngle: number;
   minSpeed: number;
   maxSpeed: number;
+  unitVectors: boolean;
   boundsSize: Vector;
   readonly cellSize: Vector;
 
