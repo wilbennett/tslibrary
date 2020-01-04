@@ -10,6 +10,9 @@ const shapeOffset = dir(0, 0);
 
 export class Flow extends SteeringAction {
   flowField?: FlowField;
+  protected _isMaxSpeed?: boolean;
+  get isMaxSpeed() { return !!this._isMaxSpeed; }
+  set isMaxSpeed(value) { this._isMaxSpeed = value; }
 
   protected calcDesiredVelocity(params: ForceProcessParams) {
     const { shape, position } = params;
@@ -31,6 +34,12 @@ export class Flow extends SteeringAction {
     const vector = this.flowField.getVectorForPoint(localPosition);
 
     if (!vector || vector.isEmpty) return Vector.empty;
+
+    if (this.isMaxSpeed) {
+      return this.flowField.unitVectors
+        ? desired.copyFrom(vector).scale(this._maxSpeed)
+        : desired.copyFrom(vector).normalizeScale(this._maxSpeed);
+    }
 
     return desired.copyFrom(vector);
   }
