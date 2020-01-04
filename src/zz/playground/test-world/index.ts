@@ -895,9 +895,10 @@ function createTestObjects() {
   ball3.props = { fillStyle: colors[0], strokeStyle: colors[7], lineWidth: 2 };
   triangle.props = { fillStyle: colors[1] };
   windShape.props = { fillStyle: WebColors.whitesmoke.withAlpha(0.05), strokeStyle: WebColors.whitesmoke.withAlpha(0.1), lineWidth: 1 };
+  wind2Shape.props = { fillStyle: WebColors.whitesmoke.withAlpha(0.05), strokeStyle: WebColors.whitesmoke.withAlpha(0.1), lineWidth: 1 };
   fan.props = { fillStyle: WebColors.magenta.withAlpha(0.2), strokeStyle: WebColors.magenta.withAlpha(0.1), lineWidth: 1 };
   fluidShape.props = { fillStyle: WebColors.green.withAlpha(0.2), strokeStyle: WebColors.green.withAlpha(0.3), lineWidth: 1 };
-  fluid2Shape.props = { fillStyle: "transparent", strokeStyle: "green", lineWidth: 1 };
+  fluid2Shape.props = { fillStyle: WebColors.green.withAlpha(0.2), strokeStyle: WebColors.green.withAlpha(0.3), lineWidth: 1 };
   flowShape.props = { fillStyle: "transparent", strokeStyle: "purple", lineWidth: 2 };
   flowShape.vectorProps = { fillStyle: "cyan", strokeStyle: "cyan", lineWidth: 2 };
   leftWall.props = { fillStyle: colors[0] };
@@ -907,8 +908,6 @@ function createTestObjects() {
 
   objectSets = [
     [[leftWall, bottomWall, rightWall, topWall, flowShape, windShape, fluidShape], [steering, fan]],
-    // [[leftWall, bottomWall, rightWall, topWall, windShape, vehicle], [steering]],
-    [[bottomWall, ball, ball1], []],
     [[bottomWall, ball, ball1], []],
     [[ball], [gravitational]],
     [[leftWall, bottomWall, rightWall, ball], [antiGravitational]],
