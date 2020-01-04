@@ -1,5 +1,5 @@
 import { ForceProcessParams, ForceSourceBase, Gravity } from '.';
-import { dir } from '../../vectors';
+import { dir, Vector } from '../../vectors';
 
 const force = dir(0, 0);
 const temp1 = dir(0, 0);
