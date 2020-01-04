@@ -29,7 +29,18 @@ export class Fan extends ForceSourceBase {
   protected _baseWidth: number;
   protected _decayRate: number;
   protected _speedSquared: number = 0;
+  get angle() { return this.shape.angle; }
+  set angle(value) {
+    this.shape.angle = value;
+    this._direction.withRadians(this.shape.angle);
+  }
   protected _direction: Vector = dir(0, 0);
+  get direction() { return this._direction; }
+  set direction(value) {
+    this._direction.withXY(value.x, value.y);
+    this._direction.magSquared !== 1 && this._direction.normalize();
+    this.shape.angle = this._direction.radians;
+  }
   protected _speedDirection: Vector = dir(0, 0);
   get speedDirection() { return this._speedDirection; }
   set speedDirection(value) {
@@ -109,7 +120,7 @@ export class Fan extends ForceSourceBase {
     const distToTarget = Math.abs(MathEx.calcDecayTime(speed, this._decayRate, speed * this.minSpeedPercent));
     const hw = this._baseWidth * 0.5;
 
-    //*
+    /*
     const heightVec = this._direction.scaleO(distToTarget);
     const baseVec = this._direction.scaleO(hw).perpRight();
     const bl = position.addO(baseVec);
@@ -118,6 +129,7 @@ export class Fan extends ForceSourceBase {
     const tl = tr.addO(heightVec.negateO());
 
     const vertices = [bl, br, tr, tl];
+    const shape = new PolygonShape(vertices, undefined, false, true);
     /*/
     const vertices = [
       pos(0, -hw),
@@ -125,11 +137,13 @@ export class Fan extends ForceSourceBase {
       pos(distToTarget, hw),
       pos(0, hw),
     ];
+
+    const shape = new PolygonShape(vertices, undefined, false);
+    shape.setPosition(position);
+    shape.angle = this._speedDirection.radians;
     //*/
 
     const props = this._shape?.props ?? { fillStyle: "transparent", strokeStyle: "transparent" };
-    const shape = new PolygonShape(vertices, undefined, false, true);
-    // shape.angle = this._speedDirection.radians;
     shape.isCustomCollide = true;
     shape.props = props;
     this._world && this._world.add(shape);

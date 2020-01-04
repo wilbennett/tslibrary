@@ -1,7 +1,7 @@
 import { AnimationLoop } from '../../../animation';
 import { WebColors } from '../../../colors';
 import { Material, MathEx, TimeStep } from '../../../core';
-import { EaseManager, EaseRunner, NumberEaser } from '../../../easing';
+import { Ease, EaseManager, EaseRunner, NumberEaser } from '../../../easing';
 import { FlowFieldNoise } from '../../../flow-fields';
 import { Bounds } from '../../../misc';
 import { Brush, CanvasContext, ContextProps, Graph, Viewport, World } from '../../../twod';
@@ -167,6 +167,7 @@ let leftWall: AABBShape;
 let bottomWall: AABBShape;
 let rightWall: AABBShape;
 let topWall: AABBShape;
+let fan: Fan;
 let flowField: FlowFieldNoise;
 let windFlowField: FlowFieldNoise;
 let objectSets: [Shape[], ForceSource[]][] = [];
@@ -214,6 +215,8 @@ const dragPos = pos(0, 0);
 const shapePoint = pos(0, 0);
 
 // const delay = new DelayEaser(2);
+const fanAngle = new NumberEaser(30, 90, 4, Ease.inOutQuad, v => { fan.angle = v * MathEx.ONE_DEGREE; });
+
 // const flowXInc = new NumberEaser(0.01, 0.05, 60, Ease.inOutElastic, v => { flowField.xStartOffset = v; });
 const flowX = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.xStartOffset = v; });
 const flowY = new NumberEaser(0, 10, 60, EaseManager.getRandomEase(), v => { flowField.yStartOffset = v; });
@@ -239,6 +242,8 @@ const loop = new AnimationLoop(update, render);
 const runner = new EaseRunner(loop);
 
 runner.add(
+  fanAngle.pingPong().repeat(Infinity),
+
   // flowXInc.repeat(Infinity),
   flowX.repeat(Infinity),
   flowY.repeat(Infinity),
@@ -255,10 +260,10 @@ drawGraph();
 changeShapes();
 applyCollider();
 applyCollisionResolver();
+addTestVehicles();
 loop.start();
 runner.start();
-
-addTestVehicles();
+// fan!.speedDirection = Vector.fromDegrees(10, fan!.speedDirection.mag);
 
 elPause.addEventListener("change", () => {
   if (elPause.checked)
@@ -864,7 +869,7 @@ function createTestObjects() {
   const triangle = new PolygonShape([pos(1, -5), pos(5, -5), pos(5, 0)], plastic);
   // triangle.velocity = dir(0, -0.2);
 
-  const fan = new Fan(Math.min(innerRect.size.x * 0.2, 5), Vector.fromDegrees(60, 15), 0.4);
+  fan = new Fan(Math.min(innerRect.size.x * 0.2, 5), Vector.fromDegrees(60, 80), 0.4);
   fan.position = innerRect.min.addO(innerRectOffset);
 
   const wind = new Wind(dir(0, 10));
