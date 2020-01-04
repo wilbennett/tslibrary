@@ -23,13 +23,12 @@ export class FlowFieldRandom extends FlowFieldBase {
     const maxIndex = Math.min(Math.round(this._maxAngle * MathEx.ONE_RADIAN), 359);
     const segments = this._circleSegments;
     const unitVectors = this.unitVectors;
-    const count = this._width * this._height;
+    const count = data.length;
 
     for (let i = 0; i < count; i++) {
       const index = MathEx.randomInt(minIndex, maxIndex);
       const radius = unitVectors ? 1 : MathEx.randomInt(minSpeed, maxSpeed);
-      const direction = segments.getVertex(index, origin, radius).withW(0);
-      data[i] = direction;
+      segments.getVertex(index, origin, radius, data[i]).withW(0);
     }
   }
 }

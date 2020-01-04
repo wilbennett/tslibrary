@@ -35,31 +35,31 @@ export class FlowFieldNoise extends FlowFieldBase {
   get xStartOffset() { return this._xStartOffset; }
   set xStartOffset(value) {
     this._xStartOffset = value;
-    this._data = undefined;
+    this.dirty();
   }
   _yStartOffset: number = 0;
   get yStartOffset() { return this._yStartOffset; }
   set yStartOffset(value) {
     this._yStartOffset = value;
-    this._data = undefined;
+    this.dirty();
   }
   _zOffset: number = 0;
   get zOffset() { return this._zOffset; }
   set zOffset(value) {
     this._zOffset = value;
-    this._data = undefined;
+    this.dirty();
   }
   _xIncrement: number = 0.1;
   get xIncrement() { return this._xIncrement; }
   set xIncrement(value) {
     this._xIncrement = value;
-    this._data = undefined;
+    this.dirty();
   }
   _yIncrement: number = 0.1;
   get yIncrement() { return this._yIncrement; }
   set yIncrement(value) {
     this._yIncrement = value;
-    this._data = undefined;
+    this.dirty();
   }
 
   protected generateDataCore(data: Vector[]) {
@@ -85,9 +85,9 @@ export class FlowFieldNoise extends FlowFieldBase {
 
         if (!unitVectors) {
           const radius = MathEx.randomInt(minSpeed, maxSpeed);
-          data[y * width + x] = Vector.fromDegrees(angle, radius, 0);
+          data[y * width + x].withDegreesMag(angle, radius);
         } else
-          data[y * width + x] = Vector.fromDegrees(angle, undefined, 0);
+          data[y * width + x].withDegrees(angle);
 
         xOffset += xIncrement;
       }
