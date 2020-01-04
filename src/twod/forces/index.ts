@@ -3,6 +3,7 @@ export * from "./force-source-base";
 export * from "./gravity";
 export * from "./gravitational";
 export * from "./anti-gravitational";
+export * from "./wind-base";
 export * from "./wind";
 export * from "./fan";
 export * from "./fluid";
