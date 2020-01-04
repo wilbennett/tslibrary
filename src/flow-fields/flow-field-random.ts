@@ -1,9 +1,7 @@
 import { FlowFieldBase } from '.';
 import { MathEx } from '../core';
 import { CircleSegmentInfo } from '../twod/shapes';
-import { pos, Vector } from '../vectors';
-
-const origin = pos(0, 0);
+import { Vector } from '../vectors';
 
 export class FlowFieldRandom extends FlowFieldBase {
   constructor(width: number, height: number, boundsSize: Vector) {
@@ -28,7 +26,7 @@ export class FlowFieldRandom extends FlowFieldBase {
     for (let i = 0; i < count; i++) {
       const index = MathEx.randomInt(minIndex, maxIndex);
       const radius = unitVectors ? 1 : MathEx.randomInt(minSpeed, maxSpeed);
-      segments.getVertex(index, origin, radius, data[i]).withW(0);
+      segments.getVertexDirection(index, data[i]).scale(radius);
     }
   }
 }
