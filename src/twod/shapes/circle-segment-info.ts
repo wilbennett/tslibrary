@@ -50,6 +50,10 @@ export class CircleSegmentInfo {
     return center.addScaledO(this._vertices[index], radius, result);
   }
 
+  getVertexDirection(index: number, result?: Vector) {
+    return this._vertices[index].clone(result);
+  }
+
   getVertices(center: Vector, radius: number) {
     const count = this._segmentCount;
     const result = new Array<Vector>(count);
