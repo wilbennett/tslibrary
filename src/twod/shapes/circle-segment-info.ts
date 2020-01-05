@@ -103,6 +103,8 @@ export class CircleSegmentInfo {
 
   getNormal(index: number) { return this._edges[index].normal; }
 
+  getIndex(angle: number) { return Math.floor(angle / this._step); }
+
   /*
   getSupportIndex(direction: Vector) {
     const segmentCount = this.segmentCount;
