@@ -35,6 +35,7 @@ import {
   Cohesion,
   Flee,
   Flow,
+  Lateral,
   Seek,
   Separate,
   SteeringForce,
@@ -353,6 +354,7 @@ function render(now: DOMHighResTimeStamp, timestep: TimeStep) {
 
   // world.contacts.forEach(contact => drawContact(contact, view));
   beginPath(mouseProps, view).strokeCircle(mouse, 0.2);
+
   view.restoreTransform();
 
   // ball.angle += 1 * ONE_DEGREE;
@@ -608,6 +610,17 @@ function addVehicleGroupCohesion(index: number, maxDistance: number, weight: num
   steering.add(cohesion);
 }
 
+function addVehicleGroupLateral(index: number, radius: number, fieldOfView: number, weight: number) {
+  const lateralGroup = vehicleGroups[index];
+  const steering = lateralGroup.steering;
+  const lateral = new Lateral();
+  lateral.group = lateralGroup.vehicles;
+  lateral.radius = radius;
+  lateral.fieldOfView = fieldOfView;
+  lateral.weight = weight;
+  steering.add(lateral);
+}
+
 function assignVehicleGroupAction(index: number) {
   switch (index) {
     case 0: return addVehicleGroupSeparate(index, 2, 1);
@@ -619,6 +632,12 @@ function assignVehicleGroupAction(index: number) {
     case 3:
       addVehicleGroupSeparate(index, 2, 1);
       addVehicleGroupCohesion(index, 10, 1);
+      break;
+    case 4:
+      break;
+    case 5:
+      addVehicleGroupSeparate(index, 2, 1);
+      addVehicleGroupLateral(index, 3, 60 * MathEx.ONE_DEGREE, 2);
       break;
   }
 }
@@ -688,12 +707,13 @@ function addVehicleAction(vehicle: Shape, group: VehicleGroupInfo) {
     case 2:
       break;
     case 3:
-      // vehicle === first && addVehicleAntiGrav(vehicle);
       break;
     case 4:
       vehicle === first && addVehicleFlee(vehicle, mouse, steering);
       break;
     case 5:
+      break;
+    case 6:
       // vehicle === first && addVehicleAntiGrav(vehicle);
       break;
   }
@@ -822,6 +842,11 @@ function addTestVehicles() {
   addVehicle(3);
   addVehicle(3);
   addVehicle(3);
+  addVehicle(5);
+  addVehicle(5);
+  addVehicle(5);
+  addVehicle(5);
+  addVehicle(5);
 
   addCircle(1);
 }

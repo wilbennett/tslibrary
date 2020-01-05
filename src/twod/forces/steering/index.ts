@@ -9,4 +9,5 @@ export * from "./wander";
 export * from "./separate";
 export * from "./align";
 export * from "./cohesion";
+export * from "./lateral";
 export * from "./flow";
