@@ -9,7 +9,6 @@ import {
   CircleCollider,
   Collider,
   CollisionResolver,
-  Contact,
   Impulse,
   LinearImpulse,
   ProjectionResolver,
@@ -798,6 +797,7 @@ function applyCollider() {
   world.narrowPhase = new SimpleNarrowPhase(collider);
 }
 
+/*
 function drawContact(contact: Contact, view: Viewport) {
   // const propsc: ContextProps = { strokeStyle: "greenyellow", fillStyle: "greenyellow", lineWidth: 2, lineDash: [] };
   const propsr: ContextProps = { strokeStyle: "magenta", fillStyle: "magenta", lineWidth: 2, lineDash: [] };
@@ -824,6 +824,7 @@ function drawContact(contact: Contact, view: Viewport) {
     relativeVelocity && relativeVelocity.scaleO(scaling).render(view, cp.point, propsrv);
   });
 }
+//*/
 
 function getLineWidth(props: ContextProps, viewport: Viewport) {
   return viewport.calcLineWidth(props.lineWidth !== undefined ? props.lineWidth : 1);
