@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>World Test</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div>
+
+    <label>Pause: <input id="pause" type="checkbox" /></label>
+    <label>Stepping: <input id="stepping" type="checkbox" checked /></label>
+    <input id="step" type="button" value="Step" />
+  </div>
+  <div class="container">
+    <div>
+      <!-- Left -->
+      <label>Best phrase:</label>
+      <div class="best-phrase">
+        <span id="best-phrase">To be or ajld alkdsf ada</span>
+      </div>
+      <div class="stats">
+        <label>Total generations: <span id="generations" class="stat-value">123</span></label>
+        <label>Average fitness:<span id="fitness" class="stat-value">12</span></label>
+        <label>Total population: <span id="population" class="stat-value">100</span></label>
+        <label>Mutation rate: <span id="mutation" class="stat-value">1%</span></label>
+      </div>
+    </div>
+    <div>
+      <!-- Right -->
+      <span>Phrases:</span>
+      <div>
+        <textarea id="phrases"></textarea>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <script src="./index.ts"></script>
+  </footer>
+</body>
+
+</html>
