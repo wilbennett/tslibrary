@@ -6,6 +6,7 @@ import {
   DanSelection,
   GeneticAlgorithm,
   MidpointCrossover,
+  MonteCarloSelection,
   MutationStrategy,
   NamedStrategy,
   ReproductionStrategy,
@@ -69,7 +70,8 @@ const mutations: NamedStrategy[] = [
 ];
 
 const selections: NamedStrategy[] = [
-  DanSelection
+  DanSelection,
+  MonteCarloSelection
 ];
 
 const reproductions: NamedStrategy[] = [
@@ -97,6 +99,10 @@ elStepping.addEventListener("change", () => stepping = elStepping.checked);
 elPhrase.addEventListener("change", startAlgorithm);
 elPopulationSize.addEventListener("change", startAlgorithm);
 elMutationRate.addEventListener("change", startAlgorithm);
+elCrossovers.addEventListener("change", startAlgorithm);
+elMutations.addEventListener("change", startAlgorithm);
+elSelections.addEventListener("change", startAlgorithm);
+elReproductions.addEventListener("change", startAlgorithm);
 document.addEventListener("DOMContentLoaded", () => initialize());
 
 function initialize() {
