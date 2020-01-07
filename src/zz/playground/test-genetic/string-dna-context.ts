@@ -35,6 +35,7 @@ export class StringDNAContext extends GeneticContextBase<StringGene> {
     }
 
     dna.fitness = score / target.length;
+    dna.fitness *= dna.fitness;
     return dna.fitness;
   }
 }
