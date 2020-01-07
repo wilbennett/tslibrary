@@ -6,6 +6,7 @@ export * from "./midpoint-crossover";
 export * from "./simple-mutation";
 export * from "./dan-selection";
 export * from "./monte-carlo-selection";
+export * from "./random-probability-selection";
 export * from "./two-parent-reproduction";
 export * from "./genetic-context-base";
 export * from "./basic-genetic-algorithm";

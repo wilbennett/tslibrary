@@ -7,7 +7,8 @@ export class DanSelection<TGene extends Gene> extends NamedStrategyBase<TGene> i
   protected _population: TypedDNA<TGene>[] = [];
   protected _matingPool: TypedDNA<TGene>[] = [];
 
-  initialize(population: TypedDNA<TGene>[]) {
+  // @ts-ignore - unused param.
+  initialize(population: TypedDNA<TGene>[], maxFitness: number, totalFitness: number) {
     this._population = population;
     const matingPool = this._matingPool;
     const count = population.length;

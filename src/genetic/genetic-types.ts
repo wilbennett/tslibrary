@@ -22,7 +22,7 @@ export interface MutationStrategy<TGene extends Gene> extends NamedStrategy {
 export interface SelectionStrategy<TGene extends Gene> extends NamedStrategy {
   readonly isInPlace: boolean;
 
-  initialize(population: TypedDNA<TGene>[]): void;
+  initialize(population: TypedDNA<TGene>[], maxFitness: number, totalFitness: number): void;
   select(): TypedDNA<TGene>;
 }
 

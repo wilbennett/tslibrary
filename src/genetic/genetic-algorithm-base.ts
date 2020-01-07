@@ -50,7 +50,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     if (this.isFinished) return;
 
     // Selection.
-    this.selectionStrategy.initialize(this.population);
+    this.selectionStrategy.initialize(this.population, this.bestFitness, this.totalFitness);
 
     // Reproduction.
     if (this.selectionStrategy.isInPlace) {
