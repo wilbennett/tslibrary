@@ -36,7 +36,7 @@ export interface GeneticContext<TGene extends Gene> {
   mutationStrategy: MutationStrategy<TGene>;
   createGene(): TGene;
   createGenes(count: number): TGene[];
-  createDNA(): TypedDNA<TGene>;
+  createDNA(empty?: boolean): TypedDNA<TGene>;
   createPopulation(count: number): TypedDNA<TGene>[];
   calcFitness(dna: TypedDNA<TGene>): number;
   crossover(...partners: TypedDNA<TGene>[]): TypedDNA<TGene>;

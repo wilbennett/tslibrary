@@ -13,7 +13,11 @@ export class StringDNAContext extends GeneticContextBase<StringGene> {
     return new BasicGene<String>(this, String.fromCharCode(MathEx.randomInt(32, 128)));
   }
 
-  createDNA(): StringDNA { return new BasicDNA<StringGene>(this.createGenes(this.target.length)); }
+  createDNA(empty?: boolean): StringDNA {
+    return empty
+      ? new BasicDNA<StringGene>(new Array(this.target.length))
+      : new BasicDNA<StringGene>(this.createGenes(this.target.length));
+  }
 
   calcFitness(dna: StringDNA) {
     const target = this.target;

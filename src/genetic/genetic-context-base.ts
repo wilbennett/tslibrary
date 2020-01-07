@@ -22,7 +22,7 @@ export abstract class GeneticContextBase<TGene extends Gene> implements GeneticC
   abstract createGene(): TGene;
   createGenes(count: number): TGene[] { return Array.from({ length: count }, () => this.createGene()); }
 
-  abstract createDNA(): DNAType<TGene>;
+  abstract createDNA(empty?: boolean): DNAType<TGene>;
   createPopulation(count: number): DNAType<TGene>[] { return Array.from({ length: count }, () => this.createDNA()); }
 
   abstract calcFitness(dna: DNAType<TGene>): number;
