@@ -1,0 +1,30 @@
+#text {
+  width: 40px;
+}
+
+.container {
+  display: flex;
+}
+
+.stats {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.stats>* {
+  flex: 1 100%;
+}
+
+.stat-value {
+  font-weight: bold;
+}
+
+.best-phrase {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 20px 0px 50px 10px;
+}
+
+#phrases {
+  height: auto;
+}

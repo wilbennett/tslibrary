@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=800, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>World Test</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div>
+    <label>Pause: <input id="pause" type="checkbox" /></label>
+    <label>Stepping: <input id="stepping" type="checkbox" /></label>
+    <input id="step" type="button" value="Step" />
+    <input id="phrase" type="text" value="to be or not to be" />
+  </div>
+  <div>
+    <label>Population: <input id="population-size" type="number" min="10" max="150000" step="50" value="150" /></label>
+    <label>Mutation: <input id="mutation-rate" type="range" min="0" max="1" step="0.005" value="0.01" /></label>
+  </div>
+  <div class="container">
+    <div>
+      <!-- Left -->
+      <label>Best phrase:</label>
+      <div class="best-phrase">
+        <span id="best-phrase"></span>
+      </div>
+      <div class="stats">
+        <label>Total generations: <span id="generations" class="stat-value"></span></label>
+        <label>Average fitness:<span id="fitness" class="stat-value"></span></label>
+        <label>Total population: <span id="population" class="stat-value"></span></label>
+        <label>Mutation rate: <span id="mutation" class="stat-value"></span></label>
+        <label>Elapsed time: <span id="elapsed" class="stat-value"></span></label>
+      </div>
+    </div>
+    <div>
+      <!-- Right -->
+      <span>Phrases:</span>
+      <div>
+        <textarea id="phrases"></textarea>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <script src="./index.ts"></script>
+  </footer>
+</body>
+
+</html>
