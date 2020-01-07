@@ -5,11 +5,11 @@ export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase<TGe
   name: string = "Midpoint Crossover";
 
   crossover(...partners: TypedDNA<TGene>[]): TypedDNA<TGene> {
-    const child = this.context.createDNA(true);
-    const childGenes = child.genes;
     const partnerGenesA = partners[0].genes;
     const partnerGenesB = partners[1].genes;
     const count = partnerGenesA.length;
+    const child = this.context.createDNA(new Array(count));
+    const childGenes = child.genes;
     const midpoint = MathEx.randomInt(partnerGenesA.length - 1);
 
     for (let i = 0; i < count; i++) {
