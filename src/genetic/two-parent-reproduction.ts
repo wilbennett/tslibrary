@@ -1,5 +1,4 @@
-import { Gene, NamedStrategyBase, ReproductionStrategy, TypedDNA } from '.';
-import { MathEx } from '../core';
+import { Gene, NamedStrategyBase, ReproductionStrategy, SelectionStrategy, TypedDNA } from '.';
 
 export class TwoParentReproduction<TGene extends Gene>
   extends NamedStrategyBase<TGene>
@@ -7,16 +6,16 @@ export class TwoParentReproduction<TGene extends Gene>
 
   name: string = "Two Parent Reproduction";
 
-  reproduce(matingPool: TypedDNA<TGene>[], population: TypedDNA<TGene>[], mutationRate: number) {
+  reproduce(newPopulation: TypedDNA<TGene>[], selectionStrategy: SelectionStrategy<TGene>, mutationRate: number) {
     const context = this.context;
-    const count = population.length;
+    const count = newPopulation.length;
 
     for (let i = 0; i < count; i++) {
-      const partnerA = MathEx.random(matingPool);
-      const partnerB = MathEx.random(matingPool);
+      const partnerA = selectionStrategy.select();
+      const partnerB = selectionStrategy.select();
       const child = context.crossover(partnerA, partnerB);
       context.mutate(child, mutationRate);
-      population[i] = child;
+      newPopulation[i] = child;
     }
   }
 }

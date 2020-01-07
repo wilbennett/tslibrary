@@ -14,6 +14,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     this.population = context.createPopulation(populationSize);
 
     this.bestDNA = this.population[0];
+    this._newPopulation = new Array(populationSize);
     this.selectionStrategy = new DanSelection(context);
     this.reproductionStrategy = new TwoParentReproduction(context);
   }
@@ -26,7 +27,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   totalFitness: number = 0;
   bestDNA: TypedDNA<TGene>;
   isFinished = false;
-  protected _matingPool: TypedDNA<TGene>[] = [];
+  protected _newPopulation: TypedDNA<TGene>[];
 
   reset() {
     this.population = this.context.createPopulation(this.populationSize);
@@ -42,14 +43,53 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
 
     this.generation++;
 
-    // Selection.
-    this.selectionStrategy.select(this.population, this._matingPool, this);
+    // Calculate fitness.
+    this.calcFitness();
     this.isFinished = this.bestFitness === 1;
 
     if (this.isFinished) return;
-    if (this._matingPool.length === 0) return;
+
+    // Selection.
+    this.selectionStrategy.initialize(this.population);
 
     // Reproduction.
-    this.reproductionStrategy.reproduce(this._matingPool, this.population, this.mutationRate);
+    if (this.selectionStrategy.isInPlace) {
+      this.reproductionStrategy.reproduce(this._newPopulation, this.selectionStrategy, this.mutationRate);
+      const temp = this.population;
+      this.population = this._newPopulation;
+      this._newPopulation = temp;
+    } else {
+      this.reproductionStrategy.reproduce(this.population, this.selectionStrategy, this.mutationRate);
+    }
+  }
+
+  protected calcFitness() {
+    const context = this.context;
+    const population = this.population;
+    const populationSize = population.length;
+    let totalFitness = 0;
+    let bestFitness = -Infinity;
+    let bestDNA = population[0];
+
+    for (let i = 0; i < populationSize; i++) {
+      const dna = population[i];
+      const fitness = context.calcFitness(dna);
+      totalFitness += fitness;
+
+      if (fitness === 1) {
+        bestFitness = fitness;
+        bestDNA = dna;
+        break;
+      }
+
+      if (fitness > bestFitness) {
+        bestFitness = fitness;
+        bestDNA = dna;
+      }
+    }
+
+    this.totalFitness = totalFitness;
+    this.bestFitness = bestFitness;
+    this.bestDNA = bestDNA;
   }
 }

@@ -20,11 +20,17 @@ export interface MutationStrategy<TGene extends Gene> extends NamedStrategy {
 }
 
 export interface SelectionStrategy<TGene extends Gene> extends NamedStrategy {
-  select(population: TypedDNA<TGene>[], matingPool: TypedDNA<TGene>[], algorithm: GeneticAlgorithm): void;
+  readonly isInPlace: boolean;
+
+  initialize(population: TypedDNA<TGene>[]): void;
+  select(): TypedDNA<TGene>;
 }
 
 export interface ReproductionStrategy<TGene extends Gene> extends NamedStrategy {
-  reproduce(matingPool: TypedDNA<TGene>[], population: TypedDNA<TGene>[], mutationRate: number): void;
+  reproduce(
+    newPopulation: TypedDNA<TGene>[],
+    selectionStrategy: SelectionStrategy<TGene>,
+    mutationRate: number): void;
 }
 
 export interface TypedDNA<TGene extends Gene> extends DNA {
