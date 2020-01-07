@@ -9,6 +9,7 @@ import {
   MonteCarloSelection,
   MutationStrategy,
   NamedStrategy,
+  RandomProbabilitySelection,
   ReproductionStrategy,
   SelectionStrategy,
   SimpleMutation,
@@ -71,7 +72,8 @@ const mutations: NamedStrategy[] = [
 
 const selections: NamedStrategy[] = [
   DanSelection,
-  MonteCarloSelection
+  MonteCarloSelection,
+  RandomProbabilitySelection
 ];
 
 const reproductions: NamedStrategy[] = [
