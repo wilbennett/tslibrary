@@ -15,6 +15,7 @@ const elGenerations = UiUtils.getElement<HTMLSpanElement>("generations");
 const elFitness = UiUtils.getElement<HTMLSpanElement>("fitness");
 const elPopulation = UiUtils.getElement<HTMLSpanElement>("population");
 const elMutation = UiUtils.getElement<HTMLSpanElement>("mutation");
+const elElapsed = UiUtils.getElement<HTMLSpanElement>("elapsed");
 
 // const colors: Brush[] = [
 //   "red",
@@ -39,6 +40,7 @@ let population: DNA[] = Array.from({ length: totalPopulation }, () => new DNA(ta
 let matingPool: DNA[] = [];
 let generation = 0;
 let done = false;
+let elapsedTime: number = 0;
 
 const fps = 60;
 let frame = -1;
@@ -65,10 +67,14 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   ++frame === (fps * pauseAfterSeconds) && pause();
   stepping && pause();
 
+  if (elPause.checked) return;
+
   if (done) {
     pause();
     return;
   }
+
+  const startTime = performance.now() * 0.001;
 
   // Selection.
   matingPool.splice(0);
@@ -112,12 +118,14 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   }
 
   generation++;
+  elapsedTime += performance.now() * 0.001 - startTime;
 
   elBestPhrase.textContent = bestDNA.getPhrase();
   elGenerations.textContent = generation.toLocaleString();
   !done && (elFitness.textContent = Math.round(totalFitness / totalPopulation * 100) + "%");
   elPopulation.textContent = "" + totalPopulation;
   elMutation.textContent = mutationRate * 100 + "%";
+  elElapsed.textContent = `${Math.round(elapsedTime)} (${Math.round(generation / elapsedTime)} g/s)`;
 
   elPhrases.value = population.map(d => d.getPhrase()).join("\n");
   adjustTextAreaHeight(elPhrases);
