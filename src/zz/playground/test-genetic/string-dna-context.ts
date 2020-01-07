@@ -13,9 +13,9 @@ export class StringDNAContext extends GeneticContextBase<StringGene> {
     return new BasicGene<String>(this, String.fromCharCode(MathEx.randomInt(32, 128)));
   }
 
-  createDNA(empty?: boolean): StringDNA {
-    return empty
-      ? new BasicDNA<StringGene>(new Array(this.target.length))
+  createDNA(genes?: StringGene[]): StringDNA {
+    return genes
+      ? new BasicDNA<StringGene>(genes)
       : new BasicDNA<StringGene>(this.createGenes(this.target.length));
   }
 
