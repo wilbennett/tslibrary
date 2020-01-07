@@ -1,8 +1,20 @@
 import { AnimationLoop } from '../../../animation';
 import { MathEx, TimeStep } from '../../../core';
-import { BasicGeneticAlgorithm, GeneticAlgorithm } from '../../../genetic';
+import {
+  BasicGeneticAlgorithm,
+  CrossoverStrategy,
+  DanSelection,
+  GeneticAlgorithm,
+  MidpointCrossover,
+  MutationStrategy,
+  NamedStrategy,
+  ReproductionStrategy,
+  SelectionStrategy,
+  SimpleMutation,
+  TwoParentReproduction,
+} from '../../../genetic';
 import { UiUtils } from '../../../utils';
-import { StringDNAContext } from './string-dna-context';
+import { StringDNAContext, StringGene } from './string-dna-context';
 
 // console.clear();
 
@@ -13,6 +25,11 @@ const elStep = UiUtils.getInputElement("step");
 const elPhrase = UiUtils.getInputElement("phrase");
 const elPopulationSize = UiUtils.getInputElement("population-size");
 const elMutationRate = UiUtils.getInputElement("mutation-rate");
+const elCrossovers = UiUtils.getSelectElement("crossovers");
+const elMutations = UiUtils.getSelectElement("mutations");
+const elSelections = UiUtils.getSelectElement("selections");
+const elReproductions = UiUtils.getSelectElement("reproductions");
+
 const elPhrases = UiUtils.getElement<HTMLTextAreaElement>("phrases");
 const elBestPhrase = UiUtils.getElement<HTMLSpanElement>("best-phrase");
 const elGenerations = UiUtils.getElement<HTMLSpanElement>("generations");
@@ -43,6 +60,22 @@ let target: string;
 let ga: GeneticAlgorithm;
 let elapsedTime: number = 0;
 
+const crossovers: NamedStrategy[] = [
+  MidpointCrossover
+];
+
+const mutations: NamedStrategy[] = [
+  SimpleMutation
+];
+
+const selections: NamedStrategy[] = [
+  DanSelection
+];
+
+const reproductions: NamedStrategy[] = [
+  TwoParentReproduction
+];
+
 const fps = 60;
 let frame = -1;
 const loop = new AnimationLoop(update);
@@ -67,6 +100,7 @@ elMutationRate.addEventListener("change", startAlgorithm);
 document.addEventListener("DOMContentLoaded", () => initialize());
 
 function initialize() {
+  populateStrategies();
   startAlgorithm();
   !paused && loop.start();
   // runner.start();
@@ -93,12 +127,17 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   !ga.isFinished && (elFitness.textContent = Math.round(ga.totalFitness / populationSize * 100) + "%");
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
-  elElapsed.textContent = `${Math.round(elapsedTime)} (${Math.round(ga.generation / elapsedTime)} g/s)`;
+  elElapsed.textContent = `${Math.round(elapsedTime)} (${Math.round(ga.generation / elapsedTime)} gen/s)`;
   populatePhrases();
 }
 
 function populatePhrases() {
   elPhrases.value = ga.population.map(d => d.toString()).join("\n");
+}
+
+function createStrategy<T>(element: HTMLSelectElement, list: NamedStrategy[], context: StringDNAContext): T {
+  // @ts-ignore - Expression is not constructable.
+  return <T>new list[element.selectedIndex](context);
 }
 
 function startAlgorithm() {
@@ -107,12 +146,38 @@ function startAlgorithm() {
   target = elPhrase.value;
   const context = new StringDNAContext(target);
   ga = new BasicGeneticAlgorithm(context, populationSize, mutationRate);
+  context.crossoverStrategy = createStrategy<CrossoverStrategy<StringGene>>(elCrossovers, crossovers, context);
+  context.mutationStrategy = createStrategy<MutationStrategy<StringGene>>(elMutations, mutations, context);
+  ga.selectionStrategy = createStrategy<SelectionStrategy<StringGene>>(elSelections, selections, context);
+  ga.reproductionStrategy = createStrategy<ReproductionStrategy<StringGene>>(elReproductions, reproductions, context);
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
   elapsedTime = 0;
 
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
+}
+
+function addOption(element: HTMLSelectElement, text: string, className = "") {
+  const option = document.createElement("option");
+  option.text = text;
+  option.value = text;
+  option.className = className;
+  element.appendChild(option);
+}
+
+function populateStrategy(element: HTMLSelectElement, strategies: NamedStrategy[]) {
+  while (element.options.length > 0)
+    element.options.remove(0);
+
+  strategies.forEach(strategy => addOption(element, strategy.name));
+}
+
+function populateStrategies() {
+  populateStrategy(elCrossovers, crossovers);
+  populateStrategy(elMutations, mutations);
+  populateStrategy(elSelections, selections);
+  populateStrategy(elReproductions, reproductions);
 }
 
 function adjustTextAreaHeight(textArea: HTMLTextAreaElement) {
