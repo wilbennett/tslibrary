@@ -8,15 +8,17 @@ export class Graph {
   protected _viewBounds: Bounds;
   protected _viewport?: Viewport;
 
-  constructor(bounds: Bounds, gridSize: number) {
+  constructor(bounds: Bounds, gridSize: number, worldBounds?: Bounds) {
     this.bounds = bounds;
-    this._gridSize = gridSize;
+    this._gridSize = dir(gridSize, gridSize);
+    this.worldBounds = worldBounds;
 
     this._viewCenter = pos(0, 0);
     this._viewBounds = Bounds.fromCenter(this._viewCenter, dir(1, 1), "up");
   }
 
   readonly bounds: Bounds;
+  worldBounds?: Bounds;
   tickInterval = 5;
   gridLineAlpha = 0.2;
   tickAlpha = 0.5;
@@ -28,7 +30,7 @@ export class Graph {
   lineBrush: Brush = "black";
 
   get range() { return this._viewBounds; }
-  protected _gridSize: number;
+  protected _gridSize: Vector;
   get gridSize() { return this._gridSize; }
   set gridSize(value) {
     this._gridSize = value;
@@ -66,7 +68,6 @@ export class Graph {
     if (viewport.ctx !== ctx)
       viewport.ctx = ctx;
 
-    viewport.worldBounds.withSize(viewport.viewBounds.size.scaleO(10));
     this._viewport = viewport;
     return viewport;
   }
@@ -78,21 +79,20 @@ export class Graph {
 
     viewport.applyTransform();
     const viewBounds = viewport.viewBounds;
-    const left = viewBounds.left;
-    const right = viewBounds.right;
-    const top = viewBounds.top;
-    const bottom = viewBounds.bottom;
+    const left = Math.round(viewBounds.left);
+    const right = Math.round(viewBounds.right);
+    const top = Math.round(viewBounds.top);
+    const bottom = Math.round(viewBounds.bottom);
     const width = right - left;
     const height = top - bottom;
     const count = Math.max(viewBounds.width, viewBounds.height);
     const tickInterval = this.tickInterval;
 
+    let start = bottom - (bottom % tickInterval);
     ctx.withStrokeStyle(this.lineBrush).beginPath();
 
-    for (let coord = 1; coord <= count; coord++) {
-      const coord2 = coord * 2;
-      ctx.rect(left, -coord, width, coord2) // Horizontal.
-        .rect(-coord, bottom, coord2, height); // Vertical.
+    for (let y = start; y <= top; y++) {
+      ctx.line(left, y, right, y); // Horizontal.
     }
 
     ctx.withGlobalAlpha(this.gridLineAlpha)
@@ -100,17 +100,36 @@ export class Graph {
       .stroke()
       .beginPath();
 
-    for (let coord = tickInterval; coord <= count; coord += tickInterval) {
-      const coord2 = coord * 2;
-      ctx.rect(left, -coord, width, coord2) // Horizontal.
-        .rect(-coord, bottom, coord2, height); // Vertical.
+    start = left - (left % tickInterval);
+
+    for (let x = start; x <= right; x++) {
+      ctx.line(x, bottom, x, top); // Vertical.
+    }
+
+    ctx.withGlobalAlpha(this.gridLineAlpha)
+      .withLineWidth(viewport.calcLineWidth(this.gridLineWidth))
+      .stroke()
+      .beginPath();
+
+    start = bottom - (bottom % tickInterval);
+
+    for (let y = start; y <= top; y += tickInterval) {
+      ctx.line(left, y, right, y); // Horizontal.
+    }
+
+    ctx.withGlobalAlpha(this.tickAlpha).stroke().beginPath();
+    start = left - (left % tickInterval);
+
+    for (let x = start; x <= right; x += tickInterval) {
+      ctx.line(x, bottom, x, top); // Vertical.
     }
 
     ctx.withGlobalAlpha(this.tickAlpha).stroke();
+    const worldBounds = viewport.worldBounds;
 
     ctx.beginPath()
-      .line(left, 0, right, 0)
-      .line(0, top, 0, bottom)
+      .line(worldBounds.left, 0, worldBounds.right, 0)
+      .line(0, worldBounds.top, 0, worldBounds.bottom)
       .withGlobalAlpha(this.gridAlpha)
       .withLineWidth(viewport.calcLineWidth(this.axisWidth))
       .stroke();
@@ -157,8 +176,17 @@ export class Graph {
   }
 
   protected createViewport(ctx: CanvasContext) {
-    const gridScale = 1 / this.gridSize;
-    const viewBounds = Bounds.fromCenter(this._viewCenter, this.bounds.size.scaleO(gridScale));
-    return new Viewport(ctx, this.bounds, viewBounds);
+    const gridScale = dir(1 / this.gridSize.x, 1 / this.gridSize.y);
+    const viewBounds = Bounds.fromCenter(this._viewCenter, this.bounds.size.multO(gridScale));
+    let worldBounds: Bounds;
+
+    if (this.worldBounds)
+      worldBounds = this.worldBounds;
+    else {
+      const worldSize = viewBounds.size.multO(this.gridSize).scale(10);
+      worldBounds = Bounds.fromCenter(pos(0, 0), worldSize);
+    }
+
+    return new Viewport(ctx, this.bounds, viewBounds, worldBounds);
   }
 }

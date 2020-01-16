@@ -45,6 +45,28 @@ export class Viewport {
     return this._scale;
   }
 
+  protected _scaleX?: number;
+  get scaleX() {
+    if (this._scaleX === undefined) {
+      const viewSize = this.viewBounds.size;
+      const screenSize = this.screenBounds.size;
+      this._scaleX = screenSize.x / viewSize.x;
+    }
+
+    return this._scaleX;
+  }
+
+  protected _scaleY?: number;
+  get scaleY() {
+    if (this._scaleY === undefined) {
+      const viewSize = this.viewBounds.size;
+      const screenSize = this.screenBounds.size;
+      this._scaleY = screenSize.y / viewSize.y;
+    }
+
+    return this._scaleY;
+  }
+
   protected _isTransformed: boolean = false;
 
   resetTransform() {
@@ -116,7 +138,8 @@ export class Viewport {
     this.adjustView();
 
     result.translate(this.screenBounds.center);
-    result.scale(this.scale);
+    // result.scale(this.scale);
+    result.scale(this.scaleX, this.scaleY);
     result.translate(this.viewBounds.center.multO(-1, 1));
     result.scale(1, -1);
 

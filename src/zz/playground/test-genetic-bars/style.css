@@ -1,0 +1,40 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background-color: darkslategrey;
+}
+
+#toolbar {
+  background-color: cadetblue;
+}
+
+#text {
+  width: 40px;
+}
+
+.container {
+  display: flex;
+  background-color: bisque;
+}
+
+.vertcontainer {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+#stats {
+  width: 100px;
+}
+
+#canvaswrapper {
+  flex: 20 1 auto;
+  margin: 0px 0px 0px 5px;
+}
+
+#canvasb {
+  background-color: black;
+}
+
+#canvas {
+  position: absolute;
+}
