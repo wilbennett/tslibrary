@@ -1,10 +1,35 @@
 export interface Gene {
   createMutation(others: Gene[], selfIndex: number): Gene;
+  combine(other: Gene): Gene | null;
+  calcError(other: Gene): number;
+  isCompatibleWith(other: Gene): boolean;
 }
 
 export interface DNA {
   fitness: number;
   readonly genes: Gene[];
+
+  clone(): DNA;
+}
+
+export interface TypedDNA<TGene extends Gene> extends DNA {
+  readonly genes: TGene[];
+
+  clone(): TypedDNA<TGene>;
+}
+
+export interface GenePool {
+  getRandomGene(): Gene;
+  getRandomGenes(count: number): Gene[];
+  populateGenes(genes: Gene[]): void;
+  createMutation(gene: Gene, others: Gene[], geneIndex: number): Gene;
+}
+
+export interface TypedGenePool<TGene extends Gene> extends GenePool {
+  getRandomGene(): TGene;
+  getRandomGenes(count: number): TGene[];
+  populateGenes(genes: TGene[]): void;
+  createMutation(gene: TGene, others: TGene[], geneIndex: number): TGene;
 }
 
 export interface NamedStrategy {
@@ -31,10 +56,6 @@ export interface ReproductionStrategy<TGene extends Gene> extends NamedStrategy 
     newPopulation: TypedDNA<TGene>[],
     selectionStrategy: SelectionStrategy<TGene>,
     mutationRate: number): void;
-}
-
-export interface TypedDNA<TGene extends Gene> extends DNA {
-  readonly genes: TGene[];
 }
 
 export interface GeneticContext<TGene extends Gene> {
