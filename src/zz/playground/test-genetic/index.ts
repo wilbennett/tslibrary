@@ -60,7 +60,8 @@ let mutationRate = +elMutationRate.value;
 let populationSize = +elPopulationSize.value;
 let target: string;
 let ga: GeneticAlgorithm;
-let elapsedTime: number = 0;
+let elapsedTime: number | undefined = undefined;
+let genPerSec = 0;
 
 const crossovers: NamedStrategy[] = [
   MidpointCrossover
@@ -71,9 +72,9 @@ const mutations: NamedStrategy[] = [
 ];
 
 const selections: NamedStrategy[] = [
-  DanSelection,
   MonteCarloSelection,
-  RandomProbabilitySelection
+  RandomProbabilitySelection,
+  DanSelection
 ];
 
 const reproductions: NamedStrategy[] = [
@@ -81,6 +82,7 @@ const reproductions: NamedStrategy[] = [
 ];
 
 const fps = 60;
+const secPerFrame = 0.01;
 let frame = -1;
 const loop = new AnimationLoop(update);
 // const runner = new EaseRunner(loop);
@@ -127,15 +129,28 @@ function update(now: DOMHighResTimeStamp, timestep: TimeStep) {
   }
 
   const startTime = performance.now() * 0.001;
-  ga.processGeneration();
+
+  if (elapsedTime === undefined) {
+    ga.processGeneration();
+    elapsedTime = performance.now() * 0.001 - startTime;
+    genPerSec = Math.round(ga.generation / elapsedTime);
+  }
+
+  let countPerFrame = Math.max(Math.round(genPerSec * secPerFrame * 0.5), 1);
+
+  for (let i = 0; i < countPerFrame; i++) {
+    ga.processGeneration();
+  }
+
   elapsedTime += performance.now() * 0.001 - startTime;
+  genPerSec = Math.round(ga.generation / elapsedTime);
 
   elBestPhrase.textContent = ga.bestDNA.toString();
   elGenerations.textContent = ga.generation.toLocaleString();
   !ga.isFinished && (elFitness.textContent = Math.round(ga.totalFitness / populationSize * 100) + "%");
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
-  elElapsed.textContent = `${Math.round(elapsedTime)} (${Math.round(ga.generation / elapsedTime)} gen/s)`;
+  elElapsed.textContent = `${elapsedTime.toFixed(2)} s (${genPerSec} gen/s)`;
   populatePhrases();
 }
 
@@ -160,7 +175,7 @@ function startAlgorithm() {
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<StringGene>>(elReproductions, reproductions, context);
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
-  elapsedTime = 0;
+  elapsedTime = undefined;
 
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
