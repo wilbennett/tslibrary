@@ -9,6 +9,7 @@ export * from "./monte-carlo-selection";
 export * from "./random-probability-selection";
 export * from "./two-parent-reproduction";
 export * from "./null-fitness-modifier";
+export * from "./squared-fitness-modifier";
 export * from "./ordered-match-fitness";
 export * from "./gene-pool-base";
 export * from "./basic-gene-pool";

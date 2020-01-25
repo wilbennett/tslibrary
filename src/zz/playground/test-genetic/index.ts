@@ -16,6 +16,7 @@ import {
   ReproductionStrategy,
   SelectionStrategy,
   SimpleMutation,
+  SquaredFitnessModifier,
   TwoParentReproduction,
 } from '../../../genetic';
 import { UiUtils } from '../../../utils';
@@ -186,6 +187,7 @@ function startAlgorithm() {
   ga.mutationStrategy = createStrategy<MutationStrategy<CharGene>>(elMutations, mutations);
   ga.selectionStrategy = createStrategy<SelectionStrategy<CharGene>>(elSelections, selections);
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<CharGene>>(elReproductions, reproductions);
+  ga.fitnessModifierStrategy = new SquaredFitnessModifier();
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
   elapsedTime = undefined;
