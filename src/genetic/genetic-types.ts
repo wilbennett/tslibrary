@@ -22,7 +22,7 @@ export interface GenePool {
   getRandomGene(): Gene;
   getRandomGenes(count: number): Gene[];
   populateGenes(genes: Gene[]): void;
-  createMutation(gene: Gene, allGenes: Gene[], geneIndex: number): Gene;
+  createMutation(gene: Gene, allGenes: Gene[]): Gene;
 }
 
 export interface TypedGenePool<TGene extends Gene> extends GenePool {
@@ -71,18 +71,6 @@ export interface FitnessModifierStrategy extends NamedStrategy {
 
 export interface DNAFactory<TGene extends Gene> {
   createDNA(genes: TGene[]): TypedDNA<TGene>;
-}
-
-export interface GeneticContext<TGene extends Gene> {
-  crossoverStrategy: CrossoverStrategy<TGene>;
-  mutationStrategy: MutationStrategy<TGene>;
-  createGene(): TGene;
-  createGenes(count: number): TGene[];
-  createDNA(genes?: TGene[]): TypedDNA<TGene>;
-  createPopulation(count: number): TypedDNA<TGene>[];
-  calcFitness(dna: TypedDNA<TGene>): number;
-  crossover(...partners: TypedDNA<TGene>[]): TypedDNA<TGene>;
-  mutate(dna: TypedDNA<TGene>, mutationRate: number): void;
 }
 
 export interface GeneticAlgorithm {

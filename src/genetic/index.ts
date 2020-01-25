@@ -10,7 +10,6 @@ export * from "./random-probability-selection";
 export * from "./two-parent-reproduction";
 export * from "./null-fitness-modifier";
 export * from "./ordered-match-fitness";
-export * from "./genetic-context-base";
 export * from "./gene-pool-base";
 export * from "./basic-gene-pool";
 export * from "./basic-genetic-algorithm";
