@@ -19,7 +19,7 @@ export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase i
 
   protected selectFitness() {
     const population = this._population;
-    const bestFitness = this._bestFitness;
+    // const bestFitness = this._bestFitness;
 
     let preventInfinite = 100;
 
@@ -27,7 +27,8 @@ export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase i
       --preventInfinite;
       const dna = MathEx.random(population);
 
-      if (Math.random() * bestFitness > dna.fitness) continue;
+      // if (Math.random() * bestFitness > dna.fitness) continue;
+      if (Math.random() > dna.fitness) continue;
 
       return dna;
     }
