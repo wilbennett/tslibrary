@@ -48,6 +48,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   totalFitness: number = 0;
   protected _bestDNA?: TypedDNA<TGene>;
   get bestDNA() { return this._bestDNA ?? this.population[0]; }
+  keepBest: boolean = true;
   isFinished = false;
   protected _newPopulation: TypedDNA<TGene>[];
 
@@ -129,7 +130,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     const population = this.population;
     const populationSize = population.length;
     let totalFitness = 0;
-    let bestFitness = this._bestDNA ? this._bestDNA.fitness : -Infinity;
+    let bestFitness = this.keepBest && this._bestDNA ? this._bestDNA.fitness : -Infinity;
     let bestDNA = this.bestDNA;
 
     for (let i = 0; i < populationSize; i++) {
@@ -157,7 +158,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     const population = this.population;
     const populationSize = population.length;
     let totalFitness = 0;
-    let bestFitness = this._bestDNA ? this.bestDNA.fitness : Infinity;
+    let bestFitness = this.keepBest && this._bestDNA ? this.bestDNA.fitness : Infinity;
     let bestDNA = this.bestDNA;
     // const totalFitnessInv = this.updateRawFitness();
     this.updateRawFitness();

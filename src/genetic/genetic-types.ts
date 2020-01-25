@@ -92,6 +92,7 @@ export interface GeneticAlgorithm {
   bestFitness: number;
   totalFitness: number;
   bestDNA: DNA;
+  keepBest: boolean;
   readonly isFinished: boolean;
 
   reset(): void;

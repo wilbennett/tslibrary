@@ -184,6 +184,7 @@ function startAlgorithm() {
   const pool = new BasicGenePool(genes);
   const dnaFactory = new StringDnaFactory();
   ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA);
+  // ga.keepBest = false;
   ga.fitnessKind = FitnessKind.error;
   // ga.fitnessKind = FitnessKind.fitness;
   ga.crossoverStrategy = createStrategy<CrossoverStrategy<CharGene>>(elCrossovers, crossovers, dnaFactory);
