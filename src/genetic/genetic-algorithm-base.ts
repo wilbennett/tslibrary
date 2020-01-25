@@ -33,7 +33,6 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     this.fitnessStrategy = new OrderedMatchFitness();
 
     this.population = this.createPopulation(populationSize);
-    this.bestDNA = this.population[0];
   }
 
   crossoverStrategy: CrossoverStrategy<TGene>;
@@ -45,17 +44,17 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   population: TypedDNA<TGene>[];
   generation = 0;
   fitnessKind: FitnessKind = FitnessKind.fitness;
-  bestFitness: number = Infinity;
+  get bestFitness() { return this.bestDNA.fitness; }
   totalFitness: number = 0;
-  bestDNA: TypedDNA<TGene>;
+  protected _bestDNA?: TypedDNA<TGene>;
+  get bestDNA() { return this._bestDNA ?? this.population[0]; }
   isFinished = false;
   protected _newPopulation: TypedDNA<TGene>[];
 
   reset() {
     this.population = this.createPopulation(this.populationSize);
-    this.bestDNA = this.population[0];
+    this._bestDNA = undefined;
     this.generation = 0;
-    this.bestFitness = Infinity;
     this.totalFitness = 0;
     this.isFinished = false;
   }
@@ -130,8 +129,8 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     const population = this.population;
     const populationSize = population.length;
     let totalFitness = 0;
-    let bestFitness = -Infinity;
-    let bestDNA = population[0];
+    let bestFitness = this._bestDNA ? this._bestDNA.fitness : -Infinity;
+    let bestDNA = this.bestDNA;
 
     for (let i = 0; i < populationSize; i++) {
       const dna = population[i];
@@ -151,16 +150,15 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     }
 
     this.totalFitness = totalFitness;
-    this.bestFitness = bestFitness;
-    this.bestDNA = bestDNA;
+    this._bestDNA = bestDNA;
   }
 
   protected calcError() {
     const population = this.population;
     const populationSize = population.length;
     let totalFitness = 0;
-    let bestFitness = Infinity;
-    let bestDNA = population[0];
+    let bestFitness = this._bestDNA ? this.bestDNA.fitness : Infinity;
+    let bestDNA = this.bestDNA;
     // const totalFitnessInv = this.updateRawFitness();
     this.updateRawFitness();
     totalFitness = 0;
@@ -185,8 +183,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     }
 
     this.totalFitness = totalFitness;
-    this.bestFitness = bestFitness;
-    this.bestDNA = bestDNA;
+    this._bestDNA = bestDNA;
   }
 
   protected createPopulation(count: number): TypedDNA<TGene>[] {
