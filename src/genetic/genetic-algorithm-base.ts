@@ -2,6 +2,7 @@ import {
   CrossoverStrategy,
   DanSelection,
   DNAFactory,
+  FitnessKind,
   FitnessModifierStrategy,
   FitnessStrategy,
   Gene,
@@ -43,7 +44,8 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   fitnessModifierStrategy?: FitnessModifierStrategy;
   population: TypedDNA<TGene>[];
   generation = 0;
-  bestFitness: number = -Infinity;
+  fitnessKind: FitnessKind = FitnessKind.fitness;
+  bestFitness: number = Infinity;
   totalFitness: number = 0;
   bestDNA: TypedDNA<TGene>;
   isFinished = false;
@@ -53,7 +55,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     this.population = this.createPopulation(this.populationSize);
     this.bestDNA = this.population[0];
     this.generation = 0;
-    this.bestFitness = -Infinity;
+    this.bestFitness = Infinity;
     this.totalFitness = 0;
     this.isFinished = false;
   }
@@ -62,17 +64,22 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     if (this.isFinished) return;
 
     this.generation++;
+    const fitnessKind = this.fitnessKind;
 
     // Calculate fitness.
-    this.calcFitness();
-    this.isFinished = this.bestFitness === 1;
+    if (fitnessKind === FitnessKind.fitness) {
+      this.calcFitness();
+      this.isFinished = this.bestFitness === 1;
+    } else {
+      this.calcError();
+      this.isFinished = this.bestFitness === 0;
+    }
 
     if (this.isFinished) return;
 
-    // Selection.
-    this.selectionStrategy.initialize(this.population, this.bestFitness, this.totalFitness);
+    this.selectionStrategy.initialize(this.population, this.bestFitness, this.totalFitness, fitnessKind);
 
-    // Reproduction.
+    // Selection/Reproduction/Mutation.
     if (this.selectionStrategy.isInPlace) {
       this.reproductionStrategy.reproduce(
         this._newPopulation,
@@ -99,6 +106,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   protected calcFitness() {
     const fitnessStrategy = this.fitnessStrategy;
     const target = this.target;
+    const fitnessKind = this.fitnessKind;
     const fitnessModifier = this.fitnessModifierStrategy;
     const population = this.population;
     const populationSize = population.length;
@@ -108,7 +116,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
 
     for (let i = 0; i < populationSize; i++) {
       const dna = population[i];
-      const fitness = fitnessStrategy.calcFitness(dna, target, fitnessModifier);
+      const fitness = fitnessStrategy.calcFitness(dna, target, fitnessKind, fitnessModifier);
       totalFitness += fitness;
 
       if (fitness === 1) {
@@ -118,6 +126,39 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
       }
 
       if (fitness > bestFitness) {
+        bestFitness = fitness;
+        bestDNA = dna;
+      }
+    }
+
+    this.totalFitness = totalFitness;
+    this.bestFitness = bestFitness;
+    this.bestDNA = bestDNA;
+  }
+
+  protected calcError() {
+    const fitnessStrategy = this.fitnessStrategy;
+    const target = this.target;
+    const fitnessKind = this.fitnessKind;
+    const fitnessModifier = this.fitnessModifierStrategy;
+    const population = this.population;
+    const populationSize = population.length;
+    let totalFitness = 0;
+    let bestFitness = Infinity;
+    let bestDNA = population[0];
+
+    for (let i = 0; i < populationSize; i++) {
+      const dna = population[i];
+      const fitness = fitnessStrategy.calcFitness(dna, target, fitnessKind, fitnessModifier);
+      totalFitness += fitness;
+
+      if (fitness === 0) {
+        bestFitness = fitness;
+        bestDNA = dna;
+        break;
+      }
+
+      if (fitness < bestFitness) {
         bestFitness = fitness;
         bestDNA = dna;
       }

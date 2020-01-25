@@ -7,6 +7,7 @@ import {
   BasicGeneticAlgorithm,
   CrossoverStrategy,
   DanSelection,
+  FitnessKind,
   GeneticAlgorithm,
   MidpointCrossover,
   MonteCarloSelection,
@@ -183,11 +184,14 @@ function startAlgorithm() {
   const pool = new BasicGenePool(genes);
   const dnaFactory = new StringDnaFactory();
   ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA);
+  ga.fitnessKind = FitnessKind.error;
+  // ga.fitnessKind = FitnessKind.fitness;
   ga.crossoverStrategy = createStrategy<CrossoverStrategy<CharGene>>(elCrossovers, crossovers, dnaFactory);
   ga.mutationStrategy = createStrategy<MutationStrategy<CharGene>>(elMutations, mutations);
   ga.selectionStrategy = createStrategy<SelectionStrategy<CharGene>>(elSelections, selections);
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<CharGene>>(elReproductions, reproductions);
   ga.fitnessModifierStrategy = new SquaredFitnessModifier();
+  ga.fitnessModifierStrategy = undefined;
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
   elapsedTime = undefined;

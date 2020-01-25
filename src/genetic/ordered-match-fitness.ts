@@ -1,14 +1,14 @@
-import { FitnessModifierStrategy, FitnessStrategy, Gene, NamedStrategyBase, TypedDNA } from '.';
+import { FitnessKind, FitnessModifierStrategy, FitnessStrategy, Gene, NamedStrategyBase, TypedDNA } from '.';
 
 export class OrderedMatchFitness<TGene extends Gene> extends NamedStrategyBase implements FitnessStrategy<TGene> {
-  calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, modifier?: FitnessModifierStrategy): number {
+  calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, fitnessKind: FitnessKind, modifier?: FitnessModifierStrategy): number {
     const genes = dna.genes;
     const targetGenes = target.genes;
-    const count = genes.length;
+    const count = targetGenes.length;
     let score = 0;
 
     if (count === 0) {
-      dna.fitness = 1;
+      dna.fitness = fitnessKind === FitnessKind.fitness ? 1 : 0;
       return dna.fitness;
     }
 
@@ -16,7 +16,8 @@ export class OrderedMatchFitness<TGene extends Gene> extends NamedStrategyBase i
       genes[i].calcError(targetGenes[i]) === 0 && (score++);
     }
 
-    dna.fitness = score / targetGenes.length;
+    fitnessKind === FitnessKind.error && (score = count - score);
+    dna.fitness = score / count;
     modifier && (dna.fitness = modifier.modifyFitness(dna.fitness));
     return dna.fitness;
   }

@@ -1,3 +1,8 @@
+export enum FitnessKind {
+  fitness,
+  error
+}
+
 export interface Gene {
   // createMutation(others: Gene[], selfIndex: number): Gene;
   combine(other: Gene): Gene | null;
@@ -47,7 +52,7 @@ export interface MutationStrategy<TGene extends Gene> extends NamedStrategy {
 export interface SelectionStrategy<TGene extends Gene> extends NamedStrategy {
   readonly isInPlace: boolean;
 
-  initialize(population: TypedDNA<TGene>[], maxFitness: number, totalFitness: number): void;
+  initialize(population: TypedDNA<TGene>[], bestFitness: number, totalFitness: number, fitnessKind: FitnessKind): void;
   select(): TypedDNA<TGene>;
 }
 
@@ -62,7 +67,7 @@ export interface ReproductionStrategy<TGene extends Gene> extends NamedStrategy 
 }
 
 export interface FitnessStrategy<TGene extends Gene> extends NamedStrategy {
-  calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, modifier?: FitnessModifierStrategy): number;
+  calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, fitnessKind: FitnessKind, modifier?: FitnessModifierStrategy): number;
 }
 
 export interface FitnessModifierStrategy extends NamedStrategy {
@@ -82,6 +87,7 @@ export interface GeneticAlgorithm {
   fitnessModifierStrategy?: NamedStrategy;
   population: DNA[];
   readonly generation: number;
+  fitnessKind: FitnessKind;
   bestFitness: number;
   totalFitness: number;
   bestDNA: DNA;

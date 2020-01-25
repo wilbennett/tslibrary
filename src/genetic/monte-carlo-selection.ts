@@ -1,29 +1,50 @@
 import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
 import { MathEx } from '../core';
+import { FitnessKind } from './genetic-types';
 
 export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
   name: string = "Dan Selection";
   get isInPlace() { return true; }
   protected _population: TypedDNA<TGene>[] = [];
-  protected _maxFitness = 0;
+  protected _bestFitness = 0;
 
   // @ts-ignore - unused param.
-  initialize(population: TypedDNA<TGene>[], maxFitness: number, totalFitness: number) {
+  initialize(population: TypedDNA<TGene>[], bestFitness: number, totalFitness: number, fitnessKind: FitnessKind) {
     this._population = population;
-    this._maxFitness = maxFitness;
+    this._bestFitness = bestFitness;
+    this.select = fitnessKind === FitnessKind.fitness ? this.selectFitness : this.selectError;
   }
 
-  select() {
-    const population = this._population;
-    const maxFitness = this._maxFitness;
+  select = this.selectFitness;
 
-    let preventInfinite = 10000;
+  protected selectFitness() {
+    const population = this._population;
+    const bestFitness = this._bestFitness;
+
+    let preventInfinite = 100;
 
     while (preventInfinite > 0) {
       --preventInfinite;
       const dna = MathEx.random(population);
 
-      if (Math.random() * maxFitness > dna.fitness) continue;
+      if (Math.random() * bestFitness > dna.fitness) continue;
+
+      return dna;
+    }
+
+    return population[0];
+  }
+
+  protected selectError() {
+    const population = this._population;
+
+    let preventInfinite = 100;
+
+    while (preventInfinite > 0) {
+      --preventInfinite;
+      const dna = MathEx.random(population);
+
+      if (Math.random() < dna.fitness) continue;
 
       return dna;
     }
