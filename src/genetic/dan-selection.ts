@@ -1,16 +1,15 @@
-import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
+import { Gene, SelectionStrategyBase, TypedDNA } from '.';
 import { MathEx } from '../core';
 import { FitnessKind } from './genetic-types';
 
-export class DanSelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
+export class DanSelection<TGene extends Gene> extends SelectionStrategyBase<TGene> {
   name: string = "Dan Selection";
   get isInPlace() { return false; }
-  protected _population: TypedDNA<TGene>[] = [];
   protected _matingPool: TypedDNA<TGene>[] = [];
 
-  // @ts-ignore - unused param.
   initialize(population: TypedDNA<TGene>[], maxFitness: number, totalFitness: number, fitnessKind: FitnessKind) {
-    this._population = population;
+    super.initialize(population, maxFitness, totalFitness, fitnessKind);
+
     const matingPool = this._matingPool;
     const count = population.length;
 
@@ -25,5 +24,6 @@ export class DanSelection<TGene extends Gene> extends NamedStrategyBase implemen
     }
   }
 
-  select() { return MathEx.random(this._matingPool) || this._population[0]; }
+  protected selectFitness() { return MathEx.random(this._matingPool) || this._population[0]; }
+  protected selectError() { return MathEx.random(this._matingPool) || this._population[0]; }
 }

@@ -4,6 +4,7 @@ export * from "./basic-dna";
 export * from "./named-strategy-base";
 export * from "./midpoint-crossover";
 export * from "./simple-mutation";
+export * from "./selection-strategy-base";
 export * from "./dan-selection";
 export * from "./monte-carlo-selection";
 export * from "./random-probability-selection";

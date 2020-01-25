@@ -1,21 +1,9 @@
-import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
+import { Gene, SelectionStrategyBase } from '.';
 import { MathEx } from '../core';
-import { FitnessKind } from './genetic-types';
 
-export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
+export class MonteCarloSelection<TGene extends Gene> extends SelectionStrategyBase<TGene> {
   name: string = "Dan Selection";
   get isInPlace() { return true; }
-  protected _population: TypedDNA<TGene>[] = [];
-  protected _bestFitness = 0;
-
-  // @ts-ignore - unused param.
-  initialize(population: TypedDNA<TGene>[], bestFitness: number, totalFitness: number, fitnessKind: FitnessKind) {
-    this._population = population;
-    this._bestFitness = bestFitness;
-    this.select = fitnessKind === FitnessKind.fitness ? this.selectFitness : this.selectError;
-  }
-
-  select = this.selectFitness;
 
   protected selectFitness() {
     const population = this._population;
