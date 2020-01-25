@@ -1,6 +1,9 @@
 import { AnimationLoop } from '../../../animation';
 import { MathEx, TimeStep } from '../../../core';
 import {
+  BasicDNA,
+  BasicGene,
+  BasicGenePool,
   BasicGeneticAlgorithm,
   CrossoverStrategy,
   DanSelection,
@@ -16,7 +19,8 @@ import {
   TwoParentReproduction,
 } from '../../../genetic';
 import { UiUtils } from '../../../utils';
-import { StringDNAContext, StringGene } from './string-dna-context';
+import { CharGene } from './char-gene';
+import { StringDnaFactory } from './string-dna-factory';
 
 // console.clear();
 
@@ -59,6 +63,7 @@ let stepping = elStepping.checked;
 let mutationRate = +elMutationRate.value;
 let populationSize = +elPopulationSize.value;
 let target: string;
+let targetDNA: BasicDNA<BasicGene<String>>;
 let ga: GeneticAlgorithm;
 let elapsedTime: number | undefined = undefined;
 let genPerSec = 0;
@@ -158,21 +163,29 @@ function populatePhrases() {
   elPhrases.value = ga.population.map(d => d.toString()).join("\n");
 }
 
-function createStrategy<T>(element: HTMLSelectElement, list: NamedStrategy[], context: StringDNAContext): T {
+function createStrategy<T>(element: HTMLSelectElement, list: NamedStrategy[], ...params: any[]): T {
   // @ts-ignore - Expression is not constructable.
-  return <T>new list[element.selectedIndex](context);
+  return <T>new list[element.selectedIndex](...params);
 }
 
 function startAlgorithm() {
   populationSize = +elPopulationSize.value;
   mutationRate = +elMutationRate.value;
   target = elPhrase.value;
-  const context = new StringDNAContext(target);
-  ga = new BasicGeneticAlgorithm(context, populationSize, mutationRate);
-  context.crossoverStrategy = createStrategy<CrossoverStrategy<StringGene>>(elCrossovers, crossovers, context);
-  context.mutationStrategy = createStrategy<MutationStrategy<StringGene>>(elMutations, mutations, context);
-  ga.selectionStrategy = createStrategy<SelectionStrategy<StringGene>>(elSelections, selections, context);
-  ga.reproductionStrategy = createStrategy<ReproductionStrategy<StringGene>>(elReproductions, reproductions, context);
+  const targetGenes = Array.from(target, v => new CharGene(v));
+  targetDNA = new BasicDNA<CharGene>(targetGenes);
+
+  const genes = Array.from(
+    { length: 128 - 32 + 1 },
+    (_, i) => new CharGene(String.fromCharCode(i + 32)));
+
+  const pool = new BasicGenePool(genes);
+  const dnaFactory = new StringDnaFactory();
+  ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA);
+  ga.crossoverStrategy = createStrategy<CrossoverStrategy<CharGene>>(elCrossovers, crossovers, dnaFactory);
+  ga.mutationStrategy = createStrategy<MutationStrategy<CharGene>>(elMutations, mutations);
+  ga.selectionStrategy = createStrategy<SelectionStrategy<CharGene>>(elSelections, selections);
+  ga.reproductionStrategy = createStrategy<ReproductionStrategy<CharGene>>(elReproductions, reproductions);
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
   elapsedTime = undefined;

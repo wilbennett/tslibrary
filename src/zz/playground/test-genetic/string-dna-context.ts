@@ -10,7 +10,7 @@ export class StringDNAContext extends GeneticContextBase<StringGene> {
   }
 
   createGene(): StringGene {
-    return new BasicGene<String>(this, String.fromCharCode(MathEx.randomInt(32, 128)));
+    return new BasicGene<String>(String.fromCharCode(MathEx.randomInt(32, 128)));
   }
 
   createDNA(genes?: StringGene[]): StringDNA {

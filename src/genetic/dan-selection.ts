@@ -1,7 +1,7 @@
 import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
 import { MathEx } from '../core';
 
-export class DanSelection<TGene extends Gene> extends NamedStrategyBase<TGene> implements SelectionStrategy<TGene> {
+export class DanSelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
   name: string = "Dan Selection";
   get isInPlace() { return false; }
   protected _population: TypedDNA<TGene>[] = [];

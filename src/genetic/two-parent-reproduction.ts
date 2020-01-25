@@ -1,20 +1,34 @@
-import { Gene, NamedStrategyBase, ReproductionStrategy, SelectionStrategy, TypedDNA } from '.';
+import {
+  CrossoverStrategy,
+  Gene,
+  MutationStrategy,
+  NamedStrategyBase,
+  ReproductionStrategy,
+  SelectionStrategy,
+  TypedDNA,
+  TypedGenePool,
+} from '.';
 
 export class TwoParentReproduction<TGene extends Gene>
-  extends NamedStrategyBase<TGene>
+  extends NamedStrategyBase
   implements ReproductionStrategy<TGene> {
 
   name: string = "Two Parent Reproduction";
 
-  reproduce(newPopulation: TypedDNA<TGene>[], selectionStrategy: SelectionStrategy<TGene>, mutationRate: number) {
-    const context = this.context;
+  reproduce(
+    newPopulation: TypedDNA<TGene>[],
+    genePool: TypedGenePool<TGene>,
+    selectionStrategy: SelectionStrategy<TGene>,
+    crossoverStrategy: CrossoverStrategy<TGene>,
+    mutationStrategy: MutationStrategy<TGene>,
+    mutationRate: number) {
     const count = newPopulation.length;
 
     for (let i = 0; i < count; i++) {
       const partnerA = selectionStrategy.select();
       const partnerB = selectionStrategy.select();
-      const child = context.crossover(partnerA, partnerB);
-      context.mutate(child, mutationRate);
+      const child = crossoverStrategy.crossover(partnerA, partnerB);
+      mutationStrategy.mutate(child, genePool, mutationRate);
       newPopulation[i] = child;
     }
   }

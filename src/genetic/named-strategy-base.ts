@@ -1,7 +1,7 @@
-import { Gene, GeneticContext, NamedStrategy } from '.';
+import { NamedStrategy } from '.';
 
-export class NamedStrategyBase<TGene extends Gene> implements NamedStrategy {
-  constructor(readonly context: GeneticContext<TGene>) {
+export class NamedStrategyBase implements NamedStrategy {
+  constructor() {
   }
 
   name = "<unnamed>";

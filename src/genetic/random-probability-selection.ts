@@ -1,6 +1,6 @@
 import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
 
-export class RandomProbabilitySelection<TGene extends Gene> extends NamedStrategyBase<TGene> implements SelectionStrategy<TGene> {
+export class RandomProbabilitySelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
   name: string = "Random Probability Selection";
   get isInPlace() { return true; }
   protected _population: TypedDNA<TGene>[] = [];

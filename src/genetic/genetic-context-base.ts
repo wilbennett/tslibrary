@@ -13,7 +13,7 @@ type DNAType<T extends Gene> = BasicDNA<T>;
 export abstract class GeneticContextBase<TGene extends Gene> implements GeneticContext<TGene> {
   constructor() {
     this.crossoverStrategy = new MidpointCrossover(this);
-    this.mutationStrategy = new SimpleMutation(this);
+    this.mutationStrategy = new SimpleMutation();
   }
 
   crossoverStrategy: CrossoverStrategy<TGene>;
@@ -28,5 +28,9 @@ export abstract class GeneticContextBase<TGene extends Gene> implements GeneticC
   abstract calcFitness(dna: DNAType<TGene>): number;
 
   crossover(...partners: DNAType<TGene>[]) { return this.crossoverStrategy.crossover(...partners); }
-  mutate(dna: DNAType<TGene>, mutationRate: number) { return this.mutationStrategy.mutate(dna, mutationRate); }
+
+  mutate(dna: DNAType<TGene>, mutationRate: number) {
+    return dna;
+    // return this.mutationStrategy.mutate(dna, mutationRate);
+  }
 }

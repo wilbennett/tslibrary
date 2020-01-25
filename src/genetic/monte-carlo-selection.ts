@@ -1,7 +1,7 @@
 import { Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
 import { MathEx } from '../core';
 
-export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase<TGene> implements SelectionStrategy<TGene> {
+export class MonteCarloSelection<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
   name: string = "Dan Selection";
   get isInPlace() { return true; }
   protected _population: TypedDNA<TGene>[] = [];
