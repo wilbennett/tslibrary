@@ -69,10 +69,10 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     // Calculate fitness.
     if (fitnessKind === FitnessKind.fitness) {
       this.calcFitness();
-      this.isFinished = this.bestFitness === 1;
+      this.isFinished = this.bestDNA.isMatch || this.bestFitness === 1;
     } else {
       this.calcError();
-      this.isFinished = this.bestFitness === 0;
+      this.isFinished = this.bestDNA.isMatch || this.bestFitness === 0;
     }
 
     if (this.isFinished) return;
@@ -103,6 +103,25 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     }
   }
 
+  protected updateRawFitness() {
+    const fitnessStrategy = this.fitnessStrategy;
+    const target = this.target;
+    const fitnessKind = this.fitnessKind;
+    const fitnessModifier = this.fitnessModifierStrategy;
+    const population = this.population;
+    const populationSize = population.length;
+    let totalFitness = 0;
+
+    for (let i = 0; i < populationSize; i++) {
+      const dna = population[i];
+      const fitness = fitnessStrategy.calcFitness(dna, target, fitnessKind, fitnessModifier);
+      totalFitness += fitness;
+    }
+
+    const totalFitnessInv = 1 / totalFitness;
+    return totalFitnessInv;
+  }
+
   protected calcFitness() {
     const fitnessStrategy = this.fitnessStrategy;
     const target = this.target;
@@ -119,7 +138,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
       const fitness = fitnessStrategy.calcFitness(dna, target, fitnessKind, fitnessModifier);
       totalFitness += fitness;
 
-      if (fitness === 1) {
+      if (dna.isMatch) {
         bestFitness = fitness;
         bestDNA = dna;
         break;
@@ -137,19 +156,20 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   }
 
   protected calcError() {
-    const fitnessStrategy = this.fitnessStrategy;
-    const target = this.target;
-    const fitnessKind = this.fitnessKind;
-    const fitnessModifier = this.fitnessModifierStrategy;
     const population = this.population;
     const populationSize = population.length;
     let totalFitness = 0;
     let bestFitness = Infinity;
     let bestDNA = population[0];
+    // const totalFitnessInv = this.updateRawFitness();
+    this.updateRawFitness();
+    totalFitness = 0;
 
     for (let i = 0; i < populationSize; i++) {
       const dna = population[i];
-      const fitness = fitnessStrategy.calcFitness(dna, target, fitnessKind, fitnessModifier);
+      // const fitness = dna.fitness * totalFitnessInv;
+      const fitness = dna.fitness;
+      dna.fitness = fitness;
       totalFitness += fitness;
 
       if (fitness === 0) {

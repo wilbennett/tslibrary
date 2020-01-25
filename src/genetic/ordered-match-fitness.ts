@@ -16,8 +16,10 @@ export class OrderedMatchFitness<TGene extends Gene> extends NamedStrategyBase i
       genes[i].calcError(targetGenes[i]) === 0 && (score++);
     }
 
+    dna.isMatch = score === count;
     fitnessKind === FitnessKind.error && (score = count - score);
-    dna.fitness = score / count;
+    score = score / count;
+    dna.fitness = score;
     modifier && (dna.fitness = modifier.modifyFitness(dna.fitness));
     return dna.fitness;
   }

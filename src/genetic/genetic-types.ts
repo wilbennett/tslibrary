@@ -12,6 +12,7 @@ export interface Gene {
 
 export interface DNA {
   fitness: number;
+  isMatch: boolean;
   readonly genes: Gene[];
 
   clone(): DNA;
