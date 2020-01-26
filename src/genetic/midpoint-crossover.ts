@@ -1,4 +1,4 @@
-import { CrossoverStrategy, DNAFactory, Gene, NamedStrategyBase, TypedDNA } from '.';
+import { CrossoverStrategy, DNAFactory, Gene, NamedStrategyBase, TypedDNA, TypedGenePool } from '.';
 import { MathEx } from '../core';
 
 export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase implements CrossoverStrategy<TGene> {
@@ -8,7 +8,7 @@ export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase imp
 
   name: string = "Midpoint Crossover";
 
-  crossover(...partners: TypedDNA<TGene>[]): TypedDNA<TGene> {
+  crossover(genePool: TypedGenePool<TGene>, ...partners: TypedDNA<TGene>[]): TypedDNA<TGene> {
     const partnerGenesA = partners[0].genes;
     const partnerGenesB = partners[1].genes;
     const count = partnerGenesA.length;
@@ -16,11 +16,15 @@ export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase imp
     const childGenes = child.genes;
     const midpoint = MathEx.randomInt(partnerGenesA.length - 1);
 
-    for (let i = 0; i < count; i++) {
-      if (i > midpoint)
-        childGenes[i] = partnerGenesA[i];
-      else
+    for (let i = 0; i < midpoint; i++) {
+      childGenes[i] = partnerGenesA[i];
+    }
+
+    for (let i = midpoint; i < count; i++) {
+      if (genePool.isCompatibleWithAll(partnerGenesB[i], childGenes, i))
         childGenes[i] = partnerGenesB[i];
+      else
+        childGenes[i] = partnerGenesA[i];
     }
 
     return child;
