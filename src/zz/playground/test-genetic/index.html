@@ -15,11 +15,16 @@
     <label>Stepping: <input id="stepping" type="checkbox" /></label>
     <input id="step" type="button" value="Step" />
     <input id="phrase" type="text" value="to be or not to be" />
+    <label>Partial: <input id="partial" type="checkbox" /></label>
+    <label>Fitness: <input id="use-fitness" type="checkbox" /></label>
+    <label>Keep best: <input id="keep-best-dna" type="checkbox" checked /></label>
   </div>
   <div>
     <label>Population: <input id="population-size" type="number" min="10" max="150000" step="50" value="150" /></label>
     <label>Mutation: <input id="mutation-rate" type="range" min="0" max="1" step="0.005" value="0.01" /></label>
     <div>
+      <select id="fitnesses"></select>
+      <select id="fitness-modifiers"></select>
       <select id="crossovers"></select>
       <select id="mutations"></select>
       <select id="selections"></select>

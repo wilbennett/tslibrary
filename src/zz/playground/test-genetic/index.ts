@@ -8,11 +8,15 @@ import {
   CrossoverStrategy,
   DanSelection,
   FitnessKind,
+  FitnessModifierStrategy,
+  FitnessStrategy,
   GeneticAlgorithm,
   MidpointCrossover,
   MonteCarloSelection,
   MutationStrategy,
   NamedStrategy,
+  NullFitnessModifier,
+  OrderedErrorFitness,
   OrderedMatchFitness,
   RandomProbabilitySelection,
   ReproductionStrategy,
@@ -24,6 +28,7 @@ import {
 } from '../../../genetic';
 import { UiUtils } from '../../../utils';
 import { CharGene } from './char-gene';
+import { StringDnaFactory } from './string-dna-factory';
 import { UniqueCharGene } from './unique-char-gene';
 import { UniqueStringDnaFactory } from './unique-string-dna-factory';
 
@@ -34,8 +39,13 @@ const elStepping = UiUtils.getInputElement("stepping");
 const elStep = UiUtils.getInputElement("step");
 
 const elPhrase = UiUtils.getInputElement("phrase");
+const elPartial = UiUtils.getInputElement("partial");
+const elUseFitness = UiUtils.getInputElement("use-fitness");
+const elKeepBest = UiUtils.getInputElement("keep-best-dna");
 const elPopulationSize = UiUtils.getInputElement("population-size");
 const elMutationRate = UiUtils.getInputElement("mutation-rate");
+const elFitnesses = UiUtils.getSelectElement("fitnesses");
+const elFitnessModifiers = UiUtils.getSelectElement("fitness-modifiers");
 const elCrossovers = UiUtils.getSelectElement("crossovers");
 const elMutations = UiUtils.getSelectElement("mutations");
 const elSelections = UiUtils.getSelectElement("selections");
@@ -67,6 +77,9 @@ let stepping = elStepping.checked;
 
 let mutationRate = +elMutationRate.value;
 let populationSize = +elPopulationSize.value;
+const minCharCode = 32;
+const maxCharCode = 128;
+const charCodeCount = maxCharCode - minCharCode + 1;
 let target: string;
 let targetDNA: BasicDNA<BasicGene<String>>;
 let ga: GeneticAlgorithm;
@@ -74,6 +87,18 @@ let elapsedTime: number | undefined = undefined;
 let genPerSec = 0;
 
 elPhrase.value = "abcde";
+elPhrase.value = "to be or not to be";
+
+const fitnesses: NamedStrategy[] = [
+  OrderedMatchFitness,
+  UnorderedMatchFitness,
+  OrderedErrorFitness,
+];
+
+const fitnessModifiers: NamedStrategy[] = [
+  NullFitnessModifier,
+  SquaredFitnessModifier
+];
 
 const crossovers: NamedStrategy[] = [
   MidpointCrossover
@@ -113,8 +138,13 @@ elPause.addEventListener("change", () => {
 elStep.addEventListener("click", () => step());
 elStepping.addEventListener("change", () => stepping = elStepping.checked);
 elPhrase.addEventListener("change", startAlgorithm);
+elPartial.addEventListener("change", startAlgorithm);
+elUseFitness.addEventListener("change", startAlgorithm);
+elKeepBest.addEventListener("change", startAlgorithm);
 elPopulationSize.addEventListener("change", startAlgorithm);
 elMutationRate.addEventListener("change", startAlgorithm);
+elFitnesses.addEventListener("change", startAlgorithm);
+elFitnessModifiers.addEventListener("change", startAlgorithm);
 elCrossovers.addEventListener("change", startAlgorithm);
 elMutations.addEventListener("change", startAlgorithm);
 elSelections.addEventListener("change", startAlgorithm);
@@ -178,50 +208,39 @@ function createStrategy<T>(element: HTMLSelectElement, list: NamedStrategy[], ..
 CharGene;
 UniqueCharGene;
 
-//*
-function startAlgorithm() {
-  populationSize = +elPopulationSize.value;
-  mutationRate = +elMutationRate.value;
-  target = elPhrase.value;
-
+function createPartialAlgorithm() {
   const targetGenes = Array.from(target, v => new UniqueCharGene(v));
   targetDNA = new BasicDNA<UniqueCharGene>(targetGenes);
 
   const genes = Array.from(
-    { length: 128 - 32 + 1 },
-    (_, i) => new UniqueCharGene(String.fromCharCode(i + 32)));
+    { length: charCodeCount },
+    (_, i) => new UniqueCharGene(String.fromCharCode(i + minCharCode)));
 
   const pool = new BasicGenePool(genes);
   const dnaFactory = new UniqueStringDnaFactory();
   const geneCount = target.length + 5;
-  // const geneCount = target.length;
   ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA, geneCount);
-  // ga.keepBest = false;
-  ga.fitnessKind = FitnessKind.error;
-  // ga.fitnessKind = FitnessKind.fitness;
+  ga.fitnessModifierStrategy = createStrategy<FitnessModifierStrategy>(elFitnessModifiers, fitnessModifiers);
   ga.crossoverStrategy = createStrategy<CrossoverStrategy<UniqueCharGene>>(elCrossovers, crossovers, dnaFactory);
   ga.mutationStrategy = createStrategy<MutationStrategy<UniqueCharGene>>(elMutations, mutations);
   ga.selectionStrategy = createStrategy<SelectionStrategy<UniqueCharGene>>(elSelections, selections);
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<UniqueCharGene>>(elReproductions, reproductions);
-  // let maxError = 0;
-  // for (let i = 0; i < target.length; i++) {
-  //   const code = target.charCodeAt(i);
-  //   maxError += Math.max(Math.abs(code - 128), Math.abs(code - 32));
-  // }
-  // ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
-  ga.fitnessStrategy = new OrderedMatchFitness();
-  ga.fitnessStrategy = new UnorderedMatchFitness();
-  ga.fitnessModifierStrategy = new SquaredFitnessModifier();
-  ga.fitnessModifierStrategy = undefined;
-  populatePhrases();
-  adjustTextAreaHeight(elPhrases);
-  elapsedTime = undefined;
 
-  elPopulation.textContent = "" + populationSize;
-  elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
+  if (fitnesses[elFitnesses.selectedIndex] instanceof OrderedErrorFitness) {
+    let maxError = 0;
+
+    for (let i = 0; i < target.length; i++) {
+      const code = target.charCodeAt(i);
+      maxError += Math.max(Math.abs(code - maxCharCode), Math.abs(code - minCharCode));
+    }
+
+    ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
+  } else {
+    ga.fitnessStrategy = createStrategy<FitnessStrategy<UniqueCharGene>>(elFitnesses, fitnesses);
+  }
 }
-/*/
-function startAlgorithm() {
+
+function createFullAlgorithm() {
   populationSize = +elPopulationSize.value;
   mutationRate = +elMutationRate.value;
   target = elPhrase.value;
@@ -230,29 +249,45 @@ function startAlgorithm() {
   targetDNA = new BasicDNA<CharGene>(targetGenes);
 
   const genes = Array.from(
-    { length: 128 - 32 + 1 },
-    (_, i) => new CharGene(String.fromCharCode(i + 32)));
+    { length: charCodeCount },
+    (_, i) => new CharGene(String.fromCharCode(i + minCharCode)));
 
   const pool = new BasicGenePool(genes);
   const dnaFactory = new StringDnaFactory();
   ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA);
-  // ga.keepBest = false;
-  ga.fitnessKind = FitnessKind.error;
-  ga.fitnessKind = FitnessKind.fitness;
   ga.crossoverStrategy = createStrategy<CrossoverStrategy<CharGene>>(elCrossovers, crossovers, dnaFactory);
   ga.mutationStrategy = createStrategy<MutationStrategy<CharGene>>(elMutations, mutations);
   ga.selectionStrategy = createStrategy<SelectionStrategy<CharGene>>(elSelections, selections);
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<CharGene>>(elReproductions, reproductions);
-  // let maxError = 0;
-  // for (let i = 0; i < target.length; i++) {
-  //   const code = target.charCodeAt(i);
-  //   maxError += Math.max(Math.abs(code - 128), Math.abs(code - 32));
-  // }
-  // ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
-  ga.fitnessStrategy = new OrderedMatchFitness();
-  ga.fitnessStrategy = new PartialMatchFitness();
-  ga.fitnessModifierStrategy = new SquaredFitnessModifier();
-  ga.fitnessModifierStrategy = undefined;
+
+  if (fitnesses[elFitnesses.selectedIndex] instanceof OrderedErrorFitness) {
+    let maxError = 0;
+
+    for (let i = 0; i < target.length; i++) {
+      const code = target.charCodeAt(i);
+      maxError += Math.max(Math.abs(code - maxCharCode), Math.abs(code - minCharCode));
+    }
+
+    ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
+  } else {
+    ga.fitnessStrategy = createStrategy<FitnessStrategy<UniqueCharGene>>(elFitnesses, fitnesses);
+  }
+}
+
+function startAlgorithm() {
+  populationSize = +elPopulationSize.value;
+  mutationRate = +elMutationRate.value;
+  target = elPhrase.value;
+
+  if (elPartial.checked)
+    createPartialAlgorithm();
+  else
+    createFullAlgorithm();
+
+  ga.keepBest = elKeepBest.checked;
+  ga.fitnessKind = elUseFitness.checked ? FitnessKind.fitness : FitnessKind.error;
+  ga.fitnessModifierStrategy = createStrategy<FitnessModifierStrategy>(elFitnessModifiers, fitnessModifiers);
+
   populatePhrases();
   adjustTextAreaHeight(elPhrases);
   elapsedTime = undefined;
@@ -260,7 +295,6 @@ function startAlgorithm() {
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
 }
-//*/
 
 function addOption(element: HTMLSelectElement, text: string, className = "") {
   const option = document.createElement("option");
@@ -279,6 +313,8 @@ function populateStrategy(element: HTMLSelectElement, strategies: NamedStrategy[
 }
 
 function populateStrategies() {
+  populateStrategy(elFitnesses, fitnesses);
+  populateStrategy(elFitnessModifiers, fitnessModifiers);
   populateStrategy(elCrossovers, crossovers);
   populateStrategy(elMutations, mutations);
   populateStrategy(elSelections, selections);
