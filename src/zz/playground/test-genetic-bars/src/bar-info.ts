@@ -8,5 +8,6 @@ export type BarInfo = {
   isHaUp: boolean;
 
   isNextOpenHigher?: boolean;
+  isUpPotential?: boolean;
   isUpEntry?: boolean;
 };

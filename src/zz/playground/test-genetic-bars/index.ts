@@ -100,6 +100,8 @@ fetch("bardata.csv")
 
     res.text().then(txt => {
       parseData(txt);
+      calculateNextOpenHigher();
+      calculateUpPotentials();
       calculateEntries();
       recreateGraph();
       elScroll.min = "0";
@@ -109,6 +111,7 @@ fetch("bardata.csv")
   });
 
 const normalProps: ContextProps = { strokeStyle: "white", lineWidth: 1 };
+const upPotentionProps: ContextProps = { strokeStyle: "white", lineWidth: 2 };
 const upEntryProps: ContextProps = { strokeStyle: "yellow", lineWidth: 2 };
 const upProps: ContextProps = { fillStyle: "green" };
 const downProps: ContextProps = { fillStyle: "red" };
@@ -513,7 +516,9 @@ function drawBar(index: number, x: number, view: Viewport) {
   height *= 0.5;
   drawRect(props, view, x, bodyMin, width, height); // Heiken indicator.
 
-  props = !!bar.isUpEntry ? upEntryProps : normalProps;
+  props = normalProps;
+  bar.isUpPotential && (props = upPotentionProps);
+  bar.isUpEntry && (props = upEntryProps);
   height = bodyMax - bodyMin;
   drawRect(props, view, x, bodyMin, width, height); // Outline.
 
@@ -551,7 +556,7 @@ function hasHighValue(target: number, lowCuttoff: number, startIndex: number) {
   return false;
 }
 
-function calculateEntries() {
+function calculateNextOpenHigher() {
   let count = bars.length;
 
   for (let i = count - 2; i >= 0; i--) {
@@ -559,13 +564,27 @@ function calculateEntries() {
     const nextBar = bars[i + 1];
     bar.isNextOpenHigher = nextBar.open > bar.high;
   }
+}
 
+function calculateUpPotentials() {
+  let count = bars.length;
+  count--;
+
+  for (let i = 0; i < count; i++) {
+    const bar = bars[i];
+    bar.isUpPotential = false;
+    bar.isUpPotential = bar.isUp && !bar.isHaUp;
+  }
+}
+
+function calculateEntries() {
+  let count = bars.length;
   count--;
 
   for (let i = 0; i < count; i++) {
     const bar = bars[i];
 
-    if (bar.isHaUp) continue;
+    if (!bar.isUpPotential) continue;
     if (!bar.isNextOpenHigher) continue;
 
     bar.isUpEntry = hasHighValue(bar.high + 0.25 + 2, bar.low, i + 1);
