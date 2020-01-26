@@ -13,6 +13,7 @@ import {
   MonteCarloSelection,
   MutationStrategy,
   NamedStrategy,
+  OrderedMatchFitness,
   RandomProbabilitySelection,
   ReproductionStrategy,
   SelectionStrategy,
@@ -186,11 +187,18 @@ function startAlgorithm() {
   ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA);
   // ga.keepBest = false;
   ga.fitnessKind = FitnessKind.error;
-  // ga.fitnessKind = FitnessKind.fitness;
+  ga.fitnessKind = FitnessKind.fitness;
   ga.crossoverStrategy = createStrategy<CrossoverStrategy<CharGene>>(elCrossovers, crossovers, dnaFactory);
   ga.mutationStrategy = createStrategy<MutationStrategy<CharGene>>(elMutations, mutations);
   ga.selectionStrategy = createStrategy<SelectionStrategy<CharGene>>(elSelections, selections);
   ga.reproductionStrategy = createStrategy<ReproductionStrategy<CharGene>>(elReproductions, reproductions);
+  // let maxError = 0;
+  // for (let i = 0; i < target.length; i++) {
+  //   const code = target.charCodeAt(i);
+  //   maxError += Math.max(Math.abs(code - 128), Math.abs(code - 32));
+  // }
+  // ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
+  ga.fitnessStrategy = new OrderedMatchFitness();
   ga.fitnessModifierStrategy = new SquaredFitnessModifier();
   ga.fitnessModifierStrategy = undefined;
   populatePhrases();

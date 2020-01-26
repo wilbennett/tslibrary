@@ -12,6 +12,7 @@ export * from "./two-parent-reproduction";
 export * from "./null-fitness-modifier";
 export * from "./squared-fitness-modifier";
 export * from "./ordered-match-fitness";
+export * from "./ordered-error-fitness";
 export * from "./gene-pool-base";
 export * from "./basic-gene-pool";
 export * from "./basic-genetic-algorithm";
