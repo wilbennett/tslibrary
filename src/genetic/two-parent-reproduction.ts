@@ -27,7 +27,7 @@ export class TwoParentReproduction<TGene extends Gene>
     for (let i = 0; i < count; i++) {
       const partnerA = selectionStrategy.select();
       const partnerB = selectionStrategy.select();
-      const child = crossoverStrategy.crossover(partnerA, partnerB);
+      const child = crossoverStrategy.crossover(genePool, partnerA, partnerB);
       mutationStrategy.mutate(child, genePool, mutationRate);
       newPopulation[i] = child;
     }

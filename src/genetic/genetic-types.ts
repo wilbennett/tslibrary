@@ -29,6 +29,7 @@ export interface GenePool {
   getRandomGenes(count: number): Gene[];
   populateGenes(genes: Gene[]): void;
   createMutation(gene: Gene, allGenes: Gene[]): Gene;
+  isCompatibleWithAll(gene: Gene, allGenes: Gene[], count?: number): boolean;
 }
 
 export interface TypedGenePool<TGene extends Gene> extends GenePool {
@@ -36,6 +37,7 @@ export interface TypedGenePool<TGene extends Gene> extends GenePool {
   getRandomGenes(count: number): TGene[];
   populateGenes(genes: TGene[]): void;
   createMutation(gene: TGene, allGenes: TGene[]): TGene;
+  isCompatibleWithAll(gene: TGene, allGenes: TGene[], count?: number): boolean;
 }
 
 export interface NamedStrategy {
@@ -43,7 +45,7 @@ export interface NamedStrategy {
 }
 
 export interface CrossoverStrategy<TGene extends Gene> extends NamedStrategy {
-  crossover(...partners: TypedDNA<TGene>[]): TypedDNA<TGene>;
+  crossover(genePool: TypedGenePool<TGene>, ...partners: TypedDNA<TGene>[]): TypedDNA<TGene>;
 }
 
 export interface MutationStrategy<TGene extends Gene> extends NamedStrategy {

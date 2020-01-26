@@ -12,7 +12,9 @@ export class GenePoolBase<TGene extends Gene> implements TypedGenePool<TGene> {
 
   getRandomGenes(count: number): TGene[] {
     const self = this;
-    return Array.from({ length: count }, () => self.getRandomGene());
+    const result = Array.from({ length: count }, () => self.getRandomGene());
+    this.ensureCompatibleGenes(result);
+    return result;
   }
 
   populateGenes(genes: TGene[]): void {
@@ -20,6 +22,8 @@ export class GenePoolBase<TGene extends Gene> implements TypedGenePool<TGene> {
       let gene = this.getRandomGene();
       genes[i] = gene;
     }
+
+    this.ensureCompatibleGenes(genes);
   }
 
   // @ts-ignore - unused param.
@@ -33,7 +37,23 @@ export class GenePoolBase<TGene extends Gene> implements TypedGenePool<TGene> {
     return mutation;
   }
 
-  protected isCompatibleWithAll(gene: TGene, allGenes: TGene[]) {
-    return allGenes.every(g => gene.isCompatibleWith(g));
+  isCompatibleWithAll(gene: TGene, allGenes: TGene[], count?: number) {
+    count = count ?? allGenes.length;
+
+    for (let i = 0; i < count; i++) {
+      if (!gene.isCompatibleWith(allGenes[i])) return false;
+    }
+
+    return true;
+  }
+
+  protected ensureCompatibleGenes(genes: TGene[]) {
+    const count = genes.length;
+
+    for (let i = 1; i < count; i++) {
+      while (!this.isCompatibleWithAll(genes[i], genes, i)) {
+        genes[i] = this.getRandomGene();
+      }
+    }
   }
 }
