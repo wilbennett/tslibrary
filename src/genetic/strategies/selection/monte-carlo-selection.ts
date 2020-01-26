@@ -1,8 +1,9 @@
-import { Gene, SelectionStrategyBase } from '.';
-import { MathEx } from '../core';
+import { SelectionStrategyBase } from '.';
+import { Gene } from '../..';
+import { MathEx } from '../../../core';
 
 export class MonteCarloSelection<TGene extends Gene> extends SelectionStrategyBase<TGene> {
-  name: string = "Dan Selection";
+  static strategyName = "Monte Carlo";
   get isInPlace() { return true; }
 
   protected selectFitness() {

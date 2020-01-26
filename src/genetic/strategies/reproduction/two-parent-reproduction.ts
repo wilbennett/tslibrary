@@ -1,19 +1,19 @@
+import { NamedStrategyBase } from '..';
 import {
   CrossoverStrategy,
   Gene,
   MutationStrategy,
-  NamedStrategyBase,
   ReproductionStrategy,
   SelectionStrategy,
   TypedDNA,
   TypedGenePool,
-} from '.';
+} from '../..';
 
 export class TwoParentReproduction<TGene extends Gene>
   extends NamedStrategyBase
   implements ReproductionStrategy<TGene> {
 
-  name: string = "Two Parent Reproduction";
+  static strategyName = "Two Parent";
 
   reproduce(
     newPopulation: TypedDNA<TGene>[],

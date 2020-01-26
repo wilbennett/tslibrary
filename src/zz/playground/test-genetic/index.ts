@@ -274,7 +274,8 @@ function populateStrategy(element: HTMLSelectElement, strategies: NamedStrategy[
   while (element.options.length > 0)
     element.options.remove(0);
 
-  strategies.forEach(strategy => addOption(element, strategy.name));
+  // @ts-ignore - missing strategyName property.
+  strategies.forEach(strategy => addOption(element, <string>strategy["strategyName"]));
 }
 
 function populateStrategies() {

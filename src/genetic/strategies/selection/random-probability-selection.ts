@@ -1,7 +1,8 @@
-import { Gene, SelectionStrategyBase } from '.';
+import { SelectionStrategyBase } from '.';
+import { Gene } from '../..';
 
 export class RandomProbabilitySelection<TGene extends Gene> extends SelectionStrategyBase<TGene> {
-  name: string = "Random Probability Selection";
+  static strategyName = "Random Probability";
   get isInPlace() { return true; }
 
   protected selectFitness() {

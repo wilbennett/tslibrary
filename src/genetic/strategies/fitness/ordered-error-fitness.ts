@@ -1,9 +1,12 @@
-import { FitnessKind, FitnessModifierStrategy, FitnessStrategy, Gene, NamedStrategyBase, TypedDNA } from '.';
+import { NamedStrategyBase } from '..';
+import { FitnessKind, FitnessModifierStrategy, FitnessStrategy, Gene, TypedDNA } from '../..';
 
 export class OrderedErrorFitness<TGene extends Gene> extends NamedStrategyBase implements FitnessStrategy<TGene> {
   constructor(public maxError: number) {
     super();
   }
+
+  static strategyName = "Ordered Error";
 
   calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, fitnessKind: FitnessKind, modifier?: FitnessModifierStrategy): number {
     const genes = dna.genes;

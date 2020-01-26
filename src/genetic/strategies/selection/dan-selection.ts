@@ -1,9 +1,10 @@
-import { Gene, SelectionStrategyBase, TypedDNA } from '.';
-import { MathEx } from '../core';
-import { FitnessKind } from './genetic-types';
+import { SelectionStrategyBase } from '.';
+import { Gene, TypedDNA } from '../..';
+import { MathEx } from '../../../core';
+import { FitnessKind } from '../../genetic-types';
 
 export class DanSelection<TGene extends Gene> extends SelectionStrategyBase<TGene> {
-  name: string = "Dan Selection";
+  static strategyName = "Dan Selection";
   get isInPlace() { return false; }
   protected _matingPool: TypedDNA<TGene>[] = [];
 

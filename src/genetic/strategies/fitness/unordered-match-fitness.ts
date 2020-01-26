@@ -1,6 +1,9 @@
-import { FitnessKind, FitnessModifierStrategy, FitnessStrategy, Gene, NamedStrategyBase, TypedDNA } from '.';
+import { NamedStrategyBase } from '..';
+import { FitnessKind, FitnessModifierStrategy, FitnessStrategy, Gene, TypedDNA } from '../..';
 
 export class UnorderedMatchFitness<TGene extends Gene> extends NamedStrategyBase implements FitnessStrategy<TGene> {
+  static strategyName = "Unordered Match";
+
   calcFitness(dna: TypedDNA<TGene>, target: TypedDNA<TGene>, fitnessKind: FitnessKind, modifier?: FitnessModifierStrategy): number {
     const genes = dna.genes;
     const targetGenes = target.genes;

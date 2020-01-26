@@ -1,7 +1,8 @@
-import { Gene, MutationStrategy, NamedStrategyBase, TypedDNA, TypedGenePool } from '.';
+import { NamedStrategyBase } from '..';
+import { Gene, MutationStrategy, TypedDNA, TypedGenePool } from '../..';
 
 export class SimpleMutation<TGene extends Gene> extends NamedStrategyBase implements MutationStrategy<TGene> {
-  name: string = "Simple Mutation";
+  static strategyName = "Simple Mutation";
 
   mutate(dna: TypedDNA<TGene>, genePool: TypedGenePool<TGene>, mutationRate: number) {
     const genes = dna.genes;

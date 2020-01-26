@@ -1,12 +1,13 @@
-import { CrossoverStrategy, DNAFactory, Gene, NamedStrategyBase, TypedDNA, TypedGenePool } from '.';
-import { MathEx } from '../core';
+import { NamedStrategyBase } from '..';
+import { CrossoverStrategy, DNAFactory, Gene, TypedDNA, TypedGenePool } from '../..';
+import { MathEx } from '../../../core';
 
 export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase implements CrossoverStrategy<TGene> {
   constructor(readonly dnaFactory: DNAFactory<TGene>) {
     super();
   }
 
-  name: string = "Midpoint Crossover";
+  static strategyName = "Midpoint";
 
   crossover(genePool: TypedGenePool<TGene>, ...partners: TypedDNA<TGene>[]): TypedDNA<TGene> {
     const partnerGenesA = partners[0].genes;

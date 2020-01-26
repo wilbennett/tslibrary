@@ -1,4 +1,5 @@
-import { FitnessKind, Gene, NamedStrategyBase, SelectionStrategy, TypedDNA } from '.';
+import { NamedStrategyBase } from '..';
+import { FitnessKind, Gene, SelectionStrategy, TypedDNA } from '../..';
 
 export abstract class SelectionStrategyBase<TGene extends Gene> extends NamedStrategyBase implements SelectionStrategy<TGene> {
   get isInPlace() { return false; }
