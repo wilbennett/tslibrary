@@ -23,8 +23,17 @@ export class MidpointCrossover<TGene extends Gene> extends NamedStrategyBase imp
     for (let i = midpoint; i < count; i++) {
       if (genePool.isCompatibleWithAll(partnerGenesB[i], childGenes, i))
         childGenes[i] = partnerGenesB[i];
-      else
+      else if (genePool.isCompatibleWithAll(partnerGenesB[i], childGenes, i))
         childGenes[i] = partnerGenesA[i];
+      else {
+        let gene = partnerGenesB[i];
+
+        while (!genePool.isCompatibleWithAll(gene, childGenes, i)) {
+          gene = genePool.getRandomGene();
+        }
+
+        childGenes[i] = gene;
+      }
     }
 
     return child;
