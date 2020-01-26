@@ -24,17 +24,20 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     readonly genePool: TypedGenePool<TGene>,
     public populationSize: number,
     public mutationRate: number,
-    public target: TypedDNA<TGene>) {
+    public target: TypedDNA<TGene>,
+    geneCount?: number) {
     this._newPopulation = new Array(populationSize);
     this.crossoverStrategy = new MidpointCrossover(this.dnaFactory);
     this.mutationStrategy = new SimpleMutation();
     this.selectionStrategy = new DanSelection();
     this.reproductionStrategy = new TwoParentReproduction();
     this.fitnessStrategy = new OrderedMatchFitness();
+    this.geneCount = geneCount ?? target.genes.length;
 
-    this.population = this.createPopulation(populationSize);
+    this.population = this.createPopulation(populationSize, this.geneCount);
   }
 
+  geneCount: number;
   crossoverStrategy: CrossoverStrategy<TGene>;
   mutationStrategy: MutationStrategy<TGene>;
   selectionStrategy: SelectionStrategy<TGene>;
@@ -53,7 +56,7 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
   protected _newPopulation: TypedDNA<TGene>[];
 
   reset() {
-    this.population = this.createPopulation(this.populationSize);
+    this.population = this.createPopulation(this.populationSize, this.geneCount);
     this._bestDNA = undefined;
     this.generation = 0;
     this.totalFitness = 0;
@@ -187,10 +190,10 @@ export abstract class GeneticAlgorithmBase<TGene extends Gene> implements TypedG
     this._bestDNA = bestDNA;
   }
 
-  protected createPopulation(count: number): TypedDNA<TGene>[] {
+  protected createPopulation(count: number, geneCount: number): TypedDNA<TGene>[] {
     const factory = this.dnaFactory;
     const pool = this.genePool;
-    const geneCount = this.target.genes.length;
-    return Array.from({ length: count }, () => factory.createDNA(pool.getRandomGenes(geneCount)));
+    const result = Array.from({ length: count }, () => factory.createDNA(pool.getRandomGenes(geneCount)));
+    return result;
   }
 }
