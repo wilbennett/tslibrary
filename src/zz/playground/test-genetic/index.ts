@@ -20,10 +20,12 @@ import {
   SimpleMutation,
   SquaredFitnessModifier,
   TwoParentReproduction,
+  UnorderedMatchFitness,
 } from '../../../genetic';
 import { UiUtils } from '../../../utils';
 import { CharGene } from './char-gene';
-import { StringDnaFactory } from './string-dna-factory';
+import { UniqueCharGene } from './unique-char-gene';
+import { UniqueStringDnaFactory } from './unique-string-dna-factory';
 
 // console.clear();
 
@@ -70,6 +72,8 @@ let targetDNA: BasicDNA<BasicGene<String>>;
 let ga: GeneticAlgorithm;
 let elapsedTime: number | undefined = undefined;
 let genPerSec = 0;
+
+elPhrase.value = "abcde";
 
 const crossovers: NamedStrategy[] = [
   MidpointCrossover
@@ -171,10 +175,57 @@ function createStrategy<T>(element: HTMLSelectElement, list: NamedStrategy[], ..
   return <T>new list[element.selectedIndex](...params);
 }
 
+CharGene;
+UniqueCharGene;
+
+//*
 function startAlgorithm() {
   populationSize = +elPopulationSize.value;
   mutationRate = +elMutationRate.value;
   target = elPhrase.value;
+
+  const targetGenes = Array.from(target, v => new UniqueCharGene(v));
+  targetDNA = new BasicDNA<UniqueCharGene>(targetGenes);
+
+  const genes = Array.from(
+    { length: 128 - 32 + 1 },
+    (_, i) => new UniqueCharGene(String.fromCharCode(i + 32)));
+
+  const pool = new BasicGenePool(genes);
+  const dnaFactory = new UniqueStringDnaFactory();
+  const geneCount = target.length + 5;
+  // const geneCount = target.length;
+  ga = new BasicGeneticAlgorithm(dnaFactory, pool, populationSize, mutationRate, targetDNA, geneCount);
+  // ga.keepBest = false;
+  ga.fitnessKind = FitnessKind.error;
+  // ga.fitnessKind = FitnessKind.fitness;
+  ga.crossoverStrategy = createStrategy<CrossoverStrategy<UniqueCharGene>>(elCrossovers, crossovers, dnaFactory);
+  ga.mutationStrategy = createStrategy<MutationStrategy<UniqueCharGene>>(elMutations, mutations);
+  ga.selectionStrategy = createStrategy<SelectionStrategy<UniqueCharGene>>(elSelections, selections);
+  ga.reproductionStrategy = createStrategy<ReproductionStrategy<UniqueCharGene>>(elReproductions, reproductions);
+  // let maxError = 0;
+  // for (let i = 0; i < target.length; i++) {
+  //   const code = target.charCodeAt(i);
+  //   maxError += Math.max(Math.abs(code - 128), Math.abs(code - 32));
+  // }
+  // ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
+  ga.fitnessStrategy = new OrderedMatchFitness();
+  ga.fitnessStrategy = new UnorderedMatchFitness();
+  ga.fitnessModifierStrategy = new SquaredFitnessModifier();
+  ga.fitnessModifierStrategy = undefined;
+  populatePhrases();
+  adjustTextAreaHeight(elPhrases);
+  elapsedTime = undefined;
+
+  elPopulation.textContent = "" + populationSize;
+  elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
+}
+/*/
+function startAlgorithm() {
+  populationSize = +elPopulationSize.value;
+  mutationRate = +elMutationRate.value;
+  target = elPhrase.value;
+
   const targetGenes = Array.from(target, v => new CharGene(v));
   targetDNA = new BasicDNA<CharGene>(targetGenes);
 
@@ -199,6 +250,7 @@ function startAlgorithm() {
   // }
   // ga.fitnessStrategy = new OrderedErrorFitness(maxError); // TODO: Doesn't work. Need to investigate.
   ga.fitnessStrategy = new OrderedMatchFitness();
+  ga.fitnessStrategy = new PartialMatchFitness();
   ga.fitnessModifierStrategy = new SquaredFitnessModifier();
   ga.fitnessModifierStrategy = undefined;
   populatePhrases();
@@ -208,6 +260,7 @@ function startAlgorithm() {
   elPopulation.textContent = "" + populationSize;
   elMutation.textContent = (mutationRate * 100).toFixed(1) + "%";
 }
+//*/
 
 function addOption(element: HTMLSelectElement, text: string, className = "") {
   const option = document.createElement("option");
