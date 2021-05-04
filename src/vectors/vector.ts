@@ -133,7 +133,7 @@ export abstract class Vector {
     return result;
   }
 
-  get normal() { return this.perp(); }
+  get normal() { return this.perpO(); }
 
   // TODO: Proper 3D implementation.
   get radians() {
